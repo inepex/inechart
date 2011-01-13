@@ -7,18 +7,14 @@ import com.allen_sauer.gwt.log.client.Log;
 
 /**
  * An utility class for managing the IneChart's underlying model.
+ * 
+ * Usage:
+ * Create an instance with initial parameters of the canvas, then update it with setViewport method each time the viewport changes
  * @author Miklós Süveges
  *
  */
 public class ModelManager {
 	 
-	private static ModelManager inst = null;
-	public static ModelManager get(int width, int height, double xMin, int chartCanvasTopPaddingPercentage){
-		if(inst == null)
-			inst = new ModelManager( width, height, xMin,chartCanvasTopPaddingPercentage);
-		return inst;
-	}
-	
 	private int chartCanvasWidth;
 	private int chartCanvasHeight;
 	private int chartCanvasTopPaddingPercentage;
@@ -26,15 +22,11 @@ public class ModelManager {
 	private double viewportMin;
 	private double viewportMax;
 	
-	private ModelManager() {
 		
-	}
-	
-	private ModelManager(int width, int height, double xMin, int chartCanvasTopPaddingPercentage){
+	public ModelManager(int width, int height, double xMin, int chartCanvasTopPaddingPercentage){
 		this.chartCanvasHeight = height;
 		this.chartCanvasWidth = width;
 		this.xMin = xMin;
-		
 		this.chartCanvasTopPaddingPercentage = chartCanvasTopPaddingPercentage;
 	}
 	
@@ -51,10 +43,6 @@ public class ModelManager {
 	/**
 	 * Translates a datapoint's x value to the canvas' coordinate system
 	 * @param x data to translate
-	 * @param chartCanvasWidth the canvas' width
-	 * @param viewportMin left side of the actual viewport
-	 * @param viewportMax right side of the actual viewport
-	 * @param xMin the lowest key in datamapping (in case of more curves, should be the lowest key in all the datamaps)
 	 * @return
 	 */
 	public double calculateX(double x) {
@@ -67,8 +55,6 @@ public class ModelManager {
 	 * @param y data to translate
 	 * @param minValue the lowest value in the curve's datamap
 	 * @param maxValue the highest value in the curve's datamap
-	 * @param chartCanvasHeight the canvas' height
-	 * @param chartCanvasTopPaddingPercentage size of the blank area (padding) at the top of the canvas, in percentage
 	 * @return
 	 */
 	public double calculateY(double y, double minValue, double maxValue){
@@ -81,10 +67,6 @@ public class ModelManager {
 	 * Creates an interval in the underlying data's dimension for an x (pixel) position in canvas
 	 * @param x a point's x position in the canvas' coordinate system
 	 * @param mathematicalRounding 
-	 * @param viewportMin left side of the actual viewport
-	 * @param viewportMax right side of the actual viewport
-	 * @param xMin the lowest key in datamapping (in case of more curves, hould be the lowest key in all datamap)
-	 * @param chartCanvasWidth the canvas' width
 	 * @return
 	 */
 	public double[] calculateDataIntervalXForPoint(int x, boolean mathematicalRounding){
@@ -95,6 +77,7 @@ public class ModelManager {
 		else
 			return new double[]{data,data+dataPerPixel};
 	}
+	
 	/**
 	 * Distance translation from data to canvas
 	 * @param dx distance in data
@@ -135,8 +118,9 @@ public class ModelManager {
 			}
 		}
 	}
+	
 	/**
-	 * Filters a curve's calculatedPoints container, and extends the pointsToDraw, based on curve's related policies.
+	 * Filters a curve's calculatedPoints to extend the pointsToDraw container, based on curve's related policies.
 	 * @param curve
 	 * @param start
 	 * @param stop
@@ -145,6 +129,7 @@ public class ModelManager {
 		long startTime = System.currentTimeMillis();
 		TreeMap<Double, Point> pointsToFilter = new TreeMap<Double,Point>();
 		TreeMap<Double, Point> xFiltered = new TreeMap<Double, Point>();
+		TreeMap<Double, Point> squareFiltered = new TreeMap<Double, Point>();
 		ArrayList<Double> problematicIndices = null;
 		int willNotShowCount = 0;
 		for(Double x:curve.getCalculatedPoints().keySet())
@@ -152,14 +137,16 @@ public class ModelManager {
 				if(curve.getPointsToDraw().get(x) == null)
 					pointsToFilter.put(x, curve.getCalculatedPoints().get(x));
 			}
+		//the actual examinee
 		Double firstIndex = null;
+	
 	/* applying X - filter */
 		for(double x:pointsToFilter.keySet()){
 			if(firstIndex == null){
 				firstIndex = x;
 				continue;
 			}
-			//problematic element
+			// if it is problematic element
 			else if(pointsToFilter.get(x).getxPos() - pointsToFilter.get(firstIndex).getxPos() < curve.getOverlapFilterXWidth()){
 				if(problematicIndices == null){ 
 					problematicIndices = new ArrayList<Double>();
@@ -188,15 +175,74 @@ public class ModelManager {
 			}
 		}
 		Log.debug(willNotShowCount + " points have been thrown out due to x-overlap-policy in " + (System.currentTimeMillis() - startTime) + " ms" );
+	/* applying square - filter */
 		startTime = System.currentTimeMillis();
 		willNotShowCount = 0;
 		if(curve.getOverlapFilterSquareSize() <= curve.getOverlapFilterXWidth())
 			curve.getPointsToDraw().putAll(xFiltered);
+
+		Integer squareTopMax = null;
+		Integer highestYinSquare = null;
+		Integer squareBottomMin = null;
+		Integer lowestYinSquare = null;
+		firstIndex = null;
+		problematicIndices = null;
+		for(double x:xFiltered.keySet()){
+			Point actual = xFiltered.get(x);
+			if(firstIndex == null){
+				firstIndex = x;
+				squareTopMax = actual.getyPos() + curve.getOverlapFilterSquareSize();
+				squareBottomMin = squareTopMax -  2 * curve.getOverlapFilterSquareSize();
+				highestYinSquare = lowestYinSquare = actual.getyPos();
+				continue;
+			}
+			// if the actual point's x position is in a square and ...
+			else if(actual.getxPos() - xFiltered.get(firstIndex).getxPos() < curve.getOverlapFilterSquareSize()  &&
+				actual.getyPos() >  squareBottomMin   &&   actual.getyPos() < squareTopMax){ // ...check the same condition on y
+				if(problematicIndices == null){ 
+					problematicIndices = new ArrayList<Double>();
+					problematicIndices.add(firstIndex);
+				}
+				problematicIndices.add(x);
+				//refine the square's min max values
+				if(actual.getyPos() > highestYinSquare){
+					squareBottomMin += actual.getyPos() - highestYinSquare;
+					highestYinSquare = actual.getyPos();
+				}
+				else if (actual.getyPos() < lowestYinSquare){
+					squareTopMax -= lowestYinSquare - actual.getyPos();
+					lowestYinSquare = actual.getyPos();
+				}
+			}
+			//not problematic
+			else{
+				//there were some  points need  filtering
+				if(problematicIndices != null){
+					willNotShowCount +=  problematicIndices.size() - 1; 
+					ArrayList<Point> points = new ArrayList<Point>();
+					for(Double key:problematicIndices)
+						points.add(curve.getCalculatedPoints().get(key));
+					Point pointToShow = choosePointByPolicy(points, curve);
+					for(Double key:problematicIndices)
+						squareFiltered.put(key, pointToShow);
+					problematicIndices = null;
+				}
+				//we need to put the last key to pointsToDraw
+				else{
+					squareFiltered.put(firstIndex, curve.getCalculatedPoints().get(firstIndex));
+				}
+				firstIndex = x;
+				squareTopMax = actual.getyPos() + curve.getOverlapFilterSquareSize();
+				squareBottomMin = squareTopMax -  2 * curve.getOverlapFilterSquareSize();
+				highestYinSquare = lowestYinSquare = actual.getyPos();
+			}
+		}
+		Log.debug(willNotShowCount + " points have been thrown out due to square-overlap-policy in " + (System.currentTimeMillis() - startTime) + " ms" );
+		curve.getPointsToDraw().putAll(squareFiltered);
 	}
 	
 	/**
 	 * From the given parameters, chooses a point to draw.
-	 * The x value will be the average of the first and the last value.
 	 * 
 	 * @param problematicPoints
 	 * @param curve

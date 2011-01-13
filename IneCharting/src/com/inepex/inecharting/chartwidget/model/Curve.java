@@ -42,15 +42,16 @@ public final class Curve {
 	private Axis curveAxis;
 	/**
 	 * a collection for calculated points per data
-	 * points in it are unfiltered.
+	 * points inside are unfiltered.
 	 * should be updated when viewport's width changes
 	 */
 	private TreeMap<Double, Point> calculatedPoints;
 	/**
-	 * drawing methods should access this container
-	 * overlap - filtered points, this should be cleared when resolution changes
+	 * drawing methods should access this collection
+	 * contains overlap filtered points
+	 * should be cleared when resolution changes
 	 * if no overlapping points have been found, this map equals with calculatedPoints, otherwise
-	 * imaginary points replaced the problematic ones
+	 * imaginary points replaced the problematic ones -> note that multiple keys can map the same imaginary point
 	 */
 	private TreeMap<Double, Point> pointsToDraw;
 	
