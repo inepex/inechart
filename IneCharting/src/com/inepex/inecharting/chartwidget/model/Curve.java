@@ -79,7 +79,7 @@ public final class Curve {
 		//default values
 		
 		hasLine = true;
-		hasPoints = false;
+		hasPoints = true;
 		curveAxis = Axis.Y;
 		calculatedPoints = new TreeMap<Double,Point>();
 		pointsToDraw = new TreeMap<Double, Point>();
@@ -203,6 +203,8 @@ public final class Curve {
 	}
 
 	public CurveDrawingPolicy getPolicy() {
+		if(policy == null)
+			policy = CurveDrawingPolicy.getDefaultCurveDrawingPolicy();
 		return policy;
 	}
 	

@@ -87,7 +87,7 @@ public final class LineCurveVisualizer extends CurveVisualizer {
 	@Override
 	public void drawNextPoint() {
 		Point start = getFirstUndrawnPointFromActualJob();
-		if(start.equals(null))
+		if(start == null)
 			scheduler.stop();
 		else
 			drawLines(start, actualDrawingJob.get(actualDrawingJob.indexOf(start)+1),actualDrawingJobDxInPx);	

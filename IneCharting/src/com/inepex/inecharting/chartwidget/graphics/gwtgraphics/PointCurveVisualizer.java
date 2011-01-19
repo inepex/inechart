@@ -93,8 +93,10 @@ public final class PointCurveVisualizer extends CurveVisualizer implements Point
 	@Override
 	public void drawNextPoint() {
 		Point start = getFirstUndrawnPointFromActualJob();
-		if(start.equals(null))
+		if(start == null){
 			scheduler.stop();
+			bringPointsToFront();
+		}
 		else
 			drawPoint(start, State.VISIBLE, actualDrawingJobDxInPx);
 		
@@ -102,7 +104,10 @@ public final class PointCurveVisualizer extends CurveVisualizer implements Point
 	
 	private void drawPoint(Point point, State state, int distanceFromPointsX){
 		removePoint(point);
-		PointDrawingInfo info = properties.getPointDrawingInfo(modelManager.getDataForPoint(point).get(0), state);  //TODO in case of overlapping points, and custom pointdrawinginfos, the results may not be satisfying
+		ArrayList<Double> datasForPoint = modelManager.getDataForPoint(point);
+		double data = datasForPoint.get(0);
+	
+		PointDrawingInfo info = properties.getPointDrawingInfo(data, state);  //TODO in case of overlapping points, and custom pointdrawinginfos, the results may not be satisfying
 		Shape shape = null;
 		switch(info.getType()){
 		case ELLIPSE:
@@ -111,20 +116,35 @@ public final class PointCurveVisualizer extends CurveVisualizer implements Point
 					point.getyPos(), 
 					info.getWidth() / 2,
 					info.getHeight() / 2);
+			break;
 		case RECTANGLE:
 			shape = new Rectangle(
 					point.getxPos() - info.getWidth() / 2 + distanceFromPointsX,
 					point.getyPos() - info.getHeight() / 2,
 					info.getWidth(),
 					info.getHeight());
+			break;
 		case NO_SHAPE:
 			return;
 		}
+		if(info.hasFill()){
+			shape.setFillColor(info.getFillColor());
+			shape.setFillOpacity(info.getFillOpacity());
+		}
+		else
+			shape.setFillOpacity(0d);
+		shape.setStrokeColor(info.getStrokeColor());
+		shape.setStrokeWidth(info.getStrokeWidth());
+		
+		((DrawingArea)canvas).add(shape);
 		drawnShapes.put(point, shape);		
 	}
 	
 	private void removePoint(Point point){
-		drawnShapes.remove(point);
+		if(drawnShapes.containsKey(point)){
+			((DrawingArea)canvas).remove(drawnShapes.get(point));
+			drawnShapes.remove(point);
+		}
 	}
 	
 	/**
@@ -180,5 +200,11 @@ public final class PointCurveVisualizer extends CurveVisualizer implements Point
 		
 		drawPoint(point, point.getState(), drawnShapes.get(drawnShapes.firstKey()).getX() - drawnShapes.firstKey().getxPos());
 		
+	}
+
+	private void bringPointsToFront(){
+		for(Point point : drawnShapes.keySet()){
+			((DrawingArea)canvas).bringToFront(drawnShapes.get(point));
+		}
 	}
 }

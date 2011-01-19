@@ -1,8 +1,10 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<module>
+<module rename-to='IneCharting'>
   
   <inherits name='org.vaadin.gwtgraphics.GWTGraphics'/>
   <inherits name="com.allen_sauer.gwt.log.gwt-log-DEBUG" />
   
+  <source path='chartwidget'/>
+  <source path='misc'/>
 
 </module>

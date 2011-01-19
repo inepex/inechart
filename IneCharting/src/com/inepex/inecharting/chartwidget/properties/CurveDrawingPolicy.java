@@ -9,6 +9,10 @@ public class CurveDrawingPolicy {
 		HIGHER,
 		AVERAGE
 	}
+	public static CurveDrawingPolicy getDefaultCurveDrawingPolicy(){
+		return new CurveDrawingPolicy(false, false, false, true, true, 20, DEFAULT_SQUARE_OVERLAPPING_SIZE, DEFAULT_OVERLAPPING_POLICY, DEFAULT_X_OVERLAPPING_WIDTH, true);
+	}
+	
 	private boolean preDrawLines;
 	private boolean preDrawPoints;
 	private boolean preCalculatePoints;
@@ -25,13 +29,6 @@ public class CurveDrawingPolicy {
 	private ImaginaryPointValuePolicy overlapFilterPolicy;
 	private int overlapFilterXWidth;
 	private boolean mathematicalRounding;
-	
-	public CurveDrawingPolicy() {
-		defineOverlapXPolicy(DEFAULT_OVERLAPPING_POLICY, DEFAULT_X_OVERLAPPING_WIDTH, DEFAULT_SQUARE_OVERLAPPING_SIZE);
-		mathematicalRounding = preCalculatePoints =  drawPointByPoint = keepInvisibleGraphicalObjects = true;
-		preDrawLines = preDrawPoints = false;
-		delayBetweenDrawingPoints = 100;
-	}
 	
 	
 	public CurveDrawingPolicy(boolean preDrawLines, boolean preDrawPoints,

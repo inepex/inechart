@@ -74,7 +74,7 @@ public final class IneChartProperties {
 	 * @return
 	 */
 	public PointDrawingInfo getPointDrawingInfo(double data, State state){
-		if(customPointDrawingInfos.get(data).equals(null) || customPointDrawingInfos.get(data).get(state).equals(null))
+		if(customPointDrawingInfos.get(data) == null || customPointDrawingInfos.get(data).get(state) ==  null)
 				return defaultPointDrawingInfo.get(state);
 		else
 			return customPointDrawingInfos.get(data).get(state);
@@ -89,5 +89,11 @@ public final class IneChartProperties {
 	public void setDefaultViewportPosition(double viewportMin, double viewportMax){
 		this.defaultViewportMax = viewportMax;
 		this.defaultViewportMin = viewportMin;
+	}
+	public double getDefaultViewportMax() {
+		return defaultViewportMax;
+	}
+	public double getDefaultViewportMin() {
+		return defaultViewportMin;
 	}
 }

@@ -40,7 +40,9 @@ public class IneChart extends Composite {
 	 */
 	private void init(){
 		modelManager = new ModelManager(properties);
+		modelManager.setViewport(properties.getDefaultViewportMin(), properties.getDefaultViewportMax());
 		drawingFactory = new DrawingFactory(DrawingTool.VAADIN_GWT_GRAPHICS, properties, modelManager);
+		curves = new TreeMap<String, Curve>();
 	}
 	
 	/**
@@ -62,8 +64,8 @@ public class IneChart extends Composite {
 	public void addCurve(Curve curve){
 		curves.put(curve.getName(), curve);
 		//let's check if the new curve had a lower value on x than the actual minimum
-		double xMin = modelManager.getxMin();
-		if(xMin == Double.NaN){
+		Double xMin = modelManager.getxMin();
+		if(xMin.equals(Double.NaN)){
 			xMin = curve.getDataMap().firstKey();
 		}
 		else{
@@ -83,6 +85,7 @@ public class IneChart extends Composite {
 			modelManager.setxMin(xMin);
 		}
 		modelManager.calculateAndSetPointsForInterval(curve, modelManager.getViewportMin(), modelManager.getViewportMax());
+		modelManager.filterOverlappingPoints(curve, modelManager.getViewportMin(), modelManager.getViewportMax());
 		//display curve
 		drawingFactory.addCurve(curve);
 	}

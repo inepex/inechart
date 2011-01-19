@@ -262,13 +262,13 @@ public class ModelManager {
 		int x = problematicPoints.get(0).getxPos() + (problematicPoints.get(problematicPoints.size() - 1).getxPos() - problematicPoints.get(0).getxPos()) / 2;
 		switch(curve.getPolicy().getOverlapFilerPolicy()){
 		case FIRST_POINT:
-			return new Point( x, problematicPoints.get(0).getxPos(), true, curve);
+			return new Point( x, problematicPoints.get(0).getyPos(), true, curve);
 		case LAST_POINT:
 			return new Point(x,problematicPoints.get(problematicPoints.size()-1).getyPos(), true, curve);
 		case AVERAGE:
 			int sum = 0;
 			for(Point axr: problematicPoints)
-				sum += axr.getxPos();
+				sum += axr.getyPos();
 			return new Point( x,sum/problematicPoints.size(), true, curve);
 		case LOWER:
 			int lowest = problematicPoints.get(0).getyPos();
@@ -318,24 +318,26 @@ public class ModelManager {
 	}
 	
 	/**
-	 * Returns x values(from the datamap) for a point
+	 * Returns x value(s in case of imaginary Point)(from the datamap) for a point
 	 * @param point
-	 * @return
+	 * @return can return an empty list if the point is not in calculatedPoints, neither in pointsToDraw collection
 	 */
 	public ArrayList<Double> getDataForPoint(Point point) {
-		double[] isInInterval;
-		isInInterval = calculateDataIntervalXForPoint(point.getxPos(), point.getParent().getPolicy().isMathematicalRounding());
 		ArrayList<Double> datas = new ArrayList<Double>();
+		//imaginary point
 		if(point.isImaginaryPoint() &&	point.getParent().getPointsToDraw().containsValue(point)){
 			for(Double x : point.getParent().getPointsToDraw().keySet()){
-				if(x >= isInInterval[0] && x <= isInInterval[1])
+				if(point.getParent().getPointsToDraw().get(x).equals(point))
 					datas.add(x);
 			}
 		}
+		//not imaginary - 1 data
 		else{
 			for(Double x : point.getParent().getCalculatedPoints().keySet()){
-				if(x >= isInInterval[0] && x <= isInInterval[1])
+				if(point.getParent().getCalculatedPoints().get(x).equals(point)){
 					datas.add(x);
+					break;
+				}
 			}
 		}
 		return datas;
