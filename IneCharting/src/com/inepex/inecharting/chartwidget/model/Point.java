@@ -1,7 +1,10 @@
 package com.inepex.inecharting.chartwidget.model;
 
-
-public final class Point{
+/**
+ * 
+ *@author Miklós Süveges / Inepex Ltd
+ */
+public final class Point implements Comparable<Point>{
 	
 	/**
 	 * View state of a point
@@ -84,6 +87,12 @@ public final class Point{
 
 	public Curve getParent() {
 		return parent;
+	}
+
+
+	@Override
+	public int compareTo(Point o) {
+		return xPos-o.xPos;
 	}
 }
 

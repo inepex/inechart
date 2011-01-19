@@ -4,13 +4,13 @@ import java.util.ArrayList;
 import java.util.TreeMap;
 
 import com.allen_sauer.gwt.log.client.Log;
+import com.inepex.inecharting.chartwidget.IneChartProperties;
 
 /**
  * An utility class for managing the IneChart's underlying model.
  * 
- * Usage:
- * Create an instance with initial parameters of the canvas, then update it with setViewport method each time the viewport changes
- * @author Miklós Süveges
+ *
+ * @author Miklós Süveges / Inepex Ltd.
  *
  */
 public class ModelManager {
@@ -23,11 +23,11 @@ public class ModelManager {
 	private double viewportMax;
 	
 		
-	public ModelManager(int width, int height, double xMin, int chartCanvasTopPaddingPercentage){
-		this.chartCanvasHeight = height;
-		this.chartCanvasWidth = width;
-		this.xMin = xMin;
-		this.chartCanvasTopPaddingPercentage = chartCanvasTopPaddingPercentage;
+	public ModelManager(IneChartProperties properties){
+		this.chartCanvasHeight = properties.getChartCanvasHeight();
+		this.chartCanvasWidth = properties.getChartCanvasWidth();
+		this.chartCanvasTopPaddingPercentage = properties.getChartCanvasTopPaddingPercentage();
+		xMin = Double.NaN;
 	}
 	
 	/**
@@ -83,9 +83,19 @@ public class ModelManager {
 	 * @param dx distance in data
 	 * @return distance in pixels
 	 */
-	public int calculateDistance(double dx, int chartCanvasWidth){
+	public int calculateDistance(double dx){
 		return (int) (calculateX(xMin + dx)
 				- calculateX(xMin));
+	}
+	
+	/**
+	 * Distance translation from canvas to data
+	 * @param dx distance in pixels
+	 * @return distance in data
+	 */
+	public double calculateDistance(int dxInPx){
+		double unit =  (viewportMax - viewportMin) / chartCanvasWidth;
+		return unit * dxInPx;
 	}
 	
 	/** 
@@ -105,7 +115,7 @@ public class ModelManager {
 			//if no point for this data
 			if(point == null){
 				int xPos, yPos;
-				if(curve.isMathematicalRounding()){ //use Math.round on each value
+				if(curve.getPolicy().isMathematicalRounding()){ //use Math.round on each value
 					xPos = (int) Math.round(calculateX(x));
 					yPos = (int) Math.round(calculateY(dataToCheck.get(x), curve.getMinValue(), curve.getMaxValue()));
 				}
@@ -147,7 +157,7 @@ public class ModelManager {
 				continue;
 			}
 			// if it is problematic element
-			else if(pointsToFilter.get(x).getxPos() - pointsToFilter.get(firstIndex).getxPos() < curve.getOverlapFilterXWidth()){
+			else if(pointsToFilter.get(x).getxPos() - pointsToFilter.get(firstIndex).getxPos() < curve.getPolicy().getOverlapFilterXWidth()){
 				if(problematicIndices == null){ 
 					problematicIndices = new ArrayList<Double>();
 					problematicIndices.add(firstIndex);
@@ -178,7 +188,7 @@ public class ModelManager {
 	/* applying square - filter */
 		startTime = System.currentTimeMillis();
 		willNotShowCount = 0;
-		if(curve.getOverlapFilterSquareSize() <= curve.getOverlapFilterXWidth())
+		if(curve.getPolicy().getOverlapFilterSquareSize() <= curve.getPolicy().getOverlapFilterXWidth())
 			curve.getPointsToDraw().putAll(xFiltered);
 
 		Integer squareTopMax = null;
@@ -191,13 +201,13 @@ public class ModelManager {
 			Point actual = xFiltered.get(x);
 			if(firstIndex == null){
 				firstIndex = x;
-				squareTopMax = actual.getyPos() + curve.getOverlapFilterSquareSize();
-				squareBottomMin = squareTopMax -  2 * curve.getOverlapFilterSquareSize();
+				squareTopMax = actual.getyPos() + curve.getPolicy().getOverlapFilterSquareSize();
+				squareBottomMin = squareTopMax -  2 * curve.getPolicy().getOverlapFilterSquareSize();
 				highestYinSquare = lowestYinSquare = actual.getyPos();
 				continue;
 			}
 			// if the actual point's x position is in a square and ...
-			else if(actual.getxPos() - xFiltered.get(firstIndex).getxPos() < curve.getOverlapFilterSquareSize()  &&
+			else if(actual.getxPos() - xFiltered.get(firstIndex).getxPos() < curve.getPolicy().getOverlapFilterSquareSize()  &&
 				actual.getyPos() >  squareBottomMin   &&   actual.getyPos() < squareTopMax){ // ...check the same condition on y
 				if(problematicIndices == null){ 
 					problematicIndices = new ArrayList<Double>();
@@ -232,8 +242,8 @@ public class ModelManager {
 					squareFiltered.put(firstIndex, curve.getCalculatedPoints().get(firstIndex));
 				}
 				firstIndex = x;
-				squareTopMax = actual.getyPos() + curve.getOverlapFilterSquareSize();
-				squareBottomMin = squareTopMax -  2 * curve.getOverlapFilterSquareSize();
+				squareTopMax = actual.getyPos() + curve.getPolicy().getOverlapFilterSquareSize();
+				squareBottomMin = squareTopMax -  2 * curve.getPolicy().getOverlapFilterSquareSize();
 				highestYinSquare = lowestYinSquare = actual.getyPos();
 			}
 		}
@@ -250,7 +260,7 @@ public class ModelManager {
 	 */
 	private Point choosePointByPolicy(ArrayList<Point> problematicPoints, Curve curve){
 		int x = problematicPoints.get(0).getxPos() + (problematicPoints.get(problematicPoints.size() - 1).getxPos() - problematicPoints.get(0).getxPos()) / 2;
-		switch(curve.getOverlapFilerPolicy()){
+		switch(curve.getPolicy().getOverlapFilerPolicy()){
 		case FIRST_POINT:
 			return new Point( x, problematicPoints.get(0).getxPos(), true, curve);
 		case LAST_POINT:
@@ -276,6 +286,78 @@ public class ModelManager {
 		}
 	}
 
+	/**
+	 * When viewport's resolution changes, call this method to set the new x position for calculated points in the curve
+	 * @param curve
+	 * @param shrinkRatio
+	 */
+	public void setXPositionForCalculatedPoints(Curve curve, double shrinkRatio){
+		for(Double x:curve.getCalculatedPoints().keySet()){
+			if(curve.getPolicy().isMathematicalRounding())
+				curve.getCalculatedPoints().get(x).setxPos((int) Math.round(curve.getCalculatedPoints().get(x).getxPos() * shrinkRatio));
+			else
+				curve.getCalculatedPoints().get(x).setxPos((int) (curve.getCalculatedPoints().get(x).getxPos() * shrinkRatio));
+		}
+	}
 	
+	/**
+	 * When adding a curve to the chart, which has a lower xMin than the actual, there's no need to recalculate all the points of all curves,
+	 * just shift them with the (positive) difference between the new and the old xMin
+	 *  (and do not forget to do this with the curve's visualizer!)
+	 * @param curve
+	 * @param dx
+	 */
+	public void addDistanceToAllPoints(Curve curve, double dx){
+		for(Double x:curve.getCalculatedPoints().keySet()){
+			curve.getCalculatedPoints().get(x).setxPos(curve.getCalculatedPoints().get(x).getxPos() + calculateDistance(dx));
+		}
+		for(Double x:curve.getPointsToDraw().keySet()){
+			if(curve.getPointsToDraw().get(x).isImaginaryPoint())
+				curve.getPointsToDraw().get(x).setxPos(curve.getPointsToDraw().get(x).getxPos() + calculateDistance(dx));
+		}
+	}
+	
+	/**
+	 * Returns x values(from the datamap) for a point
+	 * @param point
+	 * @return
+	 */
+	public ArrayList<Double> getDataForPoint(Point point) {
+		double[] isInInterval;
+		isInInterval = calculateDataIntervalXForPoint(point.getxPos(), point.getParent().getPolicy().isMathematicalRounding());
+		ArrayList<Double> datas = new ArrayList<Double>();
+		if(point.isImaginaryPoint() &&	point.getParent().getPointsToDraw().containsValue(point)){
+			for(Double x : point.getParent().getPointsToDraw().keySet()){
+				if(x >= isInInterval[0] && x <= isInInterval[1])
+					datas.add(x);
+			}
+		}
+		else{
+			for(Double x : point.getParent().getCalculatedPoints().keySet()){
+				if(x >= isInInterval[0] && x <= isInInterval[1])
+					datas.add(x);
+			}
+		}
+		return datas;
+	}
 
+	public int getChartCanvasHeight() {
+		return chartCanvasHeight;
+	}
+
+	public double getxMin() {
+		return xMin;
+	}
+
+	public double getViewportMin() {
+		return viewportMin;
+	}
+
+	public double getViewportMax() {
+		return viewportMax;
+	}
+
+	public void setxMin(double xMin) {
+		this.xMin = xMin;
+	}
 }

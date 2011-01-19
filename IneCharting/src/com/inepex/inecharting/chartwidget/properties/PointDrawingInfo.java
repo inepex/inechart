@@ -3,7 +3,8 @@ package com.inepex.inecharting.chartwidget.properties;
 public class PointDrawingInfo extends ShapeDrawingInfo {
 	public static enum PointType{
 		ELLIPSE,
-		RECTANGLE
+		RECTANGLE,
+		NO_SHAPE
 	}
 	
 	public static final int RECTANGLE_HEIGHT_TO_X_AXIS = -1;
@@ -19,7 +20,7 @@ public class PointDrawingInfo extends ShapeDrawingInfo {
 	private int height ;
 	
 	public PointDrawingInfo() {
-		// TODO Auto-generated constructor stub
+		
 	}
 	
 	public PointDrawingInfo(String strokeColor, int strokeWidth,

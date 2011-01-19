@@ -2,10 +2,15 @@ package com.inepex.inecharting.chartwidget.model;
 
 import java.util.TreeMap;
 
+import com.google.gwt.user.client.Random;
+import com.inepex.inecharting.chartwidget.properties.CurveDrawingPolicy;
 import com.inepex.inecharting.chartwidget.properties.ShapeDrawingInfo;
 
 
-
+/**
+ * 
+ *@author Miklós Süveges / Inepex Ltd
+ */
 public final class Curve {
 	/**
 	 * Curve's axis
@@ -16,14 +21,12 @@ public final class Curve {
 		NO_AXIS
 	}
 	
-	public static enum ImaginaryPointValuePolicy{
-		FIRST_POINT,
-		LAST_POINT,
-		LOWER,
-		HIGHER,
-		AVERAGE
-	}
+	
 	//data fields
+	/**
+	 * Unique name of the curve, helps identifying at event-handling which curve (or a curve's point) was selected
+	 */
+	private String name;
 	/**
 	 * the underlying data
 	 */
@@ -59,24 +62,10 @@ public final class Curve {
 	private boolean hasLine;
 	private boolean hasPoints;
 	private ShapeDrawingInfo lineDrawInfo;
-
-	/* model-to-pixel policy */
-	public static final ImaginaryPointValuePolicy DEFAULT_OVERLAPPING_POLICY = ImaginaryPointValuePolicy.AVERAGE;
-	public static final int DEFAULT_X_OVERLAPPING_WIDTH = 3;
-	public static final int DEFAULT_SQUARE_OVERLAPPING_SIZE = 10;
-
-	private int overlapFilterSquareSize ;
-	private ImaginaryPointValuePolicy overlapFilterPolicy;
-	private int overlapFilterXWidth;
-	private boolean mathematicalRounding;
-	
-	/* model handling, drawing policy */
-	private boolean preDrawLines;
-	private boolean preDrawPoints;
-	private boolean preCalculatePoints;
-	private boolean keepInvisibleGraphicalObjects;
-	
-	private Curve(TreeMap<Double, Double> dataMap) {
+	private CurveDrawingPolicy policy;
+		
+	public Curve(String name, TreeMap<Double, Double> dataMap) {
+		this.name = name;
 		this.dataMap = dataMap;
 		minValue = maxValue = dataMap.get(dataMap.firstKey());
 		for(Double time:dataMap.keySet()){
@@ -88,8 +77,7 @@ public final class Curve {
 		}
 		
 		//default values
-		defineOverlapXPolicy(DEFAULT_OVERLAPPING_POLICY, DEFAULT_X_OVERLAPPING_WIDTH, DEFAULT_SQUARE_OVERLAPPING_SIZE);
-		mathematicalRounding = true;
+		
 		hasLine = true;
 		hasPoints = false;
 		curveAxis = Axis.Y;
@@ -97,7 +85,6 @@ public final class Curve {
 		pointsToDraw = new TreeMap<Double, Point>();
 		lineDrawInfo = ShapeDrawingInfo.getDefaultShapeDrawingInfo();
 	}
-	
 	
 	
 /* GETTERS AND SETTERS */
@@ -133,41 +120,6 @@ public final class Curve {
 
 	public void setMinValue(double minValue) {
 		this.minValue = minValue;
-	}
-
-	/**
-	 * Sets a policy for overlapping X-value points.
-	 * @param policy one policy from the class' static final fields 
-	 * @param width the width
-	 */
-	public void defineOverlapXPolicy(ImaginaryPointValuePolicy policy, int overlapFilterXWidth, int overlapFilterSquareSize){
-		this.overlapFilterPolicy = policy;
-		this.overlapFilterXWidth = overlapFilterXWidth;
-		this.overlapFilterSquareSize = overlapFilterSquareSize;
-	}
-	
-	/**
-	 * Defines the model-to-pixel function should use mathematical rounding or should use double to integer casting. 
-	 * @param mathematicalRounding true if mathematical rounding should being used.
-	 */
-	public void setMathematicalRounding(boolean mathematicalRounding) {
-		this.mathematicalRounding = mathematicalRounding;
-	}
-	
-	public int getOverlapFilterSquareSize() {
-		return overlapFilterSquareSize;
-	}
-	
-	public ImaginaryPointValuePolicy getOverlapFilerPolicy() {
-		return overlapFilterPolicy;
-	}
-	
-	public int getOverlapFilterXWidth() {
-		return overlapFilterXWidth;
-	}
-	
-	public boolean isMathematicalRounding() {
-		return mathematicalRounding;
 	}
 
 	public Axis getCurveAxis() {
@@ -226,41 +178,35 @@ public final class Curve {
 		return lineDrawInfo;
 	}
 
-	public boolean isPreDrawLines() {
-		return preDrawLines;
-	}
-
-	public boolean isPreDrawPoints() {
-		return preDrawPoints;
-	}
-
-	public boolean isPreCalculatePoints() {
-		return preCalculatePoints;
-	}
-
-	public boolean isKeepInvisibleGraphicalObjects() {
-		return keepInvisibleGraphicalObjects;
-	}
-
 	public void setLineDrawInfo(ShapeDrawingInfo lineDrawInfo) {
 		this.lineDrawInfo = lineDrawInfo;
 	}
 
-	public void setPreDrawLines(boolean preDrawLines) {
-		this.preDrawLines = preDrawLines;
-	}
-
-	public void setPreDrawPoints(boolean preDrawPoints) {
-		this.preDrawPoints = preDrawPoints;
-	}
-
-	public void setPreCalculatePoints(boolean preCalculatePoints) {
-		this.preCalculatePoints = preCalculatePoints;
-	}
-
-	public void setKeepInvisibleGraphicalObjects(
-			boolean keepInvisibleGraphicalObjects) {
-		this.keepInvisibleGraphicalObjects = keepInvisibleGraphicalObjects;
+	public String getName(){
+		return name;
 	}
 	
+	public void setName(String name) {
+		this.name = name;
+	}
+	
+	/**
+	 * Generates a random name (contains 12 0-9 digits) for this curve
+	 * @return the generated name
+	 */
+	public String generateRandomName(){
+		String name = "";
+		for(int i = 0; i < 12; i++)
+			name += Random.nextInt(10);
+		this.name = name;
+		return name;
+	}
+
+	public CurveDrawingPolicy getPolicy() {
+		return policy;
+	}
+	
+	public void setPolicy(CurveDrawingPolicy policy) {
+		this.policy = policy;
+	}
 }
