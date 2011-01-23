@@ -4,8 +4,10 @@ import java.util.TreeMap;
 
 import com.google.gwt.user.client.ui.AbsolutePanel;
 import com.google.gwt.user.client.ui.Composite;
+import com.inepex.inecharting.chartwidget.graphics.CurveVisualizer;
 import com.inepex.inecharting.chartwidget.graphics.DrawingFactory;
 import com.inepex.inecharting.chartwidget.graphics.DrawingFactory.DrawingTool;
+import com.inepex.inecharting.chartwidget.graphics.HasViewport;
 import com.inepex.inecharting.chartwidget.model.Curve;
 import com.inepex.inecharting.chartwidget.model.ModelManager;
 
@@ -16,7 +18,7 @@ import com.inepex.inecharting.chartwidget.model.ModelManager;
  * @author Miklós Süveges / Inepex Ltd.
  *
  */
-public class IneChart extends Composite {
+public class IneChart extends Composite implements HasViewport{
 	//data fields
 	private ModelManager modelManager;
 	private DrawingFactory drawingFactory;
@@ -84,10 +86,46 @@ public class IneChart extends Composite {
 			}
 			modelManager.setxMin(xMin);
 		}
-		modelManager.calculateAndSetPointsForInterval(curve, modelManager.getViewportMin(), modelManager.getViewportMax());
-		modelManager.filterOverlappingPoints(curve, modelManager.getViewportMin(), modelManager.getViewportMax());
+		double start, stop;
+		if(curve.getPolicy().isPreCalculatePoints()){
+			start = curve.getDataMap().firstKey();
+			stop = curve.getDataMap().lastKey();
+		}
+		else{
+			start = curve.getLastInvisiblePointBeforeViewport(modelManager.getViewportMin());
+			stop = curve.getFirstInvisiblePointAfterViewport(modelManager.getViewportMax());
+		}
+		modelManager.calculateAndSetPointsForInterval(curve, start, stop);
+		modelManager.filterOverlappingPoints(curve, start, stop);
 		//display curve
 		drawingFactory.addCurve(curve);
+	}
+
+	
+	@Override
+	public void moveViewport(double dx) {
+		modelManager.setViewport(modelManager.getViewportMin() + dx, modelManager.getViewportMax()+dx);
+		for(String curveName : curves.keySet()){
+			Curve actualCurve = curves.get(curveName);
+			if(!actualCurve.getPolicy().isPreCalculatePoints()){
+				modelManager.calculateAndSetPointsForInterval(actualCurve, modelManager.getViewportMin(), modelManager.getViewportMax());
+				modelManager.filterOverlappingPoints(actualCurve, modelManager.getViewportMin(), modelManager.getViewportMax());
+			}
+		}
+		drawingFactory.moveViewport(dx);
+	}
+
+	@Override
+	public void setViewPort(double viewportMin, double viewportMax) {
+		modelManager.setViewport(viewportMin, viewportMax);
+		for(String curveName : curves.keySet()){
+			Curve actualCurve = curves.get(curveName);
+			if(!actualCurve.getPolicy().isPreCalculatePoints()){
+				modelManager.calculateAndSetPointsForInterval(actualCurve, modelManager.getViewportMin(), modelManager.getViewportMax());
+				modelManager.filterOverlappingPoints(actualCurve, modelManager.getViewportMin(), modelManager.getViewportMax());
+			}
+		}
+		drawingFactory.setViewPort(viewportMin, viewportMax);
 	}
 	
 	

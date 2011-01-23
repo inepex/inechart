@@ -146,26 +146,27 @@ public final class Curve {
 		this.hasPoints = hasPoints;
 	}
 
-	public double getLastInvisiblePointBeforeViewport(double viewportMin){
+	public Double getLastInvisiblePointBeforeViewport(double viewportMin){
 		double lastX = dataMap.firstKey();
 		if(lastX >= viewportMin)
-			return Double.NaN;
+			return null;
 		for (Double x:dataMap.keySet()){
 			if(x > viewportMin)
 				return lastX;
 			lastX = x;
 		}
-		return Double.NaN;
+		return null;
 	}
 
-	public double getFirstInvisiblePointAfterViewport(double viewportMax){
+	public Double getFirstInvisiblePointAfterViewport(double viewportMax){
 		for (Double x:dataMap.keySet()){
 			if(x > viewportMax)
 				return x;
 		}
-		return Double.NaN;	
+		return null;	
 	}
 
+	
 	public TreeMap<Double, Point> getCalculatedPoints() {
 		return calculatedPoints;
 	}

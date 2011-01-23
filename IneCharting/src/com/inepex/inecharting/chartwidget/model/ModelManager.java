@@ -109,6 +109,7 @@ public class ModelManager {
 		for(Double x:curve.getDataMap().keySet())
 			if(x >= start && x <= stop)
 				dataToCheck.put(x, curve.getDataMap().get(x));
+		//we also checks those invisible points, which are the closest to viewport
 		for(double x : dataToCheck.keySet()){
 			//check if we have calculated a point before
 			Point point = curve.getCalculatedPoints().get(x);

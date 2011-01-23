@@ -29,7 +29,7 @@ public final class PointCurveVisualizer extends CurveVisualizer implements Point
 	private ModelManager modelManager;
 	private ArrayList<Point> actualDrawingJob;
 	private DrawingJobScheduler scheduler;
-	private int actualDrawingJobDxInPx = 0;
+	private double totalDX = 0;
 	private IneChartProperties properties;
 	
 	public PointCurveVisualizer(Widget canvas, Curve curve, ModelManager modelManager, IneChartProperties properties) {
@@ -54,11 +54,12 @@ public final class PointCurveVisualizer extends CurveVisualizer implements Point
 	@Override
 	public void moveViewport(double dx) {
 		moveShapes(-dx);
-		if(curve.getPolicy().isPreDrawPoints())
+		if(curve.getPolicy().isPreDrawPoints()){
 			return;
+		}
 		else{
-			actualDrawingJobDxInPx = drawnShapes.get(drawnShapes.firstKey()).getX() - drawnShapes.firstKey().getxPos();
-			dropShapesOutsideViewPort();
+			if(!curve.getPolicy().isKeepInvisibleGraphicalObjects())
+				dropShapesOutsideViewPort();
 			createActualDrawingJob(modelManager.getViewportMin(), modelManager.getViewportMax());
 			if(curve.getPolicy().isDrawPointByPoint()){
 				scheduler = new DrawingJobScheduler(this, curve.getPolicy().getDelayBetweenDrawingPoints());
@@ -66,7 +67,7 @@ public final class PointCurveVisualizer extends CurveVisualizer implements Point
 			}
 			else{
 				for(Point point : actualDrawingJob){
-					drawPoint(point, State.VISIBLE, actualDrawingJobDxInPx);
+					drawPoint(point, State.VISIBLE, modelManager.calculateDistance(totalDX));
 				}
 			}			
 		}
@@ -98,7 +99,7 @@ public final class PointCurveVisualizer extends CurveVisualizer implements Point
 			bringPointsToFront();
 		}
 		else
-			drawPoint(start, State.VISIBLE, actualDrawingJobDxInPx);
+			drawPoint(start, State.VISIBLE, modelManager.calculateDistance(totalDX));
 		
 	}
 	
@@ -153,8 +154,6 @@ public final class PointCurveVisualizer extends CurveVisualizer implements Point
 	 */
 	private Point getFirstUndrawnPointFromActualJob(){
 		for(Point point:actualDrawingJob){
-			if(actualDrawingJob.indexOf(point) == actualDrawingJob.size() - 1)
-				break;
 			if(drawnShapes.containsKey(point))
 				continue;
 			else
@@ -164,9 +163,13 @@ public final class PointCurveVisualizer extends CurveVisualizer implements Point
 	}
 	
 	private void dropShapesOutsideViewPort(){
-			for(Double x : curve.getPointsToDraw().keySet()){
+		for(Double x : curve.getPointsToDraw().keySet()){
 			if(x < modelManager.getViewportMin() || x > modelManager.getViewportMax()){
-				drawnShapes.remove(curve.getPointsToDraw().get(x));
+				Shape shape = drawnShapes.get(curve.getPointsToDraw().get(x));
+				if(shape != null){
+					((DrawingArea)canvas).remove(shape);
+					drawnShapes.remove(curve.getPointsToDraw().get(x));
+				}
 			}
 		}
 	}
@@ -187,11 +190,12 @@ public final class PointCurveVisualizer extends CurveVisualizer implements Point
 	}
 
 	private void moveShapes(double dx){
+		totalDX += dx;
 		if(drawnShapes.size() == 0)
 			return;
-		int dxInPx = modelManager.calculateDistance(dx);
+		int dxInPx = modelManager.calculateDistance(totalDX);
 		for(Point point:drawnShapes.keySet()){
-			drawnShapes.get(point).setX(drawnShapes.get(point).getX() + dxInPx);
+			drawnShapes.get(point).setX(point.getxPos() + dxInPx);
 		}			
 	}
 
@@ -207,4 +211,5 @@ public final class PointCurveVisualizer extends CurveVisualizer implements Point
 			((DrawingArea)canvas).bringToFront(drawnShapes.get(point));
 		}
 	}
+
 }

@@ -10,7 +10,7 @@ public class CurveDrawingPolicy {
 		AVERAGE
 	}
 	public static CurveDrawingPolicy getDefaultCurveDrawingPolicy(){
-		return new CurveDrawingPolicy(false, false, false, true, true, 20, DEFAULT_SQUARE_OVERLAPPING_SIZE, DEFAULT_OVERLAPPING_POLICY, DEFAULT_X_OVERLAPPING_WIDTH, true);
+		return new CurveDrawingPolicy(false, false, true, false, true, 290, DEFAULT_SQUARE_OVERLAPPING_SIZE, DEFAULT_OVERLAPPING_POLICY, DEFAULT_X_OVERLAPPING_WIDTH, true);
 	}
 	
 	private boolean preDrawLines;
@@ -118,7 +118,6 @@ public class CurveDrawingPolicy {
 		this.keepInvisibleGraphicalObjects = keepInvisibleGraphicalObjects;
 	}
 
-	
 	public boolean isDrawPointByPoint() {
 		return drawPointByPoint;
 	}

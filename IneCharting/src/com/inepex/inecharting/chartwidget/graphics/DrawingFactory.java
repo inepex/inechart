@@ -4,6 +4,8 @@ import java.util.ArrayList;
 import java.util.TreeMap;
 
 import org.vaadin.gwtgraphics.client.DrawingArea;
+import org.vaadin.gwtgraphics.client.shape.Rectangle;
+
 import com.google.gwt.user.client.ui.Widget;
 import com.inepex.inecharting.chartwidget.IneChartProperties;
 import com.inepex.inecharting.chartwidget.graphics.gwtgraphics.LineCurveVisualizer;
@@ -18,7 +20,7 @@ import com.inepex.inecharting.chartwidget.model.ModelManager;
  * 
  * @author Miklós Süveges / Inepex Ltd.
  */
-public class DrawingFactory {
+public class DrawingFactory implements HasViewport{
 
 	public static enum DrawingTool{
 		VAADIN_GWT_GRAPHICS
@@ -30,8 +32,6 @@ public class DrawingFactory {
 	private DrawingTool drawingTool;
 	private IneChartProperties properties;
 	private ModelManager modelManager;
-	private double viewportMin;
-	private double viewportMax;
 	private TreeMap<String, ArrayList<CurveVisualizer>> curveVisualizers;
 	private Widget chartCanvas;
 	
@@ -56,25 +56,10 @@ public class DrawingFactory {
 	
 	private void initGwtGraphicsFields(){
 		this.chartCanvas = new DrawingArea(properties.getChartCanvasWidth(), properties.getChartCanvasHeight());
-	}
-
-	/**
-	 * Sets the actual visible area.
-	 * Draws (or moves) the graphical objects to fit the new position.
-	 * The curves should contain updated points at the time of this method call.
-	 * @param viewportMin
-	 * @param viewportMax
-	 */
-	public void setViewport(double viewportMin, double viewportMax){
-		double dx = viewportMax - this.viewportMax;
-		if(dx == viewportMin - this.viewportMin)
-		
-		this.viewportMax = viewportMax;
-		this.viewportMin = viewportMin;
+		Rectangle border = new Rectangle(0, 0, properties.getChartCanvasWidth(), properties.getChartCanvasHeight());
+		((DrawingArea)chartCanvas).add(border);
 	}
 	
- 
-  	
  	/**
  	 * draws a curve on canvas
  	 * @param curve
@@ -93,11 +78,12 @@ public class DrawingFactory {
 				pcv.drawCurve(modelManager.getViewportMin(), modelManager.getViewportMax());
 				visualizers.add(pcv);
 			}
+			curveVisualizers.put(curve.getName(), visualizers);
+			break;
 		default:
 			return;
 		}
  	}
- 
  
  	/**
  	 * removes a curve from canvas
@@ -113,4 +99,20 @@ public class DrawingFactory {
  	public Widget getChartCanvas(){
  		return chartCanvas;		
  	}
+
+	
+ 	@Override
+	public void moveViewport(double dx) {
+		for(String curveName : curveVisualizers.keySet())
+			for(CurveVisualizer visualizer: curveVisualizers.get(curveName))
+				visualizer.moveViewport(dx);		
+	}
+
+	
+ 	@Override
+	public void setViewPort(double viewportMin, double viewportMax) {
+ 		for(String curveName : curveVisualizers.keySet())
+			for(CurveVisualizer visualizer: curveVisualizers.get(curveName))
+				visualizer.setViewPort(viewportMin, viewportMax);		
+	}
 }

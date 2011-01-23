@@ -46,18 +46,18 @@ public class CustomHorizontalScrollBar extends Composite {
 	private int mouseDownOnSlidePosition;
 	private CustomHorizontalScrollBarParent parent;
 	
-	/**
-	 * Creates a scrollbar with the given parameters.
-	 * @param height the height of the FocusWidget in px
-	 * @param slideAreaWidth the width of the scrolling area (between the two arrows at the ends) in px
-	 * @param arrowButtonWidth the arrow buttons width in px
-	 * @param slidePosition	the default location for the slide in px, measured from the left of the scrolling area
-	 * @param slideWidth the default width of the slide
-	 * @param pixelStep when an arrow pressed the slide moves toward the arrow, with this quantity (in pixels)
-	 * @param parent the FocusWidget which uses the scrollbar must implent the {@link CustomHorizontalScrollBarParent} interface
-	 */
+//	/**
+//	 * Creates a scrollbar with the given parameters.
+//	 * @param height the height of the FocusWidget in px
+//	 * @param slideAreaWidth the width of the scrolling area (between the two arrows at the ends) in px
+//	 * @param arrowButtonWidth the arrow buttons width in px
+//	 * @param slidePosition	the default location for the slide in px, measured from the left of the scrolling area
+//	 * @param slideWidth the default width of the slide
+//	 * @param pixelStep when an arrow pressed the slide moves toward the arrow, with this quantity (in pixels)
+//	 * @param parent the FocusWidget which uses the scrollbar must implent the {@link CustomHorizontalScrollBarParent} interface
+//	 */
 
-
+	
 	public CustomHorizontalScrollBar(FocusWidget scrollBarLeftArrow,
 			FocusWidget scrollBarRightArrow, FocusWidget scrollBarSlider,
 			Widget scrollBarSlidingArea, int height, int slidePosition,
@@ -86,7 +86,7 @@ public class CustomHorizontalScrollBar extends Composite {
 		mainPanel.add(scrollBarLeftArrow, 0, 0);
 		mainPanel.add(scrollBarSlidingArea, arrowButtonWidth, 0);
 		mainPanel.add(scrollBarRightArrow, slideAreaWidth+arrowButtonWidth, 0);
-		mainPanel.add(scrollBarSlider,slidePosition,0);
+		mainPanel.add(scrollBarSlider,arrowButtonWidth+slidePosition,0);
 		
 		DOM.setIntStyleAttribute( scrollBarSlidingArea.getElement(), "zIndex", -1 );
 		

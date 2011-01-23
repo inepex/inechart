@@ -23,7 +23,7 @@ public final class LineCurveVisualizer extends CurveVisualizer {
 	private ArrayList<Point> actualDrawingJob;
 	private ModelManager modelManager; 
 	private DrawingJobScheduler scheduler;
-	private int actualDrawingJobDxInPx = 0;
+	private double totalDX = 0;
 	
 	public LineCurveVisualizer(Widget canvas, Curve curve, ModelManager modelManager) {
 		super(canvas, curve);
@@ -50,11 +50,12 @@ public final class LineCurveVisualizer extends CurveVisualizer {
 	@Override
 	public void moveViewport(double dx) {
 		moveShapes(-dx);
-		if(curve.getPolicy().isPreDrawLines())
+		if(curve.getPolicy().isPreDrawLines()){
 			return;
+		}
 		else{
-			actualDrawingJobDxInPx = drawnFills.get(drawnFills.firstKey()).getX() - drawnFills.firstKey().getxPos();
-			dropShapesOutsideViewPort();
+			if(!curve.getPolicy().isKeepInvisibleGraphicalObjects())
+				dropShapesOutsideViewPort();
 			createActualDrawingJob(modelManager.getViewportMin(), modelManager.getViewportMax());
 			if(curve.getPolicy().isDrawPointByPoint()){
 				scheduler = new DrawingJobScheduler(this, curve.getPolicy().getDelayBetweenDrawingPoints());
@@ -62,7 +63,7 @@ public final class LineCurveVisualizer extends CurveVisualizer {
 			}
 			else{
 				for(int i=0; i<actualDrawingJob.size()-1; i++){
-					drawLines(actualDrawingJob.get(i), actualDrawingJob.get(i+1), actualDrawingJobDxInPx);
+					drawLines(actualDrawingJob.get(i), actualDrawingJob.get(i+1), modelManager.calculateDistance(totalDX));
 				}
 			}			
 		}
@@ -70,6 +71,7 @@ public final class LineCurveVisualizer extends CurveVisualizer {
 
 	@Override
 	public void setViewPort(double viewportMin, double viewportMax) {
+		totalDX = 0;
 		removeFromCanvas();
 		createActualDrawingJob(viewportMin, viewportMax);
 		if(curve.getPolicy().isDrawPointByPoint()){
@@ -90,7 +92,7 @@ public final class LineCurveVisualizer extends CurveVisualizer {
 		if(start == null)
 			scheduler.stop();
 		else
-			drawLines(start, actualDrawingJob.get(actualDrawingJob.indexOf(start)+1),actualDrawingJobDxInPx);	
+			drawLines(start, actualDrawingJob.get(actualDrawingJob.indexOf(start)+1), modelManager.calculateDistance(totalDX));	
 	}
 	
 	/**
@@ -158,55 +160,59 @@ public final class LineCurveVisualizer extends CurveVisualizer {
 		}
 		if(!curve.getPolicy().isPreDrawLines()){
 			//we need to get invisible points closest to viewport to draw lines 
-			double start = curve.getLastInvisiblePointBeforeViewport(viewportMin);
-			double end = curve.getFirstInvisiblePointAfterViewport(viewportMax);
+			Double start = curve.getLastInvisiblePointBeforeViewport(viewportMin);
+			Double end = curve.getFirstInvisiblePointAfterViewport(viewportMax);
 			//has point before viewport
-			if(!Double.isNaN(start)){
-				actualDrawingJob.add(0, new Point(
-						(int) modelManager.calculateX(start),
-						(int) modelManager.calculateY(curve.getDataMap().get(start), curve.getMinValue(), curve.getMaxValue()),
-						true,curve));
+			if(start != null){
+				actualDrawingJob.add(0, curve.getPointsToDraw().get(start));
 			}
-			if(!Double.isNaN(end)){
-				actualDrawingJob.add(new Point(
-						(int) modelManager.calculateX(end),
-						(int) modelManager.calculateY(curve.getDataMap().get(end), curve.getMinValue(), curve.getMaxValue()),
-						true,curve));
+			if(end != null){
+				actualDrawingJob.add(curve.getPointsToDraw().get(end));
 			}
 		}
 		return actualDrawingJob;
 	}
 
 	private void moveShapes(double dx){
+		totalDX += dx;
 		if(drawnLines.size() == 0)
 			return;
-		int dxInPx = modelManager.calculateDistance(dx);
-		
+		int dxInPx = modelManager.calculateDistance(totalDX);
 		for(Point point:drawnLines.keySet()){
 			Line l = drawnLines.get(point);
-			l.setX1(l.getX1() + dxInPx);
-			l.setX2(l.getX2() + dxInPx);
+			int d = l.getX1() - point.getxPos();
+			l.setX1(point.getxPos() + dxInPx);
+			l.setX2(l.getX2() - d + dxInPx);
 		}
 		if(drawnFills.size() == 0)
 			return;
 		for(Point point:drawnFills.keySet()){
-			drawnFills.get(point).setX(drawnFills.get(point).getX() + dxInPx);
+			drawnFills.get(point).setX(point.getxPos() + dxInPx);
 		}
 			
 	}
 
 	private void dropShapesOutsideViewPort(){
 		Double firstToKeep = curve.getLastInvisiblePointBeforeViewport(modelManager.getViewportMin());
-		if(firstToKeep.equals(Double.NaN))
+		if(firstToKeep == null)
 			firstToKeep = modelManager.getViewportMin();
-		Double lastToKeep = curve.getFirstInvisiblePointAfterViewport(modelManager.getViewportMax());
-		if(lastToKeep.equals(Double.NaN))
-			lastToKeep = modelManager.getViewportMax();
+		Double lastToKeep = modelManager.getViewportMax();
 		for(Double x : curve.getPointsToDraw().keySet()){
 			if(x < firstToKeep || x > lastToKeep){
-				drawnFills.remove(curve.getPointsToDraw().get(x));
-				drawnLines.remove(curve.getPointsToDraw().get(x));
+				Line line = drawnLines.get(curve.getPointsToDraw().get(x));
+				Path path = drawnFills.get(curve.getPointsToDraw().get(x));
+				if(line != null){
+					((DrawingArea)canvas).remove(line);
+					drawnLines.remove(curve.getPointsToDraw().get(x));
+				}
+				if(path != null){
+					((DrawingArea)canvas).remove(path);
+					drawnFills.remove(curve.getPointsToDraw().get(x));
+				}
 			}
 		}
 	}
+
+
+
 }

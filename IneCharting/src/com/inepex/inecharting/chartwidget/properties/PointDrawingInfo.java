@@ -11,7 +11,7 @@ public class PointDrawingInfo extends ShapeDrawingInfo {
 	public static final int RECTANGLE_WIDTH_TO_NEXT_POINT = -1;
 	
 	public static PointDrawingInfo getDefaultPointDrawingInfo(){
-		return new PointDrawingInfo("black", 1, "red", 0.5, true, PointType.RECTANGLE, 8, 8);
+		return new PointDrawingInfo("black", 2, "red", 0.5, true, PointType.ELLIPSE, 8, 8);
 	}
 	
 	
