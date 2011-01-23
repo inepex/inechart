@@ -174,6 +174,7 @@ public final class PointCurveVisualizer extends CurveVisualizer implements Point
 		}
 	}
 	
+	
 	private ArrayList<Point> createActualDrawingJob(double viewportMin, double viewportMax){
 		//get the points which over the line will be drawn
  		actualDrawingJob = new  ArrayList<Point>();

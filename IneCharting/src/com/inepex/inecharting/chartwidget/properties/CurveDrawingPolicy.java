@@ -10,7 +10,7 @@ public class CurveDrawingPolicy {
 		AVERAGE
 	}
 	public static CurveDrawingPolicy getDefaultCurveDrawingPolicy(){
-		return new CurveDrawingPolicy(false, false, true, false, true, 290, DEFAULT_SQUARE_OVERLAPPING_SIZE, DEFAULT_OVERLAPPING_POLICY, DEFAULT_X_OVERLAPPING_WIDTH, true);
+		return new CurveDrawingPolicy(true, true, true, true, false, 30, DEFAULT_SQUARE_OVERLAPPING_SIZE, DEFAULT_OVERLAPPING_POLICY, DEFAULT_X_OVERLAPPING_WIDTH, true);
 	}
 	
 	private boolean preDrawLines;
@@ -31,15 +31,18 @@ public class CurveDrawingPolicy {
 	private boolean mathematicalRounding;
 	
 	
-	public CurveDrawingPolicy(boolean preDrawLines, boolean preDrawPoints,
-			boolean preCalculatePoints, boolean keepInvisibleGraphicalObjects,
+	public CurveDrawingPolicy(
+			boolean preDrawLines, 
+			boolean preDrawPoints,
+			boolean preCalculatePoints, 
+			boolean keepInvisibleGraphicalObjects,
 			boolean drawPointByPoint, long delayBetweenDrawingPoints,
 			int overlapFilterSquareSize,
 			ImaginaryPointValuePolicy overlapFilterPolicy,
-			int overlapFilterXWidth, boolean mathematicalRounding) {
-			this.preDrawLines = preDrawLines;
+			int overlapFilterXWidth, 
+			boolean mathematicalRounding) {
+		this.preDrawLines = preDrawLines;
 		this.preDrawPoints = preDrawPoints;
-		this.preCalculatePoints = preCalculatePoints;
 		this.keepInvisibleGraphicalObjects = keepInvisibleGraphicalObjects;
 		this.drawPointByPoint = drawPointByPoint;
 		this.delayBetweenDrawingPoints = delayBetweenDrawingPoints;
@@ -47,6 +50,7 @@ public class CurveDrawingPolicy {
 		this.overlapFilterPolicy = overlapFilterPolicy;
 		this.overlapFilterXWidth = overlapFilterXWidth;
 		this.mathematicalRounding = mathematicalRounding;
+		setPreCalculatePoints(true);
 	}
 
 
@@ -103,14 +107,22 @@ public class CurveDrawingPolicy {
 
 	public void setPreDrawLines(boolean preDrawLines) {
 		this.preDrawLines = preDrawLines;
+		if(preDrawLines)
+			preCalculatePoints = true;
 	}
 
 	public void setPreDrawPoints(boolean preDrawPoints) {
 		this.preDrawPoints = preDrawPoints;
+		if(preDrawPoints)
+			preCalculatePoints = true;
 	}
 
 	public void setPreCalculatePoints(boolean preCalculatePoints) {
-		this.preCalculatePoints = preCalculatePoints;
+		if(!preCalculatePoints && !preDrawLines && !preDrawPoints)
+			this.preCalculatePoints = preCalculatePoints;
+		else
+			this.preCalculatePoints = true;
+		
 	}
 
 	public void setKeepInvisibleGraphicalObjects(

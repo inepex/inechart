@@ -18,7 +18,7 @@ public class ModelManager {
 	private int chartCanvasWidth;
 	private int chartCanvasHeight;
 	private int chartCanvasTopPaddingPercentage;
-	private double xMin;
+	private Double xMin;
 	private double viewportMin;
 	private double viewportMax;
 	
@@ -27,7 +27,7 @@ public class ModelManager {
 		this.chartCanvasHeight = properties.getChartCanvasHeight();
 		this.chartCanvasWidth = properties.getChartCanvasWidth();
 		this.chartCanvasTopPaddingPercentage = properties.getChartCanvasTopPaddingPercentage();
-		xMin = Double.NaN;
+		xMin = null;
 	}
 	
 	/**
@@ -185,6 +185,22 @@ public class ModelManager {
 				firstIndex = x;
 			}
 		}
+		if(firstIndex != null){
+			//there were some  points need  filtering after ending cycle
+			if(problematicIndices != null){
+				willNotShowCount +=  problematicIndices.size() - 1; 
+				ArrayList<Point> points = new ArrayList<Point>();
+				for(Double key:problematicIndices)
+					points.add(curve.getCalculatedPoints().get(key));
+				Point pointToShow = choosePointByPolicy(points, curve);
+				for(Double key:problematicIndices)
+					xFiltered.put(key, pointToShow);
+			}
+			//we need to put the last key to pointsToDraw
+			else{
+				xFiltered.put(firstIndex, curve.getCalculatedPoints().get(firstIndex));
+			}
+		}
 		Log.debug(willNotShowCount + " points have been thrown out due to x-overlap-policy in " + (System.currentTimeMillis() - startTime) + " ms" );
 	/* applying square - filter */
 		startTime = System.currentTimeMillis();
@@ -246,6 +262,22 @@ public class ModelManager {
 				squareTopMax = actual.getyPos() + curve.getPolicy().getOverlapFilterSquareSize();
 				squareBottomMin = squareTopMax -  2 * curve.getPolicy().getOverlapFilterSquareSize();
 				highestYinSquare = lowestYinSquare = actual.getyPos();
+			}
+		}
+		if(firstIndex != null){
+			//there were some  points need  filtering
+			if(problematicIndices != null){
+				willNotShowCount +=  problematicIndices.size() - 1; 
+				ArrayList<Point> points = new ArrayList<Point>();
+				for(Double key:problematicIndices)
+					points.add(curve.getCalculatedPoints().get(key));
+				Point pointToShow = choosePointByPolicy(points, curve);
+				for(Double key:problematicIndices)
+					squareFiltered.put(key, pointToShow);
+			}
+			//we need to put the last key to pointsToDraw
+			else{
+				squareFiltered.put(firstIndex, curve.getCalculatedPoints().get(firstIndex));
 			}
 		}
 		Log.debug(willNotShowCount + " points have been thrown out due to square-overlap-policy in " + (System.currentTimeMillis() - startTime) + " ms" );
@@ -348,7 +380,7 @@ public class ModelManager {
 		return chartCanvasHeight;
 	}
 
-	public double getxMin() {
+	public Double getxMin() {
 		return xMin;
 	}
 

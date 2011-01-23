@@ -67,7 +67,7 @@ public class IneChart extends Composite implements HasViewport{
 		curves.put(curve.getName(), curve);
 		//let's check if the new curve had a lower value on x than the actual minimum
 		Double xMin = modelManager.getxMin();
-		if(xMin.equals(Double.NaN)){
+		if(xMin  == null){
 			xMin = curve.getDataMap().firstKey();
 		}
 		else{
@@ -86,7 +86,7 @@ public class IneChart extends Composite implements HasViewport{
 			}
 			modelManager.setxMin(xMin);
 		}
-		double start, stop;
+		Double start, stop;
 		if(curve.getPolicy().isPreCalculatePoints()){
 			start = curve.getDataMap().firstKey();
 			stop = curve.getDataMap().lastKey();
@@ -94,6 +94,10 @@ public class IneChart extends Composite implements HasViewport{
 		else{
 			start = curve.getLastInvisiblePointBeforeViewport(modelManager.getViewportMin());
 			stop = curve.getFirstInvisiblePointAfterViewport(modelManager.getViewportMax());
+			if(start == null)
+				start = curve.getDataMap().firstKey();
+			if(stop == null)
+				stop = curve.getDataMap().lastKey();
 		}
 		modelManager.calculateAndSetPointsForInterval(curve, start, stop);
 		modelManager.filterOverlappingPoints(curve, start, stop);
@@ -108,8 +112,15 @@ public class IneChart extends Composite implements HasViewport{
 		for(String curveName : curves.keySet()){
 			Curve actualCurve = curves.get(curveName);
 			if(!actualCurve.getPolicy().isPreCalculatePoints()){
-				modelManager.calculateAndSetPointsForInterval(actualCurve, modelManager.getViewportMin(), modelManager.getViewportMax());
-				modelManager.filterOverlappingPoints(actualCurve, modelManager.getViewportMin(), modelManager.getViewportMax());
+				Double start, stop;
+				start = actualCurve.getLastInvisiblePointBeforeViewport(modelManager.getViewportMin());
+				stop = actualCurve.getFirstInvisiblePointAfterViewport(modelManager.getViewportMax());
+				if(start == null)
+					start = actualCurve.getDataMap().firstKey();
+				if(stop == null)
+					stop = actualCurve.getDataMap().lastKey();
+				modelManager.calculateAndSetPointsForInterval(actualCurve, start, stop);
+				modelManager.filterOverlappingPoints(actualCurve, start, stop);
 			}
 		}
 		drawingFactory.moveViewport(dx);

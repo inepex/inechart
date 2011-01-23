@@ -5,6 +5,7 @@ import java.util.TreeMap;
 
 import org.vaadin.gwtgraphics.client.DrawingArea;
 import org.vaadin.gwtgraphics.client.Line;
+import org.vaadin.gwtgraphics.client.VectorObject;
 import org.vaadin.gwtgraphics.client.shape.Path;
 import com.google.gwt.user.client.ui.Widget;
 import com.inepex.inecharting.chartwidget.graphics.CurveVisualizer;
@@ -18,7 +19,7 @@ import com.inepex.inecharting.chartwidget.model.Point;
  * @author Miklós Süveges / Inepex Ltd
  */
 public final class LineCurveVisualizer extends CurveVisualizer {
-	private TreeMap<Point, Line> drawnLines;
+	private TreeMap<Point, VectorObject> drawnLines;
 	private TreeMap<Point, Path> drawnFills;
 	private ArrayList<Point> actualDrawingJob;
 	private ModelManager modelManager; 
@@ -29,7 +30,7 @@ public final class LineCurveVisualizer extends CurveVisualizer {
 		super(canvas, curve);
 		this.modelManager = modelManager;
 		this.drawnFills = new TreeMap<Point, Path>();
-		this.drawnLines = new TreeMap<Point, Line>();
+		this.drawnLines = new TreeMap<Point, VectorObject>();
 	}
 
 	@Override
@@ -73,19 +74,77 @@ public final class LineCurveVisualizer extends CurveVisualizer {
 	public void setViewPort(double viewportMin, double viewportMax) {
 		totalDX = 0;
 		removeFromCanvas();
-		createActualDrawingJob(viewportMin, viewportMax);
-		if(curve.getPolicy().isDrawPointByPoint()){
-			scheduler = new DrawingJobScheduler(this, curve.getPolicy().getDelayBetweenDrawingPoints());
-			scheduler.start();
+		if(!curve.getPolicy().isPreDrawLines()){
+			createActualDrawingJob(viewportMin, viewportMax);
+			if(curve.getPolicy().isDrawPointByPoint()){
+				scheduler = new DrawingJobScheduler(this, curve.getPolicy().getDelayBetweenDrawingPoints());
+				scheduler.start();
+			}
+			else{
+				for(int i=0; i<actualDrawingJob.size()-1; i++){
+					drawLines(actualDrawingJob.get(i), actualDrawingJob.get(i+1), 0);
+				}
+			}
 		}
 		else{
-			for(int i=0; i<actualDrawingJob.size()-1; i++){
-				drawLines(actualDrawingJob.get(i), actualDrawingJob.get(i+1), 0);
-			}
+			drawEntireCurve();
 		}
 		moveShapes(modelManager.getxMin() - viewportMin);	
 	}
 
+	private void drawEntireCurve(){
+		Path line = null;
+		Path fill = null;
+		Point previous = curve.getPointsToDraw().get(curve.getPointsToDraw().firstKey());
+		if(curve.getLineDrawInfo().hasFill()){
+			fill = new Path(
+					previous.getxPos(),
+					modelManager.getChartCanvasHeight());
+		}
+		
+		for(double x : curve.getPointsToDraw().keySet()){
+			Point actual = curve.getPointsToDraw().get(x);
+			if(x == curve.getPointsToDraw().firstKey()){
+				line = new Path(
+						actual.getxPos(),
+						actual.getyPos());
+				line.setStrokeColor(curve.getLineDrawInfo().getStrokeColor());
+				line.setStrokeWidth(curve.getLineDrawInfo().getStrokeWidth());
+				if(curve.getLineDrawInfo().hasFill()){
+					fill.lineRelativelyTo(
+							0, 
+							actual.getyPos() - modelManager.getChartCanvasHeight());
+					fill.setFillColor(curve.getLineDrawInfo().getFillColor());
+					fill.setFillOpacity(curve.getLineDrawInfo().getFillOpacity());
+					fill.setStrokeWidth(0);
+					fill.setStrokeColor(curve.getLineDrawInfo().getFillColor());
+					fill.setStrokeOpacity(0);
+				}
+			}
+			else{
+				line.lineRelativelyTo(
+						actual.getxPos() - previous.getxPos(),
+						actual.getyPos() - previous.getyPos());
+				if(curve.getLineDrawInfo().hasFill()){
+					fill.lineRelativelyTo(
+							actual.getxPos() - previous.getxPos(),
+							actual.getyPos() - previous.getyPos());
+				}
+			}
+			previous = actual;
+		}
+		((DrawingArea)canvas).add(line);
+		drawnLines.put(curve.getPointsToDraw().get(curve.getPointsToDraw().firstKey()), line);
+		if(curve.getLineDrawInfo().hasFill()){
+			fill.lineRelativelyTo(
+					0,
+					modelManager.getChartCanvasHeight() - previous.getyPos());
+			fill.close();
+			((DrawingArea)canvas).add(fill);
+			drawnFills.put(curve.getPointsToDraw().get(curve.getPointsToDraw().firstKey()), fill);
+		}
+	}
+	
 	@Override
 	public void drawNextPoint() {
 		Point start = getFirstUndrawnPointFromActualJob();
@@ -116,6 +175,11 @@ public final class LineCurveVisualizer extends CurveVisualizer {
 			/* FillCurve */
 			Path path =  new Path(startPoint.getxPos() + distanceFromPointsX,
 					modelManager.getChartCanvasHeight());
+			path.setFillColor(curve.getLineDrawInfo().getFillColor());
+			path.setFillOpacity(curve.getLineDrawInfo().getFillOpacity());
+			path.setStrokeWidth(0);
+			path.setStrokeColor(curve.getLineDrawInfo().getFillColor());
+			path.setStrokeOpacity(0);
 			path.lineRelativelyTo(0,
 					startPoint.getyPos() - modelManager.getChartCanvasHeight());
 			path.lineRelativelyTo(endPoint.getxPos() - startPoint.getxPos(),
@@ -123,9 +187,7 @@ public final class LineCurveVisualizer extends CurveVisualizer {
 			path.lineRelativelyTo(0,
 					modelManager.getChartCanvasHeight() - endPoint.getyPos());
 			path.close();
-			path.setFillColor(curve.getLineDrawInfo().getFillColor());
-			path.setFillOpacity(curve.getLineDrawInfo().getFillOpacity());
-			path.setStrokeWidth(0);
+			
 			((DrawingArea)canvas).add(path);
 			drawnFills.put(startPoint, path);
 		}
@@ -179,10 +241,15 @@ public final class LineCurveVisualizer extends CurveVisualizer {
 			return;
 		int dxInPx = modelManager.calculateDistance(totalDX);
 		for(Point point:drawnLines.keySet()){
-			Line l = drawnLines.get(point);
-			int d = l.getX1() - point.getxPos();
-			l.setX1(point.getxPos() + dxInPx);
-			l.setX2(l.getX2() - d + dxInPx);
+			if(drawnLines.get(point) instanceof Line){
+				Line l = (Line) drawnLines.get(point);
+				int d = l.getX1() - point.getxPos();
+				l.setX1(point.getxPos() + dxInPx);
+				l.setX2(l.getX2() - d + dxInPx);
+			}
+			else{
+				((Path)drawnLines.get(point)).setX(point.getxPos() + dxInPx);
+			}
 		}
 		if(drawnFills.size() == 0)
 			return;
@@ -199,7 +266,7 @@ public final class LineCurveVisualizer extends CurveVisualizer {
 		Double lastToKeep = modelManager.getViewportMax();
 		for(Double x : curve.getPointsToDraw().keySet()){
 			if(x < firstToKeep || x > lastToKeep){
-				Line line = drawnLines.get(curve.getPointsToDraw().get(x));
+				Line line = (Line) drawnLines.get(curve.getPointsToDraw().get(x));
 				Path path = drawnFills.get(curve.getPointsToDraw().get(x));
 				if(line != null){
 					((DrawingArea)canvas).remove(line);

@@ -57,6 +57,7 @@ public class DrawingFactory implements HasViewport{
 	private void initGwtGraphicsFields(){
 		this.chartCanvas = new DrawingArea(properties.getChartCanvasWidth(), properties.getChartCanvasHeight());
 		Rectangle border = new Rectangle(0, 0, properties.getChartCanvasWidth(), properties.getChartCanvasHeight());
+		border.setFillOpacity(0);
 		((DrawingArea)chartCanvas).add(border);
 	}
 	
@@ -79,10 +80,12 @@ public class DrawingFactory implements HasViewport{
 				visualizers.add(pcv);
 			}
 			curveVisualizers.put(curve.getName(), visualizers);
+			((DrawingArea)chartCanvas).bringToFront(((DrawingArea)chartCanvas).getVectorObject(0));
 			break;
 		default:
 			return;
 		}
+ 		
  	}
  
  	/**
@@ -106,6 +109,7 @@ public class DrawingFactory implements HasViewport{
 		for(String curveName : curveVisualizers.keySet())
 			for(CurveVisualizer visualizer: curveVisualizers.get(curveName))
 				visualizer.moveViewport(dx);		
+		((DrawingArea)chartCanvas).bringToFront(((DrawingArea)chartCanvas).getVectorObject(0));
 	}
 
 	
@@ -113,6 +117,7 @@ public class DrawingFactory implements HasViewport{
 	public void setViewPort(double viewportMin, double viewportMax) {
  		for(String curveName : curveVisualizers.keySet())
 			for(CurveVisualizer visualizer: curveVisualizers.get(curveName))
-				visualizer.setViewPort(viewportMin, viewportMax);		
+				visualizer.setViewPort(viewportMin, viewportMax);
+ 		((DrawingArea)chartCanvas).bringToFront(((DrawingArea)chartCanvas).getVectorObject(0));
 	}
 }

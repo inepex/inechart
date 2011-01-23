@@ -258,8 +258,14 @@ public class CustomHorizontalScrollBar extends Composite {
 	}
 
 	private void moveSlide(int x){
-		if(setSlidePosition(x))
-			parent.scrollBarMoved(slidePosition);
+		if(setSlidePosition(x)){
+			try{
+				parent.scrollBarMoved(slidePosition);
+			}
+			catch (Exception e) {
+				e.printStackTrace();
+			}
+		}
 	}
 
 	public int getSlidePosition() {
