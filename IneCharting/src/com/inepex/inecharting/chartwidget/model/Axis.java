@@ -3,10 +3,17 @@ package com.inepex.inecharting.chartwidget.model;
 public class Axis {
 	public static enum DataType{
 		TIME,
-		DATA
+		NUMBER
 	}
 	
 	protected DataType dataType;
-	protected boolean isAxisVisible;
 
+	public DataType getDataType() {
+		return dataType;
+	}
+
+	public void setDataType(DataType dataType) {
+		this.dataType = dataType;
+	}
+	
 }

@@ -86,6 +86,38 @@ public class IneChart extends Composite implements HasViewport{
 			}
 			modelManager.setxMin(xMin);
 		}
+		getPointsForCurve(curve);
+		//display curve
+		drawingFactory.addCurve(curve);
+	}
+
+	
+	@Override
+	public void moveViewport(double dx) {
+		modelManager.setViewport(modelManager.getViewportMin() + dx, modelManager.getViewportMax()+dx);
+		for(String curveName : curves.keySet()){
+			Curve actualCurve = curves.get(curveName);
+			getPointsForCurve(actualCurve);
+			
+		}
+		drawingFactory.moveViewport(dx);
+	}
+
+	@Override
+	public void setViewPort(double viewportMin, double viewportMax) {
+		double shrinkRatio = (modelManager.getViewportMax()  -modelManager.getViewportMin()) / (viewportMax - viewportMin);
+		modelManager.setViewport(viewportMin, viewportMax);
+		for(String curveName : curves.keySet()){
+			Curve actualCurve = curves.get(curveName);
+			modelManager.setXPositionForCalculatedPoints(actualCurve, shrinkRatio);
+			actualCurve.getPointsToDraw().clear();
+			getPointsForCurve(actualCurve);
+			
+		}
+		drawingFactory.setViewPort(viewportMin, viewportMax);
+	}
+	
+	private void getPointsForCurve(Curve curve){
 		Double start, stop;
 		if(curve.getPolicy().isPreCalculatePoints()){
 			start = curve.getDataMap().firstKey();
@@ -101,43 +133,6 @@ public class IneChart extends Composite implements HasViewport{
 		}
 		modelManager.calculateAndSetPointsForInterval(curve, start, stop);
 		modelManager.filterOverlappingPoints(curve, start, stop);
-		//display curve
-		drawingFactory.addCurve(curve);
 	}
-
-	
-	@Override
-	public void moveViewport(double dx) {
-		modelManager.setViewport(modelManager.getViewportMin() + dx, modelManager.getViewportMax()+dx);
-		for(String curveName : curves.keySet()){
-			Curve actualCurve = curves.get(curveName);
-			if(!actualCurve.getPolicy().isPreCalculatePoints()){
-				Double start, stop;
-				start = actualCurve.getLastInvisiblePointBeforeViewport(modelManager.getViewportMin());
-				stop = actualCurve.getFirstInvisiblePointAfterViewport(modelManager.getViewportMax());
-				if(start == null)
-					start = actualCurve.getDataMap().firstKey();
-				if(stop == null)
-					stop = actualCurve.getDataMap().lastKey();
-				modelManager.calculateAndSetPointsForInterval(actualCurve, start, stop);
-				modelManager.filterOverlappingPoints(actualCurve, start, stop);
-			}
-		}
-		drawingFactory.moveViewport(dx);
-	}
-
-	@Override
-	public void setViewPort(double viewportMin, double viewportMax) {
-		modelManager.setViewport(viewportMin, viewportMax);
-		for(String curveName : curves.keySet()){
-			Curve actualCurve = curves.get(curveName);
-			if(!actualCurve.getPolicy().isPreCalculatePoints()){
-				modelManager.calculateAndSetPointsForInterval(actualCurve, modelManager.getViewportMin(), modelManager.getViewportMax());
-				modelManager.filterOverlappingPoints(actualCurve, modelManager.getViewportMin(), modelManager.getViewportMax());
-			}
-		}
-		drawingFactory.setViewPort(viewportMin, viewportMax);
-	}
-	
 	
 }

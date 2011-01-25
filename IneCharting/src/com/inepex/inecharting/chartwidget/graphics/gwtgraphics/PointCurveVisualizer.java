@@ -46,9 +46,25 @@ public final class PointCurveVisualizer extends CurveVisualizer implements Point
 
 	@Override
 	public void removeFromCanvas() {
-		for(Point point : drawnShapes.keySet())
-			((DrawingArea)canvas).remove(drawnShapes.get(point));
+		ArrayList<Shape> toRemove = new ArrayList<Shape>();
+		for(int i=0;i<((DrawingArea)canvas).getVectorObjectCount();i++){
+			if(drawnShapes.containsValue(((DrawingArea)canvas).getVectorObject(i)))
+				toRemove.add( (Shape) ((DrawingArea)canvas).getVectorObject(i) );
+			
+		}
+		for(Shape s : toRemove)
+			((DrawingArea)canvas).remove(s);
 		drawnShapes.clear();
+//		for(Point point : drawnShapes.keySet()){
+//			Shape shape = drawnShapes.get(point);
+//			if(shape != null){
+//				((DrawingArea)canvas).remove(shape);
+//			}
+//			else{
+//				continue;
+//			}
+//		}
+//		drawnShapes.clear();	
 	}
 
 	@Override
@@ -76,8 +92,16 @@ public final class PointCurveVisualizer extends CurveVisualizer implements Point
 
 	@Override
 	public void setViewPort(double viewportMin, double viewportMax) {
+		totalDX = 0;
 		removeFromCanvas();
-		createActualDrawingJob(viewportMin, viewportMax);
+		if(curve.getPolicy().isPreDrawPoints()){
+			actualDrawingJob = new ArrayList<Point>();
+			for(double x:curve.getPointsToDraw().keySet())
+				actualDrawingJob.add(curve.getPointsToDraw().get(x));
+		}
+		else{
+			createActualDrawingJob(viewportMin, viewportMax);
+		}
 		if(curve.getPolicy().isDrawPointByPoint()){
 			scheduler = new DrawingJobScheduler(this, curve.getPolicy().getDelayBetweenDrawingPoints());
 			scheduler.start();
