@@ -13,6 +13,7 @@ import com.google.gwt.event.dom.client.MouseOverHandler;
 import com.google.gwt.event.dom.client.MouseUpEvent;
 import com.google.gwt.event.dom.client.MouseUpHandler;
 import com.google.gwt.user.client.DOM;
+import com.google.gwt.user.client.Timer;
 import com.google.gwt.user.client.ui.AbsolutePanel;
 import com.google.gwt.user.client.ui.Composite;
 import com.google.gwt.user.client.ui.FocusWidget;
@@ -42,8 +43,10 @@ public class CustomHorizontalScrollBar extends Composite {
 	private final static int SHIFT_DELAY = 70;
 	private int pixelStep;
 	boolean mouseDown = false;
+	boolean mouseResize = false;
 	boolean mouseOver = false;
 	private int mouseDownOnSlidePosition;
+	private int mouseDownAbsolutePosition;
 	private CustomHorizontalScrollBarParent parent;
 	
 //	/**
@@ -74,7 +77,7 @@ public class CustomHorizontalScrollBar extends Composite {
 		this.slideAreaWidth = slideAreaWidth;
 		this.pixelStep = pixelStep;
 		this.parent = parent;
-		makeLayout(slidePosition,slideWidth);
+		makeLayout(slidePosition, this.slideWidth);
 		initEventHandlers();
 	}
 	private void makeLayout(int slidePos, int slideWidth){
@@ -125,12 +128,22 @@ public class CustomHorizontalScrollBar extends Composite {
 		
 		
 		scrollBarSlider.addMouseMoveHandler(new MouseMoveHandler() {
-			
+			Timer t = new Timer() {
+				
+				@Override
+				public void run() {
+					parent.scrollBarResized(slidePosition, slideWidth);
+				}
+			};
 			@Override
 			public void onMouseMove(MouseMoveEvent event) {
-				
-				if(mouseDown)
+				if(mouseDown && mouseResize){
+					setSlideWidth(event.getClientX() - scrollBarSlidingArea.getAbsoluteLeft() - slidePosition);	
+					t.schedule(500);
+				}
+				else if(mouseDown){
 					moveSlide(event.getClientX()- mouseDownOnSlidePosition - scrollBarSlidingArea.getAbsoluteLeft());
+				}
 			}
 		});
 		
@@ -139,16 +152,22 @@ public class CustomHorizontalScrollBar extends Composite {
 			@Override
 			public void onMouseUp(MouseUpEvent event) {
 				mouseDown = false;
+				mouseResize = false;
 				DOM.releaseCapture(scrollBarSlider.getElement());
 			}
 		});
 		
 		scrollBarSlider.addMouseDownHandler(new MouseDownHandler() {
 			
+			
+
 			@Override
 			public void onMouseDown(MouseDownEvent event) {
-				mouseDown = true;
 				mouseDownOnSlidePosition = event.getRelativeX(scrollBarSlider.getElement());
+				if( slideWidth - mouseDownOnSlidePosition < 10){
+					mouseResize = true;
+				}
+				mouseDown = true;
 				DOM.setCapture(scrollBarSlider.getElement());
 				
 				
@@ -252,7 +271,12 @@ public class CustomHorizontalScrollBar extends Composite {
 	 */
 	public void setSlideWidth(int width){
 	
-		width = (width<SLIDER_MIN_WIDTH) ? SLIDER_MIN_WIDTH : ( (slidePosition + width>slideAreaWidth) ? slideAreaWidth - slidePosition : width ); // java is fun like C =)
+		width = (width < SLIDER_MIN_WIDTH) 
+			? SLIDER_MIN_WIDTH 
+			: ( (slidePosition + width > slideAreaWidth) 
+					? slideAreaWidth - slidePosition 
+				    : width ); // java is fun like C =)
+		
 		this.slideWidth = width;
 		scrollBarSlider.setPixelSize(width, height);
 	}
