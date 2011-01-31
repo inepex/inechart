@@ -23,8 +23,15 @@ public class AxisDrawingInfo {
 	protected Style.FontStyle tickTextFontStyle;
 	protected Style.FontWeight tickTextFontWeight;
 	protected String tickTextFontFamily;
-	
-	
+	protected String tickTextFormat;
+
+	public String getTickTextFormat() {
+		return tickTextFormat;
+	}
+
+	public void setTickTextFormat(String tickTextFormat) {
+		this.tickTextFormat = tickTextFormat;
+	}
 	
 	public String getAxisColor() {
 		return axisColor;

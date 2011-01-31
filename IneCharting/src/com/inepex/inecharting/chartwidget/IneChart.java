@@ -67,13 +67,17 @@ public class IneChart extends Composite implements HasViewport{
 		curves.put(curve.getName(), curve);
 		//let's check if the new curve had a lower value on x than the actual minimum
 		Double xMin = modelManager.getxMin();
+		Double xMax = modelManager.getxMax();
 		if(xMin  == null){
 			xMin = curve.getDataMap().firstKey();
+			xMax = curve.getDataMap().lastKey();
 		}
 		else{
 			for(String n : curves.keySet()){
 				if(curves.get(n).getDataMap().firstKey() < xMin)
 					xMin = curves.get(n).getDataMap().firstKey();
+				if(curves.get(n).getDataMap().lastKey() > xMax)
+					xMax = curves.get(n).getDataMap().lastKey();
 			}
 		}
 		if(modelManager.getxMin() != xMin){
@@ -86,6 +90,8 @@ public class IneChart extends Composite implements HasViewport{
 			}
 			modelManager.setxMin(xMin);
 		}
+		if(modelManager.getxMax() != xMax)
+			modelManager.setxMax(xMax);
 		getPointsForCurve(curve);
 		//display curve
 		drawingFactory.addCurve(curve);

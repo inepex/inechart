@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.TreeMap;
 
 import com.allen_sauer.gwt.log.client.Log;
+import com.google.gwt.user.client.ui.Label;
 import com.inepex.inecharting.chartwidget.IneChartProperties;
 
 /**
@@ -19,6 +20,7 @@ public class ModelManager {
 	private int chartCanvasHeight;
 	private int chartCanvasTopPaddingPercentage;
 	private Double xMin;
+	private Double xMax;
 	private double viewportMin;
 	private double viewportMax;
 	
@@ -380,6 +382,10 @@ public class ModelManager {
 		return chartCanvasHeight;
 	}
 
+	public int getChartCanvasWidth() {
+		return chartCanvasWidth;
+	}
+	
 	public Double getxMin() {
 		return xMin;
 	}
@@ -395,4 +401,15 @@ public class ModelManager {
 	public void setxMin(double xMin) {
 		this.xMin = xMin;
 	}
+
+	
+	public Double getxMax() {
+		return xMax;
+	}
+
+	public void setxMax(Double xMax) {
+		this.xMax = xMax;
+	}
+
+
 }
