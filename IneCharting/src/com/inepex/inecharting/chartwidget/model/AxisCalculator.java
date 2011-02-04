@@ -25,10 +25,10 @@ public class AxisCalculator {
 
 	private void calculateDistanceBetweenTicks(Axis axis){
 		double minDistanceBetweenTicks = modelManager.calculateDistance(tickDistanceInPX);
+		double fixTick;
+		double tickDistance;
 		if(axis instanceof TimeAxis){
 			TimeAxis tAxis = (TimeAxis)axis;
-			double fixTick;
-			double tickDistance;
 			Resolution resolution;
 			if(minDistanceBetweenTicks <= SECOND){
 				resolution = Resolution.SECOND;
@@ -78,6 +78,10 @@ public class AxisCalculator {
 			tAxis.setResolution(resolution);
 			tAxis.setFixTick(fixTick);
 			tAxis.setTickDistance(tickDistance);
+		}
+		//simple number axis
+		else{
+			
 		}
 	}
 

@@ -48,31 +48,37 @@ public class CustomHorizontalScrollBar extends Composite {
 	private int mouseDownOnSlidePosition;
 	private int mouseDownAbsolutePosition;
 	private CustomHorizontalScrollBarParent parent;
+	private boolean resizable;
 	
-//	/**
-//	 * Creates a scrollbar with the given parameters.
-//	 * @param height the height of the FocusWidget in px
-//	 * @param slideAreaWidth the width of the scrolling area (between the two arrows at the ends) in px
-//	 * @param arrowButtonWidth the arrow buttons width in px
-//	 * @param slidePosition	the default location for the slide in px, measured from the left of the scrolling area
-//	 * @param slideWidth the default width of the slide
-//	 * @param pixelStep when an arrow pressed the slide moves toward the arrow, with this quantity (in pixels)
-//	 * @param parent the FocusWidget which uses the scrollbar must implent the {@link CustomHorizontalScrollBarParent} interface
-//	 */
 
-	
+	/**
+	 * Creates a scrollbar with the given parameters
+	 * The widht of this widget is: 2 * arrowButtonWidth + slideAreaWidth
+	 * @param scrollBarLeftArrow a widget for the left button (can be clicked)
+	 * @param scrollBarRightArrow a widget for the right button (can be clicked)
+	 * @param scrollBarSlider a widget that slides between the arrows
+	 * @param scrollBarSlidingArea a widget representing background for slider
+	 * @param height height of the scrollbar widget in pixels
+	 * @param slidePosition initial position of the slide
+	 * @param slideWidth initial width of the slide
+	 * @param arrowButtonWidth the width of the arrow (button) widgets in both sides of this widget
+	 * @param slideAreaWidth the distance between the two arrow (button) widgets.
+	 * @param pixelStep when an arrow button clicked, the slide shifts width this value (in pixels).
+	 * @param parent the 'scrollable content'
+	 * @param resizable tells whether the slide should be resized when the (right) side of it being dragged
+	 */
 	public CustomHorizontalScrollBar(FocusWidget scrollBarLeftArrow,
 			FocusWidget scrollBarRightArrow, FocusWidget scrollBarSlider,
 			Widget scrollBarSlidingArea, int height, int slidePosition,
 			int slideWidth, int arrowButtonWidth, int slideAreaWidth,
-			int pixelStep, CustomHorizontalScrollBarParent parent) {
+			int pixelStep, CustomHorizontalScrollBarParent parent, boolean resizable) {
 		super();
 		this.scrollBarLeftArrow = scrollBarLeftArrow;
 		this.scrollBarRightArrow = scrollBarRightArrow;
 		this.scrollBarSlider = scrollBarSlider;
 		this.scrollBarSlidingArea = scrollBarSlidingArea;
 		this.height = height;
-		
+		this.resizable = resizable;
 		this.arrowButtonWidth = arrowButtonWidth;
 		this.slideAreaWidth = slideAreaWidth;
 		this.pixelStep = pixelStep;
@@ -80,6 +86,7 @@ public class CustomHorizontalScrollBar extends Composite {
 		makeLayout(slidePosition, this.slideWidth);
 		initEventHandlers();
 	}
+	
 	private void makeLayout(int slidePos, int slideWidth){
 		mainPanel.setPixelSize(slideAreaWidth+2*arrowButtonWidth, height);
 		scrollBarLeftArrow.setPixelSize(arrowButtonWidth, height);
@@ -137,7 +144,7 @@ public class CustomHorizontalScrollBar extends Composite {
 			};
 			@Override
 			public void onMouseMove(MouseMoveEvent event) {
-				if(mouseDown && mouseResize){
+				if(resizable && mouseDown && mouseResize){
 					setSlideWidth(event.getClientX() - scrollBarSlidingArea.getAbsoluteLeft() - slidePosition);	
 					t.schedule(500);
 				}

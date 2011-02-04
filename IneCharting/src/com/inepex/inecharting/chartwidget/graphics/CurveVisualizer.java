@@ -7,8 +7,7 @@ import com.inepex.inecharting.chartwidget.model.Curve;
  * Base class for drawing curves on canvas.
  * @author Miklós Süveges / Inepex Ltd
  */
-public abstract class CurveVisualizer implements HasViewport, HasDrawingJob{
-	protected Widget canvas;
+public abstract class CurveVisualizer extends Visualizer implements HasViewport, HasDrawingJob{
 	protected Curve curve;
 	
 	/**
@@ -17,7 +16,7 @@ public abstract class CurveVisualizer implements HasViewport, HasDrawingJob{
 	 * @param curve to draw
 	 */
 	public CurveVisualizer(Widget canvas, Curve curve) {
-		this.canvas = canvas;
+		super(canvas);
 		this.curve = curve;
 	}
 

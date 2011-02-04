@@ -2,15 +2,17 @@ package com.inepex.inecharting.chartwidget;
 
 import java.util.TreeMap;
 
-
 import com.inepex.inecharting.chartwidget.model.Point.State;
+import com.inepex.inecharting.chartwidget.properties.HorizontalAxisDrawingInfo;
 import com.inepex.inecharting.chartwidget.properties.PointDrawingInfo;
+import com.inepex.inecharting.chartwidget.properties.VerticalAxisDrawingInfo;
 
 /**
  * Class for holding (all) information about a chart:
  * 		- sizes
  * 		- drawing points,
  * 		- model / drawing policies, etc.
+ * 		- axes
  * @author Miklós Süveges / Inepex Ltd.
  */
 public final class IneChartProperties {
@@ -21,6 +23,9 @@ public final class IneChartProperties {
 	private TreeMap<Double, TreeMap<State, PointDrawingInfo>> customPointDrawingInfos = null;
 	private double defaultViewportMin;
 	private double defaultViewportMax;
+	private HorizontalAxisDrawingInfo XAxisDrawingInfo;
+	private VerticalAxisDrawingInfo YAxisDrawingInfo;
+	private VerticalAxisDrawingInfo Y2AxisDrawingInfo = null;
 	
 	public IneChartProperties() {
 		defaultPointDrawingInfo = new TreeMap<State, PointDrawingInfo>();
@@ -28,6 +33,9 @@ public final class IneChartProperties {
 		defaultPointDrawingInfo.put(State.ACTIVE, PointDrawingInfo.getDefaultPointDrawingInfo());
 		defaultPointDrawingInfo.put(State.FOCUSED, PointDrawingInfo.getDefaultPointDrawingInfo());
 		defaultPointDrawingInfo.put(State.VISIBLE, PointDrawingInfo.getDefaultPointDrawingInfo());
+		XAxisDrawingInfo = HorizontalAxisDrawingInfo.getDefaultHorizontalAxisDrawingInfo();
+//		Y2AxisDrawingInfo = 
+		YAxisDrawingInfo = VerticalAxisDrawingInfo.getDefaultVerticalAxisDrawingInfo();
 	}
 	
 	public int getChartCanvasWidth() {
@@ -95,5 +103,35 @@ public final class IneChartProperties {
 	}
 	public double getDefaultViewportMin() {
 		return defaultViewportMin;
+	}
+	public HorizontalAxisDrawingInfo getXAxisDrawingInfo() {
+		return XAxisDrawingInfo;
+	}
+	public VerticalAxisDrawingInfo getYAxisDrawingInfo() {
+		return YAxisDrawingInfo;
+	}
+	public VerticalAxisDrawingInfo getY2AxisDrawingInfo() {
+		return Y2AxisDrawingInfo;
+	}
+	/**
+	 * 
+	 * @param xAxisDrawingInfo if set null x axis will not be displayed
+	 */
+	public void setXAxisDrawingInfo(HorizontalAxisDrawingInfo xAxisDrawingInfo) {
+		XAxisDrawingInfo = xAxisDrawingInfo;
+	}
+	/**
+	 * 
+	 * @param yAxisDrawingInfo  if set null y axis will not be displayed
+	 */
+	public void setYAxisDrawingInfo(VerticalAxisDrawingInfo yAxisDrawingInfo) {
+		YAxisDrawingInfo = yAxisDrawingInfo;
+	}
+	/**
+	 * Default value: null (y2 axis not displayed)
+	 * @param y2AxisDrawingInfo  if set null y2 axis will not be displayed
+	 */
+	public void setY2AxisDrawingInfo(VerticalAxisDrawingInfo y2AxisDrawingInfo) {
+		Y2AxisDrawingInfo = y2AxisDrawingInfo;
 	}
 }

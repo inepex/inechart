@@ -4,7 +4,6 @@ import java.util.ArrayList;
 import java.util.TreeMap;
 
 import com.allen_sauer.gwt.log.client.Log;
-import com.google.gwt.user.client.ui.Label;
 import com.inepex.inecharting.chartwidget.IneChartProperties;
 
 /**

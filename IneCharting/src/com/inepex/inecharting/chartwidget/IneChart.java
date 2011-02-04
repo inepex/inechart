@@ -4,12 +4,14 @@ import java.util.TreeMap;
 
 import com.google.gwt.user.client.ui.AbsolutePanel;
 import com.google.gwt.user.client.ui.Composite;
-import com.inepex.inecharting.chartwidget.graphics.CurveVisualizer;
 import com.inepex.inecharting.chartwidget.graphics.DrawingFactory;
 import com.inepex.inecharting.chartwidget.graphics.DrawingFactory.DrawingTool;
 import com.inepex.inecharting.chartwidget.graphics.HasViewport;
+import com.inepex.inecharting.chartwidget.model.Axis;
 import com.inepex.inecharting.chartwidget.model.Curve;
 import com.inepex.inecharting.chartwidget.model.ModelManager;
+import com.inepex.inecharting.chartwidget.model.TimeAxis;
+import com.inepex.inecharting.chartwidget.properties.AxisDrawingInfo.AxisType;
 
 /**
  * 
@@ -24,6 +26,9 @@ public class IneChart extends Composite implements HasViewport{
 	private DrawingFactory drawingFactory;
 	private IneChartProperties properties;
 	private TreeMap<String, Curve> curves;
+	private Axis xAxis = null;
+	private Axis yAxis = null;
+	private Axis y2Axis = null;
 	//ui fields
 	private AbsolutePanel mainPanel;
 	
@@ -34,29 +39,42 @@ public class IneChart extends Composite implements HasViewport{
 	public IneChart(IneChartProperties properties){
 		this.properties = properties;
 		init();
-		initLayout();
-	}
-	
-	/**
-	 * Initializes all managers, factories
-	 */
-	private void init(){
-		modelManager = new ModelManager(properties);
-		modelManager.setViewport(properties.getDefaultViewportMin(), properties.getDefaultViewportMax());
-		drawingFactory = new DrawingFactory(DrawingTool.VAADIN_GWT_GRAPHICS, properties, modelManager);
-		curves = new TreeMap<String, Curve>();
-	}
-	
-	/**
-	 * Initializes the widget's structure and other UI fields
-	 */
-	private void initLayout(){
-		mainPanel = new AbsolutePanel();
-		mainPanel.add(drawingFactory.getChartCanvas());
-		
-		
 		initWidget(mainPanel); 
 	}
+	
+	/**
+	 * Initializes all managers, factories, other data fields
+	 */
+	private void init(){
+		mainPanel = new AbsolutePanel();
+		modelManager = new ModelManager(properties);
+		modelManager.setViewport(properties.getDefaultViewportMin(), properties.getDefaultViewportMax());
+		curves = new TreeMap<String, Curve>();
+		
+		//creating axes
+		if(properties.getXAxisDrawingInfo() != null){
+			if(properties.getXAxisDrawingInfo().getType().equals(AxisType.TIME))
+				xAxis = new TimeAxis(properties.getXAxisDrawingInfo());
+			else
+				xAxis = new Axis(properties.getXAxisDrawingInfo());					
+		}
+		if(properties.getYAxisDrawingInfo() != null){
+			if(properties.getYAxisDrawingInfo().getType().equals(AxisType.TIME))
+				yAxis = new TimeAxis(properties.getYAxisDrawingInfo());
+			else
+				yAxis = new Axis(properties.getYAxisDrawingInfo());		
+		}
+		if(properties.getY2AxisDrawingInfo() != null){
+			if(properties.getY2AxisDrawingInfo().getType().equals(AxisType.TIME))
+				y2Axis = new TimeAxis(properties.getY2AxisDrawingInfo());
+			else
+				y2Axis = new Axis(properties.getY2AxisDrawingInfo());		
+		}
+		drawingFactory = new DrawingFactory(mainPanel,DrawingTool.VAADIN_GWT_GRAPHICS, properties, modelManager,xAxis,yAxis,y2Axis);
+		drawingFactory.assembleLayout();
+	}
+	
+
 
 	/**
 	 * Adds a curve to the chart

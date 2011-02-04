@@ -6,10 +6,13 @@ import java.util.TreeMap;
 import org.vaadin.gwtgraphics.client.DrawingArea;
 import org.vaadin.gwtgraphics.client.shape.Rectangle;
 
+import com.google.gwt.user.client.ui.AbsolutePanel;
 import com.google.gwt.user.client.ui.Widget;
 import com.inepex.inecharting.chartwidget.IneChartProperties;
+import com.inepex.inecharting.chartwidget.graphics.gwtgraphics.HorizontalAxisVisualizer;
 import com.inepex.inecharting.chartwidget.graphics.gwtgraphics.LineCurveVisualizer;
 import com.inepex.inecharting.chartwidget.graphics.gwtgraphics.PointCurveVisualizer;
+import com.inepex.inecharting.chartwidget.model.Axis;
 import com.inepex.inecharting.chartwidget.model.Curve;
 import com.inepex.inecharting.chartwidget.model.ModelManager;
 
@@ -34,6 +37,9 @@ public class DrawingFactory implements HasViewport{
 	private ModelManager modelManager;
 	private TreeMap<String, ArrayList<CurveVisualizer>> curveVisualizers;
 	private Widget chartCanvas;
+	private HasViewport xAxisVisualizer;
+	private AxisVisualizer yAxisVisualizer;
+	private AxisVisualizer y2AxisVisualizer;
 	
 	
 	/**
@@ -41,24 +47,47 @@ public class DrawingFactory implements HasViewport{
 	 * and initializes the related objects needed for drawing (e.g.: the 'canvas')
 	 * @param drawingTool
 	 */
-	public DrawingFactory(DrawingTool drawingTool, IneChartProperties properties, ModelManager mm) {
+	public DrawingFactory(AbsolutePanel chartMainPanel, DrawingTool drawingTool, IneChartProperties properties, ModelManager mm, Axis xAxis, Axis yAxis, Axis y2Axis) {
 		this.drawingTool = drawingTool;
 		this.properties = properties;
 		this.modelManager = mm;
 		curveVisualizers = new TreeMap<String, ArrayList<CurveVisualizer>>();
 		switch (drawingTool) {
 		case VAADIN_GWT_GRAPHICS:
-			initGwtGraphicsFields();
+			initGwtGraphicsFields(xAxis,yAxis,y2Axis);
 		default:
 			return;
 		}
 	}
+	/**
+	 * Initializes the layout (the canvases hierarchy, etc)
+	 */
+	public void assembleLayout(){
+		
+	}
 	
-	private void initGwtGraphicsFields(){
+	private void initGwtGraphicsFields(Axis xAxis, Axis yAxis, Axis y2Axis){
 		this.chartCanvas = new DrawingArea(properties.getChartCanvasWidth(), properties.getChartCanvasHeight());
 		Rectangle border = new Rectangle(0, 0, properties.getChartCanvasWidth(), properties.getChartCanvasHeight());
 		border.setFillOpacity(0);
 		((DrawingArea)chartCanvas).add(border);
+		
+		if(xAxis != null){
+			//TODO height
+			DrawingArea xCanvas = new DrawingArea(properties.getChartCanvasWidth(), 30);
+			xAxisVisualizer = new HorizontalAxisVisualizer(xCanvas, xAxis, modelManager);
+		}
+		if(xAxis != null){
+			//TODO 
+			DrawingArea yCanvas = new DrawingArea(properties.getChartCanvasHeight(), 30);
+			
+		}
+		if(xAxis != null){
+			//TODO 
+			DrawingArea y2Canvas = new DrawingArea(properties.getChartCanvasHeight(), 30);
+			
+		}
+		
 	}
 	
  	/**
@@ -102,22 +131,23 @@ public class DrawingFactory implements HasViewport{
  	public Widget getChartCanvas(){
  		return chartCanvas;		
  	}
-
 	
  	@Override
 	public void moveViewport(double dx) {
+		xAxisVisualizer.moveViewport(dx);
 		for(String curveName : curveVisualizers.keySet())
 			for(CurveVisualizer visualizer: curveVisualizers.get(curveName))
 				visualizer.moveViewport(dx);		
 		((DrawingArea)chartCanvas).bringToFront(((DrawingArea)chartCanvas).getVectorObject(0));
 	}
 
-	
- 	@Override
+	@Override
 	public void setViewPort(double viewportMin, double viewportMax) {
+		xAxisVisualizer.setViewPort(viewportMin, viewportMax);
  		for(String curveName : curveVisualizers.keySet())
 			for(CurveVisualizer visualizer: curveVisualizers.get(curveName))
 				visualizer.setViewPort(viewportMin, viewportMax);
  		((DrawingArea)chartCanvas).bringToFront(((DrawingArea)chartCanvas).getVectorObject(0));
 	}
+	
 }

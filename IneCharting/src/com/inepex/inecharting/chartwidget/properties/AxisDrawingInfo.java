@@ -1,52 +1,88 @@
 package com.inepex.inecharting.chartwidget.properties;
 
 import com.google.gwt.dom.client.Style;
-import com.google.gwt.user.client.ui.Label;
+import com.google.gwt.dom.client.Style.FontStyle;
+import com.google.gwt.dom.client.Style.FontWeight;
 
 public class AxisDrawingInfo {
-	public static enum TickLocation{
-		INSIDE,
-		OUTSIDE,
-		OVER
+	
+	public static enum AxisType{
+		TIME,
+		NUMBER
+	}
+
+	public static AxisDrawingInfo getDefaultNumberAxisDrawingInfo(){
+		return new AxisDrawingInfo(
+				"black",
+				"black", 
+				"blue", 
+				1, 
+				Style.FontStyle.NORMAL, 
+				Style.FontWeight.NORMAL,
+				"verdana", 
+				"#.#",
+				AxisType.NUMBER);
 	}
 	
-	public static final int AUTO_TICK_LENGTH = -1;
+	public static AxisDrawingInfo getDefaultTimeAxisDrawingInfo(){
+		return new AxisDrawingInfo(
+				"black",
+				"black", 
+				"blue", 
+				1, 
+				Style.FontStyle.NORMAL, 
+				Style.FontWeight.NORMAL,
+				"verdana", 
+				"MM/dd HH:mm",
+				AxisType.TIME);
+	}
 	
-	protected String axisColor;
-	protected String backgrounColor;
-	protected TickLocation tickLocation;
+	
 	protected String tickColor;
-	protected int tickLength;
 	protected String tickTextColor;
 	protected String tickTextBackgroundColor;
-	protected String tickTextBackgroundOpacity;
+	protected double tickTextBackgroundOpacity;
 	protected Style.FontStyle tickTextFontStyle;
 	protected Style.FontWeight tickTextFontWeight;
 	protected String tickTextFontFamily;
 	protected String tickTextFormat;
+	protected AxisType type;
+	
+	protected AxisDrawingInfo(
+			String tickColor,
+			String tickTextColor,
+			String tickTextBackgroundColor,
+			double tickTextBackgroundOpacity,
+			FontStyle tickTextFontStyle,
+			FontWeight tickTextFontWeight,
+			String tickTextFontFamily,
+			String tickTextFormat,
+			AxisType type) {
+		this.tickColor = tickColor;
+		this.tickTextColor = tickTextColor;
+		this.tickTextBackgroundColor = tickTextBackgroundColor;
+		this.tickTextBackgroundOpacity = tickTextBackgroundOpacity;
+		this.tickTextFontStyle = tickTextFontStyle;
+		this.tickTextFontWeight = tickTextFontWeight;
+		this.tickTextFontFamily = tickTextFontFamily;
+		this.tickTextFormat = tickTextFormat;
+		this.type = type;
+	}
 
+	public AxisType getType() {
+		return type;
+	}
+	public void setType(AxisType type) {
+		this.type = type;
+	}
 	public String getTickTextFormat() {
 		return tickTextFormat;
 	}
-
 	public void setTickTextFormat(String tickTextFormat) {
 		this.tickTextFormat = tickTextFormat;
 	}
-	
-	public String getAxisColor() {
-		return axisColor;
-	}
-	public String getBackgrounColor() {
-		return backgrounColor;
-	}
-	public TickLocation getTickLocation() {
-		return tickLocation;
-	}
 	public String getTickColor() {
 		return tickColor;
-	}
-	public int getTickLength() {
-		return tickLength;
 	}
 	public String getTickTextColor() {
 		return tickTextColor;
@@ -54,7 +90,7 @@ public class AxisDrawingInfo {
 	public String getTickTextBackgroundColor() {
 		return tickTextBackgroundColor;
 	}
-	public String getTickTextBackgroundOpacity() {
+	public double getTickTextBackgroundOpacity() {
 		return tickTextBackgroundOpacity;
 	}
 	public Style.FontStyle getTickTextFontStyle() {
@@ -66,20 +102,8 @@ public class AxisDrawingInfo {
 	public String getTickTextFontFamily() {
 		return tickTextFontFamily;
 	}
-	public void setAxisColor(String axisColor) {
-		this.axisColor = axisColor;
-	}
-	public void setBackgrounColor(String backgrounColor) {
-		this.backgrounColor = backgrounColor;
-	}
-	public void setTickLocation(TickLocation tickLocation) {
-		this.tickLocation = tickLocation;
-	}
 	public void setTickColor(String tickColor) {
 		this.tickColor = tickColor;
-	}
-	public void setTickLength(int tickLength) {
-		this.tickLength = tickLength;
 	}
 	public void setTickTextColor(String tickTextColor) {
 		this.tickTextColor = tickTextColor;
@@ -87,7 +111,7 @@ public class AxisDrawingInfo {
 	public void setTickTextBackgroundColor(String tickTextBackgroundColor) {
 		this.tickTextBackgroundColor = tickTextBackgroundColor;
 	}
-	public void setTickTextBackgroundOpacity(String tickTextBackgroundOpacity) {
+	public void setTickTextBackgroundOpacity(double tickTextBackgroundOpacity) {
 		this.tickTextBackgroundOpacity = tickTextBackgroundOpacity;
 	}
 	public void setTickTextFontStyle(Style.FontStyle tickTextFontStyle) {

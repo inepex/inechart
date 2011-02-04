@@ -6,8 +6,14 @@ import com.inepex.inecharting.chartwidget.properties.AxisDrawingInfo;
 
 public class Axis {
 		
-	protected AxisDrawingInfo drawingInfo = null;
+	protected AxisDrawingInfo drawingInfo;
+	/**
+	 * a tick's absolute position, the other ticks' positions can be measured from it. 
+	 */
 	protected double fixTick;
+	/**
+	 * distance between ticks
+	 */
 	protected double tickDistance;
 	
 	public Axis(AxisDrawingInfo drawingInfo) {
