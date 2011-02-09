@@ -2,6 +2,7 @@ package com.inepex.inecharting.chartwidget;
 
 import java.util.TreeMap;
 
+import com.inepex.inecharting.chartwidget.graphics.DrawingFactory.DrawingTool;
 import com.inepex.inecharting.chartwidget.model.Point.State;
 import com.inepex.inecharting.chartwidget.properties.HorizontalAxisDrawingInfo;
 import com.inepex.inecharting.chartwidget.properties.PointDrawingInfo;
@@ -16,16 +17,25 @@ import com.inepex.inecharting.chartwidget.properties.VerticalAxisDrawingInfo;
  * @author Miklós Süveges / Inepex Ltd.
  */
 public final class IneChartProperties {
+	//sizes
 	private int chartCanvasWidth;
 	private int chartCanvasHeight;
+	private int markCanvasHeight;
 	private int chartCanvasTopPaddingPercentage;
+	//appearance of the curve's points
 	private TreeMap<State,PointDrawingInfo> defaultPointDrawingInfo = null;
 	private TreeMap<Double, TreeMap<State, PointDrawingInfo>> customPointDrawingInfos = null;
+	//default vp position
 	private double defaultViewportMin;
 	private double defaultViewportMax;
+	//axes
 	private HorizontalAxisDrawingInfo XAxisDrawingInfo;
 	private VerticalAxisDrawingInfo YAxisDrawingInfo;
 	private VerticalAxisDrawingInfo Y2AxisDrawingInfo = null;
+	/**
+	 * drawing toolkit
+	 */
+	private DrawingTool drawingTool;
 	
 	public IneChartProperties() {
 		defaultPointDrawingInfo = new TreeMap<State, PointDrawingInfo>();
@@ -34,8 +44,8 @@ public final class IneChartProperties {
 		defaultPointDrawingInfo.put(State.FOCUSED, PointDrawingInfo.getDefaultPointDrawingInfo());
 		defaultPointDrawingInfo.put(State.VISIBLE, PointDrawingInfo.getDefaultPointDrawingInfo());
 		XAxisDrawingInfo = HorizontalAxisDrawingInfo.getDefaultHorizontalAxisDrawingInfo();
-//		Y2AxisDrawingInfo = 
 		YAxisDrawingInfo = VerticalAxisDrawingInfo.getDefaultVerticalAxisDrawingInfo();
+		drawingTool = DrawingTool.VAADIN_GWT_GRAPHICS;
 	}
 	
 	public int getChartCanvasWidth() {
@@ -133,5 +143,20 @@ public final class IneChartProperties {
 	 */
 	public void setY2AxisDrawingInfo(VerticalAxisDrawingInfo y2AxisDrawingInfo) {
 		Y2AxisDrawingInfo = y2AxisDrawingInfo;
+	}
+	
+	public int getWidgetHeight(){
+		int height = chartCanvasHeight;
+		if(XAxisDrawingInfo != null)
+			height += XAxisDrawingInfo.getTickPanelHeight();
+		return height;
+	}
+	public int getWidgetWidth(){
+		int width = chartCanvasWidth;
+		if(YAxisDrawingInfo != null)
+			width += YAxisDrawingInfo.getOffChartCanvasWidth();
+		if(Y2AxisDrawingInfo != null)
+			width += Y2AxisDrawingInfo.getOffChartCanvasWidth();
+		return width;
 	}
 }

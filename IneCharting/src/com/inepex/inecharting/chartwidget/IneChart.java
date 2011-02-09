@@ -10,8 +10,9 @@ import com.inepex.inecharting.chartwidget.graphics.HasViewport;
 import com.inepex.inecharting.chartwidget.model.Axis;
 import com.inepex.inecharting.chartwidget.model.Curve;
 import com.inepex.inecharting.chartwidget.model.ModelManager;
-import com.inepex.inecharting.chartwidget.model.TimeAxis;
+import com.inepex.inecharting.chartwidget.model.HorizontalTimeAxis;
 import com.inepex.inecharting.chartwidget.properties.AxisDrawingInfo.AxisType;
+import com.inepex.inecharting.chartwidget.properties.HorizontalTimeAxisDrawingInfo;
 
 /**
  * 
@@ -54,23 +55,17 @@ public class IneChart extends Composite implements HasViewport{
 		//creating axes
 		if(properties.getXAxisDrawingInfo() != null){
 			if(properties.getXAxisDrawingInfo().getType().equals(AxisType.TIME))
-				xAxis = new TimeAxis(properties.getXAxisDrawingInfo());
+				xAxis = new HorizontalTimeAxis((HorizontalTimeAxisDrawingInfo) properties.getXAxisDrawingInfo());
 			else
 				xAxis = new Axis(properties.getXAxisDrawingInfo());					
 		}
 		if(properties.getYAxisDrawingInfo() != null){
-			if(properties.getYAxisDrawingInfo().getType().equals(AxisType.TIME))
-				yAxis = new TimeAxis(properties.getYAxisDrawingInfo());
-			else
-				yAxis = new Axis(properties.getYAxisDrawingInfo());		
+			yAxis = new Axis(properties.getYAxisDrawingInfo());
 		}
 		if(properties.getY2AxisDrawingInfo() != null){
-			if(properties.getY2AxisDrawingInfo().getType().equals(AxisType.TIME))
-				y2Axis = new TimeAxis(properties.getY2AxisDrawingInfo());
-			else
-				y2Axis = new Axis(properties.getY2AxisDrawingInfo());		
+			y2Axis = new Axis(properties.getY2AxisDrawingInfo());		
 		}
-		drawingFactory = new DrawingFactory(mainPanel,DrawingTool.VAADIN_GWT_GRAPHICS, properties, modelManager,xAxis,yAxis,y2Axis);
+		drawingFactory = new DrawingFactory(mainPanel, DrawingTool.VAADIN_GWT_GRAPHICS, properties, modelManager, xAxis, yAxis, y2Axis);
 		drawingFactory.assembleLayout();
 	}
 	
@@ -111,6 +106,35 @@ public class IneChart extends Composite implements HasViewport{
 		if(modelManager.getxMax() != xMax)
 			modelManager.setxMax(xMax);
 		getPointsForCurve(curve);
+		//first time when curve added
+		if(curves.size() == 1){
+			if(xAxis != null)
+				modelManager.getAxisCalculator().calculateDistanceBetweenTicks(xAxis);
+			switch (curve.getCurveAxis()) {
+			case NO_AXIS:
+				break;
+			case Y:
+				if(yAxis != null)
+					modelManager.getAxisCalculator().calculateDistanceBetweenTicks(yAxis);
+				break;
+			case Y2:
+				if(y2Axis != null)
+					modelManager.getAxisCalculator().calculateDistanceBetweenTicks(y2Axis);
+				break;
+			default:
+				break;
+			}
+			drawingFactory.displayAxes();
+		}
+		//first curve on Y
+		if(yAxis != null && yAxis.getTickDistance() == 0){
+			modelManager.getAxisCalculator().calculateDistanceBetweenTicks(yAxis);
+			drawingFactory.displayAxes();
+		}
+		if(y2Axis != null && y2Axis.getTickDistance() == 0){
+			modelManager.getAxisCalculator().calculateDistanceBetweenTicks(y2Axis);
+			drawingFactory.displayAxes();
+		}
 		//display curve
 		drawingFactory.addCurve(curve);
 	}
@@ -131,12 +155,13 @@ public class IneChart extends Composite implements HasViewport{
 	public void setViewPort(double viewportMin, double viewportMax) {
 		double shrinkRatio = (modelManager.getViewportMax()  -modelManager.getViewportMin()) / (viewportMax - viewportMin);
 		modelManager.setViewport(viewportMin, viewportMax);
+		if(xAxis != null)
+			modelManager.getAxisCalculator().calculateDistanceBetweenTicks(xAxis);
 		for(String curveName : curves.keySet()){
 			Curve actualCurve = curves.get(curveName);
 			modelManager.setXPositionForCalculatedPoints(actualCurve, shrinkRatio);
 			actualCurve.getPointsToDraw().clear();
 			getPointsForCurve(actualCurve);
-			
 		}
 		drawingFactory.setViewPort(viewportMin, viewportMax);
 	}

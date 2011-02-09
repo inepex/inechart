@@ -220,7 +220,8 @@ public final class PointCurveVisualizer extends CurveVisualizer implements Point
 			return;
 		int dxInPx = modelManager.calculateDistance(totalDX);
 		for(Point point:drawnShapes.keySet()){
-			drawnShapes.get(point).setX(point.getxPos() + dxInPx);
+			if( drawnShapes.get(point) != null)
+				drawnShapes.get(point).setX(point.getxPos() + dxInPx);
 		}			
 	}
 

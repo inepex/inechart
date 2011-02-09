@@ -10,11 +10,13 @@ public class Axis {
 	/**
 	 * a tick's absolute position, the other ticks' positions can be measured from it. 
 	 */
-	protected double fixTick;
+	protected double fixTick = 0;
 	/**
 	 * distance between ticks
 	 */
-	protected double tickDistance;
+	protected double tickDistance = 0;
+	
+	protected Axis(){}
 	
 	public Axis(AxisDrawingInfo drawingInfo) {
 	

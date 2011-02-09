@@ -23,12 +23,13 @@ public class VerticalAxisDrawingInfo extends AxisDrawingInfo {
 				"#.#",
 				AxisType.NUMBER,
 				"black", 
-				TickLocation.INSIDE);
+				TickLocation.INSIDE,
+				20);
 	}
 	
 	private String axisColor;
 	private TickLocation tickLocation;
-	
+	private int tickLength;
 
 	public VerticalAxisDrawingInfo(
 			String tickColor,
@@ -41,12 +42,14 @@ public class VerticalAxisDrawingInfo extends AxisDrawingInfo {
 			String tickTextFormat,
 			AxisType type,
 			String axisColor,
-			TickLocation tickLocation) {
+			TickLocation tickLocation,
+			int tickLength) {
 		super(tickColor, tickTextColor, tickTextBackgroundColor,
 				tickTextBackgroundOpacity, tickTextFontStyle,
 				tickTextFontWeight, tickTextFontFamily, tickTextFormat, type);
 		this.axisColor = axisColor;
 		this.tickLocation = tickLocation;
+		this.tickLength = tickLength;
 	}
 	public String getAxisColor() {
 		return axisColor;
@@ -60,6 +63,21 @@ public class VerticalAxisDrawingInfo extends AxisDrawingInfo {
 	public void setTickLocation(TickLocation tickLocation) {
 		this.tickLocation = tickLocation;
 	}
-	
-	
+	public int getTickLength() {
+		return tickLength;
+	}
+	public void setTickLength(int tickLength) {
+		this.tickLength = tickLength;
+	}
+	public int getOffChartCanvasWidth(){
+		switch (tickLocation) {
+		case INSIDE:
+			return 0;
+		case OUTSIDE:
+			return tickLength;
+		case OVER:
+			return tickLength/2;
+		}
+		return 0;
+	}
 }

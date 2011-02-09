@@ -1,10 +1,10 @@
 package com.inepex.inecharting.chartwidget.model;
 
-import com.inepex.inecharting.chartwidget.model.TimeAxis.Resolution;
+import com.inepex.inecharting.chartwidget.model.HorizontalTimeAxis.Resolution;
 
 public class AxisCalculator {
 
-	private final int tickDistanceInPX = 40;
+	private final int tickDistanceInPX = 90;
 	private ModelManager modelManager;
 	
 	private final long SECOND = 1000;
@@ -18,17 +18,12 @@ public class AxisCalculator {
 		this.modelManager = modelManager;
 	}
 
-
-
-
-
-
-	private void calculateDistanceBetweenTicks(Axis axis){
+	public void calculateDistanceBetweenTicks(Axis axis){
 		double minDistanceBetweenTicks = modelManager.calculateDistance(tickDistanceInPX);
 		double fixTick;
 		double tickDistance;
-		if(axis instanceof TimeAxis){
-			TimeAxis tAxis = (TimeAxis)axis;
+		if(axis instanceof HorizontalTimeAxis){
+			HorizontalTimeAxis tAxis = (HorizontalTimeAxis)axis;
 			Resolution resolution;
 			if(minDistanceBetweenTicks <= SECOND){
 				resolution = Resolution.SECOND;
@@ -43,7 +38,7 @@ public class AxisCalculator {
 			else if (minDistanceBetweenTicks <= 30 * MINUTE){
 				resolution = Resolution.MINUTE;
 				tickDistance = 30 * MINUTE;
-				fixTick = ((int)(modelManager.getxMin() / MINUTE)) * MINUTE;
+				fixTick = ((int)(modelManager.getxMin() / (30*MINUTE))) * 30 * MINUTE;
 			}
 			else if (minDistanceBetweenTicks <= HOUR){
 				resolution = Resolution.HOUR;
@@ -53,7 +48,7 @@ public class AxisCalculator {
 			else if (minDistanceBetweenTicks <= 12 * HOUR){
 				resolution = Resolution.HOUR;
 				tickDistance =  12 * HOUR;
-				fixTick = ((int)(modelManager.getxMin() / HOUR)) * HOUR;
+				fixTick = ((int)(modelManager.getxMin() / ( 12 * HOUR) )) * 12 * HOUR;
 			}
 			else if (minDistanceBetweenTicks <= DAY){
 				resolution = Resolution.DAY;
@@ -81,7 +76,8 @@ public class AxisCalculator {
 		}
 		//simple number axis
 		else{
-			
+			axis.setFixTick(modelManager.getxMin());
+			axis.setTickDistance(minDistanceBetweenTicks); //TODO
 		}
 	}
 

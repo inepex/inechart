@@ -22,13 +22,14 @@ public class ModelManager {
 	private Double xMax;
 	private double viewportMin;
 	private double viewportMax;
-	
+	private AxisCalculator axisCalculator;
 		
 	public ModelManager(IneChartProperties properties){
 		this.chartCanvasHeight = properties.getChartCanvasHeight();
 		this.chartCanvasWidth = properties.getChartCanvasWidth();
 		this.chartCanvasTopPaddingPercentage = properties.getChartCanvasTopPaddingPercentage();
 		xMin = null;
+		axisCalculator = new AxisCalculator(this);
 	}
 	
 	/**
@@ -401,7 +402,6 @@ public class ModelManager {
 		this.xMin = xMin;
 	}
 
-	
 	public Double getxMax() {
 		return xMax;
 	}
@@ -410,5 +410,7 @@ public class ModelManager {
 		this.xMax = xMax;
 	}
 
-
+	public AxisCalculator getAxisCalculator() {
+		return axisCalculator;
+	}
 }

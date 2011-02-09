@@ -23,5 +23,7 @@ public abstract class AxisVisualizer extends Visualizer {
 		super(canvas);
 		this.axis = axis;
 	}
+	
+	public abstract void display();
 
 }

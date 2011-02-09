@@ -15,20 +15,24 @@ public class HorizontalAxisDrawingInfo extends AxisDrawingInfo {
 		return new HorizontalAxisDrawingInfo(
 				"black",
 				"black", 
-				"blue", 
+				"lightblue", 
 				1, 
 				Style.FontStyle.NORMAL, 
 				Style.FontWeight.NORMAL,
 				"verdana", 
-				"MM/dd HH:mm",
-				AxisType.TIME,
-				"blue",
-				AxisLocation.BOTTOM);
+				"#.#",
+				AxisType.NUMBER,
+				"lightblue",
+				AxisLocation.BOTTOM,
+				10,
+				20);
 	}
 	
 	private String backgroundColor;
 	private AxisLocation axisLocation;
-	
+	private int tickLengthInside;
+	private int tickPanelHeight;
+
 	public HorizontalAxisDrawingInfo(
 			String tickColor,
 			String tickTextColor,
@@ -40,12 +44,16 @@ public class HorizontalAxisDrawingInfo extends AxisDrawingInfo {
 			String tickTextFormat,
 			AxisType type,
 			String backgroundColor,
-			AxisLocation axisLocation) {
+			AxisLocation axisLocation,
+			int tickLengthInside,
+			int tickPanelHeight) {
 		super(tickColor, tickTextColor, tickTextBackgroundColor,
 				tickTextBackgroundOpacity, tickTextFontStyle,
 				tickTextFontWeight, tickTextFontFamily, tickTextFormat, type);
 		this.backgroundColor = backgroundColor;
 		this.axisLocation = axisLocation;
+		this.tickLengthInside = tickLengthInside;
+		this.tickPanelHeight = tickPanelHeight;
 	}
 
 	public AxisLocation getAxisLocation() {
@@ -62,6 +70,22 @@ public class HorizontalAxisDrawingInfo extends AxisDrawingInfo {
 
 	public void setBackgroundColor(String backgroundColor) {
 		this.backgroundColor = backgroundColor;
+	}
+
+	public void setTickLengthInside(int tickLengthInside) {
+		this.tickLengthInside = tickLengthInside;
+	}
+	
+	public int getTickLengthInside() {
+		return tickLengthInside;
+	}
+
+	public int getTickPanelHeight() {
+		return tickPanelHeight;
+	}
+
+	public void setTickPanelHeight(int tickPanelHeight) {
+		this.tickPanelHeight = tickPanelHeight;
 	}
 	
 }

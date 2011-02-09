@@ -1,8 +1,9 @@
 package com.inepex.inecharting.chartwidget.model;
 
-import com.inepex.inecharting.chartwidget.properties.AxisDrawingInfo;
 
-public class TimeAxis extends Axis {
+import com.inepex.inecharting.chartwidget.properties.HorizontalTimeAxisDrawingInfo;
+
+public class HorizontalTimeAxis extends Axis {
 	public static enum Resolution{
 		SECOND,
 		MINUTE,
@@ -13,10 +14,10 @@ public class TimeAxis extends Axis {
 	}
 
 	private Resolution resolution;
+
 	
-	public TimeAxis(AxisDrawingInfo drawingInfo) {
-		super(drawingInfo);
-		
+	public HorizontalTimeAxis(HorizontalTimeAxisDrawingInfo drawingInfo) {
+		this.drawingInfo = drawingInfo;
 	}
 
 	public Resolution getResolution() {

@@ -1,14 +1,17 @@
 package com.inepex.inecharting.chartwidget.graphics.gwtgraphics;
 
 import java.util.ArrayList;
+import java.util.TreeMap;
 
 import org.vaadin.gwtgraphics.client.DrawingArea;
 import org.vaadin.gwtgraphics.client.Line;
 import org.vaadin.gwtgraphics.client.shape.Rectangle;
 
+import com.google.gwt.user.client.ui.AbsolutePanel;
 import com.google.gwt.user.client.ui.Widget;
 import com.inepex.inecharting.chartwidget.graphics.AxisVisualizer;
 import com.inepex.inecharting.chartwidget.graphics.HasViewport;
+import com.inepex.inecharting.chartwidget.graphics.TickTextVisualizer;
 import com.inepex.inecharting.chartwidget.model.Axis;
 import com.inepex.inecharting.chartwidget.model.ModelManager;
 import com.inepex.inecharting.chartwidget.properties.HorizontalAxisDrawingInfo;
@@ -23,39 +26,107 @@ public class HorizontalAxisVisualizer extends AxisVisualizer implements	HasViewp
 
 	private ModelManager modelManager;
 	private Rectangle background;
-	private ArrayList<Line> ticks;
+	private TreeMap<Double, Line> ticks;
 	private HorizontalAxisDrawingInfo info;
+	private TickTextVisualizer ttv;
+	private AbsolutePanel ap;
 	
 	
-	public HorizontalAxisVisualizer(Widget canvas, Axis axis, ModelManager modelManager) {
+	public HorizontalAxisVisualizer(Widget canvas, AbsolutePanel ap, Axis axis, ModelManager modelManager) {
 		super(canvas, axis);
 		this.modelManager = modelManager;
 		info = (HorizontalAxisDrawingInfo) axis.getDrawingInfo();
+		this.ap = ap;
 		init();
 	}
 
 	@Override
 	public void moveViewport(double dx) {
-		// TODO Auto-generated method stub
-
+		ttv.moveViewport(dx);
+		for(double x : ttv.getActualTicks()){
+			if(ticks.containsKey(x)){
+				moveTick(x, -dx);
+			}
+			else{
+				addTick(x);
+			}
+		}
+		ArrayList<Double> toRemove = new ArrayList<Double>();
+		for(double key : ticks.keySet()){
+			if(!ttv.getActualTicks().contains(key))
+				toRemove.add(key);
+		}
+		for(double x : toRemove){
+			removeTick(x);
+		}
 	}
 
 	@Override
 	public void setViewPort(double viewportMin, double viewportMax) {
-		// TODO Auto-generated method stub
-
+		removeAllTicks();
+		ttv.setViewPort(viewportMin, viewportMax);
+		for(double x : ttv.getActualTicks()){
+			addTick(x);
+		}
 	}
 	
 	private void init(){
-		background = new Rectangle(0, 0, modelManager.getChartCanvasWidth(), modelManager.getChartCanvasHeight());
+		background = new Rectangle(0, info.getTickLengthInside(), modelManager.getChartCanvasWidth(), modelManager.getChartCanvasHeight());
 		background.setFillColor(info.getBackgroundColor());
 		background.setFillOpacity(1);
 		background.setStrokeColor(info.getBackgroundColor());
 		((DrawingArea)canvas).add(background);
-		
-		ticks = new ArrayList<Line>();
+		ttv = new TickTextVisualizer(ap, axis, modelManager, true);
+		ticks = new TreeMap<Double, Line>();
 	}
 	
+	public AbsolutePanel getTextPositionerAbsolutePanel(){
+		return ap;
+	}
 	
+	private void removeAllTicks(){
+		for(double x : ticks.keySet()){
+			Line line = ticks.get(x);
+			if(line != null && line.getParent().equals(canvas))
+				((DrawingArea)canvas).remove(line);
+		}
+		ticks.clear();
+	}
+	
+	private void removeTick(double pos){
+		Line line = ticks.get(pos);
+		if(line != null && line.getParent().equals(canvas))
+			((DrawingArea)canvas).remove(line);
+		ticks.remove(pos);
+	}
+	
+	private void addTick(double pos){
+		int xPos = modelManager.calculateDistance(pos - modelManager.getViewportMin());
+		Line l = new Line(
+				xPos, 
+				0,
+				xPos,
+				info.getTickLengthInside() + info.getTickPanelHeight());
+		
+		l.setStrokeColor(info.getTickColor());
+		l.setStrokeOpacity(1);
+		l.setStrokeWidth(1);
+		ticks.put(pos, l);
+		((DrawingArea)canvas).add(l);
+	}
+	
+	private void moveTick(double pos, double dx){
+		Line l = ticks.get(pos);
+		l.setX1(l.getX1() + modelManager.calculateDistance(dx));
+		l.setX2(l.getX2() + modelManager.calculateDistance(dx));
+	}
 
+	public HorizontalAxisDrawingInfo getInfo() {
+		return info;
+	}
+
+	@Override
+	public void display() {
+		setViewPort(modelManager.getViewportMin(), modelManager.getViewportMax());
+	}
 }
