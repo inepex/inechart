@@ -110,6 +110,7 @@ public final class LineCurveVisualizer extends CurveVisualizer {
 						actual.getyPos());
 				line.setStrokeColor(curve.getLineDrawInfo().getStrokeColor());
 				line.setStrokeWidth(curve.getLineDrawInfo().getStrokeWidth());
+				line.setFillOpacity(0);
 				if(curve.getLineDrawInfo().hasFill()){
 					fill.lineRelativelyTo(
 							0, 

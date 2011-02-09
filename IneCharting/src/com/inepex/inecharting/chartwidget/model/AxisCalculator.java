@@ -4,7 +4,8 @@ import com.inepex.inecharting.chartwidget.model.HorizontalTimeAxis.Resolution;
 
 public class AxisCalculator {
 
-	private final int tickDistanceInPX = 90;
+	private final int horizontal_minTickDistanceInPX = 90;
+	private final int vertical_minTickDistanceInPX = 20;
 	private ModelManager modelManager;
 	
 	private final long SECOND = 1000;
@@ -18,8 +19,8 @@ public class AxisCalculator {
 		this.modelManager = modelManager;
 	}
 
-	public void calculateDistanceBetweenTicks(Axis axis){
-		double minDistanceBetweenTicks = modelManager.calculateDistance(tickDistanceInPX);
+	public void setHorizontalAxis(Axis axis){
+		double minDistanceBetweenTicks = modelManager.calculateDistance(horizontal_minTickDistanceInPX);
 		double fixTick;
 		double tickDistance;
 		if(axis instanceof HorizontalTimeAxis){
@@ -81,4 +82,21 @@ public class AxisCalculator {
 		}
 	}
 
+	public void setVerticalAxis(Axis axis, Curve.Axis y){
+		double  min,max;
+		if(y.equals(com.inepex.inecharting.chartwidget.model.Curve.Axis.Y)){
+			min = modelManager.getyMin();
+			max = modelManager.getyMax();
+		}
+		else if(y.equals(com.inepex.inecharting.chartwidget.model.Curve.Axis.Y2)){
+			min = modelManager.getY2Min();
+			max = modelManager.getY2Max();
+		}
+		else{
+			return;
+		}
+		double minDistBetweenTicks = modelManager.calculateYDistance(vertical_minTickDistanceInPX, min, max);
+		axis.setFixTick(min);
+		axis.setTickDistance(minDistBetweenTicks);
+	}
 }

@@ -20,6 +20,10 @@ public class ModelManager {
 	private int chartCanvasTopPaddingPercentage;
 	private Double xMin;
 	private Double xMax;
+	private Double yMax = null;
+	private Double yMin = null;
+	private Double y2Max = null;
+	private Double y2Min = null;
 	private double viewportMin;
 	private double viewportMax;
 	private AxisCalculator axisCalculator;
@@ -63,6 +67,16 @@ public class ModelManager {
 		int padding = (int) ((chartCanvasTopPaddingPercentage / 100d) * chartCanvasHeight);
 		double unit = (chartCanvasHeight - padding ) / (maxValue - minValue);
 		return unit * (maxValue - y) + padding;
+	}
+	
+	public double calculateYDistance(int dyInPx,double minValue, double maxValue){
+		double unit = (maxValue - minValue) / (chartCanvasHeight);
+		return unit * dyInPx;
+	}
+	
+	public int calculateYWithoutPadding(double y, double minValue, double maxValue){
+		double unit = (chartCanvasHeight) / (maxValue - minValue);
+		return (int) (unit * (maxValue - y));
 	}
 	
 	/**
@@ -398,10 +412,6 @@ public class ModelManager {
 		return viewportMax;
 	}
 
-	public void setxMin(double xMin) {
-		this.xMin = xMin;
-	}
-
 	public Double getxMax() {
 		return xMax;
 	}
@@ -413,4 +423,41 @@ public class ModelManager {
 	public AxisCalculator getAxisCalculator() {
 		return axisCalculator;
 	}
+
+	public Double getyMax() {
+		return yMax;
+	}
+
+	public Double getyMin() {
+		return yMin;
+	}
+
+	public Double getY2Max() {
+		return y2Max;
+	}
+
+	public Double getY2Min() {
+		return y2Min;
+	}
+
+	public void setxMin(Double xMin) {
+		this.xMin = xMin;
+	}
+
+	public void setyMax(Double yMax) {
+		this.yMax = yMax;
+	}
+
+	public void setyMin(Double yMin) {
+		this.yMin = yMin;
+	}
+
+	public void setY2Max(Double y2Max) {
+		this.y2Max = y2Max;
+	}
+
+	public void setY2Min(Double y2Min) {
+		this.y2Min = y2Min;
+	}
+	
 }

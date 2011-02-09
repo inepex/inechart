@@ -85,11 +85,12 @@ public class HorizontalAxisVisualizer extends AxisVisualizer implements	HasViewp
 	}
 	
 	private void removeAllTicks(){
-		for(double x : ticks.keySet()){
-			Line line = ticks.get(x);
-			if(line != null && line.getParent().equals(canvas))
-				((DrawingArea)canvas).remove(line);
-		}
+//		for(double x : ticks.keySet()){
+//			Line line = ticks.get(x);
+//			if(line != null && line.getParent().equals(canvas))
+//				((DrawingArea)canvas).remove(line);
+//		}
+		((DrawingArea)canvas).clear();
 		ticks.clear();
 	}
 	
@@ -128,5 +129,6 @@ public class HorizontalAxisVisualizer extends AxisVisualizer implements	HasViewp
 	@Override
 	public void display() {
 		setViewPort(modelManager.getViewportMin(), modelManager.getViewportMax());
+		hasShown = true;
 	}
 }

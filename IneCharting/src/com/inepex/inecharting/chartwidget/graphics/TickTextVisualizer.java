@@ -9,11 +9,15 @@ import com.google.gwt.i18n.client.DateTimeFormat;
 import com.google.gwt.i18n.client.NumberFormat;
 import com.google.gwt.user.client.DOM;
 import com.google.gwt.user.client.ui.AbsolutePanel;
+import com.google.gwt.user.client.ui.InlineLabel;
 import com.google.gwt.user.client.ui.Label;
+import com.google.gwt.user.client.ui.RootPanel;
 import com.google.gwt.user.client.ui.Widget;
 import com.inepex.inecharting.chartwidget.model.Axis;
+import com.inepex.inecharting.chartwidget.model.Curve;
 import com.inepex.inecharting.chartwidget.model.ModelManager;
 import com.inepex.inecharting.chartwidget.model.HorizontalTimeAxis;
+import com.inepex.inecharting.chartwidget.properties.AxisDrawingInfo.AxisType;
 import com.inepex.inecharting.chartwidget.properties.HorizontalTimeAxisDrawingInfo;
 import com.inepex.inecharting.misc.AbsolutePositioner;
 
@@ -28,6 +32,8 @@ public class TickTextVisualizer extends Visualizer implements HasViewport{
 	private ArrayList<Double> actualTicks;
 	private final int xShift_Horizontal = 4;
 	private final int yShift_Horizontal = 2;
+	private final int xShift_Vertical = 4;
+	private final int yShift_Vertical = 1;
 	
 	public TickTextVisualizer(Widget canvas, Axis axis, ModelManager mm, boolean horizontal) {
 		super(canvas);
@@ -35,8 +41,12 @@ public class TickTextVisualizer extends Visualizer implements HasViewport{
 		this.aPositioner = new AbsolutePositioner((AbsolutePanel) canvas);
 		this.actualTicks = new ArrayList<Double>();
 		this.mm = mm;
-		if(!(axis instanceof HorizontalTimeAxis))
-			nf = NumberFormat.getFormat(axis.getDrawingInfo().getTickTextFormat());
+		if(!(axis instanceof HorizontalTimeAxis)){
+			if(axis.getDrawingInfo().getType().equals(AxisType.TIME))
+				dtf = DateTimeFormat.getFormat(axis.getDrawingInfo().getTickTextFormat());
+			else if(axis.getDrawingInfo().getType().equals(AxisType.NUMBER))
+				nf = NumberFormat.getFormat(axis.getDrawingInfo().getTickTextFormat());
+		}
 		this.horizontal = horizontal;
 	}
 
@@ -112,27 +122,28 @@ public class TickTextVisualizer extends Visualizer implements HasViewport{
 						mm.calculateDistance(actualData - viewportMin) + xShift_Horizontal,
 						yShift_Horizontal); //the y pos TODO
 			}
-
 		}
 	}
 	
 	private String formatData(double data){
 		String text = "";
-		if(axis instanceof HorizontalTimeAxis)
+		if(axis.getDrawingInfo().getType().equals(AxisType.TIME))
 			text = dtf.format(new Date((long) data));
-		else
+		else if(axis.getDrawingInfo().getType().equals(AxisType.NUMBER))
 			text = nf.format(data);
 		return text;
 	}
 	
 	private Label createLabel(double data){
-		Label label = new Label(formatData(data));
+		InlineLabel label = new InlineLabel(formatData(data));
 		DOM.setElementAttribute(label.getElement(), "backgroundColor", axis.getDrawingInfo().getTickTextBackgroundColor());
 		DOM.setElementAttribute(label.getElement(), "color", axis.getDrawingInfo().getTickTextColor());
 		DOM.setElementAttribute(label.getElement(), "fontFamily", axis.getDrawingInfo().getTickTextFontFamily());			
 		DOM.setElementAttribute(label.getElement(), "opacity", axis.getDrawingInfo().getTickTextBackgroundOpacity()+"");
 		DOM.setElementAttribute(label.getElement(), "fontStyle", axis.getDrawingInfo().getTickTextFontStyle().toString());
 		DOM.setElementAttribute(label.getElement(), "fontWeight", axis.getDrawingInfo().getTickTextFontWeight().toString());
+		DOM.setElementAttribute(label.getElement(), "padding", "0px");
+		DOM.setElementAttribute(label.getElement(), "margin", "0px");
 		return label;
 	}
 	
@@ -140,5 +151,39 @@ public class TickTextVisualizer extends Visualizer implements HasViewport{
 		return actualTicks;
 	}
 
-	
+	public void displayVerticalTicks(Curve.Axis y){
+		if(!horizontal){
+			aPositioner.removeAllWidgets();
+			double min,max;
+			if(y.equals(Curve.Axis.Y)){
+				min = mm.getyMin();
+				max = mm.getyMax();
+			}
+			else if(y.equals(Curve.Axis.Y2)){
+				min = mm.getY2Min();
+				max = mm.getY2Max();
+			}
+			else{
+				return;
+			}
+			for(double actualData = axis.getFixTick(); actualData <= max; actualData += axis.getTickDistance()){
+				actualTicks.add(actualData);
+				Label label = createLabel(actualData);
+				
+				if(y.equals(Curve.Axis.Y)){
+					aPositioner.addWidget(
+							label,
+							xShift_Vertical,
+							mm.calculateYWithoutPadding(actualData, min, max) + yShift_Vertical);
+				}
+				else if(y.equals(Curve.Axis.Y2)){
+					AbsolutePositioner.setRight(
+							AbsolutePositioner.setTop(
+								aPositioner.addWidget(label),
+								mm.calculateYWithoutPadding(actualData, min, max) + yShift_Vertical),
+							xShift_Vertical);							
+				}	
+			}
+		}
+	}
 }

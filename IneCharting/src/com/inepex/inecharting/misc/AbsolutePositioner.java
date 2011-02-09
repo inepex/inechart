@@ -2,6 +2,7 @@ package com.inepex.inecharting.misc;
 
 import java.util.ArrayList;
 
+import com.google.gwt.user.client.DOM;
 import com.google.gwt.user.client.ui.AbsolutePanel;
 import com.google.gwt.user.client.ui.Widget;
 
@@ -37,6 +38,24 @@ public class AbsolutePositioner {
 			return false;
 		}
 		return true;
+	}
+	
+	public Widget addWidget(Widget w){
+		widgets.add(w);
+		panel.add(w);
+		return w;
+	}
+	
+	public static Widget setRight(Widget w, int right){
+		DOM.setStyleAttribute(w.getElement(), "position", "absolute");
+		DOM.setStyleAttribute(w.getElement(), "right", right+"px");
+		return w;
+	}
+	
+	public static Widget setTop(Widget w, int top){
+		DOM.setStyleAttribute(w.getElement(), "position", "absolute");
+		DOM.setStyleAttribute(w.getElement(), "top", top+"px");
+		return w;
 	}
 	
 	public boolean removeWidget(Widget w){

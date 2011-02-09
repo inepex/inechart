@@ -17,7 +17,6 @@ import com.inepex.inecharting.chartwidget.graphics.gwtgraphics.VerticalAxisVisua
 import com.inepex.inecharting.chartwidget.model.Axis;
 import com.inepex.inecharting.chartwidget.model.Curve;
 import com.inepex.inecharting.chartwidget.model.ModelManager;
-import com.inepex.inecharting.chartwidget.properties.HorizontalAxisDrawingInfo;
 import com.inepex.inecharting.chartwidget.properties.HorizontalAxisDrawingInfo.AxisLocation;
 
 /**
@@ -71,15 +70,17 @@ public class DrawingFactory implements HasViewport{
 		switch (drawingTool) {
 		case VAADIN_GWT_GRAPHICS:
 			int x=0,y=0;
-			chartMainPanel.setPixelSize(1000, 600);
+			chartMainPanel.setPixelSize(properties.getWidgetWidth(), properties.getWidgetHeight());
 			if(yAxisVisualizer != null){
 				if(properties.getXAxisDrawingInfo().getAxisLocation().equals(AxisLocation.TOP))
 					y +=  properties.getXAxisDrawingInfo().getTickPanelHeight();
+				
 				chartMainPanel.add(yAxisVisualizer.getCanvas(), x, y);
-				chartMainPanel.add(((VerticalAxisVisualizer)yAxisVisualizer).getTextPositionerAbsolutePanel(), x, y); //TODO pos
+				x += properties.getYAxisDrawingInfo().getOffChartCanvasWidth();
+				chartMainPanel.add(((VerticalAxisVisualizer)yAxisVisualizer).getTextPositionerAbsolutePanel(), x, y); 
 				DOM.setElementAttribute(((VerticalAxisVisualizer)yAxisVisualizer).getTextPositionerAbsolutePanel().getElement(),"zIndex", "1");
 				DOM.setElementAttribute(((VerticalAxisVisualizer)yAxisVisualizer).getCanvas().getElement(), "zIndex", "-1");
-				x += properties.getYAxisDrawingInfo().getOffChartCanvasWidth();
+				
 			}
 			if(xAxisVisualizer != null){
 				switch (properties.getXAxisDrawingInfo().getAxisLocation()) {
@@ -105,29 +106,30 @@ public class DrawingFactory implements HasViewport{
 				DOM.setElementAttribute(((HorizontalAxisVisualizer)xAxisVisualizer).getCanvas().getElement(), "zIndex", "-1");
 			}
 			if(y2AxisVisualizer != null){
-//	TODO			chartMainPanel.add(y2AxisVisualizer.getCanvas(), x , y);
-//				chartMainPanel.add(((VerticalAxisVisualizer)y2AxisVisualizer).getTextPositionerAbsolutePanel(), x, y); //TODO pos
-//				DOM.setElementAttribute(((VerticalAxisVisualizer)y2AxisVisualizer).getTextPositionerAbsolutePanel().getElement(),"zIndex", "-4");
-//				DOM.setElementAttribute(((VerticalAxisVisualizer)y2AxisVisualizer).getCanvas().getElement(), "zIndex", "-5");
+				chartMainPanel.add(y2AxisVisualizer.getCanvas(),
+						x + properties.getChartCanvasWidth() - (properties.getY2AxisDrawingInfo().getTickLength() - properties.getY2AxisDrawingInfo().getOffChartCanvasWidth()),
+						y);
+				chartMainPanel.add(((VerticalAxisVisualizer)y2AxisVisualizer).getTextPositionerAbsolutePanel(),
+						x + properties.getChartCanvasWidth() - 100,
+						y); //TODO pos
+				DOM.setElementAttribute(((VerticalAxisVisualizer)y2AxisVisualizer).getTextPositionerAbsolutePanel().getElement(),"zIndex", "1");
+				DOM.setElementAttribute(((VerticalAxisVisualizer)y2AxisVisualizer).getCanvas().getElement(), "zIndex", "-1");
 			}
 			chartMainPanel.add(chartCanvas, x, y);
+			DOM.setElementAttribute(chartCanvas.getElement(), "zIndex", "-2");
 		default:
 			return;
 		}
 	}
 	
-	private void initTexts(){
-		
-	}
-	
 	public void displayAxes(){
-		if(yAxisVisualizer != null){
+		if(yAxisVisualizer != null && !yAxisVisualizer.hasShown() && modelManager.getyMin() != null){
 			yAxisVisualizer.display();
 		}
-		if(xAxisVisualizer != null){
+		if(xAxisVisualizer != null && !((AxisVisualizer)xAxisVisualizer).hasShown() && modelManager.getxMin() != null){
 			((HorizontalAxisVisualizer)xAxisVisualizer).display();
 		}
-		if(y2AxisVisualizer != null){
+		if(y2AxisVisualizer != null && !y2AxisVisualizer.hasShown() && modelManager.getY2Min() != null){
 			y2AxisVisualizer.display();
 		}
 	}
@@ -156,9 +158,9 @@ public class DrawingFactory implements HasViewport{
 			ap.setPixelSize(
 					100,  //TODO
 					properties.getChartCanvasHeight());
+			yAxisVisualizer = new VerticalAxisVisualizer(yCanvas, ap, yAxis, modelManager, Curve.Axis.Y);
 		}
 		if(y2Axis != null){
-			//TODO 
 			DrawingArea y2Canvas = new DrawingArea(
 					properties.getY2AxisDrawingInfo().getTickLength(),
 					properties.getChartCanvasHeight());
@@ -166,6 +168,7 @@ public class DrawingFactory implements HasViewport{
 			ap.setPixelSize(
 					100,  //TODO
 					properties.getChartCanvasHeight());
+			y2AxisVisualizer = new VerticalAxisVisualizer(y2Canvas, ap, y2Axis, modelManager, Curve.Axis.Y2);
 		}
 		
 	}
@@ -189,7 +192,8 @@ public class DrawingFactory implements HasViewport{
 				visualizers.add(pcv);
 			}
 			curveVisualizers.put(curve.getName(), visualizers);
-			((DrawingArea)chartCanvas).bringToFront(((DrawingArea)chartCanvas).getVectorObject(0));
+			updateGwtGraphicsHierarchy();
+			displayAxes();
 			break;
 		default:
 			return;
@@ -218,7 +222,8 @@ public class DrawingFactory implements HasViewport{
 		for(String curveName : curveVisualizers.keySet())
 			for(CurveVisualizer visualizer: curveVisualizers.get(curveName))
 				visualizer.moveViewport(dx);		
-		((DrawingArea)chartCanvas).bringToFront(((DrawingArea)chartCanvas).getVectorObject(0));
+
+		updateGwtGraphicsHierarchy();
 	}
 
 	@Override
@@ -227,7 +232,24 @@ public class DrawingFactory implements HasViewport{
  		for(String curveName : curveVisualizers.keySet())
 			for(CurveVisualizer visualizer: curveVisualizers.get(curveName))
 				visualizer.setViewPort(viewportMin, viewportMax);
- 		((DrawingArea)chartCanvas).bringToFront(((DrawingArea)chartCanvas).getVectorObject(0));
+ 		 		
+ 		updateGwtGraphicsHierarchy();
 	}
 	
+	private void updateGwtGraphicsHierarchy(){
+		//border
+		((DrawingArea)chartCanvas).bringToFront(((DrawingArea)chartCanvas).getVectorObject(0));
+		if(yAxisVisualizer != null){
+			chartMainPanel.getElement().appendChild(((VerticalAxisVisualizer)yAxisVisualizer).getCanvas().getElement());
+			chartMainPanel.getElement().appendChild(((VerticalAxisVisualizer)yAxisVisualizer).getTextPositionerAbsolutePanel().getElement());
+		}
+		if(y2AxisVisualizer != null){
+			chartMainPanel.getElement().appendChild(((VerticalAxisVisualizer)y2AxisVisualizer).getCanvas().getElement());
+			chartMainPanel.getElement().appendChild(((VerticalAxisVisualizer)y2AxisVisualizer).getTextPositionerAbsolutePanel().getElement());
+		}
+		if(xAxisVisualizer != null){
+			chartMainPanel.getElement().appendChild(((HorizontalAxisVisualizer)xAxisVisualizer).getCanvas().getElement());
+			chartMainPanel.getElement().appendChild(((HorizontalAxisVisualizer)xAxisVisualizer).getTextPositionerAbsolutePanel().getElement());
+		}
+	}
 }

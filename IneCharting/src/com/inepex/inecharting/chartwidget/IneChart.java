@@ -78,7 +78,7 @@ public class IneChart extends Composite implements HasViewport{
 	 */
 	public void addCurve(Curve curve){
 		curves.put(curve.getName(), curve);
-		//let's check if the new curve had a lower value on x than the actual minimum
+		//setting the Horizontal min and max
 		Double xMin = modelManager.getxMin();
 		Double xMax = modelManager.getxMax();
 		if(xMin  == null){
@@ -105,35 +105,51 @@ public class IneChart extends Composite implements HasViewport{
 		}
 		if(modelManager.getxMax() != xMax)
 			modelManager.setxMax(xMax);
+		
+		//setting the Vertical min and max
+		if(curve.getCurveAxis().equals(com.inepex.inecharting.chartwidget.model.Curve.Axis.Y)){
+			if(modelManager.getyMin() == null || modelManager.getyMin()  > curve.getMinValue())
+				modelManager.setyMin(curve.getMinValue());
+			if(modelManager.getyMax() == null || modelManager.getyMax()  < curve.getMaxValue())
+				modelManager.setyMax(curve.getMaxValue());
+			modelManager.getAxisCalculator().setVerticalAxis(yAxis,Curve.Axis.Y);
+		}
+		else if(curve.getCurveAxis().equals(com.inepex.inecharting.chartwidget.model.Curve.Axis.Y2)){
+			if(modelManager.getY2Min() == null || modelManager.getY2Min()  > curve.getMinValue())
+				modelManager.setY2Min(curve.getMinValue());
+			if(modelManager.getY2Max() == null || modelManager.getY2Max()  < curve.getMaxValue())
+				modelManager.setY2Max(curve.getMaxValue());
+			modelManager.getAxisCalculator().setVerticalAxis(yAxis,Curve.Axis.Y2);
+		}
+		//calculate points
 		getPointsForCurve(curve);
-		//first time when curve added
+		//first time when curve added (axes calculations, drawing needed)s
 		if(curves.size() == 1){
 			if(xAxis != null)
-				modelManager.getAxisCalculator().calculateDistanceBetweenTicks(xAxis);
+				modelManager.getAxisCalculator().setHorizontalAxis(xAxis);
 			switch (curve.getCurveAxis()) {
 			case NO_AXIS:
 				break;
 			case Y:
 				if(yAxis != null)
-					modelManager.getAxisCalculator().calculateDistanceBetweenTicks(yAxis);
+					modelManager.getAxisCalculator().setVerticalAxis(yAxis,curve.getCurveAxis());
 				break;
 			case Y2:
 				if(y2Axis != null)
-					modelManager.getAxisCalculator().calculateDistanceBetweenTicks(y2Axis);
+					modelManager.getAxisCalculator().setVerticalAxis(y2Axis,curve.getCurveAxis());
 				break;
 			default:
 				break;
 			}
-			drawingFactory.displayAxes();
+			
 		}
 		//first curve on Y
-		if(yAxis != null && yAxis.getTickDistance() == 0){
-			modelManager.getAxisCalculator().calculateDistanceBetweenTicks(yAxis);
-			drawingFactory.displayAxes();
+		if(yAxis != null && yAxis.getTickDistance() == 0 && curve.getCurveAxis().equals(Curve.Axis.Y)){
+			modelManager.getAxisCalculator().setVerticalAxis(yAxis,Curve.Axis.Y);
 		}
-		if(y2Axis != null && y2Axis.getTickDistance() == 0){
-			modelManager.getAxisCalculator().calculateDistanceBetweenTicks(y2Axis);
-			drawingFactory.displayAxes();
+		//first curve on Y2 
+		if(y2Axis != null && y2Axis.getTickDistance() == 0 && curve.getCurveAxis().equals(Curve.Axis.Y2)){
+			modelManager.getAxisCalculator().setVerticalAxis(y2Axis,Curve.Axis.Y2);
 		}
 		//display curve
 		drawingFactory.addCurve(curve);
@@ -156,7 +172,7 @@ public class IneChart extends Composite implements HasViewport{
 		double shrinkRatio = (modelManager.getViewportMax()  -modelManager.getViewportMin()) / (viewportMax - viewportMin);
 		modelManager.setViewport(viewportMin, viewportMax);
 		if(xAxis != null)
-			modelManager.getAxisCalculator().calculateDistanceBetweenTicks(xAxis);
+			modelManager.getAxisCalculator().setHorizontalAxis(xAxis);
 		for(String curveName : curves.keySet()){
 			Curve actualCurve = curves.get(curveName);
 			modelManager.setXPositionForCalculatedPoints(actualCurve, shrinkRatio);
