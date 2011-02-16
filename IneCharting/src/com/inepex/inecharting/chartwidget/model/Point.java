@@ -1,36 +1,15 @@
 package com.inepex.inecharting.chartwidget.model;
 
+import com.inepex.inecharting.chartwidget.model.State;
 /**
  * 
  *@author Miklós Süveges / Inepex Ltd
  */
-public final class Point implements Comparable<Point>{
+public final class Point extends GraphicalObject
+	implements Comparable<Point>, HasState{
 	
 	/**
-	 * View state of a point
-	 *
-	 */
-	public static enum State {
-		/**
-		 * is not on the viewport
-		 */
-		INVISIBLE,
-		/**
-		 * is on the viewport
-		 */
-		VISIBLE,
-		/**
-		 * selected, mouseover, etc
-		 */
-		ACTIVE,
-		/**
-		 * clicked
-		 */
-		FOCUSED
-	}
-	
-	/**
-	 * the curve this point belongs to
+	 * 
 	 */
 	private Curve parent; 
 	/**
@@ -41,6 +20,11 @@ public final class Point implements Comparable<Point>{
 	 * the point's y position in the canvas' coordinate system
 	 */
 	private int yPos;
+	/**
+	 * the points z position/index
+	 * highest value means top layer
+	 */
+	private int zIndex;
 	private State state;
 
 	/**
@@ -56,6 +40,7 @@ public final class Point implements Comparable<Point>{
 		this.imaginaryPoint = imaginaryPoint;
 		this.state = State.INVISIBLE;
 		this.parent = parent;
+		this.zIndex = parent.getzIndex();
 	}
 	
 	
@@ -65,6 +50,7 @@ public final class Point implements Comparable<Point>{
 	public int getyPos() {
 		return yPos;
 	}
+	@Override
 	public State getState() {
 		return state;
 	}
@@ -74,6 +60,7 @@ public final class Point implements Comparable<Point>{
 	public void setyPos(int yPos) {
 		this.yPos = yPos;
 	}
+	@Override
 	public void setState(State state) {
 		this.state = state;
 	}
@@ -88,11 +75,17 @@ public final class Point implements Comparable<Point>{
 	public Curve getParent() {
 		return parent;
 	}
-
-
 	@Override
 	public int compareTo(Point o) {
 		return xPos-o.xPos;
+	}
+	@Override
+	public int getzIndex() {
+		return zIndex;
+	}
+	@Override
+	public void setzIndex(int zIndex) {
+		this.zIndex = zIndex;
 	}
 }
 

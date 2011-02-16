@@ -9,10 +9,9 @@ import org.vaadin.gwtgraphics.client.shape.Rectangle;
 
 import com.google.gwt.user.client.ui.AbsolutePanel;
 import com.google.gwt.user.client.ui.Widget;
-import com.inepex.inecharting.chartwidget.graphics.AxisVisualizer;
-import com.inepex.inecharting.chartwidget.graphics.HasViewport;
 import com.inepex.inecharting.chartwidget.graphics.TickTextVisualizer;
 import com.inepex.inecharting.chartwidget.model.Axis;
+import com.inepex.inecharting.chartwidget.model.HasViewport;
 import com.inepex.inecharting.chartwidget.model.ModelManager;
 import com.inepex.inecharting.chartwidget.properties.HorizontalAxisDrawingInfo;
 
@@ -126,9 +125,8 @@ public class HorizontalAxisVisualizer extends AxisVisualizer implements	HasViewp
 		return info;
 	}
 
-	@Override
 	public void display() {
 		setViewPort(modelManager.getViewportMin(), modelManager.getViewportMax());
-		hasShown = true;
+		
 	}
 }

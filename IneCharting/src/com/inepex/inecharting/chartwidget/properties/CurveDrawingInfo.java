@@ -1,7 +1,11 @@
 package com.inepex.inecharting.chartwidget.properties;
 
+import java.util.TreeMap;
 
-public class CurveDrawingPolicy {
+import com.inepex.inecharting.chartwidget.model.State;
+
+
+public class CurveDrawingInfo {
 	public static enum ImaginaryPointValuePolicy{
 		FIRST_POINT,
 		LAST_POINT,
@@ -9,16 +13,29 @@ public class CurveDrawingPolicy {
 		HIGHER,
 		AVERAGE
 	}
-	public static CurveDrawingPolicy getDefaultCurveDrawingPolicy(){
-		return new CurveDrawingPolicy(true, true, true, true, false, 30, DEFAULT_SQUARE_OVERLAPPING_SIZE, DEFAULT_OVERLAPPING_POLICY, DEFAULT_X_OVERLAPPING_WIDTH, true);
+	public static CurveDrawingInfo getDefaultCurveDrawingPolicy(){
+		return new CurveDrawingInfo(true, true, true, true, false, 30, DEFAULT_SQUARE_OVERLAPPING_SIZE, DEFAULT_OVERLAPPING_POLICY, DEFAULT_X_OVERLAPPING_WIDTH, true, getHighestzIndex());
 	}
+	
+	private static int highestzIndex = 0;
+	
+	public static int getHighestzIndex(){
+		return highestzIndex;
+	}
+	private static void setHighestzIndex(int newValue){
+		highestzIndex = newValue;
+	}
+	
 	
 	private boolean preDrawLines;
 	private boolean preDrawPoints;
 	private boolean preCalculatePoints;
 	private boolean keepInvisibleGraphicalObjects;
 	private boolean drawPointByPoint;
-	private long delayBetweenDrawingPoints; 
+	private long delayBetweenDrawingPoints;
+	private int defaultzIndex;
+	private TreeMap<Double, TreeMap<State, PointDrawingInfo>> customPointDrawingInfos = null;
+	
 
 	/* model-to-pixel policy */
 	public static final ImaginaryPointValuePolicy DEFAULT_OVERLAPPING_POLICY = ImaginaryPointValuePolicy.AVERAGE;
@@ -31,7 +48,7 @@ public class CurveDrawingPolicy {
 	private boolean mathematicalRounding;
 	
 	
-	public CurveDrawingPolicy(
+	public CurveDrawingInfo(
 			boolean preDrawLines, 
 			boolean preDrawPoints,
 			boolean preCalculatePoints, 
@@ -40,7 +57,8 @@ public class CurveDrawingPolicy {
 			int overlapFilterSquareSize,
 			ImaginaryPointValuePolicy overlapFilterPolicy,
 			int overlapFilterXWidth, 
-			boolean mathematicalRounding) {
+			boolean mathematicalRounding,
+			int zIndex) {
 		this.preDrawLines = preDrawLines;
 		this.preDrawPoints = preDrawPoints;
 		this.keepInvisibleGraphicalObjects = keepInvisibleGraphicalObjects;
@@ -51,6 +69,36 @@ public class CurveDrawingPolicy {
 		this.overlapFilterXWidth = overlapFilterXWidth;
 		this.mathematicalRounding = mathematicalRounding;
 		setPreCalculatePoints(true);
+		customPointDrawingInfos = null;
+	}
+	
+	/**
+	 * Customizes the look of a single point in datamap. 
+	 * @param data
+	 * @param state
+	 * @param info
+	 */
+	public void addCustomPointDrawingInfo(Double data, State state, PointDrawingInfo info) {
+		if(customPointDrawingInfos == null)
+			customPointDrawingInfos = new TreeMap<Double, TreeMap<State,PointDrawingInfo>>();
+		TreeMap<State, PointDrawingInfo> pinfo = customPointDrawingInfos.get(data);
+		if(pinfo == null){
+			pinfo = new TreeMap<State, PointDrawingInfo>();
+		}
+		pinfo.put(state, info);
+		customPointDrawingInfos.put(data, pinfo);
+	}
+	
+	/**
+	 * Gets a drawing info for a point. If there is not then returns null.
+	 * @param data
+	 * @param state
+	 * @return
+	 */
+	public PointDrawingInfo getPointDrawingInfo(double data, State state){
+		if(customPointDrawingInfos == null || customPointDrawingInfos.get(data) == null)
+			return null;
+		return customPointDrawingInfos.get(data).get(state);
 	}
 
 
@@ -146,4 +194,13 @@ public class CurveDrawingPolicy {
 		this.delayBetweenDrawingPoints = delayBetweenDrawingPoints;
 	}
 	
+	public void setDefaultzIndex(int zIndex){
+		if(zIndex > getHighestzIndex())
+			setHighestzIndex( zIndex);
+		this.defaultzIndex = zIndex;
+	}
+	
+	public int getDefaultzIndex(){
+		return defaultzIndex;
+	}
 }

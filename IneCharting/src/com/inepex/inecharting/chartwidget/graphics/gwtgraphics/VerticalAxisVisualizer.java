@@ -5,7 +5,6 @@ import org.vaadin.gwtgraphics.client.Line;
 
 import com.google.gwt.user.client.ui.AbsolutePanel;
 import com.google.gwt.user.client.ui.Widget;
-import com.inepex.inecharting.chartwidget.graphics.AxisVisualizer;
 import com.inepex.inecharting.chartwidget.graphics.TickTextVisualizer;
 import com.inepex.inecharting.chartwidget.model.Axis;
 import com.inepex.inecharting.chartwidget.model.Curve;
@@ -32,7 +31,6 @@ public class VerticalAxisVisualizer extends AxisVisualizer {
 		return ap;
 	}
 
-	@Override
 	public void display() {
 		
 		((DrawingArea)canvas).clear();
@@ -94,7 +92,6 @@ public class VerticalAxisVisualizer extends AxisVisualizer {
 			tick.setStrokeOpacity(1);
 			((DrawingArea)canvas).add(tick);
 		}
-		hasShown = true;
 	}
 	
 	public void refresh(){

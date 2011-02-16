@@ -13,7 +13,12 @@ public class VerticalAxisDrawingInfo extends AxisDrawingInfo {
 	}
 	
 	public static VerticalAxisDrawingInfo getDefaultVerticalAxisDrawingInfo(){
-		return new VerticalAxisDrawingInfo("black",
+		return new VerticalAxisDrawingInfo(
+				"black",
+				2,
+				true,
+				"lightgrey",
+				2,
 				"black", 
 				"blue", 
 				1, 
@@ -33,6 +38,10 @@ public class VerticalAxisDrawingInfo extends AxisDrawingInfo {
 
 	public VerticalAxisDrawingInfo(
 			String tickColor,
+			int tickLineWidth,
+			boolean hasGridLines,
+			String gridLineColor,
+			int gridLineWidth,
 			String tickTextColor,
 			String tickTextBackgroundColor,
 			double tickTextBackgroundOpacity,
@@ -44,9 +53,10 @@ public class VerticalAxisDrawingInfo extends AxisDrawingInfo {
 			String axisColor,
 			TickLocation tickLocation,
 			int tickLength) {
-		super(tickColor, tickTextColor, tickTextBackgroundColor,
-				tickTextBackgroundOpacity, tickTextFontStyle,
-				tickTextFontWeight, tickTextFontFamily, tickTextFormat, type);
+		super(tickColor, tickLineWidth, hasGridLines,
+					gridLineColor, gridLineWidth, tickTextColor,
+					tickTextBackgroundColor, tickTextBackgroundOpacity,
+					tickTextFontStyle, tickTextFontWeight, tickTextFontFamily, tickTextFormat, type);
 		this.axisColor = axisColor;
 		this.tickLocation = tickLocation;
 		this.tickLength = tickLength;

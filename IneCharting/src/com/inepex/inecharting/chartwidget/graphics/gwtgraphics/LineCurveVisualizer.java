@@ -8,7 +8,6 @@ import org.vaadin.gwtgraphics.client.Line;
 import org.vaadin.gwtgraphics.client.VectorObject;
 import org.vaadin.gwtgraphics.client.shape.Path;
 import com.google.gwt.user.client.ui.Widget;
-import com.inepex.inecharting.chartwidget.graphics.CurveVisualizer;
 import com.inepex.inecharting.chartwidget.graphics.DrawingJobScheduler;
 import com.inepex.inecharting.chartwidget.model.Curve;
 import com.inepex.inecharting.chartwidget.model.ModelManager;
@@ -51,15 +50,15 @@ public final class LineCurveVisualizer extends CurveVisualizer {
 	@Override
 	public void moveViewport(double dx) {
 		moveShapes(-dx);
-		if(curve.getPolicy().isPreDrawLines()){
+		if(curve.getCurveDrawingInfo().isPreDrawLines()){
 			return;
 		}
 		else{
-			if(!curve.getPolicy().isKeepInvisibleGraphicalObjects())
+			if(!curve.getCurveDrawingInfo().isKeepInvisibleGraphicalObjects())
 				dropShapesOutsideViewPort();
 			createActualDrawingJob(modelManager.getViewportMin(), modelManager.getViewportMax());
-			if(curve.getPolicy().isDrawPointByPoint()){
-				scheduler = new DrawingJobScheduler(this, curve.getPolicy().getDelayBetweenDrawingPoints());
+			if(curve.getCurveDrawingInfo().isDrawPointByPoint()){
+				scheduler = new DrawingJobScheduler(this, curve.getCurveDrawingInfo().getDelayBetweenDrawingPoints());
 				scheduler.start();
 			}
 			else{
@@ -74,10 +73,10 @@ public final class LineCurveVisualizer extends CurveVisualizer {
 	public void setViewPort(double viewportMin, double viewportMax) {
 		totalDX = 0;
 		removeFromCanvas();
-		if(!curve.getPolicy().isPreDrawLines()){
+		if(!curve.getCurveDrawingInfo().isPreDrawLines()){
 			createActualDrawingJob(viewportMin, viewportMax);
-			if(curve.getPolicy().isDrawPointByPoint()){
-				scheduler = new DrawingJobScheduler(this, curve.getPolicy().getDelayBetweenDrawingPoints());
+			if(curve.getCurveDrawingInfo().isDrawPointByPoint()){
+				scheduler = new DrawingJobScheduler(this, curve.getCurveDrawingInfo().getDelayBetweenDrawingPoints());
 				scheduler.start();
 			}
 			else{
@@ -108,8 +107,8 @@ public final class LineCurveVisualizer extends CurveVisualizer {
 				line = new Path(
 						actual.getxPos(),
 						actual.getyPos());
-				line.setStrokeColor(curve.getLineDrawInfo().getStrokeColor());
-				line.setStrokeWidth(curve.getLineDrawInfo().getStrokeWidth());
+				line.setStrokeColor(curve.getLineDrawInfo().getborderColor());
+				line.setStrokeWidth(curve.getLineDrawInfo().getborderWidth());
 				line.setFillOpacity(0);
 				if(curve.getLineDrawInfo().hasFill()){
 					fill.lineRelativelyTo(
@@ -168,8 +167,8 @@ public final class LineCurveVisualizer extends CurveVisualizer {
 		Line line = new Line(
 				startPoint.getxPos() + distanceFromPointsX, startPoint.getyPos(),
 				endPoint.getxPos()+ distanceFromPointsX, endPoint.getyPos());
-		line.setStrokeColor(curve.getLineDrawInfo().getStrokeColor());
-		line.setStrokeWidth(curve.getLineDrawInfo().getStrokeWidth());
+		line.setStrokeColor(curve.getLineDrawInfo().getborderColor());
+		line.setStrokeWidth(curve.getLineDrawInfo().getborderWidth());
 		drawnLines.put(startPoint, line);
 		((DrawingArea)canvas).add(line);
 		if(curve.getLineDrawInfo().hasFill()){
@@ -214,14 +213,14 @@ public final class LineCurveVisualizer extends CurveVisualizer {
  		actualDrawingJob = new  ArrayList<Point>();
 		for(Double x:curve.getPointsToDraw().keySet()){
 			//in the case of not predrawn lines we only need visible points
-			if(!curve.getPolicy().isPreDrawLines() && (x < viewportMin || x > viewportMax))
+			if(!curve.getCurveDrawingInfo().isPreDrawLines() && (x < viewportMin || x > viewportMax))
 					continue;
 			//check if we have added this point before (in case of multiple imaginary points in a row)
 			if(actualDrawingJob.indexOf(curve.getPointsToDraw().get(x)) == -1){
 				actualDrawingJob.add(curve.getPointsToDraw().get(x));
 			}
 		}
-		if(!curve.getPolicy().isPreDrawLines()){
+		if(!curve.getCurveDrawingInfo().isPreDrawLines()){
 			//we need to get invisible points closest to viewport to draw lines 
 			Double start = curve.getLastInvisiblePointBeforeViewport(viewportMin);
 			Double end = curve.getFirstInvisiblePointAfterViewport(viewportMax);

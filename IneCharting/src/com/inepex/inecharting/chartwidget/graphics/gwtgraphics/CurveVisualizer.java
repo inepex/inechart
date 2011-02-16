@@ -1,7 +1,9 @@
-package com.inepex.inecharting.chartwidget.graphics;
+package com.inepex.inecharting.chartwidget.graphics.gwtgraphics;
 
 import com.google.gwt.user.client.ui.Widget;
+import com.inepex.inecharting.chartwidget.graphics.HasDrawingJob;
 import com.inepex.inecharting.chartwidget.model.Curve;
+import com.inepex.inecharting.chartwidget.model.HasViewport;
 
 /**
  * Base class for drawing curves on canvas.

@@ -14,6 +14,10 @@ public class AxisDrawingInfo {
 	public static AxisDrawingInfo getDefaultNumberAxisDrawingInfo(){
 		return new AxisDrawingInfo(
 				"black",
+				2,
+				true,
+				"lightgrey",
+				2,
 				"black", 
 				"blue", 
 				1, 
@@ -27,6 +31,10 @@ public class AxisDrawingInfo {
 	public static AxisDrawingInfo getDefaultTimeAxisDrawingInfo(){
 		return new AxisDrawingInfo(
 				"black",
+				2,
+				true,
+				"lightgrey",
+				2,
 				"black", 
 				"blue", 
 				1, 
@@ -47,9 +55,17 @@ public class AxisDrawingInfo {
 	protected String tickTextFontFamily;
 	protected String tickTextFormat;
 	protected AxisType type;
+	protected boolean hasGridLines;
+	protected String gridLineColor;
+	protected int gridLineWidth;
+	protected int tickLineWidth;
 	
 	protected AxisDrawingInfo(
 			String tickColor,
+			int tickLineWidth,
+			boolean hasGridLines,
+			String gridLineColor,
+			int gridLineWidth,
 			String tickTextColor,
 			String tickTextBackgroundColor,
 			double tickTextBackgroundOpacity,
@@ -67,6 +83,10 @@ public class AxisDrawingInfo {
 		this.tickTextFontFamily = tickTextFontFamily;
 		this.tickTextFormat = tickTextFormat;
 		this.type = type;
+		this.gridLineColor = gridLineColor;
+		this.gridLineWidth = gridLineWidth;
+		this.hasGridLines = hasGridLines;
+		this.tickLineWidth = tickLineWidth;
 	}
 
 	public AxisType getType() {
@@ -122,5 +142,29 @@ public class AxisDrawingInfo {
 	}
 	public void setTickTextFontFamily(String tickTextFontFamily) {
 		this.tickTextFontFamily = tickTextFontFamily;
+	}
+	public boolean hasGridLines() {
+		return hasGridLines;
+	}
+	public void setHasGridLines(boolean hasGridLines) {
+		this.hasGridLines = hasGridLines;
+	}
+	public String getGridLineColor() {
+		return gridLineColor;
+	}
+	public void setGridLineColor(String gridLineColor) {
+		this.gridLineColor = gridLineColor;
+	}
+	public int getGridLineWidth() {
+		return gridLineWidth;
+	}
+	public void setGridLineWidth(int gridLineWidth) {
+		this.gridLineWidth = gridLineWidth;
+	}
+	public int getTickLineWidth() {
+		return tickLineWidth;
+	}
+	public void setTickLineWidth(int tickLineWidth) {
+		this.tickLineWidth = tickLineWidth;
 	}
 }

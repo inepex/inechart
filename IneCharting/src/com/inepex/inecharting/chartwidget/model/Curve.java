@@ -3,7 +3,7 @@ package com.inepex.inecharting.chartwidget.model;
 import java.util.TreeMap;
 
 import com.google.gwt.user.client.Random;
-import com.inepex.inecharting.chartwidget.properties.CurveDrawingPolicy;
+import com.inepex.inecharting.chartwidget.properties.CurveDrawingInfo;
 import com.inepex.inecharting.chartwidget.properties.ShapeDrawingInfo;
 
 
@@ -11,7 +11,8 @@ import com.inepex.inecharting.chartwidget.properties.ShapeDrawingInfo;
  * 
  *@author Miklós Süveges / Inepex Ltd
  */
-public final class Curve {
+public final class Curve extends GraphicalObject 
+implements Comparable<Curve>, HasState{
 	/**
 	 * Curve's axis
 	 */
@@ -20,11 +21,9 @@ public final class Curve {
 		Y2,
 		NO_AXIS
 	}
-	
-	
-	//data fields
 	/**
 	 * Unique name of the curve, helps identifying at event-handling which curve (or a curve's point) was selected
+	 * also can group curves 
 	 */
 	private String name;
 	/**
@@ -44,6 +43,11 @@ public final class Curve {
 	 */
 	private Axis curveAxis;
 	/**
+	 * 
+	 */
+	private State state;
+	
+	/**
 	 * a collection for calculated points per data
 	 * points inside are unfiltered.
 	 * should be updated when viewport's width changes
@@ -58,14 +62,18 @@ public final class Curve {
 	 */
 	private TreeMap<Double, Point> pointsToDraw;
 	
-	//curve's UI fields
 	private boolean hasLine;
 	private boolean hasPoints;
 	private ShapeDrawingInfo lineDrawInfo;
-	private CurveDrawingPolicy policy;
+	private CurveDrawingInfo curveDrawingInfo;
 		
-	public Curve(String name, TreeMap<Double, Double> dataMap) {
-		this.name = name;
+	public Curve(CurveDrawingInfo curveDrawingInfo, TreeMap<Double, Double> dataMap) {
+		this.curveDrawingInfo = curveDrawingInfo;
+		this.name = generateRandomName();
+		
+		//TODO
+//			minden public info keruljon at curveDrawingInfo-ba
+		
 		this.dataMap = dataMap;
 		minValue = maxValue = dataMap.get(dataMap.firstKey());
 		for(Double time:dataMap.keySet()){
@@ -77,13 +85,13 @@ public final class Curve {
 		}
 		
 		//default values
-		
 		hasLine = true;
 		hasPoints = true;
 		curveAxis = Axis.Y;
 		calculatedPoints = new TreeMap<Double,Point>();
 		pointsToDraw = new TreeMap<Double, Point>();
 		lineDrawInfo = ShapeDrawingInfo.getDefaultShapeDrawingInfo();
+		state = State.INVISIBLE;
 	}
 	
 	
@@ -166,7 +174,6 @@ public final class Curve {
 		return null;	
 	}
 
-	
 	public TreeMap<Double, Point> getCalculatedPoints() {
 		return calculatedPoints;
 	}
@@ -203,13 +210,36 @@ public final class Curve {
 		return name;
 	}
 
-	public CurveDrawingPolicy getPolicy() {
-		if(policy == null)
-			policy = CurveDrawingPolicy.getDefaultCurveDrawingPolicy();
-		return policy;
+	public CurveDrawingInfo getCurveDrawingInfo() {
+		if(curveDrawingInfo == null)
+			curveDrawingInfo = CurveDrawingInfo.getDefaultCurveDrawingPolicy();
+		return curveDrawingInfo;
 	}
 	
-	public void setPolicy(CurveDrawingPolicy policy) {
-		this.policy = policy;
+	public void setCurveDrawingInfo(CurveDrawingInfo curveDrawingInfo) {
+		this.curveDrawingInfo = curveDrawingInfo;
 	}
+
+
+	
+	@Override
+	public int compareTo(Curve o) {
+		
+		return this.name.compareTo(o.name);
+	}
+
+
+	@Override
+	public State getState() {
+		return state;
+	}
+
+
+	@Override
+	public void setState(State state) {
+		this.state = state;
+	}
+
+
+	
 }

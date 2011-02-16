@@ -1,11 +1,19 @@
 package com.inepex.inecharting.chartwidget.model;
 
 
+import java.util.ArrayList;
+
 import com.inepex.inecharting.chartwidget.properties.AxisDrawingInfo;
 
 
 public class Axis {
-		
+	
+	protected ArrayList<Curve> registeredCurves = new ArrayList<Curve>();
+	
+	public ArrayList<Curve> getRegisteredCurves() {
+		return registeredCurves;
+	}
+
 	protected AxisDrawingInfo drawingInfo;
 	/**
 	 * a tick's absolute position, the other ticks' positions can be measured from it. 
@@ -19,7 +27,6 @@ public class Axis {
 	protected Axis(){}
 	
 	public Axis(AxisDrawingInfo drawingInfo) {
-	
 		this.drawingInfo = drawingInfo;
 	}
 

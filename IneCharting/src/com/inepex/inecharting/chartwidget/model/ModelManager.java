@@ -18,8 +18,8 @@ public class ModelManager {
 	private int chartCanvasWidth;
 	private int chartCanvasHeight;
 	private int chartCanvasTopPaddingPercentage;
-	private Double xMin;
-	private Double xMax;
+	private Double xMin = null;
+	private Double xMax = null;
 	private Double yMax = null;
 	private Double yMin = null;
 	private Double y2Max = null;
@@ -45,6 +45,21 @@ public class ModelManager {
 		this.viewportMax = viewportMax;
 		this.viewportMin = viewportMin;
 	}
+	/**
+	 * The viewport's minimum in pixels.
+	 * @return
+	 */
+	public int getViewportMinInPx(){
+		return (int) calculateX(viewportMin);
+	}
+	
+	/**
+	 * The viewport's maximum in pixels.
+	 * @return
+	 */
+	public int getViewportMaxInPx(){
+		return (int) calculateX(viewportMax);
+	}
 	
 	/**
 	 * Translates a datapoint's x value to the canvas' coordinate system
@@ -55,6 +70,9 @@ public class ModelManager {
 		double unit = chartCanvasWidth / (viewportMax - viewportMin);
 		return unit * (x - xMin);
 	}
+	public int calculateXRelativeToViewport(double x) {
+		return (int) (calculateX(x) - calculateX(viewportMin)); 
+	}
 	
 	/**
 	 * Translates a datapoint's y value to the canvas' coordinate system
@@ -63,7 +81,7 @@ public class ModelManager {
 	 * @param maxValue the highest value in the curve's datamap
 	 * @return
 	 */
-	public double calculateY(double y, double minValue, double maxValue){
+	public double calculateYWithPadding(double y, double minValue, double maxValue){
 		int padding = (int) ((chartCanvasTopPaddingPercentage / 100d) * chartCanvasHeight);
 		double unit = (chartCanvasHeight - padding ) / (maxValue - minValue);
 		return unit * (maxValue - y) + padding;
@@ -121,24 +139,25 @@ public class ModelManager {
 	 * @param stop
 	 */
 	public void calculateAndSetPointsForInterval(Curve curve, double start, double stop){
+		if(curve.getDataMap().firstKey() > stop  || curve.getDataMap().lastKey() < start)
+			return;
 		TreeMap<Double, Double> dataToCheck  = new TreeMap<Double, Double>();
 		for(Double x:curve.getDataMap().keySet())
-			if(x >= start && x <= stop)
+			if(x >= start && x <= stop && !curve.getCalculatedPoints().containsKey(x))
 				dataToCheck.put(x, curve.getDataMap().get(x));
-		//we also checks those invisible points, which are the closest to viewport
 		for(double x : dataToCheck.keySet()){
 			//check if we have calculated a point before
 			Point point = curve.getCalculatedPoints().get(x);
 			//if no point for this data
 			if(point == null){
 				int xPos, yPos;
-				if(curve.getPolicy().isMathematicalRounding()){ //use Math.round on each value
+				if(curve.getCurveDrawingInfo().isMathematicalRounding()){ //use Math.round on each value
 					xPos = (int) Math.round(calculateX(x));
-					yPos = (int) Math.round(calculateY(dataToCheck.get(x), curve.getMinValue(), curve.getMaxValue()));
+					yPos = (int) Math.round(calculateYWithPadding(dataToCheck.get(x), curve.getMinValue(), curve.getMaxValue()));
 				}
 				else{ //simply cast to int
 					xPos = (int) calculateX(x);
-					yPos = (int) calculateY(dataToCheck.get(x), curve.getMinValue(), curve.getMaxValue());
+					yPos = (int) calculateYWithPadding(dataToCheck.get(x), curve.getMinValue(), curve.getMaxValue());
 				}
 				point = new Point(xPos, yPos, false, curve);
 				curve.getCalculatedPoints().put(x, point);
@@ -153,7 +172,9 @@ public class ModelManager {
 	 * @param stop
 	 */
 	public void filterOverlappingPoints(Curve curve, double start, double stop){
-		long startTime = System.currentTimeMillis();
+		if(curve.getDataMap().firstKey() > stop  || curve.getDataMap().lastKey() < start)
+			return;
+		long startTime = System.currentTimeMillis();		
 		TreeMap<Double, Point> pointsToFilter = new TreeMap<Double,Point>();
 		TreeMap<Double, Point> xFiltered = new TreeMap<Double, Point>();
 		TreeMap<Double, Point> squareFiltered = new TreeMap<Double, Point>();
@@ -161,7 +182,7 @@ public class ModelManager {
 		int willNotShowCount = 0;
 		for(Double x:curve.getCalculatedPoints().keySet())
 			if(x >= start && x <= stop){
-				if(curve.getPointsToDraw().get(x) == null)
+				if(!curve.getPointsToDraw().containsKey(x))
 					pointsToFilter.put(x, curve.getCalculatedPoints().get(x));
 			}
 		//the actual examinee
@@ -174,7 +195,7 @@ public class ModelManager {
 				continue;
 			}
 			// if it is problematic element
-			else if(pointsToFilter.get(x).getxPos() - pointsToFilter.get(firstIndex).getxPos() < curve.getPolicy().getOverlapFilterXWidth()){
+			else if(pointsToFilter.get(x).getxPos() - pointsToFilter.get(firstIndex).getxPos() < curve.getCurveDrawingInfo().getOverlapFilterXWidth()){
 				if(problematicIndices == null){ 
 					problematicIndices = new ArrayList<Double>();
 					problematicIndices.add(firstIndex);
@@ -217,12 +238,14 @@ public class ModelManager {
 				xFiltered.put(firstIndex, curve.getCalculatedPoints().get(firstIndex));
 			}
 		}
-		Log.debug(willNotShowCount + " points have been thrown out due to x-overlap-policy in " + (System.currentTimeMillis() - startTime) + " ms" );
+//		Log.debug(willNotShowCount + " points have been thrown out due to x-overlap-policy in " + (System.currentTimeMillis() - startTime) + " ms" );
 	/* applying square - filter */
 		startTime = System.currentTimeMillis();
 		willNotShowCount = 0;
-		if(curve.getPolicy().getOverlapFilterSquareSize() <= curve.getPolicy().getOverlapFilterXWidth())
+		if(curve.getCurveDrawingInfo().getOverlapFilterSquareSize() <= curve.getCurveDrawingInfo().getOverlapFilterXWidth()){
 			curve.getPointsToDraw().putAll(xFiltered);
+			return;
+		}
 
 		Integer squareTopMax = null;
 		Integer highestYinSquare = null;
@@ -234,13 +257,13 @@ public class ModelManager {
 			Point actual = xFiltered.get(x);
 			if(firstIndex == null){
 				firstIndex = x;
-				squareTopMax = actual.getyPos() + curve.getPolicy().getOverlapFilterSquareSize();
-				squareBottomMin = squareTopMax -  2 * curve.getPolicy().getOverlapFilterSquareSize();
+				squareTopMax = actual.getyPos() + curve.getCurveDrawingInfo().getOverlapFilterSquareSize();
+				squareBottomMin = squareTopMax -  2 * curve.getCurveDrawingInfo().getOverlapFilterSquareSize();
 				highestYinSquare = lowestYinSquare = actual.getyPos();
 				continue;
 			}
 			// if the actual point's x position is in a square and ...
-			else if(actual.getxPos() - xFiltered.get(firstIndex).getxPos() < curve.getPolicy().getOverlapFilterSquareSize()  &&
+			else if(actual.getxPos() - xFiltered.get(firstIndex).getxPos() < curve.getCurveDrawingInfo().getOverlapFilterSquareSize()  &&
 				actual.getyPos() >  squareBottomMin   &&   actual.getyPos() < squareTopMax){ // ...check the same condition on y
 				if(problematicIndices == null){ 
 					problematicIndices = new ArrayList<Double>();
@@ -275,8 +298,8 @@ public class ModelManager {
 					squareFiltered.put(firstIndex, curve.getCalculatedPoints().get(firstIndex));
 				}
 				firstIndex = x;
-				squareTopMax = actual.getyPos() + curve.getPolicy().getOverlapFilterSquareSize();
-				squareBottomMin = squareTopMax -  2 * curve.getPolicy().getOverlapFilterSquareSize();
+				squareTopMax = actual.getyPos() + curve.getCurveDrawingInfo().getOverlapFilterSquareSize();
+				squareBottomMin = squareTopMax -  2 * curve.getCurveDrawingInfo().getOverlapFilterSquareSize();
 				highestYinSquare = lowestYinSquare = actual.getyPos();
 			}
 		}
@@ -296,7 +319,7 @@ public class ModelManager {
 				squareFiltered.put(firstIndex, curve.getCalculatedPoints().get(firstIndex));
 			}
 		}
-		Log.debug(willNotShowCount + " points have been thrown out due to square-overlap-policy in " + (System.currentTimeMillis() - startTime) + " ms" );
+//		Log.debug(willNotShowCount + " points have been thrown out due to square-overlap-policy in " + (System.currentTimeMillis() - startTime) + " ms" );
 		curve.getPointsToDraw().putAll(squareFiltered);
 	}
 	
@@ -309,7 +332,7 @@ public class ModelManager {
 	 */
 	private Point choosePointByPolicy(ArrayList<Point> problematicPoints, Curve curve){
 		int x = problematicPoints.get(0).getxPos() + (problematicPoints.get(problematicPoints.size() - 1).getxPos() - problematicPoints.get(0).getxPos()) / 2;
-		switch(curve.getPolicy().getOverlapFilerPolicy()){
+		switch(curve.getCurveDrawingInfo().getOverlapFilerPolicy()){
 		case FIRST_POINT:
 			return new Point( x, problematicPoints.get(0).getyPos(), true, curve);
 		case LAST_POINT:
@@ -342,7 +365,7 @@ public class ModelManager {
 	 */
 	public void setXPositionForCalculatedPoints(Curve curve, double shrinkRatio){
 		for(Double x:curve.getCalculatedPoints().keySet()){
-			if(curve.getPolicy().isMathematicalRounding())
+			if(curve.getCurveDrawingInfo().isMathematicalRounding())
 				curve.getCalculatedPoints().get(x).setxPos((int) Math.round(curve.getCalculatedPoints().get(x).getxPos() * shrinkRatio));
 			else
 				curve.getCalculatedPoints().get(x).setxPos((int) (curve.getCalculatedPoints().get(x).getxPos() * shrinkRatio));
@@ -356,7 +379,7 @@ public class ModelManager {
 	 * @param curve
 	 * @param dx
 	 */
-	public void addDistanceToAllPoints(Curve curve, double dx){
+	public void movePoints(Curve curve, double dx){
 		for(Double x:curve.getCalculatedPoints().keySet()){
 			curve.getCalculatedPoints().get(x).setxPos(curve.getCalculatedPoints().get(x).getxPos() + calculateDistance(dx));
 		}
@@ -366,12 +389,19 @@ public class ModelManager {
 		}
 	}
 	
+	public void rescaleYPositions(Curve curve, double min, double max){
+		for(Double x:curve.getCalculatedPoints().keySet()){
+			curve.getCalculatedPoints().get(x).setyPos((int) calculateYWithPadding(curve.getDataMap().get(x), min, max));
+		}
+		curve.getPointsToDraw().clear();
+	}
+	
 	/**
 	 * Returns x value(s in case of imaginary Point)(from the datamap) for a point
 	 * @param point
 	 * @return can return an empty list if the point is not in calculatedPoints, neither in pointsToDraw collection
 	 */
-	public ArrayList<Double> getDataForPoint(Point point) {
+ 	public ArrayList<Double> getDataForPoint(Point point) {
 		ArrayList<Double> datas = new ArrayList<Double>();
 		//imaginary point
 		if(point.isImaginaryPoint() &&	point.getParent().getPointsToDraw().containsValue(point)){
@@ -460,4 +490,21 @@ public class ModelManager {
 		this.y2Min = y2Min;
 	}
 	
+	public void getPointsForCurve(Curve curve){
+		Double start, stop;
+		if(curve.getCurveDrawingInfo().isPreCalculatePoints()){
+			start = curve.getDataMap().firstKey();
+			stop = curve.getDataMap().lastKey();
+		}
+		else{
+			start = curve.getLastInvisiblePointBeforeViewport(viewportMin);
+			stop = curve.getFirstInvisiblePointAfterViewport(viewportMax);
+			if(start == null)
+				start = curve.getDataMap().firstKey();
+			if(stop == null)
+				stop = curve.getDataMap().lastKey();
+		}
+		calculateAndSetPointsForInterval(curve, start, stop);
+		filterOverlappingPoints(curve, start, stop);
+	}
 }

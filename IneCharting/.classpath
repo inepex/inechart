@@ -3,7 +3,7 @@
 	<classpathentry kind="src" path="src"/>
 	<classpathentry kind="con" path="com.google.gwt.eclipse.core.GWT_CONTAINER"/>
 	<classpathentry kind="con" path="org.eclipse.jdt.launching.JRE_CONTAINER"/>
-	<classpathentry kind="lib" path="lib/gwt/gwt-log-3.0.4.jar"/>
-	<classpathentry kind="lib" path="lib/gwt/gwt-graphics-0.9.7.jar"/>
+	<classpathentry kind="lib" path="/Libs/gwt-graphics-0.9.7.jar"/>
+	<classpathentry kind="lib" path="/Libs/gwt-log-3.0.4.jar"/>
 	<classpathentry kind="output" path="war/WEB-INF/classes"/>
 </classpath>

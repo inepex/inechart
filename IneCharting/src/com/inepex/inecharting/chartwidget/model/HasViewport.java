@@ -1,4 +1,4 @@
-package com.inepex.inecharting.chartwidget.graphics;
+package com.inepex.inecharting.chartwidget.model;
 
 /**
  * An object which support moving, resizing viewport should implement this interface.

@@ -13,15 +13,17 @@ import com.google.gwt.user.client.ui.InlineLabel;
 import com.google.gwt.user.client.ui.Label;
 import com.google.gwt.user.client.ui.RootPanel;
 import com.google.gwt.user.client.ui.Widget;
+import com.inepex.inecharting.chartwidget.graphics.gwtgraphics.Visualizer;
 import com.inepex.inecharting.chartwidget.model.Axis;
 import com.inepex.inecharting.chartwidget.model.Curve;
+import com.inepex.inecharting.chartwidget.model.HasViewport;
 import com.inepex.inecharting.chartwidget.model.ModelManager;
 import com.inepex.inecharting.chartwidget.model.HorizontalTimeAxis;
 import com.inepex.inecharting.chartwidget.properties.AxisDrawingInfo.AxisType;
 import com.inepex.inecharting.chartwidget.properties.HorizontalTimeAxisDrawingInfo;
 import com.inepex.inecharting.misc.AbsolutePositioner;
 
-public class TickTextVisualizer extends Visualizer implements HasViewport{
+public class TickTextVisualizer implements HasViewport{
 	
 	private ModelManager mm;
 	private Axis axis;
@@ -36,7 +38,7 @@ public class TickTextVisualizer extends Visualizer implements HasViewport{
 	private final int yShift_Vertical = 1;
 	
 	public TickTextVisualizer(Widget canvas, Axis axis, ModelManager mm, boolean horizontal) {
-		super(canvas);
+		
 		this.axis = axis;
 		this.aPositioner = new AbsolutePositioner((AbsolutePanel) canvas);
 		this.actualTicks = new ArrayList<Double>();
@@ -55,7 +57,9 @@ public class TickTextVisualizer extends Visualizer implements HasViewport{
 	 * @return the first visible tick with a value bigger than x
 	 */
 	public double getFirstVisibleTick(double x){
-		int multiplier = (int) ((x - axis.getFixTick()) / axis.getTickDistance()) + 1;
+		int multiplier = (int) ((x - axis.getFixTick()) / axis.getTickDistance());
+		if(x > axis.getFixTick())
+			multiplier++;
 		return multiplier * axis.getTickDistance() + axis.getFixTick();
 	}
 	
@@ -65,6 +69,8 @@ public class TickTextVisualizer extends Visualizer implements HasViewport{
 	 */
 	public double getLastVisibleTick(double x){
 		int multiplier = (int) ((x - axis.getFixTick()) / axis.getTickDistance());
+		if(x < axis.getFixTick())
+			multiplier++;
 		return multiplier * axis.getTickDistance() + axis.getFixTick();
 	}
 

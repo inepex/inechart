@@ -6,8 +6,8 @@ public class ShapeDrawingInfo {
 		return new ShapeDrawingInfo("blue", 1, "lightblue", 0.5, true);
 	}
 	
-	protected String strokeColor;
-	protected int strokeWidth;
+	protected String borderColor;
+	protected int borderWidth;
 	protected String fillColor;
 	protected double fillOpacity;
 	protected boolean hasFill;
@@ -18,11 +18,11 @@ public class ShapeDrawingInfo {
 	
 	
 	
-	public ShapeDrawingInfo(String strokeColor, int strokeWidth,
+	public ShapeDrawingInfo(String borderColor, int borderWidth,
 			String fillColor, double fillOpacity, boolean hasFill) {
 		
-		this.strokeColor = strokeColor;
-		this.strokeWidth = strokeWidth;
+		this.borderColor = borderColor;
+		this.borderWidth = borderWidth;
 		this.fillColor = fillColor;
 		this.fillOpacity = fillOpacity;
 		this.hasFill = hasFill;
@@ -30,20 +30,20 @@ public class ShapeDrawingInfo {
 
 
 
-	public String getStrokeColor() {
-		return strokeColor;
+	public String getborderColor() {
+		return borderColor;
 	}
-	public int getStrokeWidth() {
-		return strokeWidth;
+	public int getborderWidth() {
+		return borderWidth;
 	}
 	public String getFillColor() {
 		return fillColor;
 	}
-	public void setStrokeColor(String strokeColor) {
-		this.strokeColor = strokeColor;
+	public void setborderColor(String borderColor) {
+		this.borderColor = borderColor;
 	}
-	public void setStrokeWidth(int strokeWidth) {
-		this.strokeWidth = strokeWidth;
+	public void setborderWidth(int borderWidth) {
+		this.borderWidth = borderWidth;
 	}
 	public void setFillColor(String fillColor) {
 		this.fillColor = fillColor;

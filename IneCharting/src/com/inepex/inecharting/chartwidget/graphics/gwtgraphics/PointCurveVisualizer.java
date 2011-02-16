@@ -11,12 +11,11 @@ import org.vaadin.gwtgraphics.client.shape.Rectangle;
 import com.google.gwt.user.client.ui.Widget;
 import com.inepex.inecharting.chartwidget.IneChartProperties;
 import com.inepex.inecharting.chartwidget.event.PointStateChangeListener;
-import com.inepex.inecharting.chartwidget.graphics.CurveVisualizer;
 import com.inepex.inecharting.chartwidget.graphics.DrawingJobScheduler;
 import com.inepex.inecharting.chartwidget.model.Curve;
 import com.inepex.inecharting.chartwidget.model.ModelManager;
 import com.inepex.inecharting.chartwidget.model.Point;
-import com.inepex.inecharting.chartwidget.model.Point.State;
+import com.inepex.inecharting.chartwidget.model.State;
 import com.inepex.inecharting.chartwidget.properties.PointDrawingInfo;
 
 /**
@@ -70,15 +69,15 @@ public final class PointCurveVisualizer extends CurveVisualizer implements Point
 	@Override
 	public void moveViewport(double dx) {
 		moveShapes(-dx);
-		if(curve.getPolicy().isPreDrawPoints()){
+		if(curve.getCurveDrawingInfo().isPreDrawPoints()){
 			return;
 		}
 		else{
-			if(!curve.getPolicy().isKeepInvisibleGraphicalObjects())
+			if(!curve.getCurveDrawingInfo().isKeepInvisibleGraphicalObjects())
 				dropShapesOutsideViewPort();
 			createActualDrawingJob(modelManager.getViewportMin(), modelManager.getViewportMax());
-			if(curve.getPolicy().isDrawPointByPoint()){
-				scheduler = new DrawingJobScheduler(this, curve.getPolicy().getDelayBetweenDrawingPoints());
+			if(curve.getCurveDrawingInfo().isDrawPointByPoint()){
+				scheduler = new DrawingJobScheduler(this, curve.getCurveDrawingInfo().getDelayBetweenDrawingPoints());
 				scheduler.start();
 			}
 			else{
@@ -94,7 +93,7 @@ public final class PointCurveVisualizer extends CurveVisualizer implements Point
 	public void setViewPort(double viewportMin, double viewportMax) {
 		totalDX = 0;
 		removeFromCanvas();
-		if(curve.getPolicy().isPreDrawPoints()){
+		if(curve.getCurveDrawingInfo().isPreDrawPoints()){
 			actualDrawingJob = new ArrayList<Point>();
 			for(double x:curve.getPointsToDraw().keySet())
 				actualDrawingJob.add(curve.getPointsToDraw().get(x));
@@ -102,8 +101,8 @@ public final class PointCurveVisualizer extends CurveVisualizer implements Point
 		else{
 			createActualDrawingJob(viewportMin, viewportMax);
 		}
-		if(curve.getPolicy().isDrawPointByPoint()){
-			scheduler = new DrawingJobScheduler(this, curve.getPolicy().getDelayBetweenDrawingPoints());
+		if(curve.getCurveDrawingInfo().isDrawPointByPoint()){
+			scheduler = new DrawingJobScheduler(this, curve.getCurveDrawingInfo().getDelayBetweenDrawingPoints());
 			scheduler.start();
 		}
 		else{
@@ -132,7 +131,9 @@ public final class PointCurveVisualizer extends CurveVisualizer implements Point
 		ArrayList<Double> datasForPoint = modelManager.getDataForPoint(point);
 		double data = datasForPoint.get(0);
 	
-		PointDrawingInfo info = properties.getPointDrawingInfo(data, state);  //TODO in case of overlapping points, and custom pointdrawinginfos, the results may not be satisfying
+		PointDrawingInfo info = curve.getCurveDrawingInfo().getPointDrawingInfo(data, state); 
+		if(info == null)
+			info = properties.getDefaultPointDrawingInfo(state);
 		Shape shape = null;
 		switch(info.getType()){
 		case ELLIPSE:
@@ -158,8 +159,8 @@ public final class PointCurveVisualizer extends CurveVisualizer implements Point
 		}
 		else
 			shape.setFillOpacity(0d);
-		shape.setStrokeColor(info.getStrokeColor());
-		shape.setStrokeWidth(info.getStrokeWidth());
+		shape.setStrokeColor(info.getborderColor());
+		shape.setStrokeWidth(info.getborderWidth());
 		
 		((DrawingArea)canvas).add(shape);
 		drawnShapes.put(point, shape);		
@@ -204,7 +205,7 @@ public final class PointCurveVisualizer extends CurveVisualizer implements Point
  		actualDrawingJob = new  ArrayList<Point>();
 		for(Double x:curve.getPointsToDraw().keySet()){
 			//in the case of not predrawn lines we only need visible points
-			if(!curve.getPolicy().isPreDrawPoints() && (x < viewportMin || x > viewportMax))
+			if(!curve.getCurveDrawingInfo().isPreDrawPoints() && (x < viewportMin || x > viewportMax))
 					continue;
 			//check if we have added this point before (in case of multiple imaginary points in a row)
 			if(actualDrawingJob.indexOf(curve.getPointsToDraw().get(x)) == -1){

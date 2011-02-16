@@ -14,6 +14,10 @@ public class HorizontalAxisDrawingInfo extends AxisDrawingInfo {
 	public static HorizontalAxisDrawingInfo getDefaultHorizontalAxisDrawingInfo(){
 		return new HorizontalAxisDrawingInfo(
 				"black",
+				2,
+				true,
+				"lightgrey",
+				2,
 				"black", 
 				"lightblue", 
 				1, 
@@ -35,6 +39,10 @@ public class HorizontalAxisDrawingInfo extends AxisDrawingInfo {
 
 	public HorizontalAxisDrawingInfo(
 			String tickColor,
+			int tickLineWidth,
+			boolean hasGridLines,
+			String gridLineColor,
+			int gridLineWidth,
 			String tickTextColor,
 			String tickTextBackgroundColor,
 			double tickTextBackgroundOpacity,
@@ -47,9 +55,10 @@ public class HorizontalAxisDrawingInfo extends AxisDrawingInfo {
 			AxisLocation axisLocation,
 			int tickLengthInside,
 			int tickPanelHeight) {
-		super(tickColor, tickTextColor, tickTextBackgroundColor,
-				tickTextBackgroundOpacity, tickTextFontStyle,
-				tickTextFontWeight, tickTextFontFamily, tickTextFormat, type);
+		super(tickColor, tickLineWidth, hasGridLines,
+				gridLineColor, gridLineWidth, tickTextColor,
+				tickTextBackgroundColor, tickTextBackgroundOpacity,
+				tickTextFontStyle, tickTextFontWeight, tickTextFontFamily, tickTextFormat, type);
 		this.backgroundColor = backgroundColor;
 		this.axisLocation = axisLocation;
 		this.tickLengthInside = tickLengthInside;

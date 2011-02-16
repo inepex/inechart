@@ -1,6 +1,6 @@
 package com.inepex.inecharting.chartwidget.event;
 
-import com.inepex.inecharting.chartwidget.graphics.CurveVisualizer;
+import com.inepex.inecharting.chartwidget.graphics.gwtgraphics.CurveVisualizer;
 import com.inepex.inecharting.chartwidget.model.Point;
 
 /**

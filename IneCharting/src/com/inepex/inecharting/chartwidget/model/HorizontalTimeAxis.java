@@ -10,7 +10,7 @@ public class HorizontalTimeAxis extends Axis {
 		HOUR,
 		DAY,
 		DATE,
-		DATE_W_YEAR
+//		DATE_W_YEAR
 	}
 
 	private Resolution resolution;

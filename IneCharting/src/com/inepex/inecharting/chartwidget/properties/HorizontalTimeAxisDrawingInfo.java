@@ -15,6 +15,10 @@ public class HorizontalTimeAxisDrawingInfo extends HorizontalAxisDrawingInfo {
 	public static HorizontalTimeAxisDrawingInfo getDefaultTimeAxisDrawingInfo(){
 		HorizontalTimeAxisDrawingInfo defaultTADI = new HorizontalTimeAxisDrawingInfo(
 				"black",
+				2,
+				true,
+				"lightgrey",
+				2,
 				"black", 
 				"lightblue", 
 				1, 
@@ -30,12 +34,16 @@ public class HorizontalTimeAxisDrawingInfo extends HorizontalAxisDrawingInfo {
 		defaultTADI.addDateTimeFormat(Resolution.MINUTE, "HH:mm");
 		defaultTADI.addDateTimeFormat(Resolution.HOUR, "EEE HH:mm");
 		defaultTADI.addDateTimeFormat(Resolution.DAY, "MMM dd");
-		defaultTADI.addDateTimeFormat(Resolution.DATE_W_YEAR, "dd/MM/yyyy");
+		defaultTADI.addDateTimeFormat(Resolution.DATE, "dd/MM/yyyy");
 		return defaultTADI;
 	}
 	
 	public HorizontalTimeAxisDrawingInfo(
 			String tickColor,
+			int tickLineWidth,
+			boolean hasGridLines,
+			String gridLineColor,
+			int gridLineWidth,
 			String tickTextColor,
 			String tickTextBackgroundColor,
 			double tickTextBackgroundOpacity, 
@@ -47,9 +55,11 @@ public class HorizontalTimeAxisDrawingInfo extends HorizontalAxisDrawingInfo {
 			int tickLengthInside,
 			int tickPanelHeight,
 			TreeMap<HorizontalTimeAxis.Resolution, String> dateTimeFormats) {
-		super(tickColor, tickTextColor, tickTextBackgroundColor,
-				tickTextBackgroundOpacity, tickTextFontStyle, tickTextFontWeight,
-				tickTextFontFamily, null, AxisType.TIME, backgroundColor, axisLocation, tickLengthInside, tickPanelHeight);
+		super(tickColor, tickLineWidth, hasGridLines,
+				gridLineColor, gridLineWidth, tickTextColor,
+				tickTextBackgroundColor, tickTextBackgroundOpacity,
+				tickTextFontStyle, tickTextFontWeight, tickTextFontFamily,
+				tickTextFontFamily,AxisType.TIME, backgroundColor, axisLocation, tickLengthInside, tickPanelHeight);
 		this.dateTimeFormats = dateTimeFormats;
 	}
 	

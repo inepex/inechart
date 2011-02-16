@@ -1,4 +1,4 @@
-package com.inepex.inecharting.chartwidget.graphics;
+package com.inepex.inecharting.chartwidget.graphics.gwtgraphics;
 
 import com.google.gwt.user.client.ui.Widget;
 
@@ -18,4 +18,6 @@ public abstract class Visualizer {
 	public Widget getCanvas() {
 		return canvas;
 	}
+	
+	
 }

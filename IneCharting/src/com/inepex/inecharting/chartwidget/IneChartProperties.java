@@ -2,8 +2,7 @@ package com.inepex.inecharting.chartwidget;
 
 import java.util.TreeMap;
 
-import com.inepex.inecharting.chartwidget.graphics.DrawingFactory.DrawingTool;
-import com.inepex.inecharting.chartwidget.model.Point.State;
+import com.inepex.inecharting.chartwidget.model.State;
 import com.inepex.inecharting.chartwidget.properties.HorizontalAxisDrawingInfo;
 import com.inepex.inecharting.chartwidget.properties.PointDrawingInfo;
 import com.inepex.inecharting.chartwidget.properties.VerticalAxisDrawingInfo;
@@ -17,6 +16,10 @@ import com.inepex.inecharting.chartwidget.properties.VerticalAxisDrawingInfo;
  * @author Miklós Süveges / Inepex Ltd.
  */
 public final class IneChartProperties {
+	public enum DrawingTool {
+		VAADIN_GWT_GRAPHICS,
+		INECANVAS
+	}
 	//sizes
 	private int chartCanvasWidth;
 	private int chartCanvasHeight;
@@ -24,7 +27,7 @@ public final class IneChartProperties {
 	private int chartCanvasTopPaddingPercentage;
 	//appearance of the curve's points
 	private TreeMap<State,PointDrawingInfo> defaultPointDrawingInfo = null;
-	private TreeMap<Double, TreeMap<State, PointDrawingInfo>> customPointDrawingInfos = null;
+	
 	//default vp position
 	private double defaultViewportMin;
 	private double defaultViewportMax;
@@ -32,6 +35,8 @@ public final class IneChartProperties {
 	private HorizontalAxisDrawingInfo XAxisDrawingInfo;
 	private VerticalAxisDrawingInfo YAxisDrawingInfo;
 	private VerticalAxisDrawingInfo Y2AxisDrawingInfo = null;
+	//styles
+	private String chartCanvasBackgroundColor;
 	/**
 	 * drawing toolkit
 	 */
@@ -39,15 +44,21 @@ public final class IneChartProperties {
 	
 	public IneChartProperties() {
 		defaultPointDrawingInfo = new TreeMap<State, PointDrawingInfo>();
-		customPointDrawingInfos = new TreeMap<Double, TreeMap<State,PointDrawingInfo>>();
 		defaultPointDrawingInfo.put(State.ACTIVE, PointDrawingInfo.getDefaultPointDrawingInfo());
 		defaultPointDrawingInfo.put(State.FOCUSED, PointDrawingInfo.getDefaultPointDrawingInfo());
 		defaultPointDrawingInfo.put(State.VISIBLE, PointDrawingInfo.getDefaultPointDrawingInfo());
 		XAxisDrawingInfo = HorizontalAxisDrawingInfo.getDefaultHorizontalAxisDrawingInfo();
 		YAxisDrawingInfo = VerticalAxisDrawingInfo.getDefaultVerticalAxisDrawingInfo();
-		drawingTool = DrawingTool.VAADIN_GWT_GRAPHICS;
+		drawingTool = DrawingTool.INECANVAS;
+		chartCanvasBackgroundColor = "white";
 	}
-	
+	public DrawingTool getDrawingTool() {
+		return drawingTool;
+	}
+
+	public void setDrawingTool(DrawingTool drawingTool) {
+		this.drawingTool = drawingTool;
+	}
 	public int getChartCanvasWidth() {
 		return chartCanvasWidth;
 	}
@@ -69,34 +80,11 @@ public final class IneChartProperties {
 	public void addDefaultPointDrawingInfo(State state, PointDrawingInfo info){
 		defaultPointDrawingInfo.put(state, info);
 	}
-	/**
-	 * Customizes the look of a single point in datamap. 
-	 * @param data
-	 * @param state
-	 * @param info
-	 */
-	public void addCustomPointDrawingInfo(Double data, State state, PointDrawingInfo info) {
-		TreeMap<State, PointDrawingInfo> pinfo = customPointDrawingInfos.get(data);
-		if(pinfo.equals(null)){
-			pinfo = new TreeMap<State, PointDrawingInfo>();
-		}
-		pinfo.put(state, info);
+	
+	public PointDrawingInfo getDefaultPointDrawingInfo(State state){
+		return defaultPointDrawingInfo.get(state);
 	}
-	public TreeMap<State, PointDrawingInfo> getDefaultPointDrawingInfo() {
-		return defaultPointDrawingInfo;
-	}
-	/**
-	 * Gets a drawing info for a point. If there is not info it returns the default per state.
-	 * @param data
-	 * @param state
-	 * @return
-	 */
-	public PointDrawingInfo getPointDrawingInfo(double data, State state){
-		if(customPointDrawingInfos.get(data) == null || customPointDrawingInfos.get(data).get(state) ==  null)
-				return defaultPointDrawingInfo.get(state);
-		else
-			return customPointDrawingInfos.get(data).get(state);
-	}
+		
 	public int getChartCanvasTopPaddingPercentage() {
 		return chartCanvasTopPaddingPercentage;
 	}
@@ -158,5 +146,11 @@ public final class IneChartProperties {
 		if(Y2AxisDrawingInfo != null)
 			width += Y2AxisDrawingInfo.getOffChartCanvasWidth();
 		return width;
+	}
+	public void setChartCanvasBackgroundColor(String chartCanvasBackgroundColor) {
+		this.chartCanvasBackgroundColor = chartCanvasBackgroundColor;
+	}
+	public String getChartCanvasBackgroundColor() {
+		return chartCanvasBackgroundColor;
 	}
 }
