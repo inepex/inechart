@@ -4,6 +4,6 @@ public interface HasState {
 
 	public State getState();
 
-	public void setState(State state);
+	void setState(State state);
 
 }

@@ -6,6 +6,7 @@ import org.vaadin.gwtgraphics.client.Line;
 import com.google.gwt.user.client.ui.AbsolutePanel;
 import com.google.gwt.user.client.ui.Widget;
 import com.inepex.inecharting.chartwidget.graphics.TickTextVisualizer;
+import com.inepex.inecharting.chartwidget.model.Axes;
 import com.inepex.inecharting.chartwidget.model.Axis;
 import com.inepex.inecharting.chartwidget.model.Curve;
 import com.inepex.inecharting.chartwidget.model.ModelManager;
@@ -15,10 +16,10 @@ public class VerticalAxisVisualizer extends AxisVisualizer {
 	private AbsolutePanel ap;
 	private TickTextVisualizer ttv;
 	private ModelManager mm;
-	private Curve.Axis y;
+	private Axes y;
 	private VerticalAxisDrawingInfo info;
 	
-	public VerticalAxisVisualizer(Widget canvas, AbsolutePanel ap, Axis axis, ModelManager mm, Curve.Axis y) {
+	public VerticalAxisVisualizer(Widget canvas, AbsolutePanel ap, Axis axis, ModelManager mm, Axes y) {
 		super(canvas, axis);
 		this.ap = ap;
 		this.mm = mm;
@@ -37,10 +38,10 @@ public class VerticalAxisVisualizer extends AxisVisualizer {
 		int axisShift = 0;
 		switch(info.getTickLocation()){
 		case INSIDE:
-			if(y.equals(Curve.Axis.Y)){
+			if(y.equals(Axes.Y)){
 				axisShift = 0;
 			}
-			else if(y.equals(Curve.Axis.Y2)){
+			else if(y.equals(Axes.Y2)){
 				axisShift = info.getTickLength();
 			}
 			else{
@@ -48,10 +49,10 @@ public class VerticalAxisVisualizer extends AxisVisualizer {
 			}
 			break;
 		case OUTSIDE:
-			if(y.equals(Curve.Axis.Y)){
+			if(y.equals(Axes.Y)){
 				axisShift = info.getTickLength();
 			}
-			else if(y.equals(Curve.Axis.Y2)){
+			else if(y.equals(Axes.Y2)){
 				axisShift = 0;
 			}
 			else{
@@ -72,11 +73,11 @@ public class VerticalAxisVisualizer extends AxisVisualizer {
 		axis.setStrokeWidth(2);
 		((DrawingArea)canvas).add(axis);
 		double min = 0,max = 0;
-		if(y.equals(Curve.Axis.Y)){
+		if(y.equals(Axes.Y)){
 			min = mm.getyMin();
 			max = mm.getyMax();
 		}
-		else if(y.equals(Curve.Axis.Y2)){
+		else if(y.equals(Axes.Y2)){
 			min = mm.getY2Min();
 			max = mm.getY2Max();
 		}

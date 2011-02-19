@@ -1,19 +1,11 @@
 package com.inepex.inecharting.chartwidget.model;
 
 
-import java.util.ArrayList;
-
 import com.inepex.inecharting.chartwidget.properties.AxisDrawingInfo;
 
 
-public class Axis {
+public class Axis extends GraphicalObject{
 	
-	protected ArrayList<Curve> registeredCurves = new ArrayList<Curve>();
-	
-	public ArrayList<Curve> getRegisteredCurves() {
-		return registeredCurves;
-	}
-
 	protected AxisDrawingInfo drawingInfo;
 	/**
 	 * a tick's absolute position, the other ticks' positions can be measured from it. 
@@ -24,10 +16,17 @@ public class Axis {
 	 */
 	protected double tickDistance = 0;
 	
-	protected Axis(){}
+	protected Axes axis;
+	
+	
+
+	protected Axis() {
+		this.zIndex = HaszIndex.alwaysOnTop;
+	}
 	
 	public Axis(AxisDrawingInfo drawingInfo) {
 		this.drawingInfo = drawingInfo;
+		this.zIndex = HaszIndex.alwaysOnTop;
 	}
 
 	public AxisDrawingInfo getDrawingInfo() {
@@ -38,6 +37,14 @@ public class Axis {
 		this.drawingInfo = drawingInfo;
 	}
 
+	public Axes getAxis() {
+		return axis;
+	}
+
+	void setAxis(Axes axis) {
+		this.axis = axis;
+	}
+	
 	public double getFixTick() {
 		return fixTick;
 	}
@@ -46,11 +53,11 @@ public class Axis {
 		return tickDistance;
 	}
 
-	public void setFixTick(double fixTick) {
+	void setFixTick(double fixTick) {
 		this.fixTick = fixTick;
 	}
 
-	public void setTickDistance(double tickDistance) {
+	void setTickDistance(double tickDistance) {
 		this.tickDistance = tickDistance;
 	}
 

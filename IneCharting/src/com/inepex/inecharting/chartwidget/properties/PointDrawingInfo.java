@@ -10,6 +10,8 @@ public class PointDrawingInfo extends ShapeDrawingInfo {
 	public static final int RECTANGLE_HEIGHT_TO_X_AXIS = -1;
 	public static final int RECTANGLE_WIDTH_TO_NEXT_POINT = -1;
 	
+	public final static PointDrawingInfo NO_SHAPE_POINT_INFO = new PointDrawingInfo(null, 0, null, 0, false, PointType.NO_SHAPE, 0, 0);
+	
 	public static PointDrawingInfo getDefaultPointDrawingInfo(){
 		return new PointDrawingInfo("black", 2, "red", 0.5, true, PointType.ELLIPSE, 8, 8);
 	}

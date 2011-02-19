@@ -84,13 +84,13 @@ public class AxisCalculator {
 		}
 	}
 
-	public void setVerticalAxis(Axis axis, Curve.Axis y){
+	public void setVerticalAxis(Axis axis, Axes y){
 		double  min,max;
-		if(y.equals(com.inepex.inecharting.chartwidget.model.Curve.Axis.Y)){
+		if(y.equals(Axes.Y)){
 			min = modelManager.getyMin();
 			max = modelManager.getyMax();
 		}
-		else if(y.equals(com.inepex.inecharting.chartwidget.model.Curve.Axis.Y2)){
+		else if(y.equals(Axes.Y2)){
 			min = modelManager.getY2Min();
 			max = modelManager.getY2Max();
 		}
@@ -176,12 +176,12 @@ public class AxisCalculator {
 		if(y1Min != null){
 			if(oldy1Min != null && (y1Min != oldy1Min || y1Max != oldy1Max)){
 				for(Curve curve:curves)
-					if(curve.getCurveAxis().equals(Curve.Axis.Y))
+					if(curve.getCurveAxis().equals(Axes.Y))
 						modelManager.rescaleYPositions(curve, y1Min, y1Max);
 				//calc yAxis
 			}
 			if(yAxis != null){
-				setVerticalAxis(yAxis, Curve.Axis.Y);
+				setVerticalAxis(yAxis, Axes.Y);
 			}
 		}
 		else{
@@ -193,12 +193,12 @@ public class AxisCalculator {
 		if(y2Min != null){
 			if(oldy2Min != null && (y2Min != oldy2Min || y2Max != oldy2Max)){
 				for(Curve curve:curves)
-					if(curve.getCurveAxis().equals(Curve.Axis.Y2))
+					if(curve.getCurveAxis().equals(Axes.Y2))
 						modelManager.rescaleYPositions(curve, y2Min, y2Max);
-				//calc y2Axis
-				if(y2Axis != null){
-					setVerticalAxis(y2Axis, Curve.Axis.Y2);
-				}
+			}
+			//calc y2Axis
+			if(y2Axis != null){
+				setVerticalAxis(y2Axis, Axes.Y2);
 			}
 		}
 		else{

@@ -41,11 +41,11 @@ public class Axes implements HasViewport{
 
 	@Override
 	public void moveViewport(double dx) {
-		setViewPort(mm.getViewportMin(), mm.getViewportMax());
+		setViewport(mm.getViewportMin(), mm.getViewportMax());
 	}
 
 	@Override
-	public void setViewPort(double viewportMin, double viewportMax) {
+	public void setViewport(double viewportMin, double viewportMax) {
 		if(xAxis != null && xAxis.getTickDistance() != 0)
 			drawX(viewportMin, viewportMax);
 		if(yAxis != null && yAxis.getTickDistance() != 0)
@@ -95,7 +95,7 @@ public class Axes implements HasViewport{
 				curveCanvas.beginPath();
 				while(tick <= getLastVisibleTick(mm.getY2Max(), y2Axis)){
 					curveCanvas.moveTo(0,mm.calculateYWithoutPadding(tick, mm.getY2Min(), mm.getY2Max()));
-					curveCanvas.lineTo(prop.getChartCanvasWidth(),mm.calculateYWithoutPadding(tick, mm.getyMin(), mm.getyMax()));
+					curveCanvas.lineTo(prop.getChartCanvasWidth(),mm.calculateYWithoutPadding(tick, mm.getY2Min(), mm.getY2Max()));
 					tick += y2Axis.getTickDistance();
 				}
 				curveCanvas.save();
@@ -128,7 +128,6 @@ public class Axes implements HasViewport{
 	}
 	
 	private double getFirstVisibleTick(double x,Axis axis){
-	
 		int multiplier = (int) ((x - axis.getFixTick()) / axis.getTickDistance());
 		if(x > axis.getFixTick())
 			multiplier++;
@@ -189,6 +188,17 @@ public class Axes implements HasViewport{
 	
 	private void drawY2(){
 		VerticalAxisDrawingInfo info = (VerticalAxisDrawingInfo) y2Axis.getDrawingInfo();
+		double tick = getFirstVisibleTick(mm.getY2Min(),y2Axis);
+		curveCanvas.save();
+		curveCanvas.setFont(info.getTickTextFontFamily() + " " + info.getTickTextFontWeight().toString() + " " + info.getTickTextFontStyle().toString());
+		curveCanvas.setFillStyle(info.getTickTextColor());
+		curveCanvas.setTextAlign(TextAlign.RIGHT);
+		curveCanvas.setTextBaseline(TextBaseline.BOTTOM);
+		while(tick <= getLastVisibleTick(mm.getY2Max(), y2Axis)){
+			curveCanvas.fillText(formatData(tick, y2Axis), prop.getChartCanvasWidth() - 2, mm.calculateYWithoutPadding(tick, mm.getY2Min(), mm.getY2Max()) );
+			tick += y2Axis.getTickDistance();
+		}
+		curveCanvas.restore();
 	}
 	
 	private String formatData(double data, Axis axis){

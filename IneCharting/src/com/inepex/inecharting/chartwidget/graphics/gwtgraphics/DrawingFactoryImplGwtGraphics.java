@@ -11,10 +11,12 @@ import com.google.gwt.user.client.ui.AbsolutePanel;
 import com.google.gwt.user.client.ui.Widget;
 import com.inepex.inecharting.chartwidget.IneChartProperties;
 import com.inepex.inecharting.chartwidget.graphics.DrawingFactory;
+import com.inepex.inecharting.chartwidget.model.Axes;
 import com.inepex.inecharting.chartwidget.model.Axis;
 import com.inepex.inecharting.chartwidget.model.Curve;
 import com.inepex.inecharting.chartwidget.model.HasViewport;
 import com.inepex.inecharting.chartwidget.model.ModelManager;
+import com.inepex.inecharting.chartwidget.model.Point;
 import com.inepex.inecharting.chartwidget.properties.HorizontalAxisDrawingInfo.AxisLocation;
 
 /**
@@ -136,7 +138,7 @@ public class DrawingFactoryImplGwtGraphics extends DrawingFactory implements Has
 			ap.setPixelSize(
 					100,  //TODO
 					properties.getChartCanvasHeight());
-			yAxisVisualizer = new VerticalAxisVisualizer(yCanvas, ap, yAxis, modelManager, Curve.Axis.Y);
+			yAxisVisualizer = new VerticalAxisVisualizer(yCanvas, ap, yAxis, modelManager, Axes.Y);
 		}
 		if(y2Axis != null){
 			DrawingArea y2Canvas = new DrawingArea(
@@ -146,7 +148,7 @@ public class DrawingFactoryImplGwtGraphics extends DrawingFactory implements Has
 			ap.setPixelSize(
 					100,  //TODO
 					properties.getChartCanvasHeight());
-			y2AxisVisualizer = new VerticalAxisVisualizer(y2Canvas, ap, y2Axis, modelManager, Curve.Axis.Y2);
+			y2AxisVisualizer = new VerticalAxisVisualizer(y2Canvas, ap, y2Axis, modelManager, Axes.Y2);
 		}
 		
 	}
@@ -157,12 +159,12 @@ public class DrawingFactoryImplGwtGraphics extends DrawingFactory implements Has
  	 */
 	public void addCurve(Curve curve){
 		ArrayList<CurveVisualizer> vs = new ArrayList<CurveVisualizer>();
-		if(curve.hasLine()){
+		if(curve.getCurveDrawingInfo().hasLine()){
 			LineCurveVisualizer lcv = new LineCurveVisualizer(chartCanvas, curve, modelManager);
 			lcv.drawCurve(modelManager.getViewportMin(), modelManager.getViewportMax());
 			vs.add(lcv);
 		}
-		if(curve.hasPoints()){
+		if(curve.getCurveDrawingInfo().hasPoints()){
 			PointCurveVisualizer pcv = new PointCurveVisualizer(chartCanvas, curve, modelManager, properties);
 			pcv.drawCurve(modelManager.getViewportMin(), modelManager.getViewportMax());
 			vs.add(pcv);
@@ -198,11 +200,11 @@ public class DrawingFactoryImplGwtGraphics extends DrawingFactory implements Has
 	}
 
 	@Override
-	public void setViewPort(double viewportMin, double viewportMax) {
-		xAxisVisualizer.setViewPort(viewportMin, viewportMax);
+	public void setViewport(double viewportMin, double viewportMax) {
+		xAxisVisualizer.setViewport(viewportMin, viewportMax);
  		for(Curve curve : curveVisualizers.keySet())
 			for(CurveVisualizer visualizer: curveVisualizers.get(curve))
-				visualizer.setViewPort(viewportMin, viewportMax);
+				visualizer.setViewport(viewportMin, viewportMax);
 
  		updateHierarchy();
 	}
@@ -222,6 +224,12 @@ public class DrawingFactoryImplGwtGraphics extends DrawingFactory implements Has
 			chartMainPanel.getElement().appendChild(((HorizontalAxisVisualizer)xAxisVisualizer).getCanvas().getElement());
 			chartMainPanel.getElement().appendChild(((HorizontalAxisVisualizer)xAxisVisualizer).getTextPositionerAbsolutePanel().getElement());
 		}
+	}
+
+	@Override
+	public void drawPoints(ArrayList<Point> points) {
+		// TODO Auto-generated method stub
+		
 	}
 }
 

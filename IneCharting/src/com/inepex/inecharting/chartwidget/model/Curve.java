@@ -1,8 +1,8 @@
 package com.inepex.inecharting.chartwidget.model;
 
+import java.util.ArrayList;
 import java.util.TreeMap;
 
-import com.google.gwt.user.client.Random;
 import com.inepex.inecharting.chartwidget.properties.CurveDrawingInfo;
 import com.inepex.inecharting.chartwidget.properties.ShapeDrawingInfo;
 
@@ -13,19 +13,8 @@ import com.inepex.inecharting.chartwidget.properties.ShapeDrawingInfo;
  */
 public final class Curve extends GraphicalObject 
 implements Comparable<Curve>, HasState{
-	/**
-	 * Curve's axis
-	 */
-	public static enum Axis{
-		Y,
-		Y2,
-		NO_AXIS
-	}
-	/**
-	 * Unique name of the curve, helps identifying at event-handling which curve (or a curve's point) was selected
-	 * also can group curves 
-	 */
-	private String name;
+	
+	
 	/**
 	 * the underlying data
 	 */
@@ -40,40 +29,35 @@ implements Comparable<Curve>, HasState{
 	private double minValue;
 	/**
 	 * curve's axis
+	 * X means 'vertical axis independent curve'
 	 */
-	private Axis curveAxis;
-	/**
-	 * 
-	 */
-	private State state;
-	
+	private Axes curveAxis;
 	/**
 	 * a collection for calculated points per data
 	 * points inside are unfiltered.
 	 * should be updated when viewport's width changes
 	 */
 	private TreeMap<Double, Point> calculatedPoints;
+	
 	/**
-	 * drawing methods should access this collection
-	 * contains overlap filtered points
+	 * 
+	 * contains overlap-filtered points
 	 * should be cleared when resolution changes
 	 * if no overlapping points have been found, this map equals with calculatedPoints, otherwise
 	 * imaginary points replaced the problematic ones -> note that multiple keys can map the same imaginary point
 	 */
 	private TreeMap<Double, Point> pointsToDraw;
 	
-	private boolean hasLine;
-	private boolean hasPoints;
-	private ShapeDrawingInfo lineDrawInfo;
+	/**
+	 * drawing methods should access this collection
+	 * the ModelManager puts the 2 invisible points closest to viewport (if there is any) for easiest curve-drawing 
+	 */
+	private ArrayList<Point> visiblePoints;
+	
 	private CurveDrawingInfo curveDrawingInfo;
 		
 	public Curve(CurveDrawingInfo curveDrawingInfo, TreeMap<Double, Double> dataMap) {
 		this.curveDrawingInfo = curveDrawingInfo;
-		this.name = generateRandomName();
-		
-		//TODO
-//			minden public info keruljon at curveDrawingInfo-ba
-		
 		this.dataMap = dataMap;
 		minValue = maxValue = dataMap.get(dataMap.firstKey());
 		for(Double time:dataMap.keySet()){
@@ -85,15 +69,12 @@ implements Comparable<Curve>, HasState{
 		}
 		
 		//default values
-		hasLine = true;
-		hasPoints = true;
-		curveAxis = Axis.Y;
+		setzIndex(curveDrawingInfo.getDefaultzIndex());
 		calculatedPoints = new TreeMap<Double,Point>();
 		pointsToDraw = new TreeMap<Double, Point>();
-		lineDrawInfo = ShapeDrawingInfo.getDefaultShapeDrawingInfo();
-		state = State.INVISIBLE;
+		visiblePoints = new ArrayList<Point>();
+		state = State.NORMAL;
 	}
-	
 	
 /* GETTERS AND SETTERS */
 	public TreeMap<Double, Double> getDataMap() {
@@ -113,6 +94,10 @@ implements Comparable<Curve>, HasState{
 		}
 		return visible;
 	}
+	
+	public ArrayList<Point> getVisiblePoints() {
+		return visiblePoints;
+	}
 
 	public double getMaxValue() {
 		return maxValue;
@@ -130,28 +115,20 @@ implements Comparable<Curve>, HasState{
 		this.minValue = minValue;
 	}
 
-	public Axis getCurveAxis() {
+	public Axes getCurveAxis() {
 		return curveAxis;
 	}
 
-	public void setCurveAxis(Axis curveAxis) {
+	public void setCurveAxis(Axes curveAxis) {
 		this.curveAxis = curveAxis;
 	}
 
-	public boolean hasLine() {
-		return hasLine;
+	boolean hasLine() {
+		return curveDrawingInfo.hasLine();
 	}
 
-	public void setHasLine(boolean drawLine) {
-		this.hasLine = drawLine;
-	}
-
-	public boolean hasPoints() {
-		return hasPoints;
-	}
-
-	public void setHasPoints(boolean hasPoints) {
-		this.hasPoints = hasPoints;
+	boolean hasPoints() {
+		return curveDrawingInfo.hasPoints();
 	}
 
 	public Double getLastInvisiblePointBeforeViewport(double viewportMin){
@@ -177,42 +154,18 @@ implements Comparable<Curve>, HasState{
 	public TreeMap<Double, Point> getCalculatedPoints() {
 		return calculatedPoints;
 	}
-
+	
 	public TreeMap<Double, Point> getPointsToDraw() {
 		return pointsToDraw;
 	}
 
 	public ShapeDrawingInfo getLineDrawInfo() {
-		return lineDrawInfo;
-	}
-
-	public void setLineDrawInfo(ShapeDrawingInfo lineDrawInfo) {
-		this.lineDrawInfo = lineDrawInfo;
-	}
-
-	public String getName(){
-		return name;
-	}
-	
-	public void setName(String name) {
-		this.name = name;
-	}
-	
-	/**
-	 * Generates a random name (contains 12 0-9 digits) for this curve
-	 * @return the generated name
-	 */
-	public String generateRandomName(){
-		String name = "";
-		for(int i = 0; i < 12; i++)
-			name += Random.nextInt(10);
-		this.name = name;
-		return name;
+		return curveDrawingInfo.getLineDrawingInfo(state);
 	}
 
 	public CurveDrawingInfo getCurveDrawingInfo() {
 		if(curveDrawingInfo == null)
-			curveDrawingInfo = CurveDrawingInfo.getDefaultCurveDrawingPolicy();
+			curveDrawingInfo = CurveDrawingInfo.getDefaultCurveDrawingInfo();
 		return curveDrawingInfo;
 	}
 	
@@ -221,25 +174,8 @@ implements Comparable<Curve>, HasState{
 	}
 
 
-	
 	@Override
 	public int compareTo(Curve o) {
-		
-		return this.name.compareTo(o.name);
+		return curveDrawingInfo.getName().compareTo(o.getCurveDrawingInfo().getName());
 	}
-
-
-	@Override
-	public State getState() {
-		return state;
-	}
-
-
-	@Override
-	public void setState(State state) {
-		this.state = state;
-	}
-
-
-	
 }

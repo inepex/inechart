@@ -1,10 +1,16 @@
 package com.inepex.inecharting.chartwidget;
 
 import java.util.ArrayList;
-import java.util.TreeMap;
-
+import com.google.gwt.event.shared.HandlerRegistration;
 import com.google.gwt.user.client.ui.AbsolutePanel;
 import com.google.gwt.user.client.ui.Composite;
+import com.inepex.inecharting.chartwidget.event.EventManager;
+import com.inepex.inecharting.chartwidget.event.ExtremesChangeEvent;
+import com.inepex.inecharting.chartwidget.event.ExtremesChangeHandler;
+import com.inepex.inecharting.chartwidget.event.StateChangeEvent;
+import com.inepex.inecharting.chartwidget.event.StateChangeHandler;
+import com.inepex.inecharting.chartwidget.event.ViewportChangeEvent;
+import com.inepex.inecharting.chartwidget.event.ViewportChangeHandler;
 import com.inepex.inecharting.chartwidget.graphics.DrawingFactory;
 import com.inepex.inecharting.chartwidget.graphics.canvas.DrawingFactoryImplCanvas;
 import com.inepex.inecharting.chartwidget.graphics.gwtgraphics.DrawingFactoryImplGwtGraphics;
@@ -17,16 +23,18 @@ import com.inepex.inecharting.chartwidget.properties.AxisDrawingInfo.AxisType;
 import com.inepex.inecharting.chartwidget.properties.HorizontalTimeAxisDrawingInfo;
 
 /**
- * 
- * 
+ * A chart widget.
+ * Use addCurve to add new curve,
+ * use add...Handler methods to register an EventHandler.
+ * use  moveViewport  
  * 
  * @author Miklós Süveges / Inepex Ltd.
- *
  */
 public class IneChart extends Composite implements HasViewport{
 	//data fields
 	private ModelManager modelManager;
 	private DrawingFactory drawingFactory;
+	private EventManager eventManager;
 	private IneChartProperties properties;
 	private ArrayList<Curve> curves;
 	private Axis xAxis = null;
@@ -53,7 +61,7 @@ public class IneChart extends Composite implements HasViewport{
 		curves = new ArrayList<Curve>();
 
 		//init model
-		modelManager = new ModelManager(properties);
+		modelManager = ModelManager.create(properties);
 		modelManager.setViewport(properties.getDefaultViewportMin(), properties.getDefaultViewportMax());
 		
 		//creating axes
@@ -69,42 +77,41 @@ public class IneChart extends Composite implements HasViewport{
 		if(properties.getY2AxisDrawingInfo() != null){
 			y2Axis = new Axis(properties.getY2AxisDrawingInfo());		
 		}
-		
-		//init ui
-		switch (properties.getDrawingTool()) {
-		case VAADIN_GWT_GRAPHICS:
-			drawingFactory = new DrawingFactoryImplGwtGraphics(mainPanel, properties, modelManager, xAxis, yAxis, y2Axis);
-			break;
-		case INECANVAS:
-			drawingFactory = new DrawingFactoryImplCanvas(mainPanel, properties, modelManager, xAxis, yAxis, y2Axis);
-			break;
-		default:
-			break;
-		}
-		
-		
+	
+		//init UI
+		drawingFactory  = DrawingFactory.create(mainPanel, properties, modelManager, xAxis, yAxis, y2Axis);
 		//create canvas, panel hierarchy
 		drawingFactory.assembleLayout();
+
+		//init events
+		eventManager = EventManager.create(properties, this, drawingFactory, curves);
 	}
 	
-
+	
+	DrawingFactory getDrawingFactory() {
+		return drawingFactory;
+	}
+	
+	
+/* PUBLC METHODS */
 	/**
 	 * Adds a curve to the chart
 	 * @param curve
 	 */
 	public void addCurve(Curve curve){
 		curves.add(curve);
-
 		//calculate extremes of curves and set axes
 		modelManager.getAxisCalculator().calculateAxes(curves, xAxis, yAxis, y2Axis);
-		
 		//calculate points
-		modelManager.getPointsForCurve(curve);
-		
+		modelManager.getPointsForCurve(curve, false);
 		//display curve
 		drawingFactory.addCurve(curve);
 	}
 
+	/**
+	 * Removes a curve from chart
+	 * @param curve
+	 */
 	public void removeCurve(Curve curve){
 		for(Curve actCurve : curves){
 			if(actCurve.equals(curve)){
@@ -112,48 +119,69 @@ public class IneChart extends Composite implements HasViewport{
 				break;
 			}
 		}
-		
 		//calculate extremes of curves and set axes
 		modelManager.getAxisCalculator().calculateAxes(curves, xAxis, yAxis, y2Axis);
 	}
 	
-	public void removeCurves(String curveName){
+	/**
+	 * Removes curve(s) with the given name from chart
+	 * @param curveName
+	 */
+	public void removeCurve(String curveName){
 		ArrayList<Curve> toRemove = new ArrayList<Curve>();
 		for(Curve actCurve : curves){
-			if (actCurve.getName().equals(curveName)) {
+			if (actCurve.getCurveDrawingInfo().getName().equals(curveName)) {
 				toRemove.add(actCurve);
 			}
 		}
 		curves.removeAll(toRemove);
-		
 		//calculate extremes of curves and set axes
 		modelManager.getAxisCalculator().calculateAxes(curves, xAxis, yAxis, y2Axis);
 	}
 		
 	@Override
 	public void moveViewport(double dx) {
-		modelManager.setViewport(modelManager.getViewportMin() + dx, modelManager.getViewportMax()+dx);
+		modelManager.setViewport(modelManager.getViewportMin() + dx, modelManager.getViewportMax() + dx);
 		for(Curve actCurve : curves){
-			modelManager.getPointsForCurve(actCurve);	
+			modelManager.getPointsForCurve(actCurve, false);	
 		}
 		drawingFactory.moveViewport(dx);
 	}
 
 	@Override
-	public void setViewPort(double viewportMin, double viewportMax) {
-		double shrinkRatio = (modelManager.getViewportMax() - modelManager.getViewportMin()) / (viewportMax - viewportMin);
+	public void setViewport(double viewportMin, double viewportMax) {
 		modelManager.setViewport(viewportMin, viewportMax);
-		//rescale xAxis model
-//		if(xAxis != null)
-//			modelManager.getAxisCalculator().setHorizontalAxis(xAxis);
+		
 		for(Curve actualCurve : curves){
-			modelManager.setXPositionForCalculatedPoints(actualCurve, shrinkRatio);
-			actualCurve.getPointsToDraw().clear();
-			modelManager.getPointsForCurve(actualCurve);
+			modelManager.getPointsForCurve(actualCurve, true);
 		}
-		drawingFactory.setViewPort(viewportMin, viewportMax);
+		drawingFactory.setViewport(viewportMin, viewportMax);
 	}
 	
+	/**
+	 * Register a handler for receiving {@link ExtremesChangeEvent}s
+	 * @param handler
+	 * @return
+	 */
+	public HandlerRegistration addExtremesChangeHandler(ExtremesChangeHandler handler) {
+		return eventManager.addExtremesChangeHandler(handler);
+	}
+
+	/**
+	 * Register a handler for receiving {@link StateChangeEvent}s
+	 * @param handler
+	 * @return
+	 */
+	public HandlerRegistration addStateChangeHandler(StateChangeHandler handler) {
+		return eventManager.addStateChangeHandler(handler);
+	}
 	
-	
+	/**
+	 * Register a handler for receiving {@link ViewportChangeEvent}s
+	 * @param handler
+	 * @return
+	 */
+	public HandlerRegistration addViewportChangeHandler(ViewportChangeHandler handler) {
+		return eventManager.addViewportChangeHandler(handler);
+	}
 }

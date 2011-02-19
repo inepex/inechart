@@ -17,5 +17,5 @@ public interface HasViewport {
 	 * @param viewportMin
 	 * @param viewportMax
 	 */
-	public void setViewPort(double viewportMin, double viewportMax);
+	public void setViewport(double viewportMin, double viewportMax);
 }

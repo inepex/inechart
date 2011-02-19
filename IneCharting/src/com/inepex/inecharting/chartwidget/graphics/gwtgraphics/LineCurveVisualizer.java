@@ -34,7 +34,7 @@ public final class LineCurveVisualizer extends CurveVisualizer {
 
 	@Override
 	public void drawCurve(double viewportMin, double viewportMax) {
-		setViewPort(viewportMin, viewportMax);
+		setViewport(viewportMin, viewportMax);
 	}
 
 	@Override
@@ -70,7 +70,7 @@ public final class LineCurveVisualizer extends CurveVisualizer {
 	}
 
 	@Override
-	public void setViewPort(double viewportMin, double viewportMax) {
+	public void setViewport(double viewportMin, double viewportMax) {
 		totalDX = 0;
 		removeFromCanvas();
 		if(!curve.getCurveDrawingInfo().isPreDrawLines()){

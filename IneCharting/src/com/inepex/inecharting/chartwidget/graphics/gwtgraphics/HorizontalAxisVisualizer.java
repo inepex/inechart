@@ -61,9 +61,9 @@ public class HorizontalAxisVisualizer extends AxisVisualizer implements	HasViewp
 	}
 
 	@Override
-	public void setViewPort(double viewportMin, double viewportMax) {
+	public void setViewport(double viewportMin, double viewportMax) {
 		removeAllTicks();
-		ttv.setViewPort(viewportMin, viewportMax);
+		ttv.setViewport(viewportMin, viewportMax);
 		for(double x : ttv.getActualTicks()){
 			addTick(x);
 		}
@@ -126,7 +126,7 @@ public class HorizontalAxisVisualizer extends AxisVisualizer implements	HasViewp
 	}
 
 	public void display() {
-		setViewPort(modelManager.getViewportMin(), modelManager.getViewportMax());
+		setViewport(modelManager.getViewportMin(), modelManager.getViewportMax());
 		
 	}
 }

@@ -10,7 +10,6 @@ import org.vaadin.gwtgraphics.client.shape.Rectangle;
 
 import com.google.gwt.user.client.ui.Widget;
 import com.inepex.inecharting.chartwidget.IneChartProperties;
-import com.inepex.inecharting.chartwidget.event.PointStateChangeListener;
 import com.inepex.inecharting.chartwidget.graphics.DrawingJobScheduler;
 import com.inepex.inecharting.chartwidget.model.Curve;
 import com.inepex.inecharting.chartwidget.model.ModelManager;
@@ -22,7 +21,7 @@ import com.inepex.inecharting.chartwidget.properties.PointDrawingInfo;
  *  Point curve implementation using gwt-graphics 
  * @author Miklós Süveges / Inepex Ltd
  */
-public final class PointCurveVisualizer extends CurveVisualizer implements PointStateChangeListener {
+public final class PointCurveVisualizer extends CurveVisualizer  {
 
 	private TreeMap<Point, Shape> drawnShapes;
 	private ModelManager modelManager;
@@ -40,7 +39,7 @@ public final class PointCurveVisualizer extends CurveVisualizer implements Point
 
 	@Override
 	public void drawCurve(double viewportMin, double viewportMax) {
-		setViewPort(viewportMin, viewportMax);
+		setViewport(viewportMin, viewportMax);
 	}
 
 	@Override
@@ -82,7 +81,7 @@ public final class PointCurveVisualizer extends CurveVisualizer implements Point
 			}
 			else{
 				for(Point point : actualDrawingJob){
-					drawPoint(point, State.VISIBLE, modelManager.calculateDistance(totalDX));
+					drawPoint(point, State.NORMAL, modelManager.calculateDistance(totalDX));
 				}
 			}			
 		}
@@ -90,7 +89,7 @@ public final class PointCurveVisualizer extends CurveVisualizer implements Point
 	}
 
 	@Override
-	public void setViewPort(double viewportMin, double viewportMax) {
+	public void setViewport(double viewportMin, double viewportMax) {
 		totalDX = 0;
 		removeFromCanvas();
 		if(curve.getCurveDrawingInfo().isPreDrawPoints()){
@@ -107,7 +106,7 @@ public final class PointCurveVisualizer extends CurveVisualizer implements Point
 		}
 		else{
 			for(Point point : actualDrawingJob){
-				drawPoint(point, State.VISIBLE, 0);
+				drawPoint(point, State.NORMAL, 0);
 			}
 		}
 		moveShapes(modelManager.getxMin() - viewportMin);	
@@ -122,7 +121,7 @@ public final class PointCurveVisualizer extends CurveVisualizer implements Point
 			bringPointsToFront();
 		}
 		else
-			drawPoint(start, State.VISIBLE, modelManager.calculateDistance(totalDX));
+			drawPoint(start, State.NORMAL, modelManager.calculateDistance(totalDX));
 		
 	}
 	
@@ -133,7 +132,7 @@ public final class PointCurveVisualizer extends CurveVisualizer implements Point
 	
 		PointDrawingInfo info = curve.getCurveDrawingInfo().getPointDrawingInfo(data, state); 
 		if(info == null)
-			info = properties.getDefaultPointDrawingInfo(state);
+			info = curve.getCurveDrawingInfo().getDefaultPointDrawingInfo(state);
 		Shape shape = null;
 		switch(info.getType()){
 		case ELLIPSE:
@@ -204,7 +203,7 @@ public final class PointCurveVisualizer extends CurveVisualizer implements Point
 		//get the points which over the line will be drawn
  		actualDrawingJob = new  ArrayList<Point>();
 		for(Double x:curve.getPointsToDraw().keySet()){
-			//in the case of not predrawn lines we only need visible points
+			//in the case of not predrawn lines we only need NORMAL points
 			if(!curve.getCurveDrawingInfo().isPreDrawPoints() && (x < viewportMin || x > viewportMax))
 					continue;
 			//check if we have added this point before (in case of multiple imaginary points in a row)
@@ -226,7 +225,7 @@ public final class PointCurveVisualizer extends CurveVisualizer implements Point
 		}			
 	}
 
-	@Override
+	
 	public void pointStateChanged(Point point) {
 		
 		drawPoint(point, point.getState(), drawnShapes.get(drawnShapes.firstKey()).getX() - drawnShapes.firstKey().getxPos());

@@ -18,7 +18,7 @@ public class VerticalAxisDrawingInfo extends AxisDrawingInfo {
 				2,
 				true,
 				"lightgrey",
-				2,
+				1,
 				"black", 
 				"blue", 
 				1, 

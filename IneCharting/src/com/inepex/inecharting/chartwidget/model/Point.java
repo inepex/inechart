@@ -1,12 +1,14 @@
 package com.inepex.inecharting.chartwidget.model;
 
+import java.util.ArrayList;
+
 import com.inepex.inecharting.chartwidget.model.State;
+import com.inepex.inecharting.chartwidget.properties.PointDrawingInfo;
 /**
  * 
  *@author Miklós Süveges / Inepex Ltd
  */
-public final class Point extends GraphicalObject
-	implements Comparable<Point>, HasState{
+public final class Point extends GraphicalObject implements Comparable<Point>{
 	
 	/**
 	 * 
@@ -20,12 +22,7 @@ public final class Point extends GraphicalObject
 	 * the point's y position in the canvas' coordinate system
 	 */
 	private int yPos;
-	/**
-	 * the points z position/index
-	 * highest value means top layer
-	 */
-	private int zIndex;
-	private State state;
+
 
 	/**
 	 * tells to a drawing/calculating method that this point does not have a proper data.
@@ -38,7 +35,7 @@ public final class Point extends GraphicalObject
 		this.xPos = xPos;
 		this.yPos = yPos;
 		this.imaginaryPoint = imaginaryPoint;
-		this.state = State.INVISIBLE;
+		this.state = State.NORMAL;
 		this.parent = parent;
 		this.zIndex = parent.getzIndex();
 	}
@@ -50,26 +47,16 @@ public final class Point extends GraphicalObject
 	public int getyPos() {
 		return yPos;
 	}
-	@Override
-	public State getState() {
-		return state;
-	}
-	public void setxPos(int xPos) {
+	
+	void setxPos(int xPos) {
 		this.xPos = xPos;
 	}
-	public void setyPos(int yPos) {
+	void setyPos(int yPos) {
 		this.yPos = yPos;
 	}
-	@Override
-	public void setState(State state) {
-		this.state = state;
-	}
+	
 	public boolean isImaginaryPoint() {
 		return imaginaryPoint;
-	}
-
-	public void setParent(Curve parent) {
-		this.parent = parent;
 	}
 
 	public Curve getParent() {
@@ -79,13 +66,23 @@ public final class Point extends GraphicalObject
 	public int compareTo(Point o) {
 		return xPos-o.xPos;
 	}
-	@Override
-	public int getzIndex() {
-		return zIndex;
+	
+	public ArrayList<Double> getUnderlyingData(){
+		return ModelManager.get().getDataForPoint(this);
 	}
-	@Override
-	public void setzIndex(int zIndex) {
-		this.zIndex = zIndex;
+	
+	public PointDrawingInfo getPointDrawingInfo(){
+		PointDrawingInfo info = null;
+		ArrayList<Double> vls = getUnderlyingData();
+		int i=0;
+		for(Double x : vls){
+			info = getParent().getCurveDrawingInfo().getPointDrawingInfo(getUnderlyingData().get(i++),getState());
+			if(info != null)
+				return info;
+		}
+		if(info == null)
+			info = getParent().getCurveDrawingInfo().getDefaultPointDrawingInfo(getState());
+		return info;
 	}
 }
 

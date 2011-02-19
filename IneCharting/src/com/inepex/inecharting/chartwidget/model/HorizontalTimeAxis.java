@@ -24,7 +24,7 @@ public class HorizontalTimeAxis extends Axis {
 		return resolution;
 	}
 	
-	public void setResolution(Resolution resolution) {
+	void setResolution(Resolution resolution) {
 		this.resolution = resolution;
 	}
 }

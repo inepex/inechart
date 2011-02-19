@@ -2,7 +2,10 @@ package com.inepex.inecharting.chartwidget;
 
 import java.util.TreeMap;
 
+import com.google.gwt.event.shared.EventBus;
+import com.inepex.inecharting.chartwidget.event.EventManager;
 import com.inepex.inecharting.chartwidget.model.State;
+import com.inepex.inecharting.chartwidget.properties.EventManagerProperties;
 import com.inepex.inecharting.chartwidget.properties.HorizontalAxisDrawingInfo;
 import com.inepex.inecharting.chartwidget.properties.PointDrawingInfo;
 import com.inepex.inecharting.chartwidget.properties.VerticalAxisDrawingInfo;
@@ -18,16 +21,13 @@ import com.inepex.inecharting.chartwidget.properties.VerticalAxisDrawingInfo;
 public final class IneChartProperties {
 	public enum DrawingTool {
 		VAADIN_GWT_GRAPHICS,
-		INECANVAS
+		CANVAS
 	}
 	//sizes
 	private int chartCanvasWidth;
 	private int chartCanvasHeight;
 	private int markCanvasHeight;
 	private int chartCanvasTopPaddingPercentage;
-	//appearance of the curve's points
-	private TreeMap<State,PointDrawingInfo> defaultPointDrawingInfo = null;
-	
 	//default vp position
 	private double defaultViewportMin;
 	private double defaultViewportMax;
@@ -41,16 +41,16 @@ public final class IneChartProperties {
 	 * drawing toolkit
 	 */
 	private DrawingTool drawingTool;
+	//events
+	private EventManagerProperties eventManagerProperties;
 	
 	public IneChartProperties() {
-		defaultPointDrawingInfo = new TreeMap<State, PointDrawingInfo>();
-		defaultPointDrawingInfo.put(State.ACTIVE, PointDrawingInfo.getDefaultPointDrawingInfo());
-		defaultPointDrawingInfo.put(State.FOCUSED, PointDrawingInfo.getDefaultPointDrawingInfo());
-		defaultPointDrawingInfo.put(State.VISIBLE, PointDrawingInfo.getDefaultPointDrawingInfo());
+		
 		XAxisDrawingInfo = HorizontalAxisDrawingInfo.getDefaultHorizontalAxisDrawingInfo();
 		YAxisDrawingInfo = VerticalAxisDrawingInfo.getDefaultVerticalAxisDrawingInfo();
-		drawingTool = DrawingTool.INECANVAS;
+		drawingTool = DrawingTool.CANVAS;
 		chartCanvasBackgroundColor = "white";
+		eventManagerProperties = new EventManagerProperties();
 	}
 	public DrawingTool getDrawingTool() {
 		return drawingTool;
@@ -71,20 +71,7 @@ public final class IneChartProperties {
 	public void setChartCanvasHeight(int chartCanvasHeight) {
 		this.chartCanvasHeight = chartCanvasHeight;
 	}
-	/**
-	 * Defines how to a draw a point in a {@link State} by default.
-	 * Needless to say there is no need to set a State.INVISIBLE mapping.
-	 * @param state
-	 * @param info
-	 */
-	public void addDefaultPointDrawingInfo(State state, PointDrawingInfo info){
-		defaultPointDrawingInfo.put(state, info);
-	}
-	
-	public PointDrawingInfo getDefaultPointDrawingInfo(State state){
-		return defaultPointDrawingInfo.get(state);
-	}
-		
+
 	public int getChartCanvasTopPaddingPercentage() {
 		return chartCanvasTopPaddingPercentage;
 	}
@@ -132,7 +119,6 @@ public final class IneChartProperties {
 	public void setY2AxisDrawingInfo(VerticalAxisDrawingInfo y2AxisDrawingInfo) {
 		Y2AxisDrawingInfo = y2AxisDrawingInfo;
 	}
-	
 	public int getWidgetHeight(){
 		int height = chartCanvasHeight;
 		if(XAxisDrawingInfo != null)
@@ -153,4 +139,18 @@ public final class IneChartProperties {
 	public String getChartCanvasBackgroundColor() {
 		return chartCanvasBackgroundColor;
 	}
+	public int getMarkCanvasHeight() {
+		return markCanvasHeight;
+	}
+	public void setMarkCanvasHeight(int markCanvasHeight) {
+		this.markCanvasHeight = markCanvasHeight;
+	}
+	public EventManagerProperties getEventManagerProperties() {
+		return eventManagerProperties;
+	}
+	public void setEventManagerProperties(
+			EventManagerProperties eventManagerProperties) {
+		this.eventManagerProperties = eventManagerProperties;
+	}
+	
 }

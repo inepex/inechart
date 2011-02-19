@@ -14,6 +14,7 @@ import com.google.gwt.user.client.ui.Label;
 import com.google.gwt.user.client.ui.RootPanel;
 import com.google.gwt.user.client.ui.Widget;
 import com.inepex.inecharting.chartwidget.graphics.gwtgraphics.Visualizer;
+import com.inepex.inecharting.chartwidget.model.Axes;
 import com.inepex.inecharting.chartwidget.model.Axis;
 import com.inepex.inecharting.chartwidget.model.Curve;
 import com.inepex.inecharting.chartwidget.model.HasViewport;
@@ -115,7 +116,7 @@ public class TickTextVisualizer implements HasViewport{
 	}
 
 	@Override
-	public void setViewPort(double viewportMin, double viewportMax) {
+	public void setViewport(double viewportMin, double viewportMax) {
 		if(horizontal){
 			aPositioner.removeAllWidgets();
 			if(axis instanceof HorizontalTimeAxis){
@@ -157,15 +158,15 @@ public class TickTextVisualizer implements HasViewport{
 		return actualTicks;
 	}
 
-	public void displayVerticalTicks(Curve.Axis y){
+	public void displayVerticalTicks(Axes y){
 		if(!horizontal){
 			aPositioner.removeAllWidgets();
 			double min,max;
-			if(y.equals(Curve.Axis.Y)){
+			if(y.equals(Axes.Y)){
 				min = mm.getyMin();
 				max = mm.getyMax();
 			}
-			else if(y.equals(Curve.Axis.Y2)){
+			else if(y.equals(Axes.Y2)){
 				min = mm.getY2Min();
 				max = mm.getY2Max();
 			}
@@ -176,13 +177,13 @@ public class TickTextVisualizer implements HasViewport{
 				actualTicks.add(actualData);
 				Label label = createLabel(actualData);
 				
-				if(y.equals(Curve.Axis.Y)){
+				if(y.equals(Axes.Y)){
 					aPositioner.addWidget(
 							label,
 							xShift_Vertical,
 							mm.calculateYWithoutPadding(actualData, min, max) + yShift_Vertical);
 				}
-				else if(y.equals(Curve.Axis.Y2)){
+				else if(y.equals(Axes.Y2)){
 					AbsolutePositioner.setRight(
 							AbsolutePositioner.setTop(
 								aPositioner.addWidget(label),

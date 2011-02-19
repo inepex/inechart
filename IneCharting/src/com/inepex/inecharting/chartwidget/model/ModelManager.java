@@ -3,7 +3,6 @@ package com.inepex.inecharting.chartwidget.model;
 import java.util.ArrayList;
 import java.util.TreeMap;
 
-import com.allen_sauer.gwt.log.client.Log;
 import com.inepex.inecharting.chartwidget.IneChartProperties;
 
 /**
@@ -14,7 +13,18 @@ import com.inepex.inecharting.chartwidget.IneChartProperties;
  *
  */
 public class ModelManager {
-	 
+
+	public static ModelManager instance = null;
+	
+	public static ModelManager get(){
+		return instance;
+	}
+	public static ModelManager create(IneChartProperties prop){
+		instance = new ModelManager(prop);
+		return instance;
+	}
+	
+	
 	private int chartCanvasWidth;
 	private int chartCanvasHeight;
 	private int chartCanvasTopPaddingPercentage;
@@ -27,8 +37,9 @@ public class ModelManager {
 	private double viewportMin;
 	private double viewportMax;
 	private AxisCalculator axisCalculator;
+	private IneChartProperties properties;
 		
-	public ModelManager(IneChartProperties properties){
+	private ModelManager(IneChartProperties properties){
 		this.chartCanvasHeight = properties.getChartCanvasHeight();
 		this.chartCanvasWidth = properties.getChartCanvasWidth();
 		this.chartCanvasTopPaddingPercentage = properties.getChartCanvasTopPaddingPercentage();
@@ -133,7 +144,8 @@ public class ModelManager {
 	}
 	
 	/** 
-	 * Updates a curve's calculatedPoints container with the points calculated at the given data interval.
+	 * Updates a curve's calculatedPoints container with the points calculated
+	 * within given data interval.
 	 * @param curve
 	 * @param start
 	 * @param stop
@@ -166,7 +178,7 @@ public class ModelManager {
 	}
 	
 	/**
-	 * Filters a curve's calculatedPoints to extend the pointsToDraw container, based on curve's related policies.
+	 * Applies overlap-policies on the given curve within the given interval.
 	 * @param curve
 	 * @param start
 	 * @param stop
@@ -185,7 +197,7 @@ public class ModelManager {
 				if(!curve.getPointsToDraw().containsKey(x))
 					pointsToFilter.put(x, curve.getCalculatedPoints().get(x));
 			}
-		//the actual examinee
+		//the actual
 		Double firstIndex = null;
 	
 	/* applying X - filter */
@@ -291,7 +303,7 @@ public class ModelManager {
 					Point pointToShow = choosePointByPolicy(points, curve);
 					for(Double key:problematicIndices)
 						squareFiltered.put(key, pointToShow);
-					problematicIndices = null;
+					problematicIndices = null;					
 				}
 				//we need to put the last key to pointsToDraw
 				else{
@@ -403,8 +415,8 @@ public class ModelManager {
 	 */
  	public ArrayList<Double> getDataForPoint(Point point) {
 		ArrayList<Double> datas = new ArrayList<Double>();
-		//imaginary point
-		if(point.isImaginaryPoint() &&	point.getParent().getPointsToDraw().containsValue(point)){
+		
+		if( /* point.isImaginaryPoint() && */	point.getParent().getPointsToDraw().containsValue(point)){
 			for(Double x : point.getParent().getPointsToDraw().keySet()){
 				if(point.getParent().getPointsToDraw().get(x).equals(point))
 					datas.add(x);
@@ -490,9 +502,43 @@ public class ModelManager {
 		this.y2Min = y2Min;
 	}
 	
-	public void getPointsForCurve(Curve curve){
+	public void setVisiblePoints(Curve curve){
 		Double start, stop;
-		if(curve.getCurveDrawingInfo().isPreCalculatePoints()){
+		start = curve.getLastInvisiblePointBeforeViewport(viewportMin);
+		stop = curve.getFirstInvisiblePointAfterViewport(viewportMax);
+		if(start == null)
+			start = curve.getDataMap().firstKey();
+		if(stop == null)
+			stop = curve.getDataMap().lastKey();
+		for(double x : curve.getPointsToDraw().keySet()){
+			if(x > stop)
+				break;
+			else if(x >= start){
+				Point point = curve.getPointsToDraw().get(x);
+				if(!curve.getVisiblePoints().contains(point))
+					curve.getVisiblePoints().add(point);
+			}
+		}
+		if(curve.getVisiblePoints().size() == 1)
+			curve.getVisiblePoints().clear();
+	}
+	
+	/**
+	 * Sets the curve's point containers to fit the viewport
+	 *
+	 * @param curve
+	 * @param resolutionChanged if true all point-container will be cleared
+	 */
+	public void getPointsForCurve(Curve curve, boolean resolutionChanged){
+		//clear previous points
+		curve.getVisiblePoints().clear();
+		if(resolutionChanged){
+			curve.getCalculatedPoints().clear();
+			curve.getPointsToDraw().clear();
+		}
+		//setting the interval to calculate
+		Double start, stop;
+		if( curve.getCurveDrawingInfo().isPreCalculatePoints() ){ 
 			start = curve.getDataMap().firstKey();
 			stop = curve.getDataMap().lastKey();
 		}
@@ -504,7 +550,13 @@ public class ModelManager {
 			if(stop == null)
 				stop = curve.getDataMap().lastKey();
 		}
-		calculateAndSetPointsForInterval(curve, start, stop);
-		filterOverlappingPoints(curve, start, stop);
+		//calculate points, filter  them at the interval
+		if(curve.getCalculatedPoints().size() != curve.getDataMap().size()
+			|| curve.getCalculatedPoints().size() != curve.getPointsToDraw().size()){
+			calculateAndSetPointsForInterval(curve, start, stop);
+			filterOverlappingPoints(curve, start, stop);
+		}
+	
+		setVisiblePoints(curve);
 	}
 }

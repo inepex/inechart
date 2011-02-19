@@ -1,14 +1,11 @@
 package com.inepex.inecharting.chartwidget.model;
 
 public enum State {
+
 	/**
-	 * is not on the viewport
+	 * default state
 	 */
-	INVISIBLE,
-	/**
-	 * is on the viewport
-	 */
-	VISIBLE,
+	NORMAL,
 	/**
 	 * selected, mouseover, etc
 	 */

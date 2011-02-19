@@ -1,5 +1,5 @@
 package com.inepex.inecharting.chartwidget.model;
 
-public class Mark {
+public class Mark extends GraphicalObject{
 
 }
