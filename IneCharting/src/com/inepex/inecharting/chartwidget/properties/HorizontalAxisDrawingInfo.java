@@ -8,7 +8,9 @@ public class HorizontalAxisDrawingInfo extends AxisDrawingInfo {
 
 	public static enum AxisLocation {
 		TOP,
-		BOTTOM
+//		TOP_OVER_CURVES,
+		BOTTOM,
+//		BOTTOM_OVER_CURVES,
 	}
 	
 	public static HorizontalAxisDrawingInfo getDefaultHorizontalAxisDrawingInfo(){
@@ -22,20 +24,21 @@ public class HorizontalAxisDrawingInfo extends AxisDrawingInfo {
 				"lightblue", 
 				1, 
 				Style.FontStyle.NORMAL, 
-				Style.FontWeight.NORMAL,
-				"verdana", 
+				Style.FontWeight.BOLD,
+				"Calibri", 
 				"#.#",
 				AxisType.NUMBER,
-				"lightblue",
+				ShapeDrawingInfo.getDefaultShapeDrawingInfo(),
 				AxisLocation.BOTTOM,
 				10,
 				20);
 	}
 	
-	private String backgroundColor;
+//	private String backgroundColor;
+	private ShapeDrawingInfo axisPanelDrawingInfo;
 	private AxisLocation axisLocation;
-	private int tickLengthInside;
-	private int tickPanelHeight;
+	private int tickLengthOutsideAxisPanel;
+	private int axisPanelHeight;
 
 	public HorizontalAxisDrawingInfo(
 			String tickColor,
@@ -51,7 +54,7 @@ public class HorizontalAxisDrawingInfo extends AxisDrawingInfo {
 			String tickTextFontFamily,
 			String tickTextFormat,
 			AxisType type,
-			String backgroundColor,
+			ShapeDrawingInfo axisPanelDrawingInfo,
 			AxisLocation axisLocation,
 			int tickLengthInside,
 			int tickPanelHeight) {
@@ -59,10 +62,10 @@ public class HorizontalAxisDrawingInfo extends AxisDrawingInfo {
 				gridLineColor, gridLineWidth, tickTextColor,
 				tickTextBackgroundColor, tickTextBackgroundOpacity,
 				tickTextFontStyle, tickTextFontWeight, tickTextFontFamily, tickTextFormat, type);
-		this.backgroundColor = backgroundColor;
+		this.axisPanelDrawingInfo = axisPanelDrawingInfo;
 		this.axisLocation = axisLocation;
-		this.tickLengthInside = tickLengthInside;
-		this.tickPanelHeight = tickPanelHeight;
+		this.tickLengthOutsideAxisPanel = tickLengthInside;
+		this.axisPanelHeight = tickPanelHeight;
 	}
 
 	public AxisLocation getAxisLocation() {
@@ -73,28 +76,28 @@ public class HorizontalAxisDrawingInfo extends AxisDrawingInfo {
 		this.axisLocation = axisLocation;
 	}
 
-	public String getBackgroundColor() {
-		return backgroundColor;
-	}
-
-	public void setBackgroundColor(String backgroundColor) {
-		this.backgroundColor = backgroundColor;
-	}
-
-	public void setTickLengthInside(int tickLengthInside) {
-		this.tickLengthInside = tickLengthInside;
+	public ShapeDrawingInfo getAxisPanelDrawingInfo() {
+		return axisPanelDrawingInfo;
 	}
 	
-	public int getTickLengthInside() {
-		return tickLengthInside;
+	public void setAxisPanelDrawingInfo(ShapeDrawingInfo axisPanelDrawingInfo) {
+		this.axisPanelDrawingInfo = axisPanelDrawingInfo;
 	}
 
-	public int getTickPanelHeight() {
-		return tickPanelHeight;
+	public void setTickLengthOutsideAxisPanel(int tickLengthInside) {
+		this.tickLengthOutsideAxisPanel = tickLengthInside;
+	}
+	
+	public int getTickLengthOutsideAxisPanel() {
+		return tickLengthOutsideAxisPanel;
 	}
 
-	public void setTickPanelHeight(int tickPanelHeight) {
-		this.tickPanelHeight = tickPanelHeight;
+	public int getAxisPanelHeight() {
+		return axisPanelHeight;
+	}
+
+	public void setAxisPanelHeight(int tickPanelHeight) {
+		this.axisPanelHeight = tickPanelHeight;
 	}
 	
 }

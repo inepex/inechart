@@ -24,7 +24,7 @@ public class ModelManager {
 		return instance;
 	}
 	
-	
+	private MarkContainer markContainer;
 	private int chartCanvasWidth;
 	private int chartCanvasHeight;
 	private int chartCanvasTopPaddingPercentage;
@@ -37,7 +37,6 @@ public class ModelManager {
 	private double viewportMin;
 	private double viewportMax;
 	private AxisCalculator axisCalculator;
-	private IneChartProperties properties;
 		
 	private ModelManager(IneChartProperties properties){
 		this.chartCanvasHeight = properties.getChartCanvasHeight();
@@ -45,6 +44,7 @@ public class ModelManager {
 		this.chartCanvasTopPaddingPercentage = properties.getChartCanvasTopPaddingPercentage();
 		xMin = null;
 		axisCalculator = new AxisCalculator(this);
+		this.markContainer = new MarkContainer();
 	}
 	
 	/**
@@ -163,13 +163,22 @@ public class ModelManager {
 			//if no point for this data
 			if(point == null){
 				int xPos, yPos;
+				double min = 0,max = 0;
+				if(curve.getCurveAxis().equals(Axes.Y)){
+					min = yMin;
+					max = yMax;
+				}
+				else if(curve.getCurveAxis().equals(Axes.Y2)){
+					min = y2Min;
+					max = y2Max;
+				}
 				if(curve.getCurveDrawingInfo().isMathematicalRounding()){ //use Math.round on each value
 					xPos = (int) Math.round(calculateX(x));
-					yPos = (int) Math.round(calculateYWithPadding(dataToCheck.get(x), curve.getMinValue(), curve.getMaxValue()));
+					yPos = (int) Math.round(calculateYWithPadding(dataToCheck.get(x), min, max));
 				}
 				else{ //simply cast to int
 					xPos = (int) calculateX(x);
-					yPos = (int) calculateYWithPadding(dataToCheck.get(x), curve.getMinValue(), curve.getMaxValue());
+					yPos = (int) calculateYWithPadding(dataToCheck.get(x), min, max);
 				}
 				point = new Point(xPos, yPos, false, curve);
 				curve.getCalculatedPoints().put(x, point);
@@ -186,7 +195,7 @@ public class ModelManager {
 	public void filterOverlappingPoints(Curve curve, double start, double stop){
 		if(curve.getDataMap().firstKey() > stop  || curve.getDataMap().lastKey() < start)
 			return;
-		long startTime = System.currentTimeMillis();		
+//		long startTime = System.currentTimeMillis();		
 		TreeMap<Double, Point> pointsToFilter = new TreeMap<Double,Point>();
 		TreeMap<Double, Point> xFiltered = new TreeMap<Double, Point>();
 		TreeMap<Double, Point> squareFiltered = new TreeMap<Double, Point>();
@@ -252,7 +261,7 @@ public class ModelManager {
 		}
 //		Log.debug(willNotShowCount + " points have been thrown out due to x-overlap-policy in " + (System.currentTimeMillis() - startTime) + " ms" );
 	/* applying square - filter */
-		startTime = System.currentTimeMillis();
+//		startTime = System.currentTimeMillis();
 		willNotShowCount = 0;
 		if(curve.getCurveDrawingInfo().getOverlapFilterSquareSize() <= curve.getCurveDrawingInfo().getOverlapFilterXWidth()){
 			curve.getPointsToDraw().putAll(xFiltered);
@@ -415,7 +424,6 @@ public class ModelManager {
 	 */
  	public ArrayList<Double> getDataForPoint(Point point) {
 		ArrayList<Double> datas = new ArrayList<Double>();
-		
 		if( /* point.isImaginaryPoint() && */	point.getParent().getPointsToDraw().containsValue(point)){
 			for(Double x : point.getParent().getPointsToDraw().keySet()){
 				if(point.getParent().getPointsToDraw().get(x).equals(point))
@@ -559,4 +567,13 @@ public class ModelManager {
 	
 		setVisiblePoints(curve);
 	}
+
+	public int getCanvasX(Point point){
+		return point.getxPos() - getViewportMinInPx();
+	}
+
+	public MarkContainer getMarkContainer() {
+		return markContainer;
+	}
+	
 }

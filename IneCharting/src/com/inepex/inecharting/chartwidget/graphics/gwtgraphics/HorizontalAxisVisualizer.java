@@ -9,7 +9,6 @@ import org.vaadin.gwtgraphics.client.shape.Rectangle;
 
 import com.google.gwt.user.client.ui.AbsolutePanel;
 import com.google.gwt.user.client.ui.Widget;
-import com.inepex.inecharting.chartwidget.graphics.TickTextVisualizer;
 import com.inepex.inecharting.chartwidget.model.Axis;
 import com.inepex.inecharting.chartwidget.model.HasViewport;
 import com.inepex.inecharting.chartwidget.model.ModelManager;
@@ -70,10 +69,10 @@ public class HorizontalAxisVisualizer extends AxisVisualizer implements	HasViewp
 	}
 	
 	private void init(){
-		background = new Rectangle(0, info.getTickLengthInside(), modelManager.getChartCanvasWidth(), modelManager.getChartCanvasHeight());
-		background.setFillColor(info.getBackgroundColor());
+		background = new Rectangle(0, info.getTickLengthOutsideAxisPanel(), modelManager.getChartCanvasWidth(), modelManager.getChartCanvasHeight());
+		background.setFillColor(info.getAxisPanelDrawingInfo().getFillColor());
 		background.setFillOpacity(1);
-		background.setStrokeColor(info.getBackgroundColor());
+		background.setStrokeColor(info.getAxisPanelDrawingInfo().getborderColor());
 		((DrawingArea)canvas).add(background);
 		ttv = new TickTextVisualizer(ap, axis, modelManager, true);
 		ticks = new TreeMap<Double, Line>();
@@ -106,7 +105,7 @@ public class HorizontalAxisVisualizer extends AxisVisualizer implements	HasViewp
 				xPos, 
 				0,
 				xPos,
-				info.getTickLengthInside() + info.getTickPanelHeight());
+				info.getTickLengthOutsideAxisPanel() + info.getAxisPanelHeight());
 		
 		l.setStrokeColor(info.getTickColor());
 		l.setStrokeOpacity(1);

@@ -1,24 +1,33 @@
 package com.inepex.inecharting.chartwidget.graphics.canvas;
 
 import java.util.ArrayList;
+import java.util.TreeMap;
 
 import com.google.gwt.canvas.client.Canvas;
+import com.google.gwt.canvas.dom.client.CanvasPixelArray;
 import com.google.gwt.canvas.dom.client.Context2d;
+import com.google.gwt.canvas.dom.client.ImageData;
+import com.google.gwt.core.client.JavaScriptException;
 import com.google.gwt.user.client.ui.AbsolutePanel;
 import com.inepex.inecharting.chartwidget.IneChartProperties;
 import com.inepex.inecharting.chartwidget.event.EventManager;
+import com.inepex.inecharting.chartwidget.event.ExtremesChangeEvent;
+import com.inepex.inecharting.chartwidget.event.StateChangeEvent;
+import com.inepex.inecharting.chartwidget.event.StateChangeHandler;
 import com.inepex.inecharting.chartwidget.graphics.DrawingFactory;
 import com.inepex.inecharting.chartwidget.model.Axis;
 import com.inepex.inecharting.chartwidget.model.Curve;
+import com.inepex.inecharting.chartwidget.model.Mark;
 import com.inepex.inecharting.chartwidget.model.ModelManager;
 import com.inepex.inecharting.chartwidget.model.Point;
+import com.inepex.inecharting.chartwidget.model.State;
 import com.inepex.inecharting.chartwidget.properties.HorizontalAxisDrawingInfo;
-import com.inepex.inecharting.chartwidget.properties.PointDrawingInfo.PointType;
 import com.inepex.inecharting.chartwidget.properties.VerticalAxisDrawingInfo;
 
-public class DrawingFactoryImplCanvas extends DrawingFactory {
+public class DrawingFactoryImplCanvas extends DrawingFactory implements StateChangeHandler{
 	private Axes axes;
 	private Curves curves;
+	private Marks marks;
 	private Context2d curveCanvasCtx;
 	private Canvas xAxisCanvas;
 	private Canvas yAxisCanvas;
@@ -50,12 +59,15 @@ public class DrawingFactoryImplCanvas extends DrawingFactory {
 		curves.setViewport(viewportMin, viewportMax);
 		//axes
 		axes.setViewport(viewportMin, viewportMax);
+		//marks
+		marks.setViewport(viewportMin, viewportMax);
 		EventManager.get().setReadyForEvents(true);
 	}
 
 	@Override
 	protected void init(Axis xAxis, Axis yAxis, Axis y2Axis) {
 		chartCanvas = Canvas.createIfSupported();
+		
 		chartCanvas.setPixelSize(properties.getChartCanvasWidth(), properties.getChartCanvasHeight());
 		((Canvas) chartCanvas).setCoordinateSpaceHeight(properties.getChartCanvasHeight());
 		((Canvas) chartCanvas).setCoordinateSpaceWidth(properties.getChartCanvasWidth());
@@ -68,8 +80,8 @@ public class DrawingFactoryImplCanvas extends DrawingFactory {
 	
 		if(xAxis != null)
 		xAxisCanvas = Canvas.createIfSupported();
-		xAxisCanvas.setPixelSize(properties.getChartCanvasWidth(), ((HorizontalAxisDrawingInfo)xAxis.getDrawingInfo()).getTickPanelHeight());
-		xAxisCanvas.setCoordinateSpaceHeight( ((HorizontalAxisDrawingInfo)xAxis.getDrawingInfo()).getTickPanelHeight());
+		xAxisCanvas.setPixelSize(properties.getChartCanvasWidth(), ((HorizontalAxisDrawingInfo)xAxis.getDrawingInfo()).getAxisPanelHeight());
+		xAxisCanvas.setCoordinateSpaceHeight( ((HorizontalAxisDrawingInfo)xAxis.getDrawingInfo()).getAxisPanelHeight());
 		xAxisCanvas.setCoordinateSpaceWidth(properties.getChartCanvasWidth());
 		
 		axes.addXAxis(xAxis, xAxisCanvas.getContext2d());
@@ -95,6 +107,8 @@ public class DrawingFactoryImplCanvas extends DrawingFactory {
 		}
 		else
 			axes.addYAxis(yAxis,null);
+		marks = new Marks(curveCanvasCtx, (HorizontalAxisDrawingInfo) xAxis.getDrawingInfo());
+		
 	}
 
 	@Override
@@ -124,6 +138,8 @@ public class DrawingFactoryImplCanvas extends DrawingFactory {
 			curves.addCurve(curve);
 		//axes
 		axes.setViewport(modelManager.getViewportMin(), modelManager.getViewportMax());
+		//marks
+		marks.setViewport(modelManager.getViewportMin(), modelManager.getViewportMax());
 		EventManager.get().setReadyForEvents(true);
 	}
 
@@ -141,27 +157,91 @@ public class DrawingFactoryImplCanvas extends DrawingFactory {
 		curves.removeCurve(curve);
 		//axes
 		axes.setViewport(modelManager.getViewportMin(), modelManager.getViewportMax());
+		//marks
+		marks.setViewport(modelManager.getViewportMin(), modelManager.getViewportMax());
 		EventManager.get().setReadyForEvents(true);
 	}
 
-	@Override
-	public void drawPoints(ArrayList<Point> points) {
-//		int x,width;
-//		for(Point point:points)		{
-//			x = point.getxPos();
-//			if(!point.getPointDrawingInfo().getType().equals(PointType.NO_SHAPE)){
-//				width = point.getPointDrawingInfo().getWidth();
-//				curveCanvasCtx.save();
-//				curveCanvasCtx.setFillStyle(properties.getChartCanvasBackgroundColor());
-//				curveCanvasCtx.fillRect(x-ModelManager.get().getViewportMinInPx()-width/2-1, 0, width + 2 , properties.getChartCanvasHeight());
-//				curveCanvasCtx.restore();
-//				curves.setViewport(point.getUnderlyingData().get(0),point.getUnderlyingData().get(0)+ModelManager.get().calculateDistance(width+2));
-//			}
-//		}
-		
+	public void updateShapes(ArrayList<Point> point){
 		setViewport(modelManager.getViewportMin(), modelManager.getViewportMax());
-		
 	}
+	
+	private void updateShape(Point point, State prev){
+//		EventManager.get().setReadyForEvents(false);
+//		int x, width = point.getPointDrawingInfo(prev).getWidth(); 
+//		if(width < point.getActualPointDrawingInfo().getWidth())
+//			width = point.getActualPointDrawingInfo().getWidth();
+//		if(width == 0)
+//			return;
+//		else{
+//			x = point.getxPos() - modelManager.getViewportMinInPx() - width / 2 - 1;
+//			width += 2;
+//			if(x < 0){
+//				width += x;
+//				x = 0;
+//			}
+//			else if(x > modelManager.getChartCanvasWidth()){
+//				width -= x - modelManager.getChartCanvasWidth(); 
+//				x = modelManager.getChartCanvasWidth();
+//			}
+//			else if(x+width > modelManager.getViewportMaxInPx()){
+//				width = modelManager.getViewportMaxInPx() - x;
+//			}
+//			
+//		}
+//		//creating backbuffercanvas
+//		Canvas canvas = Canvas.createIfSupported();
+//		canvas.setCoordinateSpaceHeight(properties.getChartCanvasHeight());
+//		canvas.setCoordinateSpaceWidth(width);
+//		Context2d backBuffer = canvas.getContext2d();
+//		
+//		axes.drawGridLines(x, x + width, backBuffer);
+//		curves.drawLinesAndShapes(x, x + width, backBuffer);
+//		axes.drawAxes(x, x + width, backBuffer);
+//		
+//		//copy
+////		
+//		try{
+//			curveCanvasCtx.save();
+//			curveCanvasCtx.setFillStyle(properties.getChartCanvasBackgroundColor());
+//			curveCanvasCtx.fillRect(x, 0, width, properties.getChartCanvasHeight());
+//			curveCanvasCtx.restore();
+//			curveCanvasCtx.drawImage(backBuffer.getCanvas(), x, 0);
+//		}
+//		catch (JavaScriptException e) {
+//			e.getDescription();
+//		}
+//		EventManager.get().setReadyForEvents(true);			
+		setViewport(modelManager.getViewportMin(), modelManager.getViewportMax());
+	}
+
+	/**
+	 * Updating through this method is slow in most cases
+	 */
+	@Override
+	public void onStateChange(StateChangeEvent event) {
+		if (event.getSourceObject() instanceof Point) {
+			updateShape((Point) event.getSourceObject(), event.getPreviousState());
+		}
+	}
+
+	public void addMark(Mark mark){
+		marks.addMark(mark);
+		setViewport(modelManager.getViewportMin(), modelManager.getViewportMax());
+	}
+	
+	public void removeMark(Mark mark){
+		marks.removeMark(mark);
+		setViewport(modelManager.getViewportMin(), modelManager.getViewportMax());
+	}
+
+	@Override
+	public TreeMap<Mark, int[]> getMarkBoundingBoxes() {
+		return marks.getBoundingBoxes();
+	}
+
+	
+
 }
 				
 				

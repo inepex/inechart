@@ -1,13 +1,7 @@
 package com.inepex.inecharting.chartwidget;
 
-import java.util.TreeMap;
-
-import com.google.gwt.event.shared.EventBus;
-import com.inepex.inecharting.chartwidget.event.EventManager;
-import com.inepex.inecharting.chartwidget.model.State;
-import com.inepex.inecharting.chartwidget.properties.EventManagerProperties;
+import com.inepex.inecharting.chartwidget.properties.EventProperties;
 import com.inepex.inecharting.chartwidget.properties.HorizontalAxisDrawingInfo;
-import com.inepex.inecharting.chartwidget.properties.PointDrawingInfo;
 import com.inepex.inecharting.chartwidget.properties.VerticalAxisDrawingInfo;
 
 /**
@@ -42,7 +36,7 @@ public final class IneChartProperties {
 	 */
 	private DrawingTool drawingTool;
 	//events
-	private EventManagerProperties eventManagerProperties;
+	private EventProperties eventManagerProperties;
 	
 	public IneChartProperties() {
 		
@@ -50,7 +44,7 @@ public final class IneChartProperties {
 		YAxisDrawingInfo = VerticalAxisDrawingInfo.getDefaultVerticalAxisDrawingInfo();
 		drawingTool = DrawingTool.CANVAS;
 		chartCanvasBackgroundColor = "white";
-		eventManagerProperties = new EventManagerProperties();
+		eventManagerProperties = new EventProperties();
 	}
 	public DrawingTool getDrawingTool() {
 		return drawingTool;
@@ -122,7 +116,7 @@ public final class IneChartProperties {
 	public int getWidgetHeight(){
 		int height = chartCanvasHeight;
 		if(XAxisDrawingInfo != null)
-			height += XAxisDrawingInfo.getTickPanelHeight();
+			height += XAxisDrawingInfo.getAxisPanelHeight();
 		return height;
 	}
 	public int getWidgetWidth(){
@@ -145,11 +139,11 @@ public final class IneChartProperties {
 	public void setMarkCanvasHeight(int markCanvasHeight) {
 		this.markCanvasHeight = markCanvasHeight;
 	}
-	public EventManagerProperties getEventManagerProperties() {
+	public EventProperties getEventManagerProperties() {
 		return eventManagerProperties;
 	}
 	public void setEventManagerProperties(
-			EventManagerProperties eventManagerProperties) {
+			EventProperties eventManagerProperties) {
 		this.eventManagerProperties = eventManagerProperties;
 	}
 	

@@ -71,18 +71,33 @@ public final class Point extends GraphicalObject implements Comparable<Point>{
 		return ModelManager.get().getDataForPoint(this);
 	}
 	
-	public PointDrawingInfo getPointDrawingInfo(){
+	public PointDrawingInfo getActualPointDrawingInfo(){
+		return getPointDrawingInfo(state);
+	}
+	
+	public PointDrawingInfo getPointDrawingInfo(State state){
 		PointDrawingInfo info = null;
 		ArrayList<Double> vls = getUnderlyingData();
-		int i=0;
-		for(Double x : vls){
-			info = getParent().getCurveDrawingInfo().getPointDrawingInfo(getUnderlyingData().get(i++),getState());
+		//look for custom info
+		for(int i = 0; i < vls.size(); i++){
+			info = getParent().getCurveDrawingInfo().getPointDrawingInfo(getUnderlyingData().get(i),state);
 			if(info != null)
 				return info;
 		}
+		//look for default;
 		if(info == null)
-			info = getParent().getCurveDrawingInfo().getDefaultPointDrawingInfo(getState());
+			info = getParent().getCurveDrawingInfo().getDefaultPointDrawingInfo(state);
 		return info;
+	}
+	
+	public int getShapeMaxWidth(){
+		int maxWidth = 0;
+		for(State state : State.values()){
+			int actWidth = getPointDrawingInfo(state).getWidth();
+			if(actWidth > maxWidth)
+				maxWidth = actWidth;
+		}
+		return maxWidth;
 	}
 }
 

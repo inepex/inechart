@@ -4,6 +4,8 @@ import java.util.ArrayList;
 import java.util.Date;
 
 import com.google.gwt.canvas.dom.client.Context2d;
+import com.google.gwt.canvas.dom.client.CssColor;
+import com.google.gwt.canvas.dom.client.FillStrokeStyle;
 import com.google.gwt.canvas.dom.client.Context2d.TextAlign;
 import com.google.gwt.canvas.dom.client.Context2d.TextBaseline;
 import com.google.gwt.i18n.client.DateTimeFormat;
@@ -21,6 +23,7 @@ import com.inepex.inecharting.chartwidget.properties.HorizontalAxisDrawingInfo;
 import com.inepex.inecharting.chartwidget.properties.HorizontalTimeAxisDrawingInfo;
 import com.inepex.inecharting.chartwidget.properties.VerticalAxisDrawingInfo;
 import com.inepex.inecharting.chartwidget.properties.AxisDrawingInfo.AxisType;
+import com.inepex.inecharting.chartwidget.properties.HorizontalAxisDrawingInfo.AxisLocation;
 
 public class Axes implements HasViewport{
 	private ModelManager mm;
@@ -46,8 +49,30 @@ public class Axes implements HasViewport{
 
 	@Override
 	public void setViewport(double viewportMin, double viewportMax) {
-		if(xAxis != null && xAxis.getTickDistance() != 0)
-			drawX(viewportMin, viewportMax);
+		if(xAxis != null && xAxis.getTickDistance() != 0){
+			AxisLocation pos = ((HorizontalAxisDrawingInfo) xAxis.getDrawingInfo()).getAxisLocation();
+			Context2d context;
+			int dx = 0,dy = 0;
+			if(pos.equals(AxisLocation.TOP) || pos.equals(AxisLocation.BOTTOM)){
+				context = xAxisCanvas;
+				context.save();
+				context.setFillStyle(CssColor.make("white"));
+				context.fillRect(0, 0, prop.getChartCanvasWidth(), ((HorizontalAxisDrawingInfo) xAxis.getDrawingInfo()).getAxisPanelHeight());
+				context.restore();
+			}
+			else{
+				context = curveCanvas;
+//TODO			if(pos.equals(AxisLocation.TOP_OVER_CURVES)){
+//				
+//				}
+//				else if(pos.equals(AxisLocation.BOTTOM_OVER_CURVES)){
+//					dy = prop.getChartCanvasHeight() - ((HorizontalAxisDrawingInfo) xAxis.getDrawingInfo()).getAxisPanelHeight();
+//				}
+//			
+			}
+			
+			drawX(viewportMin, viewportMax,context,dx,dy);
+		}
 		if(yAxis != null && yAxis.getTickDistance() != 0)
 			drawY();
 		if(y2Axis != null && y2Axis.getTickDistance() != 0)
@@ -127,6 +152,80 @@ public class Axes implements HasViewport{
 		}
 	}
 	
+	public void drawGridLines(int min, int max, Context2d backBuffer){
+		if(yAxis != null && yAxis.getTickDistance() != 0){
+			VerticalAxisDrawingInfo info = (VerticalAxisDrawingInfo) yAxis.getDrawingInfo();
+			if(info.hasGridLines()){
+				double tick = getFirstVisibleTick(mm.getyMin(),yAxis);
+				backBuffer.beginPath();
+				while(tick <= getLastVisibleTick(mm.getyMax(), yAxis)){
+					backBuffer.moveTo(0,mm.calculateYWithoutPadding(tick, mm.getyMin(), mm.getyMax()));
+					backBuffer.lineTo(max-min,mm.calculateYWithoutPadding(tick, mm.getyMin(), mm.getyMax()));
+					tick += yAxis.getTickDistance();
+				}
+				backBuffer.save();
+				backBuffer.setStrokeStyle(info.getGridLineColor());
+				backBuffer.setLineWidth(info.getGridLineWidth());
+				backBuffer.stroke();
+				backBuffer.restore();
+				backBuffer.closePath();
+			}
+		}
+		if(y2Axis != null && y2Axis.getTickDistance() != 0){
+			VerticalAxisDrawingInfo info = (VerticalAxisDrawingInfo) y2Axis.getDrawingInfo();
+			if(info.hasGridLines()){
+				double tick = getFirstVisibleTick(mm.getY2Min(),y2Axis);
+				backBuffer.beginPath();
+				while(tick <= getLastVisibleTick(mm.getY2Max(), y2Axis)){
+					backBuffer.moveTo(0,mm.calculateYWithoutPadding(tick, mm.getY2Min(), mm.getY2Max()));
+					backBuffer.lineTo(max-min,mm.calculateYWithoutPadding(tick, mm.getY2Min(), mm.getY2Max()));
+					tick += y2Axis.getTickDistance();
+				}
+				backBuffer.save();
+				backBuffer.setStrokeStyle(info.getGridLineColor());
+				backBuffer.setLineWidth(info.getGridLineWidth());
+				backBuffer.stroke();
+				backBuffer.restore();
+				backBuffer.closePath();
+			}
+		}
+		if(xAxis != null && xAxis.getTickDistance() != 0){
+			HorizontalAxisDrawingInfo info = (HorizontalAxisDrawingInfo) xAxis.getDrawingInfo();
+			if(info.hasGridLines()){
+				mm.getAxisCalculator().setHorizontalAxis(xAxis, (int) measureMaxTickText());
+				double tick = getFirstVisibleTick(mm.calculateDistance(min + mm.getViewportMinInPx()), xAxis);	
+				backBuffer.beginPath();
+				while(tick <= getLastVisibleTick(mm.calculateDistance(max + mm.getViewportMinInPx()), xAxis)){
+					backBuffer.moveTo(mm.calculateXRelativeToViewport(tick),0);
+					backBuffer.lineTo(mm.calculateXRelativeToViewport(tick),prop.getChartCanvasHeight());
+					tick += xAxis.getTickDistance();
+				}
+				backBuffer.save();
+				backBuffer.setStrokeStyle(info.getGridLineColor());
+				backBuffer.setLineWidth(info.getGridLineWidth());
+				backBuffer.stroke();
+				backBuffer.restore();
+				backBuffer.closePath();
+			}
+		}
+	}
+	
+	public void drawAxes(int min, int max, Context2d backBuffer){
+		if(xAxis != null && xAxis.getTickDistance() != 0){
+			AxisLocation pos = ((HorizontalAxisDrawingInfo) xAxis.getDrawingInfo()).getAxisLocation();
+			int dx = - (mm.getViewportMinInPx() + min), dy = 0;
+//TODO		if(pos.equals(AxisLocation.TOP_OVER_CURVES)){
+//				
+//			}
+//			else if(pos.equals(AxisLocation.BOTTOM_OVER_CURVES)){
+//				dy = prop.getChartCanvasHeight() - ((HorizontalAxisDrawingInfo) xAxis.getDrawingInfo()).getAxisPanelHeight();
+//			}
+			double start = mm.calculateDistance(min + mm.getViewportMinInPx());
+			double stop = mm.calculateDistance(max + mm.getViewportMinInPx());
+			drawX(start, stop, backBuffer, dx, dy);
+		}
+	}
+	
 	private double getFirstVisibleTick(double x,Axis axis){
 		int multiplier = (int) ((x - axis.getFixTick()) / axis.getTickDistance());
 		if(x > axis.getFixTick())
@@ -141,41 +240,43 @@ public class Axes implements HasViewport{
 		return multiplier * axis.getTickDistance() + axis.getFixTick();
 	}
 	
-	private void drawX(double min, double max){
+	private void drawX(double min, double max, Context2d context, int dx, int dy){
 		HorizontalAxisDrawingInfo info = (HorizontalAxisDrawingInfo) xAxis.getDrawingInfo();
-//		mm.getAxisCalculator().setHorizontalAxis(xAxis, (int) measureMaxTickText());
 		double tick = getFirstVisibleTick(min, xAxis);
+		context.save();
+		context.setStrokeStyle(info.getAxisPanelDrawingInfo().getborderColor());
+		context.setLineWidth(info.getAxisPanelDrawingInfo().getborderWidth());
+		context.strokeRect(dx, dy, prop.getChartCanvasWidth(), info.getAxisPanelHeight());
 		
-		xAxisCanvas.save();
-		xAxisCanvas.setFillStyle(info.getBackgroundColor());
-		xAxisCanvas.fillRect(0, 0, prop.getChartCanvasWidth(), info.getTickPanelHeight());
-		xAxisCanvas.restore();
-		
-		xAxisCanvas.beginPath();
-		xAxisCanvas.save();
-		xAxisCanvas.setFont(info.getTickTextFontFamily() + " " + info.getTickTextFontWeight().toString() + " " + info.getTickTextFontStyle().toString());
-		xAxisCanvas.setTextAlign(TextAlign.LEFT);
-		xAxisCanvas.setTextBaseline(TextBaseline.TOP);
-		xAxisCanvas.setFillStyle(info.getTickTextColor());
+		if(info.getAxisPanelDrawingInfo().hasFill()){
+			context.setFillStyle(info.getAxisPanelDrawingInfo().getFillColor());
+			context.setGlobalAlpha(info.getAxisPanelDrawingInfo().getFillOpacity());
+		}
+		context.fillRect(dx, dy, prop.getChartCanvasWidth(), info.getAxisPanelHeight());
+
+		context.beginPath();
+		context.setFont("13px " + info.getTickTextFontFamily() + " " + info.getTickTextFontWeight().toString() + " " + info.getTickTextFontStyle().toString());
+		context.setTextAlign(TextAlign.LEFT);
+		context.setTextBaseline(TextBaseline.TOP);
+		context.setFillStyle(info.getTickTextColor());
+		context.setGlobalAlpha(1);
 		while(tick <= getLastVisibleTick(max, xAxis)){
-			xAxisCanvas.moveTo(mm.calculateXRelativeToViewport(tick),info.getTickPanelHeight());
-			xAxisCanvas.lineTo(mm.calculateXRelativeToViewport(tick), 0);
-			xAxisCanvas.fillText(formatData(tick, xAxis), mm.calculateXRelativeToViewport(tick) + 5, 7);
+			context.moveTo(dx + mm.calculateXRelativeToViewport(tick), dy + info.getAxisPanelHeight());
+			context.lineTo(dx + mm.calculateXRelativeToViewport(tick), dy);
+			context.fillText(formatData(tick, xAxis), dx + mm.calculateXRelativeToViewport(tick) + 5, dy + 7);
 			tick += xAxis.getTickDistance();
 		}
-		xAxisCanvas.restore();
-		xAxisCanvas.save();
-		xAxisCanvas.setStrokeStyle(info.getTickColor());
-		xAxisCanvas.setLineWidth(info.getTickLineWidth());
-		xAxisCanvas.stroke();
-		xAxisCanvas.restore();
+		context.setStrokeStyle(info.getTickColor());
+		context.setLineWidth(info.getTickLineWidth());
+		context.stroke();
+		context.restore();
 	}
 	
 	private void drawY(){
 		VerticalAxisDrawingInfo info = (VerticalAxisDrawingInfo) yAxis.getDrawingInfo();
 		double tick = getFirstVisibleTick(mm.getyMin(),yAxis);
 		curveCanvas.save();
-		curveCanvas.setFont(info.getTickTextFontFamily() + " " + info.getTickTextFontWeight().toString() + " " + info.getTickTextFontStyle().toString());
+		curveCanvas.setFont("13px " + info.getTickTextFontFamily() + " " + info.getTickTextFontWeight().toString() + " " + info.getTickTextFontStyle().toString());
 		curveCanvas.setFillStyle(info.getTickTextColor());
 		curveCanvas.setTextAlign(TextAlign.LEFT);
 		curveCanvas.setTextBaseline(TextBaseline.BOTTOM);
@@ -190,7 +291,7 @@ public class Axes implements HasViewport{
 		VerticalAxisDrawingInfo info = (VerticalAxisDrawingInfo) y2Axis.getDrawingInfo();
 		double tick = getFirstVisibleTick(mm.getY2Min(),y2Axis);
 		curveCanvas.save();
-		curveCanvas.setFont(info.getTickTextFontFamily() + " " + info.getTickTextFontWeight().toString() + " " + info.getTickTextFontStyle().toString());
+		curveCanvas.setFont("13px " + info.getTickTextFontFamily() + " " + info.getTickTextFontWeight().toString() + " " + info.getTickTextFontStyle().toString());
 		curveCanvas.setFillStyle(info.getTickTextColor());
 		curveCanvas.setTextAlign(TextAlign.RIGHT);
 		curveCanvas.setTextBaseline(TextBaseline.BOTTOM);
@@ -215,7 +316,7 @@ public class Axes implements HasViewport{
 	private double measureMaxTickText(){
 		HorizontalAxisDrawingInfo info = (HorizontalAxisDrawingInfo) xAxis.getDrawingInfo();
 		xAxisCanvas.save();
-		xAxisCanvas.setFont(info.getTickTextFontFamily() + " " + info.getTickTextFontWeight().toString() + " " + info.getTickTextFontStyle().toString());
+		xAxisCanvas.setFont("13px " + info.getTickTextFontFamily() + " " + info.getTickTextFontWeight().toString() + " " + info.getTickTextFontStyle().toString());
 		double width = 0;
 		if(xAxis instanceof HorizontalTimeAxis){
 			for(Resolution res:Resolution.values()){

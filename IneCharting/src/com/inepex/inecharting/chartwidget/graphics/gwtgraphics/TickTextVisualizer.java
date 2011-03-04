@@ -1,4 +1,4 @@
-package com.inepex.inecharting.chartwidget.graphics;
+package com.inepex.inecharting.chartwidget.graphics.gwtgraphics;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -13,7 +13,6 @@ import com.google.gwt.user.client.ui.InlineLabel;
 import com.google.gwt.user.client.ui.Label;
 import com.google.gwt.user.client.ui.RootPanel;
 import com.google.gwt.user.client.ui.Widget;
-import com.inepex.inecharting.chartwidget.graphics.gwtgraphics.Visualizer;
 import com.inepex.inecharting.chartwidget.model.Axes;
 import com.inepex.inecharting.chartwidget.model.Axis;
 import com.inepex.inecharting.chartwidget.model.Curve;

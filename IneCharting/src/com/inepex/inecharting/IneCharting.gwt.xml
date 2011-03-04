@@ -1,10 +1,23 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <module rename-to='IneCharting'>
   
-  <inherits name='org.vaadin.gwtgraphics.GWTGraphics'/>
-  <inherits name="com.allen_sauer.gwt.log.gwt-log-DEBUG" />
+   <inherits name="com.google.gwt.canvas.Canvas"/>
+  <inherits name="com.google.gwt.user.User"/>
+  <inherits name="org.vaadin.gwtgraphics.GWTGraphics"/>
   
+
+  
+  
+
+  <replace-with class="com.google.gwt.canvas.client.Canvas.CanvasElementSupportDetectedMaybe">
+    <when-type-is class="com.google.gwt.canvas.client.Canvas.CanvasElementSupportDetector" />
+       <any>
+           <when-property-is name="user.agent" value="ie8"/>
+       </any>
+  </replace-with>
+  
+
+
   <source path='chartwidget'/>
   <source path='misc'/>
-
 </module>

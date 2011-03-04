@@ -10,11 +10,14 @@ import com.google.gwt.user.client.DOM;
 import com.google.gwt.user.client.ui.AbsolutePanel;
 import com.google.gwt.user.client.ui.Widget;
 import com.inepex.inecharting.chartwidget.IneChartProperties;
+import com.inepex.inecharting.chartwidget.event.ExtremesChangeEvent;
+import com.inepex.inecharting.chartwidget.event.StateChangeEvent;
 import com.inepex.inecharting.chartwidget.graphics.DrawingFactory;
 import com.inepex.inecharting.chartwidget.model.Axes;
 import com.inepex.inecharting.chartwidget.model.Axis;
 import com.inepex.inecharting.chartwidget.model.Curve;
 import com.inepex.inecharting.chartwidget.model.HasViewport;
+import com.inepex.inecharting.chartwidget.model.Mark;
 import com.inepex.inecharting.chartwidget.model.ModelManager;
 import com.inepex.inecharting.chartwidget.model.Point;
 import com.inepex.inecharting.chartwidget.properties.HorizontalAxisDrawingInfo.AxisLocation;
@@ -22,7 +25,7 @@ import com.inepex.inecharting.chartwidget.properties.HorizontalAxisDrawingInfo.A
 /**
  * 
  * A class for drawing the chart's model to the canvas.
- * The complete view of the IneChart belongs here.
+ *
  * 
  * @author Miklós Süveges / Inepex Ltd.
  */
@@ -56,7 +59,7 @@ public class DrawingFactoryImplGwtGraphics extends DrawingFactory implements Has
 		chartMainPanel.setPixelSize(properties.getWidgetWidth(), properties.getWidgetHeight());
 		if(yAxisVisualizer != null){
 			if(properties.getXAxisDrawingInfo().getAxisLocation().equals(AxisLocation.TOP))
-				y +=  properties.getXAxisDrawingInfo().getTickPanelHeight();
+				y +=  properties.getXAxisDrawingInfo().getAxisPanelHeight();
 
 			chartMainPanel.add(yAxisVisualizer.getCanvas(), x, y);
 			x += properties.getYAxisDrawingInfo().getOffChartCanvasWidth();
@@ -70,7 +73,7 @@ public class DrawingFactoryImplGwtGraphics extends DrawingFactory implements Has
 			case BOTTOM:
 				chartMainPanel.add(((HorizontalAxisVisualizer)xAxisVisualizer).getCanvas(),
 						x,
-						y + properties.getChartCanvasHeight() - properties.getXAxisDrawingInfo().getTickLengthInside());
+						y + properties.getChartCanvasHeight() - properties.getXAxisDrawingInfo().getTickLengthOutsideAxisPanel());
 				chartMainPanel.add(((HorizontalAxisVisualizer)xAxisVisualizer).getTextPositionerAbsolutePanel(),
 						x,
 						y + properties.getChartCanvasHeight());
@@ -123,11 +126,11 @@ public class DrawingFactoryImplGwtGraphics extends DrawingFactory implements Has
 		if(xAxis != null){
 			DrawingArea xCanvas = new DrawingArea(
 					properties.getChartCanvasWidth(),
-					properties.getXAxisDrawingInfo().getTickPanelHeight() + properties.getXAxisDrawingInfo().getTickLengthInside());
+					properties.getXAxisDrawingInfo().getAxisPanelHeight() + properties.getXAxisDrawingInfo().getTickLengthOutsideAxisPanel());
 			AbsolutePanel ap =  new AbsolutePanel();
 			ap.setPixelSize(
 					properties.getChartCanvasWidth(), 
-					properties.getXAxisDrawingInfo().getTickPanelHeight());
+					properties.getXAxisDrawingInfo().getAxisPanelHeight());
 			xAxisVisualizer = new HorizontalAxisVisualizer(xCanvas,ap, xAxis, modelManager);
 		}
 		if(yAxis != null){
@@ -226,10 +229,25 @@ public class DrawingFactoryImplGwtGraphics extends DrawingFactory implements Has
 		}
 	}
 
+
 	@Override
-	public void drawPoints(ArrayList<Point> points) {
+	public void addMark(Mark mark) {
 		// TODO Auto-generated method stub
 		
 	}
+
+	@Override
+	public void removeMark(Mark mark) {
+		// TODO Auto-generated method stub
+		
+	}
+
+	@Override
+	public TreeMap<Mark, int[]> getMarkBoundingBoxes() {
+		// TODO Auto-generated method stub
+		return null;
+	}
+
+
 }
 

@@ -98,8 +98,8 @@ public class CurveDrawingInfo {
 	private TreeMap<State, ShapeDrawingInfo> lineDrawingInfo = null;
 	/* model-to-pixel policy */
 	public static final ImaginaryPointValuePolicy DEFAULT_OVERLAPPING_POLICY = ImaginaryPointValuePolicy.AVERAGE;
-	public static final int DEFAULT_X_OVERLAPPING_WIDTH = 3;
-	public static final int DEFAULT_SQUARE_OVERLAPPING_SIZE = 10;
+	public static final int DEFAULT_X_OVERLAPPING_WIDTH = 5;
+	public static final int DEFAULT_SQUARE_OVERLAPPING_SIZE = 30;
 	private int overlapFilterSquareSize ;
 	private ImaginaryPointValuePolicy overlapFilterPolicy;
 	private int overlapFilterXWidth;
@@ -205,8 +205,8 @@ public class CurveDrawingInfo {
 		
 		this.lineDrawingInfo = new TreeMap<State, ShapeDrawingInfo>();
 		defaultPointDrawingInfo = new TreeMap<State, PointDrawingInfo>();
-		defaultPointDrawingInfo.put(State.ACTIVE, PointDrawingInfo.getDefaultPointDrawingInfo());
-		defaultPointDrawingInfo.put(State.FOCUSED, PointDrawingInfo.getDefaultPointDrawingInfo());
+		defaultPointDrawingInfo.put(State.ACTIVE, PointDrawingInfo.NO_SHAPE_POINT_INFO);
+		defaultPointDrawingInfo.put(State.FOCUSED, PointDrawingInfo.NO_SHAPE_POINT_INFO);
 		defaultPointDrawingInfo.put(State.NORMAL, PointDrawingInfo.NO_SHAPE_POINT_INFO);
 		lineDrawingInfo.put(State.NORMAL, ShapeDrawingInfo.getDefaultShapeDrawingInfo());
 		lineDrawingInfo.put(State.ACTIVE, ShapeDrawingInfo.getDefaultShapeDrawingInfo());

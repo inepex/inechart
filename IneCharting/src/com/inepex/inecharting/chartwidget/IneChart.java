@@ -17,6 +17,7 @@ import com.inepex.inecharting.chartwidget.graphics.gwtgraphics.DrawingFactoryImp
 import com.inepex.inecharting.chartwidget.model.Axis;
 import com.inepex.inecharting.chartwidget.model.Curve;
 import com.inepex.inecharting.chartwidget.model.HasViewport;
+import com.inepex.inecharting.chartwidget.model.Mark;
 import com.inepex.inecharting.chartwidget.model.ModelManager;
 import com.inepex.inecharting.chartwidget.model.HorizontalTimeAxis;
 import com.inepex.inecharting.chartwidget.properties.AxisDrawingInfo.AxisType;
@@ -82,7 +83,6 @@ public class IneChart extends Composite implements HasViewport{
 		drawingFactory  = DrawingFactory.create(mainPanel, properties, modelManager, xAxis, yAxis, y2Axis);
 		//create canvas, panel hierarchy
 		drawingFactory.assembleLayout();
-
 		//init events
 		eventManager = EventManager.create(properties, this, drawingFactory, curves);
 	}
@@ -139,12 +139,31 @@ public class IneChart extends Composite implements HasViewport{
 		modelManager.getAxisCalculator().calculateAxes(curves, xAxis, yAxis, y2Axis);
 	}
 		
+	public void addMarks(ArrayList<Mark> marks){
+		modelManager.getMarkContainer().addMarks(marks);
+		moveViewport(0);
+	}
+	
+	public void addMark(Mark mark){
+		ModelManager.get().getMarkContainer().addMark(mark);
+		drawingFactory.addMark(mark);
+	}
+	
+	public void removeMark(Mark mark){
+		ModelManager.get().getMarkContainer().removeMark(mark);
+		drawingFactory.removeMark(mark);
+	}
+	
 	@Override
 	public void moveViewport(double dx) {
 		modelManager.setViewport(modelManager.getViewportMin() + dx, modelManager.getViewportMax() + dx);
+		//curves
 		for(Curve actCurve : curves){
 			modelManager.getPointsForCurve(actCurve, false);	
 		}
+		//marks
+		ModelManager.get().getMarkContainer().moveViewport(dx);
+		
 		drawingFactory.moveViewport(dx);
 	}
 
@@ -152,9 +171,12 @@ public class IneChart extends Composite implements HasViewport{
 	public void setViewport(double viewportMin, double viewportMax) {
 		modelManager.setViewport(viewportMin, viewportMax);
 		
+		//curves
 		for(Curve actualCurve : curves){
 			modelManager.getPointsForCurve(actualCurve, true);
 		}
+		//marks
+		ModelManager.get().getMarkContainer().setViewport(viewportMin, viewportMax);
 		drawingFactory.setViewport(viewportMin, viewportMax);
 	}
 	

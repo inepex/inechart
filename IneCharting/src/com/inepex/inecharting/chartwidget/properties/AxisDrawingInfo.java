@@ -22,8 +22,8 @@ public class AxisDrawingInfo {
 				"blue", 
 				1, 
 				Style.FontStyle.NORMAL, 
-				Style.FontWeight.NORMAL,
-				"verdana", 
+				Style.FontWeight.BOLD,
+				"Calibri", 
 				"#.#",
 				AxisType.NUMBER);
 	}
@@ -39,8 +39,8 @@ public class AxisDrawingInfo {
 				"blue", 
 				1, 
 				Style.FontStyle.NORMAL, 
-				Style.FontWeight.NORMAL,
-				"verdana", 
+				Style.FontWeight.BOLD,
+				"Calibri", 
 				"MM/dd HH:mm",
 				AxisType.TIME);
 	}

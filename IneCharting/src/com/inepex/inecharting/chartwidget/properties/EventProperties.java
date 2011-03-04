@@ -6,7 +6,7 @@ import java.util.TreeMap;
 import com.inepex.inecharting.chartwidget.event.StateChangeEvent;
 import com.inepex.inecharting.chartwidget.model.State;
 
-public class EventManagerProperties {
+public class EventProperties {
 	enum GraphicalObjectType{
 		AXIS,
 		CURVE,
@@ -15,11 +15,26 @@ public class EventManagerProperties {
 	}
 	
 	TreeMap<GraphicalObjectType, State[]> eventFiringPolicy;
+	boolean curvePointsSelectionByXposOnly;
 	
 	
-	
-	public EventManagerProperties() {
-		eventFiringPolicy = new TreeMap<EventManagerProperties.GraphicalObjectType, State[]>();
+	/**
+	 * @return the curvePointsSelectionByXposOnly
+	 */
+	public boolean isCurvePointsSelectionByXposOnly() {
+		return curvePointsSelectionByXposOnly;
+	}
+
+	/**
+	 * @param curvePointsSelectionByXposOnly the curvePointsSelectionByXposOnly to set
+	 */
+	public void setCurvePointsSelectionByXposOnly(
+			boolean curvePointsSelectionByXposOnly) {
+		this.curvePointsSelectionByXposOnly = curvePointsSelectionByXposOnly;
+	}
+
+	public EventProperties() {
+		eventFiringPolicy = new TreeMap<EventProperties.GraphicalObjectType, State[]>();
 		setEventFiringStatesForAxis(State.FOCUSED);
 		setEventFiringStatesForMark(State.FOCUSED, State.ACTIVE);
 		setEventFiringStatesForPoint(State.FOCUSED, State.ACTIVE);
@@ -54,5 +69,7 @@ public class EventManagerProperties {
 	public void setEventFiringStatesForAxis(State... states){
 		this.eventFiringPolicy.put(GraphicalObjectType.AXIS, states);
 	}
+	
+	
 
 }

@@ -23,8 +23,8 @@ public class HorizontalTimeAxisDrawingInfo extends HorizontalAxisDrawingInfo {
 				"lightblue", 
 				1, 
 				Style.FontStyle.NORMAL, 
-				Style.FontWeight.NORMAL,
-				"verdana", 
+				Style.FontWeight.BOLD,
+				"Calibri", 
 				"lightblue",
 				AxisLocation.BOTTOM,
 				10,
@@ -59,7 +59,7 @@ public class HorizontalTimeAxisDrawingInfo extends HorizontalAxisDrawingInfo {
 				gridLineColor, gridLineWidth, tickTextColor,
 				tickTextBackgroundColor, tickTextBackgroundOpacity,
 				tickTextFontStyle, tickTextFontWeight, tickTextFontFamily,
-				tickTextFontFamily,AxisType.TIME, backgroundColor, axisLocation, tickLengthInside, tickPanelHeight);
+				tickTextFontFamily,AxisType.TIME, ShapeDrawingInfo.getDefaultShapeDrawingInfo(), axisLocation, tickLengthInside, tickPanelHeight);
 		this.dateTimeFormats = dateTimeFormats;
 	}
 	

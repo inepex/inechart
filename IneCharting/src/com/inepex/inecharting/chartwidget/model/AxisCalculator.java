@@ -2,12 +2,14 @@ package com.inepex.inecharting.chartwidget.model;
 
 import java.util.ArrayList;
 
+import com.inepex.inecharting.chartwidget.event.EventManager;
+import com.inepex.inecharting.chartwidget.event.ExtremesChangeEvent;
 import com.inepex.inecharting.chartwidget.model.HorizontalTimeAxis.Resolution;
 
 public class AxisCalculator {
 
 	public final int horizontal_minTickDistanceInPX = 90;
-	private final int vertical_minTickDistanceInPX = 20;
+	private final int vertical_minTickDistanceInPX = 42;
 	private ModelManager modelManager;
 	
 	private final long SECOND = 1000;
@@ -143,7 +145,7 @@ public class AxisCalculator {
 			y2Min = y2Max = null;
 	
 		/** extreme related notifications  **/
-		Double oldxMin = modelManager.getxMin(),
+		Double oldxMin = modelManager.getxMin(), oldxMax = modelManager.getxMax(),
 			oldy1Min = modelManager.getyMin(), oldy1Max = modelManager.getyMax(),
 			oldy2Min = modelManager.getY2Min(), oldy2Max = modelManager.getY2Max();
 			
@@ -207,5 +209,12 @@ public class AxisCalculator {
 				y2Axis.setTickDistance(0);
 			}
 		}
+		/* event firing */
+		if(oldxMin != xMin || oldxMax != xMax)
+			EventManager.get().fireEvent(new ExtremesChangeEvent(Axes.X, xMin, xMax));
+		if(oldy1Min != y1Min || oldy1Max != y1Max)
+			EventManager.get().fireEvent(new ExtremesChangeEvent(Axes.Y, y1Min, y1Max));
+		if(oldy2Min != y2Min || oldy2Max != y2Max)
+			EventManager.get().fireEvent(new ExtremesChangeEvent(Axes.Y, y2Min, y2Max));
 	}
 }

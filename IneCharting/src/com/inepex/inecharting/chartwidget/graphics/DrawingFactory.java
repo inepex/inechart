@@ -1,17 +1,21 @@
 package com.inepex.inecharting.chartwidget.graphics;
 
 import java.util.ArrayList;
+import java.util.TreeMap;
 
 import com.google.gwt.user.client.ui.AbsolutePanel;
 import com.google.gwt.user.client.ui.Widget;
 import com.inepex.inecharting.chartwidget.IneChart;
 import com.inepex.inecharting.chartwidget.IneChartProperties;
 import com.inepex.inecharting.chartwidget.event.EventManager;
+import com.inepex.inecharting.chartwidget.event.ExtremesChangeHandler;
+import com.inepex.inecharting.chartwidget.event.StateChangeHandler;
 import com.inepex.inecharting.chartwidget.graphics.canvas.DrawingFactoryImplCanvas;
 import com.inepex.inecharting.chartwidget.graphics.gwtgraphics.DrawingFactoryImplGwtGraphics;
 import com.inepex.inecharting.chartwidget.model.Axis;
 import com.inepex.inecharting.chartwidget.model.Curve;
 import com.inepex.inecharting.chartwidget.model.HasViewport;
+import com.inepex.inecharting.chartwidget.model.Mark;
 import com.inepex.inecharting.chartwidget.model.ModelManager;
 import com.inepex.inecharting.chartwidget.model.Point;
 
@@ -35,7 +39,6 @@ public abstract class DrawingFactory implements HasViewport{
 		} 
 		return instance;
 	} 
-	
 	
 	protected IneChartProperties properties;
 	protected ModelManager modelManager;
@@ -70,5 +73,17 @@ public abstract class DrawingFactory implements HasViewport{
 		return chartCanvas;
 	}
  	
- 	public abstract void drawPoints(ArrayList<Point>  points);
+ 	/**
+ 	 * draws a curve on canvas
+ 	 * @param curve
+ 	 */
+	public abstract void addMark(Mark mark);
+	
+ 	/**
+ 	 * removes a curve from canvas
+ 	 * @param index
+ 	 */
+ 	public abstract void removeMark(Mark mark);
+ 	
+ 	public abstract TreeMap<Mark, int[]> getMarkBoundingBoxes();
 }

@@ -5,7 +5,9 @@ import java.util.Collections;
 import java.util.Iterator;
 
 
+import com.google.gwt.canvas.client.Canvas;
 import com.google.gwt.canvas.dom.client.Context2d;
+import com.google.gwt.canvas.dom.client.ImageData;
 import com.inepex.inecharting.chartwidget.IneChartProperties;
 import com.inepex.inecharting.chartwidget.model.Curve;
 import com.inepex.inecharting.chartwidget.model.GraphicalObject;
@@ -51,55 +53,67 @@ public class Curves implements HasViewport{
 		Collections.sort(curves, GraphicalObject.getzIndexComparator());
 		for(Curve curve:curves){
 			if(curve.getCurveDrawingInfo().hasLine()){
-				drawLinesOverVisiblePoints(curve);
+				drawLinesOverPoints(curve.getLineDrawInfo(),curve.getVisiblePoints(),null,0);
 			}
-			if(curve.getCurveDrawingInfo().hasPoints())
-				drawShapesOverVisiblePoints(curve);
+			if(curve.getCurveDrawingInfo().hasPoints()){
+				drawShapesOverPoints(curve.getVisiblePoints());
+			}
 		}
 	}
 	
-	private void drawLinesOverVisiblePoints(Curve curve){
-		ShapeDrawingInfo info = curve.getLineDrawInfo();
-		ArrayList<Point> toDraw = curve.getVisiblePoints();
+	private void drawLinesOverPoints(ShapeDrawingInfo info,ArrayList<Point> toDraw, Context2d backBuffer,int canvasX){
+		Context2d context;
+		int dx, dy;
 		if(toDraw.size() < 2)
 			return;
-		int dx = - mm.getViewportMinInPx();
-		int dy = 0;
-		Iterator<Point> iPoint = toDraw.iterator();
-		canvas.beginPath();
-		canvas.moveTo(toDraw.get(0).getxPos() + dx, toDraw.get(0).getyPos() + dy);
-		while (iPoint.hasNext()){
-			Point point = iPoint.next();
-			canvas.lineTo(point.getxPos() + dx, point.getyPos() + dy);
+		if(backBuffer != null){
+			context = backBuffer;
+			dx = - (mm.getViewportMinInPx() + canvasX);
+			dy = 0;
+		}
+		else{
+			context = canvas;
+			dx = - mm.getViewportMinInPx();
+			dy = 0;
 		}
 		
-		canvas.save();
-		canvas.setStrokeStyle(info.getborderColor());
-		canvas.setLineWidth(info.getborderWidth());
-		canvas.setLineJoin("round");
-		canvas.stroke();
-		canvas.restore();
-		if(info.hasFill()){
-			canvas.lineTo(toDraw.get(toDraw.size()-1).getxPos() + dx, prop.getChartCanvasHeight() + dy);
-			canvas.lineTo(toDraw.get(0).getxPos() + dx, prop.getChartCanvasHeight() + dy);
-			canvas.save();
-			canvas.setLineWidth(0);
-			canvas.setFillStyle(info.getFillColor());
-			canvas.setGlobalAlpha(info.getFillOpacity());
-			canvas.fill();
-			canvas.restore();
+		Iterator<Point> iPoint = toDraw.iterator();
+		context.beginPath();
+		context.moveTo(toDraw.get(0).getxPos() + dx, toDraw.get(0).getyPos() + dy);
+		while (iPoint.hasNext()){
+			Point point = iPoint.next();
+			context.lineTo(point.getxPos() + dx, point.getyPos() + dy);
 		}
-		canvas.closePath();
+		
+		context.save();
+		context.setStrokeStyle(info.getborderColor());
+		context.setLineWidth(info.getborderWidth());
+		context.setLineJoin("round");
+		context.stroke();
+		context.restore();
+		if(info.hasFill()){
+			context.lineTo(toDraw.get(toDraw.size()-1).getxPos() + dx, prop.getChartCanvasHeight() + dy);
+			context.lineTo(toDraw.get(0).getxPos() + dx, prop.getChartCanvasHeight() + dy);
+			context.save();
+			context.setLineWidth(0);
+			context.setFillStyle(info.getFillColor());
+			context.setGlobalAlpha(info.getFillOpacity());
+			context.fill();
+			context.restore();
+		}
+		context.closePath();	
 	}
 	
-	private void drawShapesOverVisiblePoints(Curve curve){
-		for(Point point : curve.getVisiblePoints()){
-			drawShape(point);
+	private void drawShapesOverPoints(ArrayList<Point> toDraw){
+		int dx =  - mm.getViewportMinInPx(), dy = 0;
+	
+		for(Point point : toDraw){
+			drawShape(canvas, point, dx, dy);
 		}	
 	}
 	
-	private void drawShape(Point point){
-		PointDrawingInfo info = point.getPointDrawingInfo();
+	private static void drawShape(Context2d canvas, Point point, int dx, int dy){
+		PointDrawingInfo info = point.getActualPointDrawingInfo();
 		if(info == null || info.getType().equals(PointType.NO_SHAPE))
 			return;
 		canvas.save();
@@ -109,8 +123,6 @@ public class Curves implements HasViewport{
 		canvas.setGlobalAlpha(info.getFillOpacity());
 		canvas.beginPath();
 		int width = info.getWidth(), height = info.getHeight();
-		int dx = - mm.getViewportMinInPx();
-		int dy = 0;
 		switch (info.getType()) {
 		case ELLIPSE:
 			double scaleX = 1, scaleY=1;
@@ -137,5 +149,56 @@ public class Curves implements HasViewport{
 		canvas.closePath();
 	}
 
+	/**
+	 * Redraws the canvas at the given x interval.
+	 * @param min px in the canvas/viewport's dimension
+	 * @param max px in the canvas/viewport's dimension
+	 */
+	public void drawLinesAndShapes(int min, int max, Context2d backBuffer){
+		Collections.sort(curves, GraphicalObject.getzIndexComparator());
+		for(Curve curve : curves){
+			Point prev = null;
+			for(Point point : curve.getVisiblePoints()){
+				if(prev == null)
+					prev = point;
+				else if(curve.getCurveDrawingInfo().hasLine() && isLineInInterval(prev, point, min, max)){
+					ArrayList<Point> toDraw = new ArrayList<Point>();
+					toDraw.add(prev);
+					toDraw.add(point);
+					drawLinesOverPoints(curve.getLineDrawInfo(), toDraw,backBuffer, min);
+				}
+				prev = point;
+			}
+			for(Point point : curve.getVisiblePoints()){
+				if(curve.getCurveDrawingInfo().hasPoints() && isShapeInInterval(point, min, max)) {
+					drawShape(backBuffer,point,  - (mm.getViewportMinInPx() + min), 0);
+				}
+			}
+		}
+	}
+	
+	private boolean isShapeInInterval(Point point,int min, int max){
+		PointDrawingInfo info = point.getActualPointDrawingInfo();
+		if(info == null || info.getType().equals(PointType.NO_SHAPE))
+			return false;
+		int shapesLeft =  mm.getCanvasX(point)- info.getWidth() / 2;
+		int shapesRight =  mm.getCanvasX(point)+ info.getWidth() / 2;
+		if(shapesRight < min  ||  shapesLeft > max) 
+			return false;
+		else
+			return true;
+	}
+	
+	private boolean isLineInInterval(Point point1,Point point2,int min, int max){
+		if( (mm.getCanvasX(point1) < min && mm.getCanvasX(point2) < min) ||  (mm.getCanvasX(point1) > max && mm.getCanvasX(point2) > max))
+			return false;
+		else
+			return true;
+	}
+	
+		
+	
+	
+	
 	
 }

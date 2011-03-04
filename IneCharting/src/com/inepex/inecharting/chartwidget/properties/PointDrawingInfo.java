@@ -34,6 +34,8 @@ public class PointDrawingInfo extends ShapeDrawingInfo {
 		this.height = height;
 	}
 	public int getWidth() {
+		if(type == PointType.NO_SHAPE)
+			return 0;
 		return width;
 	}
 	public int getHeight() {
