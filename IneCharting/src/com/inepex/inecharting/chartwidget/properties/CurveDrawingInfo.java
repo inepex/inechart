@@ -127,6 +127,7 @@ public class CurveDrawingInfo {
 	 * @param hasLine draw lines between points (if you set false, no lines will be drawn regardless of this curve's {@link State})
 	 * @param hasPoints draw shapes on the points (if you set false, no points will be shown regardless of their {@link State}) 
 	 */
+	@Deprecated
 	public CurveDrawingInfo(
 			String name,
 			boolean preDrawLines, 

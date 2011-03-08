@@ -14,7 +14,7 @@ import com.inepex.inecharting.chartwidget.properties.VerticalAxisDrawingInfo;
  */
 public final class IneChartProperties {
 	public enum DrawingTool {
-		VAADIN_GWT_GRAPHICS,
+//		VAADIN_GWT_GRAPHICS,
 		CANVAS
 	}
 	//sizes

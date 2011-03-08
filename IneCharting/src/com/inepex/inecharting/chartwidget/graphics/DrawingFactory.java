@@ -3,6 +3,7 @@ package com.inepex.inecharting.chartwidget.graphics;
 import java.util.ArrayList;
 import java.util.TreeMap;
 
+import com.google.gwt.core.client.GWT;
 import com.google.gwt.user.client.ui.AbsolutePanel;
 import com.google.gwt.user.client.ui.Widget;
 import com.inepex.inecharting.chartwidget.IneChart;
@@ -26,17 +27,8 @@ public abstract class DrawingFactory implements HasViewport{
 	public static DrawingFactory get(){
 		return instance;
 	}
-	public static DrawingFactory create(AbsolutePanel chartMainPanel, IneChartProperties properties, ModelManager modelManager, Axis xAxis, Axis yAxis, Axis y2Axis){
-		switch (properties.getDrawingTool()) {
-		case VAADIN_GWT_GRAPHICS:
-			instance = new DrawingFactoryImplGwtGraphics(chartMainPanel, properties, modelManager, xAxis, yAxis, y2Axis);
-			break;
-		case CANVAS:
-			instance = new DrawingFactoryImplCanvas(chartMainPanel, properties, modelManager, xAxis, yAxis, y2Axis);
-			break;
-		default:
-			break;
-		} 
+	public static DrawingFactory create(){
+		instance = GWT.create(DrawingFactory.class);
 		return instance;
 	} 
 	
@@ -46,14 +38,10 @@ public abstract class DrawingFactory implements HasViewport{
 	
 	protected AbsolutePanel chartMainPanel;
 	
-	protected DrawingFactory(AbsolutePanel chartMainPanel, IneChartProperties properties, ModelManager modelManager, Axis xAxis, Axis yAxis, Axis y2Axis) {
-		this.properties = properties;
-		this.chartMainPanel = chartMainPanel;
-		this.modelManager = modelManager;
-		init(xAxis, yAxis, y2Axis);
-	}
 	
-	protected abstract void init(Axis xAxis, Axis yAxis, Axis y2Axis);
+	protected DrawingFactory() {}
+	
+	public abstract void init(AbsolutePanel chartMainPanel, IneChartProperties properties, ModelManager modelManager, Axis xAxis, Axis yAxis, Axis y2Axis);
 	
 	public abstract void assembleLayout();
 	

@@ -9,6 +9,7 @@ import com.google.gwt.canvas.dom.client.Context2d;
 import com.google.gwt.canvas.dom.client.ImageData;
 import com.google.gwt.core.client.JavaScriptException;
 import com.google.gwt.user.client.ui.AbsolutePanel;
+import com.google.gwt.user.client.ui.Widget;
 import com.inepex.inecharting.chartwidget.IneChartProperties;
 import com.inepex.inecharting.chartwidget.event.EventManager;
 import com.inepex.inecharting.chartwidget.event.ExtremesChangeEvent;
@@ -25,20 +26,15 @@ import com.inepex.inecharting.chartwidget.properties.HorizontalAxisDrawingInfo;
 import com.inepex.inecharting.chartwidget.properties.VerticalAxisDrawingInfo;
 
 public class DrawingFactoryImplCanvas extends DrawingFactory implements StateChangeHandler{
-	private Axes axes;
-	private Curves curves;
-	private Marks marks;
-	private Context2d curveCanvasCtx;
-	private Canvas xAxisCanvas;
-	private Canvas yAxisCanvas;
-	private Canvas y2AxisCanvas;
+	protected Axes axes;
+	protected Curves curves;
+	protected Marks marks;
+	protected Context2d curveCanvasCtx;
+	protected Widget xAxisCanvas;
+	protected Widget yAxisCanvas;
+	protected Widget y2AxisCanvas;
 
-	public DrawingFactoryImplCanvas(AbsolutePanel chartMainPanel,
-			IneChartProperties properties, ModelManager modelManager,
-			Axis xAxis, Axis yAxis, Axis y2Axis) {
-		super(chartMainPanel, properties, modelManager, xAxis, yAxis, y2Axis);
-		
-	}
+	
 
 	@Override
 	public void moveViewport(double dx) {
@@ -47,6 +43,7 @@ public class DrawingFactoryImplCanvas extends DrawingFactory implements StateCha
 
 	@Override
 	public void setViewport(double viewportMin, double viewportMax) {
+
 		EventManager.get().setReadyForEvents(false);
 		//bg color
 		curveCanvasCtx.save();
@@ -54,18 +51,21 @@ public class DrawingFactoryImplCanvas extends DrawingFactory implements StateCha
 		curveCanvasCtx.fillRect(0, 0, properties.getChartCanvasWidth(), properties.getChartCanvasHeight());
 		curveCanvasCtx.restore();
 		//gridlines
-		axes.drawGridLines();
+//		axes.drawGridLines();
 		//curves
 		curves.setViewport(viewportMin, viewportMax);
 		//axes
-		axes.setViewport(viewportMin, viewportMax);
+//		axes.setViewport(viewportMin, viewportMax);
 		//marks
-		marks.setViewport(viewportMin, viewportMax);
+//		marks.setViewport(viewportMin, viewportMax);
 		EventManager.get().setReadyForEvents(true);
 	}
 
 	@Override
-	protected void init(Axis xAxis, Axis yAxis, Axis y2Axis) {
+	public void init(AbsolutePanel chartMainPanel, IneChartProperties properties, ModelManager modelManager, Axis xAxis, Axis yAxis, Axis y2Axis) {
+		this.properties = properties;
+		this.chartMainPanel = chartMainPanel;
+		this.modelManager = modelManager;
 		chartCanvas = Canvas.createIfSupported();
 		
 		chartCanvas.setPixelSize(properties.getChartCanvasWidth(), properties.getChartCanvasHeight());
@@ -78,21 +78,21 @@ public class DrawingFactoryImplCanvas extends DrawingFactory implements StateCha
 		curveCanvasCtx.restore();
 		axes = new Axes(curveCanvasCtx, modelManager, properties);
 	
-		if(xAxis != null)
-		xAxisCanvas = Canvas.createIfSupported();
-		xAxisCanvas.setPixelSize(properties.getChartCanvasWidth(), ((HorizontalAxisDrawingInfo)xAxis.getDrawingInfo()).getAxisPanelHeight());
-		xAxisCanvas.setCoordinateSpaceHeight( ((HorizontalAxisDrawingInfo)xAxis.getDrawingInfo()).getAxisPanelHeight());
-		xAxisCanvas.setCoordinateSpaceWidth(properties.getChartCanvasWidth());
-		
-		axes.addXAxis(xAxis, xAxisCanvas.getContext2d());
-		
+		if(xAxis != null){
+			xAxisCanvas = Canvas.createIfSupported();
+			xAxisCanvas.setPixelSize(properties.getChartCanvasWidth(), ((HorizontalAxisDrawingInfo)xAxis.getDrawingInfo()).getAxisPanelHeight());
+			((Canvas) xAxisCanvas).setCoordinateSpaceHeight( ((HorizontalAxisDrawingInfo)xAxis.getDrawingInfo()).getAxisPanelHeight());
+			((Canvas) xAxisCanvas).setCoordinateSpaceWidth(properties.getChartCanvasWidth());
+			
+			axes.addXAxis(xAxis, ((Canvas) xAxisCanvas).getContext2d());
+		}
 		if(y2Axis != null && ((VerticalAxisDrawingInfo)y2Axis.getDrawingInfo()).getOffChartCanvasWidth() > 0){
 			y2AxisCanvas = Canvas.createIfSupported();
 			y2AxisCanvas.setPixelSize(((VerticalAxisDrawingInfo)y2Axis.getDrawingInfo()).getOffChartCanvasWidth(),  properties.getChartCanvasHeight());
-			y2AxisCanvas.setCoordinateSpaceHeight(  properties.getChartCanvasHeight());
-			y2AxisCanvas.setCoordinateSpaceWidth(((VerticalAxisDrawingInfo)y2Axis.getDrawingInfo()).getOffChartCanvasWidth());
+			((Canvas) y2AxisCanvas).setCoordinateSpaceHeight(  properties.getChartCanvasHeight());
+			((Canvas) y2AxisCanvas).setCoordinateSpaceWidth(((VerticalAxisDrawingInfo)y2Axis.getDrawingInfo()).getOffChartCanvasWidth());
 			
-			axes.addY2Axis(y2Axis, y2AxisCanvas.getContext2d());
+			axes.addY2Axis(y2Axis, ((Canvas) y2AxisCanvas).getContext2d());
 		}
 		else
 			axes.addY2Axis(y2Axis, null);
@@ -100,10 +100,10 @@ public class DrawingFactoryImplCanvas extends DrawingFactory implements StateCha
 		if(yAxis != null &&((VerticalAxisDrawingInfo)yAxis.getDrawingInfo()).getOffChartCanvasWidth() > 0){
 			yAxisCanvas = Canvas.createIfSupported();
 			yAxisCanvas.setPixelSize(((VerticalAxisDrawingInfo)yAxis.getDrawingInfo()).getOffChartCanvasWidth(), properties.getChartCanvasHeight());
-			yAxisCanvas.setCoordinateSpaceHeight(  properties.getChartCanvasHeight());
-			yAxisCanvas.setCoordinateSpaceWidth(((VerticalAxisDrawingInfo)yAxis.getDrawingInfo()).getOffChartCanvasWidth());
+			((Canvas) yAxisCanvas).setCoordinateSpaceHeight(  properties.getChartCanvasHeight());
+			((Canvas) yAxisCanvas).setCoordinateSpaceWidth(((VerticalAxisDrawingInfo)yAxis.getDrawingInfo()).getOffChartCanvasWidth());
 		
-			axes.addYAxis(yAxis, yAxisCanvas.getContext2d());
+			axes.addYAxis(yAxis, ((Canvas) yAxisCanvas).getContext2d());
 		}
 		else
 			axes.addYAxis(yAxis,null);
@@ -119,11 +119,14 @@ public class DrawingFactoryImplCanvas extends DrawingFactory implements StateCha
 		chartMainPanel.add(chartCanvas,0,0);
 		chartMainPanel.add(xAxisCanvas,0,properties.getChartCanvasHeight());
 		
+		
 	}
 
 	@Override
 	public void addCurve(Curve curve) {
+
 		EventManager.get().setReadyForEvents(false);
+		
 		//bg color
 		curveCanvasCtx.save();
 		curveCanvasCtx.setFillStyle(properties.getChartCanvasBackgroundColor());
@@ -166,52 +169,7 @@ public class DrawingFactoryImplCanvas extends DrawingFactory implements StateCha
 		setViewport(modelManager.getViewportMin(), modelManager.getViewportMax());
 	}
 	
-	private void updateShape(Point point, State prev){
-//		EventManager.get().setReadyForEvents(false);
-//		int x, width = point.getPointDrawingInfo(prev).getWidth(); 
-//		if(width < point.getActualPointDrawingInfo().getWidth())
-//			width = point.getActualPointDrawingInfo().getWidth();
-//		if(width == 0)
-//			return;
-//		else{
-//			x = point.getxPos() - modelManager.getViewportMinInPx() - width / 2 - 1;
-//			width += 2;
-//			if(x < 0){
-//				width += x;
-//				x = 0;
-//			}
-//			else if(x > modelManager.getChartCanvasWidth()){
-//				width -= x - modelManager.getChartCanvasWidth(); 
-//				x = modelManager.getChartCanvasWidth();
-//			}
-//			else if(x+width > modelManager.getViewportMaxInPx()){
-//				width = modelManager.getViewportMaxInPx() - x;
-//			}
-//			
-//		}
-//		//creating backbuffercanvas
-//		Canvas canvas = Canvas.createIfSupported();
-//		canvas.setCoordinateSpaceHeight(properties.getChartCanvasHeight());
-//		canvas.setCoordinateSpaceWidth(width);
-//		Context2d backBuffer = canvas.getContext2d();
-//		
-//		axes.drawGridLines(x, x + width, backBuffer);
-//		curves.drawLinesAndShapes(x, x + width, backBuffer);
-//		axes.drawAxes(x, x + width, backBuffer);
-//		
-//		//copy
-////		
-//		try{
-//			curveCanvasCtx.save();
-//			curveCanvasCtx.setFillStyle(properties.getChartCanvasBackgroundColor());
-//			curveCanvasCtx.fillRect(x, 0, width, properties.getChartCanvasHeight());
-//			curveCanvasCtx.restore();
-//			curveCanvasCtx.drawImage(backBuffer.getCanvas(), x, 0);
-//		}
-//		catch (JavaScriptException e) {
-//			e.getDescription();
-//		}
-//		EventManager.get().setReadyForEvents(true);			
+	private void updateShape(Point point, State prev){	
 		setViewport(modelManager.getViewportMin(), modelManager.getViewportMax());
 	}
 

@@ -41,15 +41,7 @@ public class DrawingFactoryImplGwtGraphics extends DrawingFactory implements Has
 	private AbsolutePanel chartMainPanel;
 	
 	
-	/**
-	 * Creates an instance with the defined drawing toolkit,
-	 * and initializes the related objects (e.g.: the 'canvas')
-	 * @param drawingTool
-	 */
-	public DrawingFactoryImplGwtGraphics(AbsolutePanel chartMainPanel, IneChartProperties properties, ModelManager mm, Axis xAxis, Axis yAxis, Axis y2Axis) {
-		super(chartMainPanel, properties, mm, xAxis, yAxis, y2Axis);
-		curveVisualizers = new TreeMap<Curve, ArrayList<CurveVisualizer>>();
-	}
+	
 	
 	/**
 	 * Initializes the layout (the canvases hierarchy, etc)
@@ -117,8 +109,12 @@ public class DrawingFactoryImplGwtGraphics extends DrawingFactory implements Has
 		}
 	}
 	
-	protected void init(Axis xAxis, Axis yAxis, Axis y2Axis){
+	public void init(AbsolutePanel chartMainPanel, IneChartProperties properties, ModelManager modelManager, Axis xAxis, Axis yAxis, Axis y2Axis) {
+		this.chartMainPanel = chartMainPanel;
+		this.properties = properties;
+		this.modelManager = modelManager;
 		this.chartCanvas = new DrawingArea(properties.getChartCanvasWidth(), properties.getChartCanvasHeight());
+		this.curveVisualizers = new TreeMap<Curve, ArrayList<CurveVisualizer>>();
 		Rectangle border = new Rectangle(0, 0, properties.getChartCanvasWidth(), properties.getChartCanvasHeight());
 		border.setFillOpacity(0);
 		((DrawingArea)chartCanvas).add(border);

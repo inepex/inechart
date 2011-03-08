@@ -112,7 +112,7 @@ public class EventManager extends HandlesAllMouseEvents implements ClickHandler{
 					newlySelectedMark = mark;
 				}
 				else if(newlySelectedMark != null){
-					break;
+//					break;
 				}
 			}
 		}

@@ -47,19 +47,25 @@ public class Marks extends GraphicalObject implements HasViewport{
 			for(Mark mark : ModelManager.get().getMarkContainer().getActualVisibleMarks()){
 				if(mark.isImaginaryMark() && (mark.getState().equals(State.ACTIVE) || mark.getState().equals(State.FOCUSED))){
 					int dx = 0, dy = 0, lastMarksHeight;
+					int[] bb;
 					for(Mark hiddenMark:ModelManager.get().getMarkContainer().getMarksForImaginaryMark(mark)){
 						if(hiddenMark.getText().endsWith("#22")){
 							ModelManager.get();
 						}
 						//first hidden mark (should has an arrow)
 						if(dy == 0){
-							boundingBoxes.put(hiddenMark, drawMarkTextBox(hiddenMark,dx, dy,true,xAxisInfo.getAxisLocation()));
+							bb = drawMarkTextBox(hiddenMark,dx, dy,true,xAxisInfo.getAxisLocation());
 						}
 						else{
 							dx = mark.getxPosition() - hiddenMark.getxPosition();
-							boundingBoxes.put(hiddenMark, drawMarkTextBox(hiddenMark, dx, dy,false,xAxisInfo.getAxisLocation()));
+							bb = drawMarkTextBox(hiddenMark,dx, dy,false,xAxisInfo.getAxisLocation());
+							
 						}
- 						lastMarksHeight = boundingBoxes.get(hiddenMark)[3];
+						if(bb == null){
+							break;
+						}
+						boundingBoxes.put(hiddenMark, bb);
+ 						lastMarksHeight = bb[3];
 						if(xAxisInfo.getAxisLocation().equals(AxisLocation.BOTTOM)){
 							dy -= lastMarksHeight + 1;
 						}
@@ -70,10 +76,12 @@ public class Marks extends GraphicalObject implements HasViewport{
 					ModelManager.get();
 				}
 				else{
-					boundingBoxes.put(mark, drawMarkTextBox(mark, 0, 0, true,xAxisInfo.getAxisLocation()));
+					int[] bb = drawMarkTextBox(mark, 0, 0, true,xAxisInfo.getAxisLocation());
+					if(bb != null)
+						boundingBoxes.put(mark,bb);
 				}
 			}
-			
+			ModelManager.get();
 		}
 		
 	}
@@ -123,6 +131,8 @@ public class Marks extends GraphicalObject implements HasViewport{
 				y,
 				width,
 				height};
+		if(!isBoundingBoxVisible(boundingBox))
+			return null;
 		curveCanvas.save();
 		curveCanvas.setFillStyle(info.getFillColor());
 		curveCanvas.setGlobalAlpha(info.getFillOpacity());
@@ -192,5 +202,15 @@ public class Marks extends GraphicalObject implements HasViewport{
 
 	public TreeMap<Mark, int[]> getBoundingBoxes() {
 		return boundingBoxes;
+	}
+
+	public boolean isBoundingBoxVisible(int[] bb){
+		if(bb[1] > ModelManager.get().getChartCanvasHeight() ||
+				bb[0] > ModelManager.get().getChartCanvasWidth() ||
+				bb[0] + bb[2] <= 0 ||
+				bb[1] + bb[3] <= 0 ){
+			return false;
+		}
+		else return true;
 	}
 }

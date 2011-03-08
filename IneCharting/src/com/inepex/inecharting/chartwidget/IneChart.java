@@ -1,6 +1,8 @@
 package com.inepex.inecharting.chartwidget;
 
 import java.util.ArrayList;
+
+import com.google.gwt.core.client.GWT;
 import com.google.gwt.event.shared.HandlerRegistration;
 import com.google.gwt.user.client.ui.AbsolutePanel;
 import com.google.gwt.user.client.ui.Composite;
@@ -80,7 +82,9 @@ public class IneChart extends Composite implements HasViewport{
 		}
 	
 		//init UI
-		drawingFactory  = DrawingFactory.create(mainPanel, properties, modelManager, xAxis, yAxis, y2Axis);
+//		drawingFactory  = DrawingFactory.create();
+		drawingFactory = GWT.create(DrawingFactory.class);
+		drawingFactory.init(mainPanel, properties, modelManager, xAxis, yAxis, y2Axis);
 		//create canvas, panel hierarchy
 		drawingFactory.assembleLayout();
 		//init events
