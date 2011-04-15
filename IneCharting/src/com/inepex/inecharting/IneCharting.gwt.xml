@@ -1,35 +1,11 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <module rename-to='IneCharting'>
   
-   <inherits name="com.google.gwt.canvas.Canvas"/>
+  <inherits name="com.google.gwt.canvas.Canvas"/>
   <inherits name="com.google.gwt.user.User"/>
   <inherits name="org.vaadin.gwtgraphics.GWTGraphics"/>
-  
+  <inherits name="com.inepex.inegraphics.IneGraphics"/>
 
-  
-  
-
-<!--  <replace-with class="com.google.gwt.canvas.client.Canvas.CanvasElementSupportDetectedMaybe">-->
-<!--    <when-type-is class="com.google.gwt.canvas.client.Canvas.CanvasElementSupportDetector" />-->
-<!--       <any>-->
-<!--           <when-property-is name="user.agent" value="ie8"/>-->
-<!--       </any>-->
-<!--  </replace-with>-->
-	<replace-with class='com.inepex.inecharting.chartwidget.graphics.canvas.DrawingFactoryImplCanvas'>
-		<when-type-is class='com.inepex.inecharting.chartwidget.graphics.DrawingFactory'/>
-	</replace-with>
-<!--	<replace-with class='com.inepex.inecharting.chartwidget.graphics.gwtgraphics.DrawingFactoryImplGwtGraphics'>-->
-	<replace-with class='com.inepex.inecharting.chartwidget.graphics.canvas.DrawingFactoryImplCanvasIE'>
-		<when-type-is class='com.inepex.inecharting.chartwidget.graphics.DrawingFactory'/>
-	    <any>
-	        <when-property-is name='user.agent' value='ie6'/>
-	        <when-property-is name='user.agent' value='ie7'/>
-	    	<when-property-is name='user.agent' value='ie8'/>
-	    </any>
-	</replace-with>
-
-  <script src='excanvas.js'/>
-  
 
 
   <source path='chartwidget'/>
