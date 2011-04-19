@@ -3,6 +3,8 @@ package com.inepex.inecharting.chartwidget.model;
 import java.util.ArrayList;
 import java.util.TreeMap;
 
+import com.google.gwt.user.client.ui.Label;
+import com.google.gwt.user.client.ui.RootPanel;
 import com.inepex.inecharting.chartwidget.IneChartProperties;
 
 /**
@@ -539,11 +541,14 @@ public class ModelManager {
 	 */
 	public void getPointsForCurve(Curve curve, boolean resolutionChanged){
 		//clear previous points
+		RootPanel.get().add(new Label("--------------start of getPointsForCurve ----------------"));
+		long startTime;
 		curve.getVisiblePoints().clear();
 		if(resolutionChanged){
 			curve.getCalculatedPoints().clear();
 			curve.getPointsToDraw().clear();
 		}
+		
 		//setting the interval to calculate
 		Double start, stop;
 		if( curve.getCurveDrawingInfo().isPreCalculatePoints() ){ 
@@ -558,14 +563,21 @@ public class ModelManager {
 			if(stop == null)
 				stop = curve.getDataMap().lastKey();
 		}
+		
 		//calculate points, filter  them at the interval
+		
 		if(curve.getCalculatedPoints().size() != curve.getDataMap().size()
 			|| curve.getCalculatedPoints().size() != curve.getPointsToDraw().size()){
+			startTime = System.currentTimeMillis();
 			calculateAndSetPointsForInterval(curve, start, stop);
+			RootPanel.get().add(new Label(System.currentTimeMillis() - startTime + " ms (Calc)"));
+			startTime = System.currentTimeMillis();
 			filterOverlappingPoints(curve, start, stop);
+			RootPanel.get().add(new Label(System.currentTimeMillis() - startTime + " ms (Filter)"));
 		}
-	
+		
 		setVisiblePoints(curve);
+		RootPanel.get().add(new Label("--------------end of getPointsForCurve ------------------"));
 	}
 
 	public int getCanvasX(Point point){

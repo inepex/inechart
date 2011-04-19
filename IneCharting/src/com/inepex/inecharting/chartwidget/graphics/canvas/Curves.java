@@ -5,9 +5,9 @@ import java.util.Collections;
 import java.util.Iterator;
 
 
-import com.google.gwt.canvas.client.Canvas;
-import com.google.gwt.canvas.dom.client.Context2d;
-import com.google.gwt.canvas.dom.client.ImageData;
+
+import com.google.gwt.user.client.ui.Label;
+import com.google.gwt.user.client.ui.RootPanel;
 import com.inepex.inecharting.chartwidget.IneChartProperties;
 import com.inepex.inecharting.chartwidget.model.Curve;
 import com.inepex.inecharting.chartwidget.model.GraphicalObject;
@@ -17,15 +17,16 @@ import com.inepex.inecharting.chartwidget.model.Point;
 import com.inepex.inecharting.chartwidget.properties.PointDrawingInfo;
 import com.inepex.inecharting.chartwidget.properties.PointDrawingInfo.PointType;
 import com.inepex.inecharting.chartwidget.properties.ShapeDrawingInfo;
+import com.inepex.inegraphics.impl.client.canvas.CanvasWidget;
 
 public class Curves implements HasViewport{
 
 	private ArrayList<Curve> curves;
 	private ModelManager mm;
-	private Context2d canvas;
+	private CanvasWidget canvas;
 	private IneChartProperties prop;
 	
-	public Curves(Context2d canvas, Curve curve, ModelManager mm, IneChartProperties prop) {
+	public Curves(CanvasWidget canvas, Curve curve, ModelManager mm, IneChartProperties prop) {
 		this.mm = mm;
 		curves = new ArrayList<Curve>();
 		this.prop = prop;
@@ -50,8 +51,10 @@ public class Curves implements HasViewport{
 
 	@Override
 	public void setViewport(double viewportMin, double viewportMax) {
+		long start = System.currentTimeMillis();
 		Collections.sort(curves, GraphicalObject.getzIndexComparator());
 		for(Curve curve:curves){
+			
 			if(curve.getCurveDrawingInfo().hasLine()){
 				drawLinesOverPoints(curve.getLineDrawInfo(),curve.getVisiblePoints(),null,0);
 			}
@@ -59,10 +62,11 @@ public class Curves implements HasViewport{
 				drawShapesOverPoints(curve.getVisiblePoints());
 			}
 		}
+		RootPanel.get().add(new Label(System.currentTimeMillis() - start + " ms (Curves.setViewport method)"));
 	}
 	
-	private void drawLinesOverPoints(ShapeDrawingInfo info,ArrayList<Point> toDraw, Context2d backBuffer,int canvasX){
-		Context2d context;
+	private void drawLinesOverPoints(ShapeDrawingInfo info,ArrayList<Point> toDraw, CanvasWidget backBuffer,int canvasX){
+		CanvasWidget context;
 		int dx, dy;
 		if(toDraw.size() < 2)
 			return;
@@ -76,7 +80,7 @@ public class Curves implements HasViewport{
 			dx = - mm.getViewportMinInPx();
 			dy = 0;
 		}
-		
+		long start = System.currentTimeMillis();
 		Iterator<Point> iPoint = toDraw.iterator();
 		context.beginPath();
 		context.moveTo(toDraw.get(0).getxPos() + dx, toDraw.get(0).getyPos() + dy);
@@ -84,7 +88,8 @@ public class Curves implements HasViewport{
 			Point point = iPoint.next();
 			context.lineTo(point.getxPos() + dx, point.getyPos() + dy);
 		}
-		
+		RootPanel.get().add(new Label(System.currentTimeMillis() - start + " ms (adding lineTo - s to context)"));
+		start = System.currentTimeMillis();
 		context.save();
 		context.setStrokeStyle(info.getborderColor());
 		context.setLineWidth(info.getborderWidth());
@@ -102,17 +107,19 @@ public class Curves implements HasViewport{
 			context.restore();
 		}
 		context.closePath();	
+		RootPanel.get().add(new Label(System.currentTimeMillis() - start + " ms (stroke an fill called context)"));
 	}
 	
 	private void drawShapesOverPoints(ArrayList<Point> toDraw){
 		int dx =  - mm.getViewportMinInPx(), dy = 0;
-	
+		long start = System.currentTimeMillis();
 		for(Point point : toDraw){
 			drawShape(canvas, point, dx, dy);
 		}	
+		RootPanel.get().add(new Label(System.currentTimeMillis() - start + " ms ( point drawing)"));
 	}
 	
-	private static void drawShape(Context2d canvas, Point point, int dx, int dy){
+	private static void drawShape(CanvasWidget canvas, Point point, int dx, int dy){
 		PointDrawingInfo info = point.getActualPointDrawingInfo();
 		if(info == null || info.getType().equals(PointType.NO_SHAPE))
 			return;
@@ -135,7 +142,7 @@ public class Curves implements HasViewport{
 				height = width;
 			}
 			canvas.scale(scaleX, scaleY);
-			canvas.arc(point.getxPos() + dx, point.getyPos() + dy, height / 2, 0, Math.PI*2);
+			canvas.arc(point.getxPos() + dx, point.getyPos() + dy, height / 2, 0, Math.PI*2, false);
 			break;
 		case RECTANGLE:
 			canvas.rect(point.getxPos() + dx - width / 2, point.getyPos() + dy - height / 2, width, height);
@@ -154,7 +161,7 @@ public class Curves implements HasViewport{
 	 * @param min px in the canvas/viewport's dimension
 	 * @param max px in the canvas/viewport's dimension
 	 */
-	public void drawLinesAndShapes(int min, int max, Context2d backBuffer){
+	public void drawLinesAndShapes(int min, int max, CanvasWidget backBuffer){
 		Collections.sort(curves, GraphicalObject.getzIndexComparator());
 		for(Curve curve : curves){
 			Point prev = null;

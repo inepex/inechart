@@ -5,6 +5,7 @@ import java.util.TreeMap;
 import com.google.gwt.canvas.dom.client.Context2d;
 import com.google.gwt.canvas.dom.client.Context2d.TextAlign;
 import com.google.gwt.canvas.dom.client.Context2d.TextBaseline;
+import com.inepex.inecharting.chartwidget.model.Axis;
 import com.inepex.inecharting.chartwidget.model.GraphicalObject;
 import com.inepex.inecharting.chartwidget.model.HasViewport;
 import com.inepex.inecharting.chartwidget.model.Mark;
@@ -30,9 +31,12 @@ public class Marks extends GraphicalObject implements HasViewport{
 	private final int roundedCornerR = 5;
 	private final int markMinSize = 18;
 	
-	public Marks(Context2d curveCanvas, HorizontalAxisDrawingInfo xAxisInfo) {
+	public Marks(Context2d curveCanvas, Axis xAxis) {
 		this.curveCanvas = curveCanvas;
-		this.xAxisInfo = xAxisInfo;
+		if(xAxis == null)
+			this.xAxisInfo = HorizontalAxisDrawingInfo.getDefaultHorizontalAxisDrawingInfo();
+		else
+			this.xAxisInfo = (HorizontalAxisDrawingInfo) xAxis.getDrawingInfo();
 	}
 	
 	@Override

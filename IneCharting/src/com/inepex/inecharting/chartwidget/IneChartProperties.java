@@ -20,8 +20,6 @@ public final class IneChartProperties {
 	//sizes
 	private int chartCanvasWidth;
 	private int chartCanvasHeight;
-	private int markCanvasHeight;
-	private int chartCanvasTopPaddingPercentage;
 	//default vp position
 	private double defaultViewportMin;
 	private double defaultViewportMax;
@@ -67,11 +65,11 @@ public final class IneChartProperties {
 	}
 
 	public int getChartCanvasTopPaddingPercentage() {
-		return chartCanvasTopPaddingPercentage;
+		return 1;
 	}
 	public void setChartCanvasTopPaddingPercentage(
 			int chartCanvasTopPaddingPercentage) {
-		this.chartCanvasTopPaddingPercentage = chartCanvasTopPaddingPercentage;
+//		this.chartCanvasTopPaddingPercentage = schartCanvasTopPaddingPercentage;
 	}
 	public void setDefaultViewportPosition(double viewportMin, double viewportMax){
 		this.defaultViewportMax = viewportMax;
@@ -134,10 +132,10 @@ public final class IneChartProperties {
 		return chartCanvasBackgroundColor;
 	}
 	public int getMarkCanvasHeight() {
-		return markCanvasHeight;
+		return 1;
 	}
 	public void setMarkCanvasHeight(int markCanvasHeight) {
-		this.markCanvasHeight = markCanvasHeight;
+//		this.markCanvasHeight = markCanvasHeight;
 	}
 	public EventProperties getEventManagerProperties() {
 		return eventManagerProperties;

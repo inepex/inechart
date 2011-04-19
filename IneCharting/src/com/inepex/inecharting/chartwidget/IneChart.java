@@ -6,6 +6,8 @@ import com.google.gwt.core.client.GWT;
 import com.google.gwt.event.shared.HandlerRegistration;
 import com.google.gwt.user.client.ui.AbsolutePanel;
 import com.google.gwt.user.client.ui.Composite;
+import com.google.gwt.user.client.ui.Label;
+import com.google.gwt.user.client.ui.RootPanel;
 import com.inepex.inecharting.chartwidget.event.EventManager;
 import com.inepex.inecharting.chartwidget.event.ExtremesChangeEvent;
 import com.inepex.inecharting.chartwidget.event.ExtremesChangeHandler;
@@ -105,9 +107,13 @@ public class IneChart extends Composite implements HasViewport{
 	public void addCurve(Curve curve){
 		curves.add(curve);
 		//calculate extremes of curves and set axes
+		long start = System.currentTimeMillis();
 		modelManager.getAxisCalculator().calculateAxes(curves, xAxis, yAxis, y2Axis);
+		RootPanel.get().add(new Label(System.currentTimeMillis() - start + " ms (Axis calc at the model)"));
+		start = System.currentTimeMillis();
 		//calculate points
 		modelManager.getPointsForCurve(curve, false);
+		RootPanel.get().add(new Label(System.currentTimeMillis() - start + " ms (point setting for curve at the model)"));
 		//display curve
 		drawingFactory.addCurve(curve);
 	}

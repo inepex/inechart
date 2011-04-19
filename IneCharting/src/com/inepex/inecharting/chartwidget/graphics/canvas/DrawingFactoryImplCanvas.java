@@ -3,10 +3,7 @@ package com.inepex.inecharting.chartwidget.graphics.canvas;
 import java.util.ArrayList;
 import java.util.TreeMap;
 
-import com.google.gwt.canvas.client.Canvas;
-import com.google.gwt.canvas.dom.client.CanvasPixelArray;
-import com.google.gwt.canvas.dom.client.Context2d;
-import com.google.gwt.canvas.dom.client.ImageData;
+
 import com.google.gwt.core.client.JavaScriptException;
 import com.google.gwt.user.client.ui.AbsolutePanel;
 import com.google.gwt.user.client.ui.Widget;
@@ -24,12 +21,13 @@ import com.inepex.inecharting.chartwidget.model.Point;
 import com.inepex.inecharting.chartwidget.model.State;
 import com.inepex.inecharting.chartwidget.properties.HorizontalAxisDrawingInfo;
 import com.inepex.inecharting.chartwidget.properties.VerticalAxisDrawingInfo;
+import com.inepex.inegraphics.impl.client.canvas.CanvasWidget;
 
 public class DrawingFactoryImplCanvas extends DrawingFactory implements StateChangeHandler{
 	protected Axes axes;
 	protected Curves curves;
 	protected Marks marks;
-	protected Context2d curveCanvasCtx;
+	protected CanvasWidget curveCanvasCtx;
 	protected Widget xAxisCanvas;
 	protected Widget yAxisCanvas;
 	protected Widget y2AxisCanvas;
@@ -50,6 +48,7 @@ public class DrawingFactoryImplCanvas extends DrawingFactory implements StateCha
 		curveCanvasCtx.setFillStyle(properties.getChartCanvasBackgroundColor());
 		curveCanvasCtx.fillRect(0, 0, properties.getChartCanvasWidth(), properties.getChartCanvasHeight());
 		curveCanvasCtx.restore();
+//		curveCanvasCtx.translate(0.5, 0.5);
 		//gridlines
 //		axes.drawGridLines();
 		//curves
@@ -66,48 +65,52 @@ public class DrawingFactoryImplCanvas extends DrawingFactory implements StateCha
 		this.properties = properties;
 		this.chartMainPanel = chartMainPanel;
 		this.modelManager = modelManager;
-		chartCanvas = Canvas.createIfSupported();
 		
-		chartCanvas.setPixelSize(properties.getChartCanvasWidth(), properties.getChartCanvasHeight());
-		((Canvas) chartCanvas).setCoordinateSpaceHeight(properties.getChartCanvasHeight());
-		((Canvas) chartCanvas).setCoordinateSpaceWidth(properties.getChartCanvasWidth());
-		curveCanvasCtx = ((Canvas) chartCanvas).getContext2d();
+//		chartCanvas = Canvas.createIfSupported();
+		
+//		chartCanvas.setPixelSize(properties.getChartCanvasWidth(), properties.getChartCanvasHeight());
+//		((Canvas) chartCanvas).setCoordinateSpaceHeight(properties.getChartCanvasHeight());
+//		((Canvas) chartCanvas).setCoordinateSpaceWidth(properties.getChartCanvasWidth());
+//		curveCanvasCtx = ((Canvas) chartCanvas).getContext2d();
+		curveCanvasCtx = new CanvasWidget(properties.getChartCanvasWidth(), properties.getChartCanvasHeight());
+		this.chartCanvas = curveCanvasCtx;
+		curveCanvasCtx.translate(0.5, 0.5);
 		curveCanvasCtx.save();
 		curveCanvasCtx.setFillStyle(properties.getChartCanvasBackgroundColor());
 		curveCanvasCtx.fillRect(0, 0, properties.getChartCanvasWidth(), properties.getChartCanvasHeight());
 		curveCanvasCtx.restore();
 		axes = new Axes(curveCanvasCtx, modelManager, properties);
 	
-		if(xAxis != null){
-			xAxisCanvas = Canvas.createIfSupported();
-			xAxisCanvas.setPixelSize(properties.getChartCanvasWidth(), ((HorizontalAxisDrawingInfo)xAxis.getDrawingInfo()).getAxisPanelHeight());
-			((Canvas) xAxisCanvas).setCoordinateSpaceHeight( ((HorizontalAxisDrawingInfo)xAxis.getDrawingInfo()).getAxisPanelHeight());
-			((Canvas) xAxisCanvas).setCoordinateSpaceWidth(properties.getChartCanvasWidth());
-			
-			axes.addXAxis(xAxis, ((Canvas) xAxisCanvas).getContext2d());
-		}
-		if(y2Axis != null && ((VerticalAxisDrawingInfo)y2Axis.getDrawingInfo()).getOffChartCanvasWidth() > 0){
-			y2AxisCanvas = Canvas.createIfSupported();
-			y2AxisCanvas.setPixelSize(((VerticalAxisDrawingInfo)y2Axis.getDrawingInfo()).getOffChartCanvasWidth(),  properties.getChartCanvasHeight());
-			((Canvas) y2AxisCanvas).setCoordinateSpaceHeight(  properties.getChartCanvasHeight());
-			((Canvas) y2AxisCanvas).setCoordinateSpaceWidth(((VerticalAxisDrawingInfo)y2Axis.getDrawingInfo()).getOffChartCanvasWidth());
-			
-			axes.addY2Axis(y2Axis, ((Canvas) y2AxisCanvas).getContext2d());
-		}
-		else
-			axes.addY2Axis(y2Axis, null);
-		
-		if(yAxis != null &&((VerticalAxisDrawingInfo)yAxis.getDrawingInfo()).getOffChartCanvasWidth() > 0){
-			yAxisCanvas = Canvas.createIfSupported();
-			yAxisCanvas.setPixelSize(((VerticalAxisDrawingInfo)yAxis.getDrawingInfo()).getOffChartCanvasWidth(), properties.getChartCanvasHeight());
-			((Canvas) yAxisCanvas).setCoordinateSpaceHeight(  properties.getChartCanvasHeight());
-			((Canvas) yAxisCanvas).setCoordinateSpaceWidth(((VerticalAxisDrawingInfo)yAxis.getDrawingInfo()).getOffChartCanvasWidth());
-		
-			axes.addYAxis(yAxis, ((Canvas) yAxisCanvas).getContext2d());
-		}
-		else
-			axes.addYAxis(yAxis,null);
-		marks = new Marks(curveCanvasCtx, (HorizontalAxisDrawingInfo) xAxis.getDrawingInfo());
+//		if(xAxis != null){
+//			xAxisCanvas = Canvas.createIfSupported();
+//			xAxisCanvas.setPixelSize(properties.getChartCanvasWidth(), ((HorizontalAxisDrawingInfo)xAxis.getDrawingInfo()).getAxisPanelHeight());
+//			((Canvas) xAxisCanvas).setCoordinateSpaceHeight( ((HorizontalAxisDrawingInfo)xAxis.getDrawingInfo()).getAxisPanelHeight());
+//			((Canvas) xAxisCanvas).setCoordinateSpaceWidth(properties.getChartCanvasWidth());
+//			
+//			axes.addXAxis(xAxis, ((Canvas) xAxisCanvas).getContext2d());
+//		}
+//		if(y2Axis != null && ((VerticalAxisDrawingInfo)y2Axis.getDrawingInfo()).getOffChartCanvasWidth() > 0){
+//			y2AxisCanvas = Canvas.createIfSupported();
+//			y2AxisCanvas.setPixelSize(((VerticalAxisDrawingInfo)y2Axis.getDrawingInfo()).getOffChartCanvasWidth(),  properties.getChartCanvasHeight());
+//			((Canvas) y2AxisCanvas).setCoordinateSpaceHeight(  properties.getChartCanvasHeight());
+//			((Canvas) y2AxisCanvas).setCoordinateSpaceWidth(((VerticalAxisDrawingInfo)y2Axis.getDrawingInfo()).getOffChartCanvasWidth());
+//			
+//			axes.addY2Axis(y2Axis, ((Canvas) y2AxisCanvas).getContext2d());
+//		}
+//		else
+//			axes.addY2Axis(y2Axis, null);
+//		
+//		if(yAxis != null &&((VerticalAxisDrawingInfo)yAxis.getDrawingInfo()).getOffChartCanvasWidth() > 0){
+//			yAxisCanvas = Canvas.createIfSupported();
+//			yAxisCanvas.setPixelSize(((VerticalAxisDrawingInfo)yAxis.getDrawingInfo()).getOffChartCanvasWidth(), properties.getChartCanvasHeight());
+//			((Canvas) yAxisCanvas).setCoordinateSpaceHeight(  properties.getChartCanvasHeight());
+//			((Canvas) yAxisCanvas).setCoordinateSpaceWidth(((VerticalAxisDrawingInfo)yAxis.getDrawingInfo()).getOffChartCanvasWidth());
+//		
+//			axes.addYAxis(yAxis, ((Canvas) yAxisCanvas).getContext2d());
+//		}
+//		else
+//			axes.addYAxis(yAxis,null);
+//		marks = new Marks(curveCanvasCtx, xAxis);
 		
 	}
 
@@ -116,15 +119,14 @@ public class DrawingFactoryImplCanvas extends DrawingFactory implements StateCha
 		// TODO 
 		chartMainPanel.setPixelSize(properties.getWidgetWidth(), properties.getWidgetHeight());
 		int dx = 0,dy = 0;
-		chartMainPanel.add(chartCanvas,0,0);
-		chartMainPanel.add(xAxisCanvas,0,properties.getChartCanvasHeight());
+		chartMainPanel.add(curveCanvasCtx,0,0);
+//		chartMainPanel.add(xAxisCanvas,0,properties.getChartCanvasHeight());
 		
 		
 	}
 
 	@Override
 	public void addCurve(Curve curve) {
-
 		EventManager.get().setReadyForEvents(false);
 		
 		//bg color
@@ -133,16 +135,16 @@ public class DrawingFactoryImplCanvas extends DrawingFactory implements StateCha
 		curveCanvasCtx.fillRect(0, 0, properties.getChartCanvasWidth(), properties.getChartCanvasHeight());
 		curveCanvasCtx.restore();
 		//gridlines
-		axes.drawGridLines();
+//		axes.drawGridLines();
 		//curves
 		if(curves == null)
 			curves = new Curves(curveCanvasCtx, curve, modelManager, properties);
 		else
 			curves.addCurve(curve);
 		//axes
-		axes.setViewport(modelManager.getViewportMin(), modelManager.getViewportMax());
+//		axes.setViewport(modelManager.getViewportMin(), modelManager.getViewportMax());
 		//marks
-		marks.setViewport(modelManager.getViewportMin(), modelManager.getViewportMax());
+//		marks.setViewport(modelManager.getViewportMin(), modelManager.getViewportMax());
 		EventManager.get().setReadyForEvents(true);
 	}
 
@@ -155,7 +157,7 @@ public class DrawingFactoryImplCanvas extends DrawingFactory implements StateCha
 		curveCanvasCtx.fillRect(0, 0, properties.getChartCanvasWidth(), properties.getChartCanvasHeight());
 		curveCanvasCtx.restore();
 		//gridlines
-		axes.drawGridLines();
+//		axes.drawGridLines();
 		//curves
 		curves.removeCurve(curve);
 		//axes

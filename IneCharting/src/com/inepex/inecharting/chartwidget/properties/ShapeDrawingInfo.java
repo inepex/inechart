@@ -3,7 +3,7 @@ package com.inepex.inecharting.chartwidget.properties;
 public class ShapeDrawingInfo {
 
 	public static ShapeDrawingInfo getDefaultShapeDrawingInfo(){
-		return new ShapeDrawingInfo("blue", 1, "lightblue", 0.5, true);
+		return new ShapeDrawingInfo("#000066", 1, "#0066CC", 0.5, true);
 	}
 	
 	protected String borderColor;

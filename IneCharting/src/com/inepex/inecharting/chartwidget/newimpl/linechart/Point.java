@@ -3,7 +3,7 @@ package com.inepex.inecharting.chartwidget.newimpl.linechart;
 import java.util.Comparator;
 
 
-public class Point {
+public class Point implements Comparable<Point>{
 	public static Comparator<Point> dataXComparator(){
 		return new Comparator<Point>() {
 			
@@ -32,10 +32,11 @@ public class Point {
 		};
 	}
 	public static int distance(Point o1, Point o2){
-		return (o2.posX - o1.posX)^2 + (o2.posY - o1.posY)^2;
+		return (int)Math.sqrt((Math.pow((o2.posX - o1.posX),2) + Math.pow((o2.posY - o1.posY),2)));
 	}
 	private double dataX, dataY;
 	private int posX, posY;
+	Curve parent; 
 	
 	public Point(double dataX, double dataY) {
 		this.dataX = dataX;
@@ -92,5 +93,42 @@ public class Point {
 	 */
 	public void setPosY(int posY) {
 		this.posY = posY;
+	}
+	
+	private static int lastCompareEqualButDiffCurve = 1; 
+	@Override
+	public int compareTo(Point arg0) {
+		if(arg0.parent.equals(this.parent)){
+			if(dataX > arg0.dataX)
+				return 1;
+			else if(dataX < arg0.dataX)
+				return -1;
+			else{
+				if(dataY > arg0.dataY)
+					return 1;
+				else if(dataY < arg0.dataY)
+					return -1;
+				else 
+					return 0;
+			}
+		}
+		else{
+			if(dataX > arg0.dataX)
+				return 1;
+			else if(dataX < arg0.dataX)
+				return -1;
+			else{
+				if(dataY > arg0.dataY)
+					return 1;
+				else{
+					lastCompareEqualButDiffCurve = -lastCompareEqualButDiffCurve;
+					return lastCompareEqualButDiffCurve;
+				}
+			}
+		}
+	}
+	
+	public Curve getParent() {
+		return parent;
 	}
 }

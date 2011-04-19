@@ -10,9 +10,11 @@ import com.inepex.inecharting.chartwidget.newimpl.axes.Axis.AxisType;
 import com.inepex.inecharting.chartwidget.newimpl.axes.Tick;
 import com.inepex.inecharting.chartwidget.newimpl.misc.HasShadow;
 import com.inepex.inecharting.chartwidget.newimpl.misc.HasZIndex;
+import com.inepex.inecharting.chartwidget.newimpl.misc.ZIndexComparator;
 import com.inepex.inecharting.chartwidget.newimpl.properties.Color;
 import com.inepex.inecharting.chartwidget.newimpl.properties.LineProperties;
 import com.inepex.inecharting.chartwidget.newimpl.properties.ShapeProperties;
+import com.inepex.inecharting.chartwidget.newimpl.shape.Shape;
 import com.inepex.inegraphics.shared.gobjects.Path;
 
 /**
@@ -23,19 +25,19 @@ import com.inepex.inegraphics.shared.gobjects.Path;
  * @author Miklós Süveges / Inepex Ltd.
  *
  */
-public class Curve implements HasZIndex,HasShadow{
+public class Curve implements HasZIndex,HasShadow, Comparable<Curve>{
 
-	ArrayList<Point> uncalculatedPoints;
+	ArrayList<Point> uncalculatedPoints = new ArrayList<Point>();
 	/**
 	 * All of the points
 	 * in ascending order, the ordering key is: dataX
 	 */
-	ArrayList<Point> points;
+	ArrayList<Point> points = new ArrayList<Point>();
 	/**
 	 * Points inside the viewPort
 	 * in ascending order, the ordering key is: posX
 	 */
-	ArrayList<Point> visiblePoints;
+	ArrayList<Point> visiblePoints = new ArrayList<Point>();
 	/**
 	 * Stores information about lineCurve's discontinuity
 	 * (If a point present in this Collection then there must not be line to next point)
@@ -51,8 +53,11 @@ public class Curve implements HasZIndex,HasShadow{
 	//line
 	LineProperties lineProperties;
 	//points
-	ShapeProperties pointProperties;
+	Shape normalPointShape;
+	Shape selectedPointShape;
 	
+	//shadow
+	Color shadowColor;
 	double shadowOffsetX=0, shadowOffsetY=0;
 	int zIndex = 0;
 	//Axis
@@ -93,14 +98,13 @@ public class Curve implements HasZIndex,HasShadow{
 	public void addPoint(Point point){
 		double x = point.getDataX();
 		double y = point.getDataY();
-		if(points == null){
-			points = new ArrayList<Point>();
-			uncalculatedPoints = new ArrayList<Point>();
+		if(points.size() == 0){
 			xMax = xMin = x;
 			yMax = yMin = y;
 		}
 		points.add(point);
 		uncalculatedPoints.add(point);
+		point.parent = this;
 		
 		//extremes
 		if(x > xMax){
@@ -240,10 +244,7 @@ public class Curve implements HasZIndex,HasShadow{
 	 * @return visible points
 	 */
 	ArrayList<Point> updateVisiblePoints(double vpMin, double vpMax, int overlapFilterDistance){
-		if(visiblePoints == null)
-			visiblePoints = new ArrayList<Point>();
-		else
-			visiblePoints.clear();
+		visiblePoints.clear();
 		for(Point point : points){
 			if(point.getDataX() > vpMax)
 				break;
@@ -265,11 +266,10 @@ public class Curve implements HasZIndex,HasShadow{
 				//we found overlapping points
 				if(actual != visiblePoints.get(--i)){
 					//dont skip the first not overlapping point
-					
 					Point imgPoint = new Point();
 					imgPoint.setPosX((startPoint.getPosX() + actual.getPosX()) / 2);
 					imgPoint.setPosY((startPoint.getPosY() + actual.getPosY()) / 2);
-					
+					imgPoint.parent = this;
 					cleared.add(imgPoint);
 				}
 				else
@@ -374,7 +374,6 @@ public class Curve implements HasZIndex,HasShadow{
 	public AxisType getyAxis() {
 		return yAxis;
 	}
-	
 
 	/**
 	 * @param yAxis the yAxis to set
@@ -398,42 +397,48 @@ public class Curve implements HasZIndex,HasShadow{
 		ArrayList<Point> calculated = new ArrayList<Point>();
 		Collections.sort(uncalculatedPoints, Point.dataXComparator());
 		if(onlyUncalculated){
+			boolean ready = false;
 			for(Point point : uncalculatedPoints){
-				if(point.getDataX() > to)
+				if(ready)
 					break;
-				else if(point.getDataX() > from){
+				if(point.getDataX() > to){
+					calculatorInst.calculatePoint(point, yAxis);
+					calculated.add(point);
+					ready = true;
+				}
+				else if(point.getDataX() > from || (getNextPoint(point) != null && getNextPoint(point).getDataX() > from)){
 					calculatorInst.calculatePoint(point, yAxis);
 					calculated.add(point);
 				}
 			}
 		}
 		else{
+			boolean ready = false;
 			for(Point point : points){
-				if(point.getDataX() > to)
+				if(ready)
 					break;
-				else if(point.getDataX() > from){
+				if(point.getDataX() > to){
+					calculatorInst.calculatePoint(point, yAxis);
+					calculated.add(point);
+					ready = true;
+				}
+				else if(point.getDataX() > from || (getNextPoint(point) != null && getNextPoint(point).getDataX() > from)){
 					calculatorInst.calculatePoint(point, yAxis);
 					calculated.add(point);
 				}
 			}
 		}
-		if(calculated.size() > 0){
-			Point tmp = getPreviousPoint(calculated.get(0));
-			Point tmp2 = getNextPoint(calculated.get(calculated.size()-1));
-			if(tmp != null)
-				calculatorInst.calculatePoint(tmp,yAxis);
-			if(tmp2 != null)
-				calculatorInst.calculatePoint(tmp2, yAxis);
-			if(tmp2 != null)
-				calculated.add(tmp2);
-			if(tmp != null)
-				calculated.add(tmp);
-		}
+		
 		for(Point point : calculated){
 			uncalculatedPoints.remove(point);
 		}
 	}
 	
+	/**
+	 * All of the points outside the vp will be marked as uncalculated
+	 * @param viewportMin
+	 * @param viewportMax
+	 */
 	void updateUncalculatedPoints(double viewportMin, double viewportMax){
 		uncalculatedPoints.clear();
 		for(Point point : points){
@@ -442,6 +447,7 @@ public class Curve implements HasZIndex,HasShadow{
 			}
 		}
 	}
+
 	
 	public Point getPointBefore(double x){
 		Point last = null;
@@ -462,7 +468,9 @@ public class Curve implements HasZIndex,HasShadow{
 	}
 	
 	/**
-	 * 
+	 * A {@link Path} containing points from the point before left side of vp, 
+	 * to the point after the right side of vp (both inclusive).
+	 * Null if the curve got no points in the interval above.
 	 * @return a path with null context, no fill, no stroke -> 'bare' path
 	 */
 	Path getVisiblePath(){
@@ -507,7 +515,6 @@ public class Curve implements HasZIndex,HasShadow{
 	}
 
 	
-	
 	@Override
 	public void setShadowOffsetX(double offsetX) {
 		this.shadowOffsetX = offsetX;
@@ -537,4 +544,70 @@ public class Curve implements HasZIndex,HasShadow{
 	public int getZIndex() {
 		return this.zIndex;
 	}
+
+	@Override
+	public Color getShadowColor() {
+		return shadowColor;
+	}
+
+	@Override
+	public void setShadowColor(Color shadowColor) {
+		this.shadowColor = shadowColor;
+	}
+
+	/**
+	 * @return the normalPointShape
+	 */
+	public Shape getNormalPointShape() {
+		return normalPointShape;
+	}
+
+	/**
+	 * Sets the shape which will represent this curve's point in normal state
+	 * @param normalPointShape the normalPointShape to set
+	 */
+	public void setNormalPointShape(Shape normalPointShape) {
+		this.normalPointShape = normalPointShape;
+	}
+
+	/**
+	 * @return the selectedPointShape
+	 */
+	public Shape getSelectedPointShape() {
+		return selectedPointShape;
+	}
+
+	/**
+	 * Sets the shape which will represent this curve's point in selected state
+	 * @param selectedPointShape the selectedPointShape to set
+	 */
+	public void setSelectedPointShape(Shape selectedPointShape) {
+		this.selectedPointShape = selectedPointShape;
+	}
+
+	@Override
+	public int compareTo(Curve o) {
+		if(o.equals(this))
+			return 0;
+		ZIndexComparator zC = new ZIndexComparator();
+		int c1 = zC.compare(this, o); 
+		if( c1> 0)
+			return 1;
+		else if (c1 < 0)
+			return -1;
+		else{
+			if(xMax > o.xMax)
+				return 1;
+			else if(xMax < o.xMax)
+				return -1;
+			else if(xMin > o.xMin)
+				return 1;
+			else if(xMin < o.xMin)
+				return -1;
+			else
+				return 0;
+		}
+	}
+	
+	
 }

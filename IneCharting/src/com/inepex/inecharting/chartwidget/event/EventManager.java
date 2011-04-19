@@ -6,11 +6,17 @@ import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;
 import com.google.gwt.event.dom.client.HandlesAllMouseEvents;
 import com.google.gwt.event.dom.client.MouseDownEvent;
+import com.google.gwt.event.dom.client.MouseDownHandler;
 import com.google.gwt.event.dom.client.MouseMoveEvent;
+import com.google.gwt.event.dom.client.MouseMoveHandler;
 import com.google.gwt.event.dom.client.MouseOutEvent;
+import com.google.gwt.event.dom.client.MouseOutHandler;
 import com.google.gwt.event.dom.client.MouseOverEvent;
+import com.google.gwt.event.dom.client.MouseOverHandler;
 import com.google.gwt.event.dom.client.MouseUpEvent;
+import com.google.gwt.event.dom.client.MouseUpHandler;
 import com.google.gwt.event.dom.client.MouseWheelEvent;
+import com.google.gwt.event.dom.client.MouseWheelHandler;
 import com.google.gwt.event.shared.GwtEvent;
 import com.google.gwt.event.shared.HandlerManager;
 import com.google.gwt.event.shared.HandlerRegistration;
@@ -32,7 +38,7 @@ import com.inepex.inecharting.chartwidget.model.State;
  * @author Miklós Süveges / Inepex Ltd.
  *
  */
-public class EventManager extends HandlesAllMouseEvents implements ClickHandler{
+public class EventManager extends HandlesAllMouseEvents{
 	public static EventManager instance = null;
 	
 	public static EventManager get(){
@@ -72,7 +78,7 @@ public class EventManager extends HandlesAllMouseEvents implements ClickHandler{
 		chartCanvas.addDomHandler(this, MouseOutEvent.getType());
 		chartCanvas.addDomHandler(this, MouseOverEvent.getType());
 		chartCanvas.addDomHandler(this, MouseWheelEvent.getType());
-		chartCanvas.addDomHandler(this, ClickEvent.getType());
+//		chartCanvas.addDomHandler(this, ClickEvent.getType());
 		addExtremesChangeHandler(ModelManager.get().getMarkContainer());
 	}
 
@@ -223,8 +229,8 @@ public class EventManager extends HandlesAllMouseEvents implements ClickHandler{
 	public void onMouseMove(MouseMoveEvent event) {
 		mouseX = event.getRelativeX(chartCanvas.getElement());
 		mouseY = event.getRelativeY(chartCanvas.getElement());
-		if(readyForEvents)
-			updateSelection();
+//		if(readyForEvents)
+//			updateSelection();
 	}
 
 	@Override
@@ -243,12 +249,12 @@ public class EventManager extends HandlesAllMouseEvents implements ClickHandler{
 		event.preventDefault();
 	}
 
-	@Override
-	public void onClick(ClickEvent event) {
-		event.preventDefault();
-		if(readyForEvents)
-			updateFocus();
-	}	
+//	@Override
+//	public void onClick(ClickEvent event) {
+//		event.preventDefault();
+//		if(readyForEvents)
+//			updateFocus();
+//	}	
 
 
 	/**

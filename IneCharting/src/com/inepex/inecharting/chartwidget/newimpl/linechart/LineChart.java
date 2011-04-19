@@ -1,6 +1,7 @@
 package com.inepex.inecharting.chartwidget.newimpl.linechart;
 
 import java.util.ArrayList;
+import java.util.TreeMap;
 
 import net.sourceforge.htmlunit.corejs.javascript.ast.Yield;
 
@@ -8,12 +9,17 @@ import com.inepex.inecharting.chartwidget.newimpl.IneChartModul;
 import com.inepex.inecharting.chartwidget.newimpl.axes.Axes;
 import com.inepex.inecharting.chartwidget.newimpl.axes.Axis;
 import com.inepex.inecharting.chartwidget.newimpl.axes.Axis.AxisType;
+import com.inepex.inecharting.chartwidget.newimpl.linechart.LineChartProperties.PointSelectionMode;
 import com.inepex.inecharting.chartwidget.newimpl.properties.Color;
 import com.inepex.inecharting.chartwidget.newimpl.properties.LineProperties;
+import com.inepex.inecharting.chartwidget.newimpl.properties.LineProperties.LineStyle;
 import com.inepex.inegraphics.impl.client.DrawingAreaImplCanvas;
 import com.inepex.inegraphics.impl.client.GraphicalObjectEventHandler;
 import com.inepex.inegraphics.impl.client.InteractiveGraphicalObject;
 import com.inepex.inegraphics.shared.Context;
+import com.inepex.inegraphics.shared.DrawingArea;
+import com.inepex.inegraphics.shared.GraphicalObjectContainer;
+import com.inepex.inegraphics.shared.gobjects.GraphicalObject;
 import com.inepex.inegraphics.shared.gobjects.Path;
 
 public class LineChart extends IneChartModul implements GraphicalObjectEventHandler{
@@ -31,14 +37,20 @@ public class LineChart extends IneChartModul implements GraphicalObjectEventHand
 	Axes axes;
 	double yMax, y2Max, xMax, yMin, y2Min, xMin, yRatio, y2Ratio, xRatio;
 	
+	//interavtive- and graphicalobjects
+	TreeMap<GraphicalObject, Point> interactivePoints = new TreeMap<GraphicalObject, Point>();
+	ArrayList<Point> selectedPoints = new ArrayList<Point>();
+	TreeMap<Curve, GraphicalObjectContainer> gosPerCurve;
+	TreeMap<Curve, TreeMap<Point, GraphicalObjectContainer>> gosPerPoint;
+	boolean redrawNeeded = false;
+	
 	public LineChart(DrawingAreaImplCanvas canvas, Axes axes) {
 		super(canvas);
+		canvas.addGraphicalObjectEventHandler(this);
 		this.axes = axes;
 	}
 
 	
-
-
 	protected void calculateAxes(double min, double max){
 		
 	}
@@ -63,18 +75,6 @@ public class LineChart extends IneChartModul implements GraphicalObjectEventHand
 			viewportChanged = true;
 		viewportMin += dX;
 		viewportMax += dX;
-	}
-
-	@Override
-	public	void onMouseClick(ArrayList<InteractiveGraphicalObject> sourceGOs) {
-		// TODO Auto-generated method stub
-		
-	}
-
-	@Override
-	public	void onMouseOver(ArrayList<InteractiveGraphicalObject> sourceGOs) {
-		// TODO Auto-generated method stub
-		
 	}
 
 	@Override
@@ -198,6 +198,7 @@ public class LineChart extends IneChartModul implements GraphicalObjectEventHand
 	}
 	
 	protected void curveToGOs(Curve curve){
+		GraphicalObjectContainer gos = new  GraphicalObjectContainer();
 		
 		//linechart
 		Path path = curve.getVisiblePath();
@@ -207,7 +208,11 @@ public class LineChart extends IneChartModul implements GraphicalObjectEventHand
 			Path line = new Path(path);
 			line.setContext(createLineContext(curve));
 			line.setStroke(true);
-			canvas.addGraphicalObject(line);
+			line.setzIndex(curve.getZIndex());
+			if(curve.getLineProperties().getStyle().equals(LineStyle.DASHED))
+				gos.addGraphicalObject(DrawingArea.createDashedLinePath(line, curve.getLineProperties().getDashStrokeLength(), curve.getLineProperties().getDashDistance()));
+			else
+				gos.addGraphicalObject(line);
 		}
 		if(curve.toCanvasYFills != null && curve.toCanvasYFills.size() > 0){
 			for(int i : curve.toCanvasYFills.keySet()){
@@ -216,8 +221,9 @@ public class LineChart extends IneChartModul implements GraphicalObjectEventHand
 				fill.lineTo(fill.getBasePointX(), i, false);
 				fill.lineToBasePoint();
 				fill.setFill(true);
+				fill.setzIndex(curve.getZIndex());
 				fill.setContext(createFillContext(curve.toCanvasYFills.get(i)));
-				canvas.addGraphicalObject(fill);
+				gos.addGraphicalObject(fill);
 			}
 		}
 		if(curve.toCurveFills != null && curve.toCurveFills.size() > 0){
@@ -230,9 +236,10 @@ public class LineChart extends IneChartModul implements GraphicalObjectEventHand
 					fill.getPathElements().add(otherPath.getPathElements().get(i));
 				}
 				fill.lineToBasePoint();
+				fill.setzIndex(curve.getZIndex());
 				fill.setContext(createFillContext(curve.toCurveFills.get(toCurve)));
 				fill.setFill(true);
-				canvas.addGraphicalObject(fill);
+				gos.addGraphicalObject(fill);
 			}
 		}
 		if(curve.toYFills != null && curve.toYFills.size() > 0){
@@ -244,8 +251,27 @@ public class LineChart extends IneChartModul implements GraphicalObjectEventHand
 				fill.lineTo(fill.getBasePointX(), tmp.getPosY(), false);
 				fill.lineToBasePoint();
 				fill.setFill(true);
+				fill.setzIndex(curve.getZIndex());
 				fill.setContext(createFillContext(curve.toYFills.get(i)));
-				canvas.addGraphicalObject(fill);
+				gos.addGraphicalObject(fill);
+			}
+		}
+		ArrayList<Point> visiblePoints = curve.getVisiblePoints();
+		if(visiblePoints != null && visiblePoints.size() > 0){
+			//if the point can be selected if mouseOver we register the points
+			// as interactive GOs
+			if(properties.pointSelectionMode == PointSelectionMode.On_Point_Click ||
+					properties.pointSelectionMode == PointSelectionMode.On_Point_Over){
+				for(Point point : visiblePoints){
+					if(curve.normalPointShape != null){
+						this.interactivePoints.put(curve.normalPointShape.toInterActiveGraphicalObject(), point);
+						//TODO
+						//gos.addGraphicalObject(curve.normalPointShape.toGraphicalObjects());
+					}
+					else if(curve.selectedPointShape != null){
+						
+					}
+				}
 			}
 		}
 	}
@@ -270,8 +296,8 @@ public class LineChart extends IneChartModul implements GraphicalObjectEventHand
 				Color.DEFAULT_COLOR,
 				curve.shadowOffsetX,
 				curve.shadowOffsetY,
-				0.5,
-				curve.lineProperties.getLineColor().getColor());
+				curve.shadowColor == null ? Color.DEFAULT_ALPHA : curve.shadowColor.getAlpha(),
+				curve.shadowColor == null ? Color.DEFAULT_COLOR : curve.shadowColor.getColor());
 	}
 	
 	/**
@@ -330,6 +356,16 @@ public class LineChart extends IneChartModul implements GraphicalObjectEventHand
 	public void setProperties(LineChartProperties properties){
 		this.properties = properties;
 	}
-	
-	
+
+	@Override
+	public void onMouseClick(ArrayList<GraphicalObject> sourceGOs) {
+		// TODO Auto-generated method stub
+		
+	}
+
+	@Override
+	public void onMouseOver(ArrayList<GraphicalObject> sourceGOs) {
+		// TODO Auto-generated method stub
+		
+	}
 }
