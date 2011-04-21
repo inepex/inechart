@@ -28,4 +28,5 @@ public class LineChartProperties {
 	
 	PointSelectionMode pointSelectionMode;
 	
+	
 }

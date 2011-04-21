@@ -4,6 +4,7 @@ import java.util.ArrayList;
 
 import com.google.gwt.event.shared.EventBus;
 import com.google.gwt.event.shared.SimpleEventBus;
+import com.google.gwt.user.client.Timer;
 import com.google.gwt.user.client.ui.AbsolutePanel;
 import com.google.gwt.user.client.ui.Composite;
 import com.inepex.inecharting.chartwidget.newimpl.axes.Axes;
@@ -19,6 +20,9 @@ public class IneChart extends Composite {
 	private AbsolutePanel mainPanel;
 	private DrawingAreaImplCanvas drawingArea;
 	private EventBus eventBus;
+	private Timer updateTimer;
+	private int updateInterval = DEFAULT_UPDATE_INTERVAL;
+	public static final int DEFAULT_UPDATE_INTERVAL = 800;
 	
 	//properties
 	private static final int DEFAULT_PADDING = 30;
@@ -37,8 +41,17 @@ public class IneChart extends Composite {
 		mainPanel.setPixelSize(widgetWidth, widgetHeight);
 		this.drawingArea = new DrawingAreaImplCanvas(canvasWidth,canvasHeight);
 		moduls = new ArrayList<IneChartModul>();
-//		mainPanel.add(drawingArea.getCanvas(), widgetWidth-canvasWidth, widgetHeight-canvasHeight);
-		this.initWidget(drawingArea.getCanvas());
+		mainPanel.add(drawingArea.getCanvas(), widgetWidth-canvasWidth, widgetHeight-canvasHeight);
+		this.initWidget(mainPanel);
+		updateTimer = new Timer() {
+			
+			@Override
+			public void run() {
+				if(redrawNeeded())
+					update();
+			}
+		};
+		
 	}
 	
 	/*
@@ -71,14 +84,31 @@ public class IneChart extends Composite {
 	}
 	
 	public void update(){
+		updateTimer.cancel();
 		//update model, create GOs per modul
+		drawingArea.removeAllGraphicalObject();
 		for(IneChartModul modul : moduls){
 			modul.update();
+			drawingArea.addAllGraphicalObject(modul.graphicalObjectContainer);
 		}
 		//draw
 		drawingArea.update();
+		updateTimer.schedule(updateInterval);
 	}
+	
+	boolean redrawNeeded(){
+		for(IneChartModul modul : moduls){
+			if(modul.redrawNeeded)
+				return true;
+		}
+		return false;
+	}
+	
 	public DrawingAreaImplCanvas getCanvas(){
 		return this.drawingArea;
+	}
+	
+	public void setUpdateInterval(int ms){
+		this.updateInterval = ms;
 	}
 }

@@ -473,7 +473,7 @@ public class Curve implements HasZIndex,HasShadow, Comparable<Curve>{
 	 * Null if the curve got no points in the interval above.
 	 * @return a path with null context, no fill, no stroke -> 'bare' path
 	 */
-	Path getVisiblePath(){
+	Path getVisiblePath(int dx){
 		ArrayList<Point> points = getVisiblePoints();
 		if(points.size() == 0){
 			Point bef = getPointBefore(vpMin);
@@ -495,21 +495,21 @@ public class Curve implements HasZIndex,HasShadow, Comparable<Curve>{
 		if(temp != null && !discontinuities.contains(temp)){ 
 			//there is not discontuniuty
 			//TODO zIndex
-			line = new Path(temp.getPosX(), temp.getPosY(), 1, null, false, false);
+			line = new Path(temp.getPosX() + dx, temp.getPosY(), 1, null, false, false);
 		}
 		else{
-			line = new Path(points.get(i).getPosX(), points.get(i).getPosY(), 1, null, false, false);
+			line = new Path(points.get(i).getPosX() + dx, points.get(i).getPosY(), 1, null, false, false);
 			i++;
 		}
 		for(; i < points.size(); i++){
 			if(!discontinuities.contains(points.get(i)))
-				line.lineTo(points.get(i).getPosX(), points.get(i).getPosY(), false);
+				line.lineTo(points.get(i).getPosX() + dx, points.get(i).getPosY(), false);
 			else
-				line.moveTo(points.get(i).getPosX(), points.get(i).getPosY(), false);
+				line.moveTo(points.get(i).getPosX() + dx, points.get(i).getPosY(), false);
 		}
 		temp = getNextPoint(points.get(points.size() - 1));
 		if(temp != null && !discontinuities.contains(points.get(points.size() - 1))){ 
-			line.lineTo(temp.getPosX(), temp.getPosY(), false);
+			line.lineTo(temp.getPosX() + dx, temp.getPosY(), false);
 		}
 		return line;
 	}
