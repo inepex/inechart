@@ -17,7 +17,7 @@ public abstract class IneChartModul{
 	/**
 	 * @return the graphicalObjectContainer
 	 */
-	GraphicalObjectContainer getGraphicalObjectContainer() {
+	public GraphicalObjectContainer getGraphicalObjectContainer() {
 		return graphicalObjectContainer;
 	}
 
@@ -36,9 +36,9 @@ public abstract class IneChartModul{
 	
 	
 	
-	protected abstract void update();
-	protected abstract void setViewport(double startX, double stopX);
-	protected abstract void moveViewport(double dX);
+	public abstract void update();
+	public abstract void setViewport(double startX, double stopX);
+	public abstract void moveViewport(double dX);
 
 	
 }

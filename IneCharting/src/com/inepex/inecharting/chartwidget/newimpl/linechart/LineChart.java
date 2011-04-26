@@ -59,9 +59,10 @@ public class LineChart extends IneChartModul implements GraphicalObjectEventHand
 	 */
 	TreeMap<Curve, TreeMap<Point, GraphicalObjectContainer>> gosPerPoint = new  TreeMap<Curve, TreeMap<Point,GraphicalObjectContainer>>();
 		
-	public LineChart(DrawingAreaImplCanvas canvas, Axes axes) {
+	public LineChart(DrawingArea canvas, Axes axes) {
 		super(canvas);
-	
+		if (canvas instanceof DrawingAreaImplCanvas)
+			((DrawingAreaImplCanvas)canvas).addGraphicalObjectEventHandler(this);
 		this.axes = axes;
 	}
 
@@ -80,7 +81,7 @@ public class LineChart extends IneChartModul implements GraphicalObjectEventHand
 	}	
 	
 	@Override
-	protected void setViewport(double startX, double stopX) {
+	public void setViewport(double startX, double stopX) {
 		if(startX != viewportMin || stopX != viewportMax)
 			viewportResized = true;
 		viewportMax = stopX;
@@ -88,7 +89,7 @@ public class LineChart extends IneChartModul implements GraphicalObjectEventHand
 	}
 
 	@Override
-	protected void moveViewport(double dX) {
+	public void moveViewport(double dX) {
 		if(dX != 0)
 			viewportChanged = true;
 		viewportMin += dX;
@@ -96,7 +97,7 @@ public class LineChart extends IneChartModul implements GraphicalObjectEventHand
 	}
 
 	@Override
-	protected void update() {
+	public void update() {
 		//if no property defined yet, then use the default
 		if(properties == null)
 			properties = LineChartProperties.getDefaultLineChartProperties();
@@ -314,9 +315,11 @@ public class LineChart extends IneChartModul implements GraphicalObjectEventHand
 			for(GraphicalObject go : gosPerCurve.get(curve).getGraphicalObjects()){
 				graphicalObjectContainer.addGraphicalObject(go);
 			}
-			for(Point point : gosPerPoint.get(curve).keySet()){
-				for(GraphicalObject go : gosPerPoint.get(curve).get(point).getGraphicalObjects()){
-					graphicalObjectContainer.addGraphicalObject(go);
+			if (gosPerPoint.get(curve) != null) {
+				for(Point point : gosPerPoint.get(curve).keySet()){
+					for(GraphicalObject go : gosPerPoint.get(curve).get(point).getGraphicalObjects()){
+						graphicalObjectContainer.addGraphicalObject(go);
+					}
 				}
 			}
 		}
@@ -326,8 +329,10 @@ public class LineChart extends IneChartModul implements GraphicalObjectEventHand
 	void removeAllGORelatedToCurve(Curve curve){
 		for(GraphicalObject go : gosPerCurve.get(curve).getGraphicalObjects())
 			graphicalObjectContainer.removeGraphicalObject(go);
-		for(Point p : gosPerPoint.get(curve).keySet())
-			removeAllGORelatedToPoint(p);
+		if (gosPerPoint.get(curve) != null){
+			for(Point p : gosPerPoint.get(curve).keySet())
+				removeAllGORelatedToPoint(p);
+		}
 		
 	}
 	
@@ -502,12 +507,14 @@ public class LineChart extends IneChartModul implements GraphicalObjectEventHand
 	 */
 	public void setProperties(LineChartProperties properties){
 		this.properties = properties;
-		if(properties.pointSelectionMode == PointSelectionMode.Closest_To_Cursor){
-			((DrawingAreaImplCanvas) canvas).addMouseMoveHandler(this);
-			((DrawingAreaImplCanvas) canvas).addMouseOutHandler(this);
+		if (canvas instanceof DrawingAreaImplCanvas) {
+			if(properties.pointSelectionMode == PointSelectionMode.Closest_To_Cursor){
+				((DrawingAreaImplCanvas) canvas).addMouseMoveHandler(this);
+				((DrawingAreaImplCanvas) canvas).addMouseOutHandler(this);
+			}
+			else
+				((DrawingAreaImplCanvas) canvas).addGraphicalObjectEventHandler(this);
 		}
-		else
-			((DrawingAreaImplCanvas) canvas).addGraphicalObjectEventHandler(this);
 	}
 
 	@Override
