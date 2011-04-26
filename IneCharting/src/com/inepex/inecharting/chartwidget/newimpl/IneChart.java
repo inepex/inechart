@@ -10,6 +10,7 @@ import com.google.gwt.user.client.ui.Composite;
 import com.inepex.inecharting.chartwidget.newimpl.axes.Axes;
 import com.inepex.inecharting.chartwidget.newimpl.linechart.LineChart;
 import com.inepex.inecharting.chartwidget.newimpl.linechart.LineChartProperties;
+import com.inepex.inecharting.chartwidget.newimpl.piechart.PieChart;
 import com.inepex.inegraphics.impl.client.DrawingAreaImplCanvas;
 import com.inepex.inegraphics.impl.client.canvas.Canvas;
 import com.inepex.inegraphics.impl.client.canvas.CanvasWidget;
@@ -71,6 +72,12 @@ public class IneChart extends Composite {
 	public LineChart createLineChart(LineChartProperties properties){
 		LineChart chart = createLineChart();
 		chart.setProperties(properties);
+		return chart;
+	}
+	
+	public PieChart createPieChart(){
+		PieChart chart = new PieChart(drawingArea);
+		moduls.add(chart);
 		return chart;
 	}
 	

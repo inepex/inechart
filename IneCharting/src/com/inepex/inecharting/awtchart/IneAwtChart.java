@@ -6,6 +6,7 @@ import com.inepex.inecharting.chartwidget.newimpl.IneChartModul;
 import com.inepex.inecharting.chartwidget.newimpl.axes.Axes;
 import com.inepex.inecharting.chartwidget.newimpl.linechart.LineChart;
 import com.inepex.inecharting.chartwidget.newimpl.linechart.LineChartProperties;
+import com.inepex.inecharting.chartwidget.newimpl.piechart.PieChart;
 import com.inepex.inegraphics.awt.DrawingAreaAwt;
 
 public class IneAwtChart {
@@ -48,6 +49,11 @@ public class IneAwtChart {
 		return chart;
 	}
 	
+	public PieChart createPieChart(){
+		PieChart chart = new PieChart(drawingArea);
+		moduls.add(chart);
+		return chart;
+	}
 	
 	/* public methods */
 	public void setViewport(double startX, double stopX){
