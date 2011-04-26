@@ -14,6 +14,8 @@ public class Rectangle extends Shape {
 	int width, height, roundedCornerR;
 	
 
+	
+
 	public Rectangle(int width, int height){
 		this(width, height, ShapeProperties.defaultShapeProperties());
 	}
@@ -94,4 +96,45 @@ public class Rectangle extends Shape {
 			return inner;
 	}
 
+	/**
+	 * @return the width
+	 */
+	public int getWidth() {
+		return width;
+	}
+
+	/**
+	 * @param width the width to set
+	 */
+	public void setWidth(int width) {
+		this.width = width;
+	}
+
+	/**
+	 * @return the height
+	 */
+	public int getHeight() {
+		return height;
+	}
+
+	/**
+	 * @param height the height to set
+	 */
+	public void setHeight(int height) {
+		this.height = height;
+	}
+
+	/**
+	 * @return the roundedCornerR
+	 */
+	public int getRoundedCornerR() {
+		return roundedCornerR;
+	}
+
+	/**
+	 * @param roundedCornerR the roundedCornerR to set
+	 */
+	public void setRoundedCornerR(int roundedCornerR) {
+		this.roundedCornerR = roundedCornerR;
+	}
 }

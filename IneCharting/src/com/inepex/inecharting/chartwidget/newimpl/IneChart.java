@@ -49,9 +49,10 @@ public class IneChart extends Composite {
 			public void run() {
 				if(redrawNeeded())
 					update();
+				if(updateInterval > 0)
+					updateTimer.schedule(updateInterval);
 			}
 		};
-		
 	}
 	
 	/*
@@ -63,6 +64,7 @@ public class IneChart extends Composite {
 		LineChart chart = new LineChart(drawingArea,axes);
 		moduls.add(chart);
 		moduls.add(axes);
+		chart.setProperties(LineChartProperties.getDefaultLineChartProperties());
 		return chart;
 	}
 	
@@ -84,7 +86,6 @@ public class IneChart extends Composite {
 	}
 	
 	public void update(){
-		updateTimer.cancel();
 		//update model, create GOs per modul
 		drawingArea.removeAllGraphicalObject();
 		for(IneChartModul modul : moduls){
@@ -93,7 +94,6 @@ public class IneChart extends Composite {
 		}
 		//draw
 		drawingArea.update();
-		updateTimer.schedule(updateInterval);
 	}
 	
 	boolean redrawNeeded(){
@@ -110,5 +110,7 @@ public class IneChart extends Composite {
 	
 	public void setUpdateInterval(int ms){
 		this.updateInterval = ms;
+		if(updateInterval > 0)
+			updateTimer.schedule(updateInterval);
 	}
 }

@@ -59,7 +59,7 @@ public class Curve implements HasZIndex,HasShadow, Comparable<Curve>{
 	//shadow
 	Color shadowColor;
 	double shadowOffsetX=0, shadowOffsetY=0;
-	int zIndex = 0;
+	int zIndex = Integer.MIN_VALUE;
 	//Axis
 	AxisType yAxis = AxisType.Y;
 	boolean modelChanged = false;

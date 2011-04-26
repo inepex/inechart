@@ -2,14 +2,13 @@ package com.inepex.inecharting.chartwidget.newimpl.linechart;
 
 public class LineChartProperties {
 	public static LineChartProperties getDefaultLineChartProperties(){
-		return new LineChartProperties();
+		return new LineChartProperties(false, false, 0, true, 15, PointSelectionMode.Closest_To_Cursor);
 	}
 	boolean autoCreateAxes;
 	boolean bringSelectedCurveToFront;
-	boolean drawSelectedPointOverNormal;
-	int overlapFilterDistance = 0;
+	int overlapFilterDistance;
 	boolean precalculatePoints;
-	int topPadding = 20;
+	int topPadding;
 	
 	public enum PointSelectionMode{
 		/**
@@ -28,5 +27,18 @@ public class LineChartProperties {
 	
 	PointSelectionMode pointSelectionMode;
 	
+	
+
+	public LineChartProperties(boolean autoCreateAxes,
+			boolean bringSelectedCurveToFront, int overlapFilterDistance,
+			boolean precalculatePoints, int topPadding,
+			PointSelectionMode pointSelectionMode) {
+		this.autoCreateAxes = autoCreateAxes;
+		this.bringSelectedCurveToFront = bringSelectedCurveToFront;
+		this.overlapFilterDistance = overlapFilterDistance;
+		this.precalculatePoints = precalculatePoints;
+		this.topPadding = topPadding;
+		this.pointSelectionMode = pointSelectionMode;
+	}
 	
 }

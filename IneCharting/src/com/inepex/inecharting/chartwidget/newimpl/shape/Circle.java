@@ -57,7 +57,7 @@ public class Circle extends Shape {
 						0, 0, 
 						this.zIndex,
 						innerContext, false, true,
-						outer == null ? this.radius : radius - properties.getLineProperties().getLineWidth());	
+						outer == null ? this.radius : radius - properties.getLineProperties().getLineWidth()+1);	
 		}
 		
 		ArrayList<GraphicalObject> toRet = new ArrayList<GraphicalObject>();

@@ -3,10 +3,10 @@ package com.inepex.inecharting.chartwidget.newimpl.linechart;
 import java.util.ArrayList;
 import java.util.TreeMap;
 
-import net.sourceforge.htmlunit.corejs.javascript.ast.Yield;
-
 import com.google.gwt.event.dom.client.MouseMoveEvent;
 import com.google.gwt.event.dom.client.MouseMoveHandler;
+import com.google.gwt.event.dom.client.MouseOutEvent;
+import com.google.gwt.event.dom.client.MouseOutHandler;
 import com.inepex.inecharting.chartwidget.newimpl.IneChartModul;
 import com.inepex.inecharting.chartwidget.newimpl.axes.Axes;
 import com.inepex.inecharting.chartwidget.newimpl.axes.Axis;
@@ -14,6 +14,8 @@ import com.inepex.inecharting.chartwidget.newimpl.axes.Axis.AxisType;
 import com.inepex.inecharting.chartwidget.newimpl.linechart.LineChartProperties.PointSelectionMode;
 import com.inepex.inecharting.chartwidget.newimpl.properties.Color;
 import com.inepex.inecharting.chartwidget.newimpl.properties.LineProperties.LineStyle;
+import com.inepex.inecharting.chartwidget.newimpl.shape.Circle;
+import com.inepex.inecharting.chartwidget.newimpl.shape.Rectangle;
 import com.inepex.inegraphics.impl.client.DrawingAreaImplCanvas;
 import com.inepex.inegraphics.impl.client.GraphicalObjectEventHandler;
 import com.inepex.inegraphics.impl.client.InteractiveGraphicalObject;
@@ -23,7 +25,7 @@ import com.inepex.inegraphics.shared.GraphicalObjectContainer;
 import com.inepex.inegraphics.shared.gobjects.GraphicalObject;
 import com.inepex.inegraphics.shared.gobjects.Path;
 
-public class LineChart extends IneChartModul implements GraphicalObjectEventHandler, MouseMoveHandler{
+public class LineChart extends IneChartModul implements GraphicalObjectEventHandler, MouseMoveHandler, MouseOutHandler{
 	
 	LineChartProperties properties = null;
 	double viewportMin=0, viewportMax=0;
@@ -37,6 +39,7 @@ public class LineChart extends IneChartModul implements GraphicalObjectEventHand
 	Axis y2Axis;
 	Axes axes;
 	double yMax, y2Max, xMax, yMin, y2Min, xMin, yRatio, y2Ratio, xRatio;
+	int highestZIndex = 1;
 	
 	//interactivity and graphicalobjects
 	/**
@@ -55,11 +58,10 @@ public class LineChart extends IneChartModul implements GraphicalObjectEventHand
 	 * all gos per point, should contain only points inside vp!
 	 */
 	TreeMap<Curve, TreeMap<Point, GraphicalObjectContainer>> gosPerPoint = new  TreeMap<Curve, TreeMap<Point,GraphicalObjectContainer>>();
-	
-	
+		
 	public LineChart(DrawingAreaImplCanvas canvas, Axes axes) {
 		super(canvas);
-		canvas.addGraphicalObjectEventHandler(this);
+	
 		this.axes = axes;
 	}
 
@@ -71,6 +73,10 @@ public class LineChart extends IneChartModul implements GraphicalObjectEventHand
 		if(curves == null)
 			curves = new ArrayList<Curve>();
 		curves.add(curve);
+		if(curve.zIndex == Integer.MIN_VALUE)
+			curve.zIndex = ++highestZIndex;
+		else if(curve.zIndex > highestZIndex)
+			highestZIndex = curve.zIndex;
 	}	
 	
 	@Override
@@ -148,6 +154,7 @@ public class LineChart extends IneChartModul implements GraphicalObjectEventHand
 		//reset indicator fields
 		viewportChanged = false;
 		viewportResized = false;
+		redrawNeeded = false;
 		
 		for(Curve curve : curves){
 			curve.modelChanged = false;
@@ -158,6 +165,8 @@ public class LineChart extends IneChartModul implements GraphicalObjectEventHand
 	protected void updateExtremes(){
 		xMax = xMin = y2Max = y2Min = yMin = yMax = 0;
 		for(Curve curve : curves){
+			if(curve.zIndex > highestZIndex)
+				highestZIndex = curve.zIndex;
 			if(xMin == xMax && xMax == 0){
 				xMax = curve.xMax;
 				xMin = curve.xMin;
@@ -301,7 +310,7 @@ public class LineChart extends IneChartModul implements GraphicalObjectEventHand
 			change = true;
 		}
 		if(change){
-			graphicalObjectContainer.removeAllGraphicalObject();
+			removeAllGORelatedToCurve(curve);
 			for(GraphicalObject go : gosPerCurve.get(curve).getGraphicalObjects()){
 				graphicalObjectContainer.addGraphicalObject(go);
 			}
@@ -314,7 +323,25 @@ public class LineChart extends IneChartModul implements GraphicalObjectEventHand
 		
 	}
 	
+	void removeAllGORelatedToCurve(Curve curve){
+		for(GraphicalObject go : gosPerCurve.get(curve).getGraphicalObjects())
+			graphicalObjectContainer.removeGraphicalObject(go);
+		for(Point p : gosPerPoint.get(curve).keySet())
+			removeAllGORelatedToPoint(p);
+		
+	}
+	
+	void removeAllGORelatedToPoint(Point point){
+		
+		for(Point p : gosPerPoint.get(point.parent).keySet())
+			for(GraphicalObject go : gosPerPoint.get(point.parent).get(p).getGraphicalObjects())
+				graphicalObjectContainer.removeGraphicalObject(go);
+		
+	}
+	
 	void createGOsForPoint(Point point, boolean mouseOverRelatedSelection){
+		if(point == null)
+			return;
 		//selected state
 		GraphicalObjectContainer gocForPoint = new GraphicalObjectContainer(); 
 		if(selectedPoints.contains(point)){
@@ -323,8 +350,16 @@ public class LineChart extends IneChartModul implements GraphicalObjectEventHand
 				ArrayList<GraphicalObject> gosOfPoint = point.parent.selectedPointShape.toGraphicalObjects();
 				//set the proper pos for gos
 				for(GraphicalObject go : gosOfPoint){
-					go.setBasePointX(getCanvasXForPoint(point));
-					go.setBasePointY(point.getPosY());
+					if(point.parent.selectedPointShape instanceof Circle){
+						go.setBasePointX(getCanvasXForPoint(point));
+						go.setBasePointY(point.getPosY());
+						go.setzIndex(point.parent.zIndex);
+					}
+					else if(point.parent.selectedPointShape instanceof Rectangle){
+						go.setBasePointX(getCanvasXForPoint(point) - ((Rectangle)point.parent.selectedPointShape).getWidth()/2);
+						go.setBasePointY(point.getPosY() - ((Rectangle)point.parent.selectedPointShape).getHeight()/2);
+						go.setzIndex(point.parent.zIndex);
+					}
 					gocForPoint.addGraphicalObject(go);
 				}
 				if(mouseOverRelatedSelection){
@@ -339,8 +374,16 @@ public class LineChart extends IneChartModul implements GraphicalObjectEventHand
 				ArrayList<GraphicalObject> gosOfPoint = point.parent.normalPointShape.toGraphicalObjects();
 				//set the proper pos for gos
 				for(GraphicalObject go : gosOfPoint){
-					go.setBasePointX(getCanvasXForPoint(point));
-					go.setBasePointY(point.getPosY());
+					if(point.parent.normalPointShape instanceof Circle){
+						go.setBasePointX(getCanvasXForPoint(point));
+						go.setBasePointY(point.getPosY());
+						go.setzIndex(point.parent.zIndex);
+					}
+					else if(point.parent.normalPointShape instanceof Rectangle){
+						go.setBasePointX(getCanvasXForPoint(point) - ((Rectangle)point.parent.normalPointShape).getWidth()/2);
+						go.setBasePointY(point.getPosY() - ((Rectangle)point.parent.normalPointShape).getHeight()/2);
+						go.setzIndex(point.parent.zIndex);
+					}
 					gocForPoint.addGraphicalObject(go);
 				}
 				if(mouseOverRelatedSelection){
@@ -348,12 +391,20 @@ public class LineChart extends IneChartModul implements GraphicalObjectEventHand
 					interactivePoints.put(interactivePoint, point);
 				}
 			}
-			//if we do not hace normal-state point but the points get selected via mouseOver
+			//if we do not have normal-state point but the points get selected via mouseOver
 			//we should add a transparent interactiveGO to recieve mouseEvents
 			else if(mouseOverRelatedSelection && point.parent.selectedPointShape != null){
 				GraphicalObject interactivePoint = point.parent.selectedPointShape.toInterActiveGraphicalObject();
-				interactivePoint.setBasePointX(getCanvasXForPoint(point));
-				interactivePoint.setBasePointY(point.getPosY());
+				if(point.parent.selectedPointShape instanceof Circle){
+					interactivePoint.setBasePointX(getCanvasXForPoint(point));
+					interactivePoint.setBasePointY(point.getPosY());
+					interactivePoint.setzIndex(point.parent.zIndex);
+				}
+				else if(point.parent.selectedPointShape instanceof Rectangle){
+					interactivePoint.setBasePointX(getCanvasXForPoint(point) - ((Rectangle)point.parent.selectedPointShape).getWidth()/2);
+					interactivePoint.setBasePointY(point.getPosY() - ((Rectangle)point.parent.selectedPointShape).getHeight()/2);
+					interactivePoint.setzIndex(point.parent.zIndex);
+				}
 				//make it transparent
 				interactivePoint.getContext().setAlpha(0d);
 				interactivePoints.put(interactivePoint, point);
@@ -363,7 +414,7 @@ public class LineChart extends IneChartModul implements GraphicalObjectEventHand
 			gosPerPoint.put(point.parent, new TreeMap<Point, GraphicalObjectContainer>());
 		gosPerPoint.get(point.parent).put(point, gocForPoint);
 	}
-
+	
 	int getCanvasXForPoint(Point point){
 		return point.getPosX() - getViewportMinInPX(); 
 	}
@@ -451,6 +502,12 @@ public class LineChart extends IneChartModul implements GraphicalObjectEventHand
 	 */
 	public void setProperties(LineChartProperties properties){
 		this.properties = properties;
+		if(properties.pointSelectionMode == PointSelectionMode.Closest_To_Cursor){
+			((DrawingAreaImplCanvas) canvas).addMouseMoveHandler(this);
+			((DrawingAreaImplCanvas) canvas).addMouseOutHandler(this);
+		}
+		else
+			((DrawingAreaImplCanvas) canvas).addGraphicalObjectEventHandler(this);
 	}
 
 	@Override
@@ -496,30 +553,60 @@ public class LineChart extends IneChartModul implements GraphicalObjectEventHand
 				Point last = null;
 				for(Point point : curve.getVisiblePoints()){
 					actualD = Math.abs(getCanvasXForPoint(point) - mouseX);
-					if(d < actualD){
+					if(d > actualD){
 						d = actualD;
 					}
-					else{
-						actualSelection.add(last);
+					else {
 						break;
 					}
 					last = point;
 				}
+				if(last != null)
+					actualSelection.add(last);
 			}
+			ArrayList<Point> stateChangedPoints = new ArrayList<Point>();
 			for(Point p : actualSelection){
 				if(!selectedPoints.contains(p)){
-					createGOsForPoint(p, false);
-					redrawNeeded = true;
+					stateChangedPoints.add(p);
+					removeAllGORelatedToPoint(p);
 				}
 			}
 			for(Point p : selectedPoints){
 				if(!actualSelection.contains(p)){
-					createGOsForPoint(p, false);
-					redrawNeeded = true;
+					stateChangedPoints.add(p);
+					removeAllGORelatedToPoint(p);
 				}
 			}
 			selectedPoints = actualSelection;
+		
+			
+			if(stateChangedPoints.size() > 0){
+				redrawNeeded = true;
+				for(Point p : stateChangedPoints){
+					createGOsForPoint(p, false);
+				}
+			}
 		}			
+	}
+
+	@Override
+	public void onMouseOut(MouseOutEvent event) {
+		if(properties.pointSelectionMode == PointSelectionMode.Closest_To_Cursor){
+			ArrayList<Point> stateChanged = new ArrayList<Point>();
+			for(Point point : selectedPoints){
+				removeAllGORelatedToPoint(point);
+				stateChanged.add(point);
+			}
+			if(stateChanged.size() > 0){
+				redrawNeeded = true;
+				selectedPoints.clear();
+				for(Point point : stateChanged){
+					createGOsForPoint(point, false);
+				}
+			}
+			
+		}
+		
 	}
 
 
