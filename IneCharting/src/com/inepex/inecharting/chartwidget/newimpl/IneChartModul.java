@@ -13,6 +13,10 @@ public abstract class IneChartModul{
 	protected GraphicalObjectContainer graphicalObjectContainer;
 	protected DrawingArea canvas;
 	protected boolean redrawNeeded;
+	protected double viewportMin=0;
+	protected double viewportMax=0;
+	protected boolean viewportResized = false;
+	protected boolean viewportMoved  = false;
 	
 	/**
 	 * @return the graphicalObjectContainer
@@ -21,13 +25,6 @@ public abstract class IneChartModul{
 		return graphicalObjectContainer;
 	}
 
-	/**
-	 * @param graphicalObjectContainer the graphicalObjectContainer to set
-	 */
-	void setGraphicalObjectContainer(
-			GraphicalObjectContainer graphicalObjectContainer) {
-		this.graphicalObjectContainer = graphicalObjectContainer;
-	}
 
 	protected IneChartModul(DrawingArea canvas){
 		graphicalObjectContainer = new GraphicalObjectContainer();
@@ -37,8 +34,25 @@ public abstract class IneChartModul{
 	
 	
 	public abstract void update();
-	public abstract void setViewport(double startX, double stopX);
-	public abstract void moveViewport(double dX);
+	
 
+	public void setViewport(double startX, double stopX) {
+		if(startX != viewportMin || stopX != viewportMax)
+			viewportResized = true;
+		viewportMax = stopX;
+		viewportMin = startX;
+	}
+
+	public void moveViewport(double dX) {
+		if(dX != 0){
+			viewportMoved = true;
+			viewportMin += dX;
+			viewportMax += dX;
+		}
+	}
+	
+	protected int getPositionRelativeToViewport(double x){
+		 return (int) ((x - viewportMin) * canvas.getWidth() / (viewportMax - viewportMin));
+	}
 	
 }

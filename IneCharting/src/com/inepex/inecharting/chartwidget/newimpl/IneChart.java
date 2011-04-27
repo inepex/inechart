@@ -10,6 +10,7 @@ import com.google.gwt.user.client.ui.Composite;
 import com.inepex.inecharting.chartwidget.newimpl.axes.Axes;
 import com.inepex.inecharting.chartwidget.newimpl.linechart.LineChart;
 import com.inepex.inecharting.chartwidget.newimpl.linechart.LineChartProperties;
+import com.inepex.inecharting.chartwidget.newimpl.misc.LabelPositioner;
 import com.inepex.inecharting.chartwidget.newimpl.piechart.PieChart;
 import com.inepex.inegraphics.impl.client.DrawingAreaImplCanvas;
 import com.inepex.inegraphics.impl.client.canvas.Canvas;
@@ -26,7 +27,7 @@ public class IneChart extends Composite {
 	public static final int DEFAULT_UPDATE_INTERVAL = 800;
 	
 	//properties
-	private static final int DEFAULT_PADDING = 30;
+	private static final int DEFAULT_PADDING = 50;
 	private int widgetWidth;
 	private int widgetHeight;
 	private int canvasWidth;
@@ -61,10 +62,12 @@ public class IneChart extends Composite {
 	 */
 	
 	public LineChart createLineChart(){
-		Axes axes = new Axes(drawingArea);
+		LabelPositioner lp = new LabelPositioner(mainPanel, widgetWidth-canvasWidth, widgetHeight-canvasHeight, drawingArea);
+		Axes axes = new Axes(drawingArea, lp);
 		LineChart chart = new LineChart(drawingArea,axes);
 		moduls.add(chart);
 		moduls.add(axes);
+		moduls.add(lp);
 		chart.setProperties(LineChartProperties.getDefaultLineChartProperties());
 		return chart;
 	}

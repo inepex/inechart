@@ -8,23 +8,23 @@ public class Tick implements Comparable<Tick>{
 	/**
 	 * the position of this tick on the parent axis
 	 */
-	protected double position;
+	double position;
 	/**
 	 * the grid's look, or null if has none 
 	 */
-	protected LineProperties gridLine;
+	 LineProperties gridLine;
 	/**
 	 * the lookout of the tick, or null if invisible
 	 */
-	protected LineProperties tickLine;
+	 LineProperties tickLine;
 	/**
 	 * the length of the tick's line
 	 */
-	protected int tickLength;
+	 int tickLength;
 	/**
 	 * the tick's label
 	 */
-	protected String tickText;
+	 String tickText;
 	
 	/**
 	 * Constructs a tick with default look, without label

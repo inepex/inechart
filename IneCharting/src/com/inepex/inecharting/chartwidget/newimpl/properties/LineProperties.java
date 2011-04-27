@@ -17,11 +17,11 @@ public class LineProperties {
 	}
 	
 	public static LineProperties getDefaultSolidLine(){
-		return new LineProperties(1, new Color("#ffffff"));
+		return new LineProperties(1, new Color("#000000"));
 	}
 
 	public static LineProperties getDefaultDashedLine(){
-		return new LineProperties(1, new Color("#ffffff"),DEFAULT_DASH_STROKE_LENGTH,DEFAULT_DASH_DISTANCE);
+		return new LineProperties(1, new Color("#000000"),DEFAULT_DASH_STROKE_LENGTH,DEFAULT_DASH_DISTANCE);
 	}
 
 	public static final double DEFAULT_DASH_STROKE_LENGTH = 3.5;

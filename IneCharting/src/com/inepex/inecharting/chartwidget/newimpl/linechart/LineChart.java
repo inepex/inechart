@@ -11,8 +11,10 @@ import com.inepex.inecharting.chartwidget.newimpl.IneChartModul;
 import com.inepex.inecharting.chartwidget.newimpl.axes.Axes;
 import com.inepex.inecharting.chartwidget.newimpl.axes.Axis;
 import com.inepex.inecharting.chartwidget.newimpl.axes.Axis.AxisType;
+import com.inepex.inecharting.chartwidget.newimpl.axes.Tick;
 import com.inepex.inecharting.chartwidget.newimpl.linechart.LineChartProperties.PointSelectionMode;
 import com.inepex.inecharting.chartwidget.newimpl.properties.Color;
+import com.inepex.inecharting.chartwidget.newimpl.properties.LineProperties;
 import com.inepex.inecharting.chartwidget.newimpl.properties.LineProperties.LineStyle;
 import com.inepex.inecharting.chartwidget.newimpl.shape.Circle;
 import com.inepex.inecharting.chartwidget.newimpl.shape.Rectangle;
@@ -28,9 +30,6 @@ import com.inepex.inegraphics.shared.gobjects.Path;
 public class LineChart extends IneChartModul implements GraphicalObjectEventHandler, MouseMoveHandler, MouseOutHandler{
 	
 	LineChartProperties properties = null;
-	double viewportMin=0, viewportMax=0;
-	boolean viewportResized = false;
-	boolean viewportChanged  = false;
 
 	//model fields
 	ArrayList<Curve> curves;
@@ -40,6 +39,8 @@ public class LineChart extends IneChartModul implements GraphicalObjectEventHand
 	Axes axes;
 	double yMax, y2Max, xMax, yMin, y2Min, xMin, yRatio, y2Ratio, xRatio;
 	int highestZIndex = 1;
+	final int DEFAULT_VERTICAL_TICK_DISTANCE = 50;
+	final int DEFAULT_HORIZONTAL_TICK_DISTANCE = 20;
 	
 	//interactivity and graphicalobjects
 	/**
@@ -66,8 +67,34 @@ public class LineChart extends IneChartModul implements GraphicalObjectEventHand
 		this.axes = axes;
 	}
 
-	protected void calculateAxes(double min, double max){
-		
+	protected void calculateAxes(){
+		if(xAxis != null){
+			axes.removeAxis(xAxis);
+		}
+		xAxis = new Axis(LineProperties.getDefaultSolidLine());
+		xAxis.setType(AxisType.X);
+		axes.addAxis(xAxis);
+		//TODO
+		double x = xMin;
+		for(int i=0;i<20;i++){
+			xAxis.addTick(new Tick(x, new LineProperties(1, new Color("grey")), LineProperties.getDefaultSolidLine(), 5, x+""));
+			x += (xMax - xMin) / 20;
+		}
+		if(yAxis != null){
+			axes.removeAxis(yAxis);
+		}
+		yAxis = new Axis(LineProperties.getDefaultSolidLine());
+		yAxis.setType(AxisType.Y);
+		axes.addAxis(yAxis);
+		//TODO
+		double y = yMin;
+		for(int i=0;i<20;i++){
+			yAxis.addTick(new Tick(x, null, new LineProperties(2, new Color("red")), 3, y+""));
+			y += (yMax - yMin) / 20;
+		}
+		if(y2Axis != null){
+			axes.removeAxis(y2Axis);			
+		}
 	}
 
 	public void addCurve(Curve curve) {
@@ -80,22 +107,6 @@ public class LineChart extends IneChartModul implements GraphicalObjectEventHand
 			highestZIndex = curve.zIndex;
 	}	
 	
-	@Override
-	public void setViewport(double startX, double stopX) {
-		if(startX != viewportMin || stopX != viewportMax)
-			viewportResized = true;
-		viewportMax = stopX;
-		viewportMin = startX;
-	}
-
-	@Override
-	public void moveViewport(double dX) {
-		if(dX != 0)
-			viewportChanged = true;
-		viewportMin += dX;
-		viewportMax += dX;
-	}
-
 	@Override
 	public void update() {
 		//if no property defined yet, then use the default
@@ -135,7 +146,7 @@ public class LineChart extends IneChartModul implements GraphicalObjectEventHand
 		//no vp resize
 		else{
 			//viewport moved
-			if(viewportChanged){
+			if(viewportMoved){
 				//if precalculatePoints is true we dont have to calc
 				if(!properties.precalculatePoints){
 					for(Curve curve : curves){
@@ -153,14 +164,14 @@ public class LineChart extends IneChartModul implements GraphicalObjectEventHand
 			curveToGOs(curve);
 		}		
 		//reset indicator fields
-		viewportChanged = false;
+		viewportMoved = false;
 		viewportResized = false;
 		redrawNeeded = false;
 		
 		for(Curve curve : curves){
 			curve.modelChanged = false;
 		}
-		
+		calculateAxes();
 	}
 	
 	protected void updateExtremes(){
@@ -225,7 +236,7 @@ public class LineChart extends IneChartModul implements GraphicalObjectEventHand
 		boolean change = false;
 		/* LINECHART */
 		//if no change in vp and point we should not update linechart gobjects
-		if(viewportChanged || viewportResized || curve.modelChanged || !gosPerCurve.containsKey(curve)){
+		if(viewportMoved || viewportResized || curve.modelChanged || !gosPerCurve.containsKey(curve)){
 			GraphicalObjectContainer gos = new  GraphicalObjectContainer();
 			Path path = curve.getVisiblePath(-getViewportMinInPX());
 			if(path == null)
@@ -294,7 +305,7 @@ public class LineChart extends IneChartModul implements GraphicalObjectEventHand
 			TreeMap<Point, GraphicalObjectContainer> pointsGOs = new TreeMap<Point, GraphicalObjectContainer>();
 			ArrayList<Point> visiblePoints = curve.getVisiblePoints();
 			//if vp or model changed we clear our related container
-			if(viewportChanged || viewportResized || curve.modelChanged || !gosPerPoint.containsKey(curve)){
+			if(viewportMoved || viewportResized || curve.modelChanged || !gosPerPoint.containsKey(curve)){
 				this.gosPerPoint.put(curve, pointsGOs);
 				this.interactivePoints.clear();
 			}

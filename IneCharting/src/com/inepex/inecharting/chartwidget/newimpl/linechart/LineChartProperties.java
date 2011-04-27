@@ -1,15 +1,6 @@
 package com.inepex.inecharting.chartwidget.newimpl.linechart;
 
 public class LineChartProperties {
-	public static LineChartProperties getDefaultLineChartProperties(){
-		return new LineChartProperties(false, false, 0, true, 15, PointSelectionMode.Closest_To_Cursor);
-	}
-	boolean autoCreateAxes;
-	boolean bringSelectedCurveToFront;
-	int overlapFilterDistance;
-	boolean precalculatePoints;
-	int topPadding;
-	
 	public enum PointSelectionMode{
 		/**
 		 * The closest point to the cursor will be selected
@@ -25,10 +16,18 @@ public class LineChartProperties {
 		On_Point_Over
 	}
 	
+	public static LineChartProperties getDefaultLineChartProperties(){
+		return new LineChartProperties(false, false, 0, true, 15, PointSelectionMode.Closest_To_Cursor);
+	}
+	
+	boolean autoCreateAxes;
+	boolean bringSelectedCurveToFront;
+	int overlapFilterDistance;
+	boolean precalculatePoints;
+	int topPadding;
 	PointSelectionMode pointSelectionMode;
 	
 	
-
 	public LineChartProperties(boolean autoCreateAxes,
 			boolean bringSelectedCurveToFront, int overlapFilterDistance,
 			boolean precalculatePoints, int topPadding,
