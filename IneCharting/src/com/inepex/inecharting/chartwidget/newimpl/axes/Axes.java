@@ -24,7 +24,7 @@ public class Axes extends IneChartModul {
 	private TreeMap<Axis, ArrayList<PositionedLabel>> labelsPerAxis;
 	private LabelPositioner labelPositioner;
 
-	private int zIndex = Integer.MIN_VALUE;
+	private int zIndex = -100;
 	
 	public Axes(DrawingArea canvas, LabelPositioner labelPositioner) {
 		super(canvas);
@@ -52,7 +52,6 @@ public class Axes extends IneChartModul {
 
 	@Override
 	public void update() {
-		
 		for(Axis axis:axes){
 			if(axis.changed){
 				removeAllGOAndLabelRelatedToAxis(axis);
@@ -126,7 +125,8 @@ public class Axes extends IneChartModul {
 				goc.addGraphicalObject(gridLine);
 			}
 			if(tick.tickText != null && tick.tickText.length() > 0){
-				PositionedLabel pl = new PositionedLabel(tick.tickText, x, y, false);
+//				PositionedLabel pl = new PositionedLabel(tick.tickText, x, y, false);
+				PositionedLabel pl = new PositionedLabel(tick.tickText, tick.position, y, false);
 				labelPositioner.addLabel(pl);
 				pls.add(pl);
 			}

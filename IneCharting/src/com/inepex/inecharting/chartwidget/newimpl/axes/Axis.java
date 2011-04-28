@@ -23,6 +23,11 @@ public class Axis implements Comparable<Axis>{
 	 */
 	double min, max;
 	
+	//comparing helper fields
+	private static int highestComparableNo = 0; 
+	private int comparableNo;
+	
+	
 	public Axis() {
 		this(LineProperties.getDefaultSolidLine());
 	}
@@ -31,6 +36,7 @@ public class Axis implements Comparable<Axis>{
 		this.lineProperties = lineProperties;
 		ticks = new ArrayList<Tick>();
 		gridFills = new TreeMap<Tick[], Color>();
+		comparableNo = Axis.highestComparableNo++;
 	}
 	
 	public void addTick(Tick tick){
@@ -145,23 +151,24 @@ public class Axis implements Comparable<Axis>{
 
 	@Override
 	public int compareTo(Axis o) {
-		if(type == AxisType.X){
-			if(o.type != AxisType.X)
-				return 1;
-			else if(ticks.size() > o.ticks.size()){
-				return 1;
-			}
-			else
-				return -1;
-		}
-		else if(o.type == AxisType.X){
-			return -1;
-		}
-		else if(ticks.size() > o.ticks.size()){
-			return 1;
-		}
-		else
-			return -1;
+		return comparableNo - o.comparableNo;
+//		if(type == AxisType.X){
+//			if(o.type != AxisType.X)
+//				return 1;
+//			else if(ticks.size() > o.ticks.size()){
+//				return 1;
+//			}
+//			else
+//				return -1;
+//		}
+//		else if(o.type == AxisType.X){
+//			return -1;
+//		}
+//		else if(ticks.size() > o.ticks.size()){
+//			return 1;
+//		}
+//		else
+//			return -1;
 		
 	}
 }

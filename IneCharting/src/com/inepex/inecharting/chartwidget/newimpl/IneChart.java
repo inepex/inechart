@@ -27,7 +27,7 @@ public class IneChart extends Composite {
 	public static final int DEFAULT_UPDATE_INTERVAL = 800;
 	
 	//properties
-	private static final int DEFAULT_PADDING = 50;
+	private static final int DEFAULT_PADDING = 30;
 	private int widgetWidth;
 	private int widgetHeight;
 	private int canvasWidth;
@@ -35,15 +35,15 @@ public class IneChart extends Composite {
 	
 	public IneChart(int width, int height) {
 		eventBus = new SimpleEventBus();
-		canvasHeight = height - DEFAULT_PADDING / 2;
-		canvasWidth = width - DEFAULT_PADDING / 2;
+		canvasHeight = height - DEFAULT_PADDING;
+		canvasWidth = width - DEFAULT_PADDING;
 		widgetHeight = height;
 		widgetWidth = width;
 		this.mainPanel =  new AbsolutePanel();
 		mainPanel.setPixelSize(widgetWidth, widgetHeight);
 		this.drawingArea = new DrawingAreaImplCanvas(canvasWidth,canvasHeight);
 		moduls = new ArrayList<IneChartModul>();
-		mainPanel.add(drawingArea.getCanvas(), widgetWidth-canvasWidth, widgetHeight-canvasHeight);
+		mainPanel.add(drawingArea.getCanvas(), DEFAULT_PADDING/2, DEFAULT_PADDING/2);
 		this.initWidget(mainPanel);
 		updateTimer = new Timer() {
 			
@@ -62,7 +62,7 @@ public class IneChart extends Composite {
 	 */
 	
 	public LineChart createLineChart(){
-		LabelPositioner lp = new LabelPositioner(mainPanel, widgetWidth-canvasWidth, widgetHeight-canvasHeight, drawingArea);
+		LabelPositioner lp = new LabelPositioner(mainPanel, DEFAULT_PADDING/2, DEFAULT_PADDING/2, drawingArea);
 		Axes axes = new Axes(drawingArea, lp);
 		LineChart chart = new LineChart(drawingArea,axes);
 		moduls.add(chart);

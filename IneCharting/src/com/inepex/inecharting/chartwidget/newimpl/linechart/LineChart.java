@@ -67,7 +67,7 @@ public class LineChart extends IneChartModul implements GraphicalObjectEventHand
 		this.axes = axes;
 	}
 
-	protected void calculateAxes(){
+	public void calculateAxes(){
 		if(xAxis != null){
 			axes.removeAxis(xAxis);
 		}
@@ -105,6 +105,7 @@ public class LineChart extends IneChartModul implements GraphicalObjectEventHand
 			curve.zIndex = ++highestZIndex;
 		else if(curve.zIndex > highestZIndex)
 			highestZIndex = curve.zIndex;
+		
 	}	
 	
 	@Override
@@ -171,7 +172,7 @@ public class LineChart extends IneChartModul implements GraphicalObjectEventHand
 		for(Curve curve : curves){
 			curve.modelChanged = false;
 		}
-		calculateAxes();
+		
 	}
 	
 	protected void updateExtremes(){
