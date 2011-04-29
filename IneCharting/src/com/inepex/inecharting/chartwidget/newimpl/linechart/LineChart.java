@@ -42,6 +42,8 @@ public class LineChart extends IneChartModul implements GraphicalObjectEventHand
 	final int DEFAULT_VERTICAL_TICK_DISTANCE = 50;
 	final int DEFAULT_HORIZONTAL_TICK_DISTANCE = 20;
 	
+	
+	
 	//interactivity and graphicalobjects
 	/**
 	 * A collection containing mouseOver related points, whose implements {@link InteractiveGraphicalObject}
@@ -85,11 +87,13 @@ public class LineChart extends IneChartModul implements GraphicalObjectEventHand
 		}
 		yAxis = new Axis(LineProperties.getDefaultSolidLine());
 		yAxis.setType(AxisType.Y);
+		yAxis.setMin(yMin);
+		yAxis.setMax(yMax);
 		axes.addAxis(yAxis);
 		//TODO
 		double y = yMin;
 		for(int i=0;i<20;i++){
-			yAxis.addTick(new Tick(x, null, new LineProperties(2, new Color("red")), 3, y+""));
+			yAxis.addTick(new Tick(y, null, new LineProperties(2, new Color("red")), 3, y+""));
 			y += (yMax - yMin) / 20;
 		}
 		if(y2Axis != null){
@@ -215,21 +219,33 @@ public class LineChart extends IneChartModul implements GraphicalObjectEventHand
 				}
 			}
 		}
+		if(xAxis != null){
+			xAxis.setMax(xMax);
+			xAxis.setMin(xMin);
+		}
+		if(yAxis != null){
+			yAxis.setMax(yMax);
+			yAxis.setMin(yMin);
+		}
+		if(y2Axis != null){
+			y2Axis.setMax(y2Max);
+			y2Axis.setMin(y2Min);
+		}
 	}
 	
 	protected void updateRatios(){
-		xRatio  = canvas.getWidth() / (viewportMax - viewportMin);
-		yRatio = (canvas.getHeight() - properties.topPadding)  / (yMax - yMin);
-		y2Ratio = (canvas.getHeight() - properties.topPadding)  / (y2Max - y2Min);
+		xRatio  = (canvas.getWidth() - leftPadding - rightPadding)/ (viewportMax - viewportMin);
+		yRatio = (canvas.getHeight() - properties.topPadding - topPadding - bottomPadding)  / (yMax - yMin);
+		y2Ratio = (canvas.getHeight() - properties.topPadding - topPadding - bottomPadding)  / (y2Max - y2Min);
 	}
 	
 	void calculatePoint(Point point, AxisType axis){
-		point.setPosX((int) (xRatio * (point.getDataX() - xMin)));
+		point.setPosX((int) (xRatio * (point.getDataX() - xMin)) + leftPadding);
 		if(axis == AxisType.Y){
-			point.setPosY((int) (yRatio * (yMax - point.getDataY())) + properties.topPadding);
+			point.setPosY((int) (yRatio * (yMax - point.getDataY())) + properties.topPadding + topPadding);
 		}
 		else if(axis == AxisType.Y2){
-			point.setPosY((int) (y2Ratio * (y2Max - point.getDataY())) + properties.topPadding);
+			point.setPosY((int) (y2Ratio * (y2Max - point.getDataY())) + properties.topPadding + topPadding);
 		} 
 	}
 	
@@ -239,7 +255,7 @@ public class LineChart extends IneChartModul implements GraphicalObjectEventHand
 		//if no change in vp and point we should not update linechart gobjects
 		if(viewportMoved || viewportResized || curve.modelChanged || !gosPerCurve.containsKey(curve)){
 			GraphicalObjectContainer gos = new  GraphicalObjectContainer();
-			Path path = curve.getVisiblePath(-getViewportMinInPX());
+			Path path = curve.getVisiblePath(-getViewportMinInPX(), leftPadding, canvas.getWidth() - rightPadding);
 			if(path == null)
 				return;
 			if(curve.getLineProperties() != null){
@@ -267,7 +283,7 @@ public class LineChart extends IneChartModul implements GraphicalObjectEventHand
 			if(curve.toCurveFills != null && curve.toCurveFills.size() > 0){
 				for(Curve toCurve : curve.toCurveFills.keySet()){
 					Path fill = new Path(path);
-					Path otherPath = toCurve.getVisiblePath(-getViewportMinInPX());
+					Path otherPath = toCurve.getVisiblePath(-getViewportMinInPX(), leftPadding, canvas.getWidth() - rightPadding);
 					if(otherPath == null)
 						continue;
 					for(int i = otherPath.getPathElements().size()-1; i >= 0; i--){
@@ -437,7 +453,7 @@ public class LineChart extends IneChartModul implements GraphicalObjectEventHand
 	}
 	
 	int getViewportMinInPX(){
-		return (int) ((viewportMin - xMin) * xRatio);
+		return (int) ((viewportMin - xMin) * xRatio + leftPadding);
 	}
 	
 	static Context createFillContext(Color fillColor){

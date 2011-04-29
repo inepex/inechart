@@ -15,6 +15,7 @@ import com.inepex.inecharting.chartwidget.newimpl.properties.Color;
 import com.inepex.inecharting.chartwidget.newimpl.properties.LineProperties;
 import com.inepex.inecharting.chartwidget.newimpl.properties.ShapeProperties;
 import com.inepex.inecharting.chartwidget.newimpl.shape.Shape;
+import com.inepex.inegraphics.shared.DrawingArea;
 import com.inepex.inegraphics.shared.gobjects.Path;
 
 /**
@@ -471,9 +472,12 @@ public class Curve implements HasZIndex,HasShadow, Comparable<Curve>{
 	 * A {@link Path} containing points from the point before left side of vp, 
 	 * to the point after the right side of vp (both inclusive).
 	 * Null if the curve got no points in the interval above.
+	 * @param dx 
+	 * @param clipLeft the path will be clipped before the given value, set negative value if you do not want a clip
+	 * @param clipRight the path will be clipped after the given value, set negative value if you do not want a clip
 	 * @return a path with null context, no fill, no stroke -> 'bare' path
 	 */
-	Path getVisiblePath(int dx){
+	Path getVisiblePath(int dx, int clipLeft, int clipRight){
 		ArrayList<Point> points = getVisiblePoints();
 		if(points.size() == 0){
 			Point bef = getPointBefore(vpMin);
@@ -511,6 +515,10 @@ public class Curve implements HasZIndex,HasShadow, Comparable<Curve>{
 		if(temp != null && !discontinuities.contains(points.get(points.size() - 1))){ 
 			line.lineTo(temp.getPosX() + dx, temp.getPosY(), false);
 		}
+		if(clipLeft > 0)
+			line = DrawingArea.clipPathAtX(clipLeft, true, line);
+		if(clipRight > 0)
+			line = DrawingArea.clipPathAtX(clipRight, false, line);
 		return line;
 	}
 

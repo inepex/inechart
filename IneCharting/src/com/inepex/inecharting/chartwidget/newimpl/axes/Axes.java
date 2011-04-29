@@ -5,8 +5,6 @@ import java.util.TreeMap;
 
 import com.inepex.inecharting.chartwidget.newimpl.IneChartModul;
 import com.inepex.inecharting.chartwidget.newimpl.axes.Axis.AxisType;
-import com.inepex.inecharting.chartwidget.newimpl.misc.LabelPositioner;
-import com.inepex.inecharting.chartwidget.newimpl.misc.PositionedLabel;
 import com.inepex.inecharting.chartwidget.newimpl.properties.Color;
 import com.inepex.inecharting.chartwidget.newimpl.properties.LineProperties;
 import com.inepex.inegraphics.impl.client.ishapes.Rectangle;
@@ -15,23 +13,22 @@ import com.inepex.inegraphics.shared.DrawingArea;
 import com.inepex.inegraphics.shared.GraphicalObjectContainer;
 import com.inepex.inegraphics.shared.gobjects.GraphicalObject;
 import com.inepex.inegraphics.shared.gobjects.Line;
+import com.inepex.inegraphics.shared.gobjects.Text;
 
 public class Axes extends IneChartModul {
 	
 	private ArrayList<Axis> axes;
 	
 	private TreeMap<Axis, GraphicalObjectContainer> gosPerAxis;
-	private TreeMap<Axis, ArrayList<PositionedLabel>> labelsPerAxis;
-	private LabelPositioner labelPositioner;
+	private TreeMap<Axis, ArrayList<Text>> labelsPerAxis;
 
 	private int zIndex = -100;
 	
-	public Axes(DrawingArea canvas, LabelPositioner labelPositioner) {
+	public Axes(DrawingArea canvas) {
 		super(canvas);
 		axes = new ArrayList<Axis>();
-		this.labelPositioner = labelPositioner;
 		gosPerAxis = new TreeMap<Axis, GraphicalObjectContainer>(); 
-		labelsPerAxis = new TreeMap<Axis,  ArrayList<PositionedLabel>>();
+		labelsPerAxis = new TreeMap<Axis,  ArrayList<Text>>();
 	}
 
 	
@@ -69,19 +66,19 @@ public class Axes extends IneChartModul {
 		if(axis.lineProperties != null){
 			switch (axis.type) {
 			case X:
-				x = 0;
-				y2 = y = canvas.getHeight();
-				x2 = canvas.getWidth();
+				x = leftPadding;
+				y2 = y = canvas.getHeight() - bottomPadding;
+				x2 = canvas.getWidth() - rightPadding;
 				break;
 			case Y:
-				x = x2 = 0;
-				y = 0;
-				y2 = canvas.getHeight();
+				x = x2 = leftPadding;
+				y = topPadding;
+				y2 = canvas.getHeight() - bottomPadding;
 				break;
 			case Y2:
-				x = x2 = canvas.getWidth();
-				y = 0;
-				y2 = canvas.getHeight();
+				x = x2 = canvas.getWidth() - rightPadding;
+				y = topPadding;
+				y2 = canvas.getHeight() - bottomPadding;
 				break;
 			default:
 				x = x2 = y = y2 = 0;
@@ -91,26 +88,26 @@ public class Axes extends IneChartModul {
 			goc.addGraphicalObject(axisLine);
 		}
 		//ticks
-		 ArrayList<PositionedLabel> pls = new ArrayList<PositionedLabel>();
+		 ArrayList<Text> pls = new ArrayList<Text>();
 		for(Tick tick : axis.getVisibleTicks(viewportMin, viewportMax)){
 			switch(axis.type) {
 			case X:
-				gridX = x = x2 = getPositionRelativeToViewport(tick.position);
-				y =  canvas.getHeight();
+				gridX = x = x2 = getPositionRelativeToViewport(tick.position) ;
+				y =  canvas.getHeight() - bottomPadding;
 				y2 = y - tick.tickLength;
-				gridY = 0;
+				gridY = topPadding;
 				break;
 			case Y:
-				x = 0;
+				x = leftPadding;
 				x2 = x + tick.tickLength;
 				gridY = y = y2 = getYForHorizontalTick(tick, axis);
-				gridX = canvas.getWidth();
+				gridX = canvas.getWidth() - rightPadding;
 				break;
 			case Y2:
 				x = canvas.getWidth();
 				x2 = x - tick.tickLength;
 				gridY = y = y2 = getYForHorizontalTick(tick, axis);
-				gridX = 0;
+				gridX = leftPadding;
 				break;
 			default:
 				x = x2 = y = y2 = gridX = gridY = 0;
@@ -125,10 +122,8 @@ public class Axes extends IneChartModul {
 				goc.addGraphicalObject(gridLine);
 			}
 			if(tick.tickText != null && tick.tickText.length() > 0){
-//				PositionedLabel pl = new PositionedLabel(tick.tickText, x, y, false);
-				PositionedLabel pl = new PositionedLabel(tick.tickText, tick.position, y, false);
-				labelPositioner.addLabel(pl);
-				pls.add(pl);
+				Text pl = new Text(tick.tickText, x, y);
+				goc.addGraphicalObject(pl);
 			}
 			//TODO DASHed line!!!
 		}
@@ -154,7 +149,7 @@ public class Axes extends IneChartModul {
 	}
 	
 	int getYForHorizontalTick(Tick tick, Axis axis){
-		return (int) (canvas.getHeight() - (tick.position - axis.min) * canvas.getHeight() / (axis.max - axis.min));
+		return (int) (canvas.getHeight() - topPadding - bottomPadding - (tick.position - axis.min) * (canvas.getHeight() - topPadding - bottomPadding) / (axis.max - axis.min)) + topPadding;
 	}
 	
 	Context createFillContext(Color fillColor){
@@ -185,11 +180,6 @@ public class Axes extends IneChartModul {
 		if(gosPerAxis.get(axis) != null){
 			for(GraphicalObject go : gosPerAxis.get(axis).getGraphicalObjects()){
 				graphicalObjectContainer.removeGraphicalObject(go);
-			}
-		}
-		if(labelsPerAxis.get(axis)!= null){
-			for(PositionedLabel pl : labelsPerAxis.get(axis)){
-				labelPositioner.removeLabel(pl);
 			}
 		}
 		gosPerAxis.remove(axis);

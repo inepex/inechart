@@ -10,41 +10,27 @@ import com.google.gwt.user.client.ui.Composite;
 import com.inepex.inecharting.chartwidget.newimpl.axes.Axes;
 import com.inepex.inecharting.chartwidget.newimpl.linechart.LineChart;
 import com.inepex.inecharting.chartwidget.newimpl.linechart.LineChartProperties;
-import com.inepex.inecharting.chartwidget.newimpl.misc.LabelPositioner;
 import com.inepex.inecharting.chartwidget.newimpl.piechart.PieChart;
 import com.inepex.inegraphics.impl.client.DrawingAreaImplCanvas;
-import com.inepex.inegraphics.impl.client.canvas.Canvas;
-import com.inepex.inegraphics.impl.client.canvas.CanvasWidget;
 
 public class IneChart extends Composite {
 
 	private ArrayList<IneChartModul> moduls;
-	private AbsolutePanel mainPanel;
 	private DrawingAreaImplCanvas drawingArea;
-	private EventBus eventBus;
 	private Timer updateTimer;
 	private int updateInterval = DEFAULT_UPDATE_INTERVAL;
 	public static final int DEFAULT_UPDATE_INTERVAL = 800;
 	
 	//properties
-	private static final int DEFAULT_PADDING = 30;
-	private int widgetWidth;
-	private int widgetHeight;
 	private int canvasWidth;
 	private int canvasHeight;
 	
 	public IneChart(int width, int height) {
-		eventBus = new SimpleEventBus();
-		canvasHeight = height - DEFAULT_PADDING;
-		canvasWidth = width - DEFAULT_PADDING;
-		widgetHeight = height;
-		widgetWidth = width;
-		this.mainPanel =  new AbsolutePanel();
-		mainPanel.setPixelSize(widgetWidth, widgetHeight);
+		canvasHeight = height;
+		canvasWidth = width;
 		this.drawingArea = new DrawingAreaImplCanvas(canvasWidth,canvasHeight);
 		moduls = new ArrayList<IneChartModul>();
-		mainPanel.add(drawingArea.getCanvas(), DEFAULT_PADDING/2, DEFAULT_PADDING/2);
-		this.initWidget(mainPanel);
+		this.initWidget(drawingArea.getWidget());
 		updateTimer = new Timer() {
 			
 			@Override
@@ -62,12 +48,10 @@ public class IneChart extends Composite {
 	 */
 	
 	public LineChart createLineChart(){
-		LabelPositioner lp = new LabelPositioner(mainPanel, DEFAULT_PADDING/2, DEFAULT_PADDING/2, drawingArea);
-		Axes axes = new Axes(drawingArea, lp);
+		Axes axes = new Axes(drawingArea);
 		LineChart chart = new LineChart(drawingArea,axes);
 		moduls.add(chart);
 		moduls.add(axes);
-		moduls.add(lp);
 		chart.setProperties(LineChartProperties.getDefaultLineChartProperties());
 		return chart;
 	}

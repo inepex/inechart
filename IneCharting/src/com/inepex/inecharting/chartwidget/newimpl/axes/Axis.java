@@ -131,7 +131,7 @@ public class Axis implements Comparable<Axis>{
 	/**
 	 * @param max the max to set
 	 */
-	void setMax(double max) {
+	public void setMax(double max) {
 		this.max = max;
 	}
 

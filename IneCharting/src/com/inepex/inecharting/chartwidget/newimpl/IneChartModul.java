@@ -17,7 +17,9 @@ public abstract class IneChartModul{
 	protected double viewportMax=0;
 	protected boolean viewportResized = false;
 	protected boolean viewportMoved  = false;
-	
+	protected static final int DEFAULT_PADDING = 20;
+	protected int topPadding = DEFAULT_PADDING, leftPadding = DEFAULT_PADDING, bottomPadding = DEFAULT_PADDING, rightPadding = DEFAULT_PADDING;
+
 	/**
 	 * @return the graphicalObjectContainer
 	 */
@@ -52,7 +54,7 @@ public abstract class IneChartModul{
 	}
 	
 	protected int getPositionRelativeToViewport(double x){
-		 return (int) ((x - viewportMin) * canvas.getWidth() / (viewportMax - viewportMin));
+		 return (int) ((x - viewportMin) * (canvas.getWidth() - leftPadding - rightPadding) / (viewportMax - viewportMin)) + leftPadding;
 	}
 	
 }
