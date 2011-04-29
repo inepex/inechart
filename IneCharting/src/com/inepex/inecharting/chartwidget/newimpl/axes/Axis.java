@@ -14,7 +14,7 @@ public class Axis implements Comparable<Axis>{
 	}
 
 	ArrayList<Tick> ticks;
-	TreeMap<Tick[], Color> gridFills;
+	ArrayList<Object[]> gridFills;
 	boolean changed = true;
 	AxisType type;
 	LineProperties lineProperties;
@@ -35,7 +35,7 @@ public class Axis implements Comparable<Axis>{
 	public Axis(LineProperties lineProperties) {
 		this.lineProperties = lineProperties;
 		ticks = new ArrayList<Tick>();
-		gridFills = new TreeMap<Tick[], Color>();
+		gridFills = new ArrayList<Object[]>();
 		comparableNo = Axis.highestComparableNo++;
 	}
 	
@@ -56,28 +56,38 @@ public class Axis implements Comparable<Axis>{
 		case 0:
 			return;
 		case 1:
-			gridFills.put(new Tick[]{tick2, tick1}, color);
+			gridFills.add(new Object[]{tick2, tick1, color});
 			break;
 		case -1:
-			gridFills.put(new Tick[]{tick1, tick2}, color);
+			gridFills.add(new Object[]{tick1, tick2, color});
 			break;
 		}
 		changed = true;
 	}
 	
 	public void removeFill(Tick tick1, Tick tick2){
-		Tick[] pair = null;
+		Tick lower = null,upper = null;
 		switch (tick1.compareTo(tick2)) {
 		case 0:
 			return;
 		case 1:
-			pair = new Tick[]{tick2, tick1};
+			lower = tick2;
+			upper = tick1;
 			break;
 		case -1:
-			pair = new Tick[]{tick1, tick2};
+			lower = tick1;
+			upper = tick2;
 			break;
 		}
-		gridFills.remove(pair);
+		Object[] toRemove = null;
+		for(Object[] triple : gridFills){
+			if(((Tick)triple[0]).position == lower.position && ((Tick)triple[1]).position == upper.position){
+				toRemove = triple;
+				break;
+			}
+		}
+		if(toRemove != null)
+			gridFills.remove(toRemove);
 		changed = true;
 	}
 

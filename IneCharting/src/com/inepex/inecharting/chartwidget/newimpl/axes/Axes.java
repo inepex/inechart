@@ -128,20 +128,20 @@ public class Axes extends IneChartModul {
 			//TODO DASHed line!!!
 		}
 		labelsPerAxis.put(axis, pls);
-		for(Tick[] tickPair : axis.gridFills.keySet()){
+		for(Object[] tickPair : axis.gridFills){
 			if(axis.type == AxisType.X){
-				x = getPositionRelativeToViewport(tickPair[0].position);
-				x2 = getPositionRelativeToViewport(tickPair[1].position);
-				y = 0;
-				y2 = canvas.getHeight();
+				x = getPositionRelativeToViewport(((Tick)tickPair[0]).position);
+				x2 = getPositionRelativeToViewport(((Tick)tickPair[1]).position);
+				y = topPadding;
+				y2 = canvas.getHeight() - bottomPadding;
 			}
 			else{
-				x = 0;
-				x2 = canvas.getWidth();
-				y = getYForHorizontalTick(tickPair[0], axis);
-				y2 = getYForHorizontalTick(tickPair[1], axis);
+				x = leftPadding;
+				x2 = canvas.getWidth() - rightPadding;
+				y = getYForHorizontalTick((Tick) tickPair[0], axis);
+				y2 = getYForHorizontalTick((Tick) tickPair[1], axis);
 			}
-			Rectangle fill = new  Rectangle(x, y, x2 - x, y2 - y, 0, zIndex, createFillContext(axis.gridFills.get(tickPair)), false, true);
+			Rectangle fill = new  Rectangle(x, y-1, x2 - x, y2 - y, 0, zIndex, createFillContext((Color)tickPair[2]), false, true);
 			goc.addGraphicalObject(fill);
 		}
 		gosPerAxis.put(axis, goc);
@@ -154,10 +154,10 @@ public class Axes extends IneChartModul {
 	
 	Context createFillContext(Color fillColor){
 		return new Context(
-				fillColor.getAlpha(),
-				fillColor.getColor(),
-				0,
+				Color.DEFAULT_ALPHA,
 				Color.DEFAULT_COLOR,
+				0,
+				fillColor.getColor(),
 				0,
 				0,
 				0,
