@@ -39,5 +39,67 @@ public class LineChartProperties {
 		this.topPadding = topPadding;
 		this.pointSelectionMode = pointSelectionMode;
 	}
+
+
+	public boolean isAutoCreateAxes() {
+		return autoCreateAxes;
+	}
+
+
+	public void setAutoCreateAxes(boolean autoCreateAxes) {
+		this.autoCreateAxes = autoCreateAxes;
+	}
+
+
+	public boolean isBringSelectedCurveToFront() {
+		return bringSelectedCurveToFront;
+	}
+
+
+	public void setBringSelectedCurveToFront(boolean bringSelectedCurveToFront) {
+		this.bringSelectedCurveToFront = bringSelectedCurveToFront;
+	}
+
+
+	public int getOverlapFilterDistance() {
+		return overlapFilterDistance;
+	}
+
+
+	public void setOverlapFilterDistance(int overlapFilterDistance) {
+		this.overlapFilterDistance = overlapFilterDistance;
+	}
+
+
+	public boolean isPrecalculatePoints() {
+		return precalculatePoints;
+	}
+
+
+	public void setPrecalculatePoints(boolean precalculatePoints) {
+		this.precalculatePoints = precalculatePoints;
+	}
+
+
+	public int getTopPadding() {
+		return topPadding;
+	}
+
+
+	public void setTopPadding(int topPadding) {
+		this.topPadding = topPadding;
+	}
+
+
+	public PointSelectionMode getPointSelectionMode() {
+		return pointSelectionMode;
+	}
+
+
+	public void setPointSelectionMode(PointSelectionMode pointSelectionMode) {
+		this.pointSelectionMode = pointSelectionMode;
+	}
+	
+	
 	
 }
