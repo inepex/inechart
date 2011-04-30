@@ -1,9 +1,0 @@
-<?xml version="1.0" encoding="UTF-8"?>
-<module rename-to='IneChart'>
-	<inherits name="com.google.gwt.canvas.Canvas" />
-	<inherits name="com.google.gwt.user.User" />
-	<inherits name="com.inepex.inegraphics.IneGraphics" />
-
-	<source path='chartwidget' />
-	<source path='misc' />
-</module>
