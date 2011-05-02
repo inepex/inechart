@@ -13,6 +13,7 @@ public class AwtPieChartTest {
 		IneAwtChart chart = new IneAwtChart(800, 400);
 		PieChart pc = chart.createPieChart();
 		Pie pie = new Pie();
+		pie.addData("nul", 0.01, null);
 		pie.addData("first", 10.0, null);
 		pie.addData("second", 20.0, null);
 		pie.addData("third", 40.0, null);

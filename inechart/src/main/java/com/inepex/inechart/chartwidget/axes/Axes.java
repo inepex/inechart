@@ -122,6 +122,21 @@ public class Axes extends IneChartModul {
 				goc.addGraphicalObject(gridLine);
 			}
 			if(tick.tickText != null && tick.tickText.length() > 0){
+//				TODO: a general solution for text positioning
+				switch(axis.type) {
+				case X:
+					x = x - tick.tickText.length() / 2 * 5;
+					y = y + 15;
+					break;
+				case Y:
+					x = x - tick.tickText.length() * 8;
+					y = y + 3;
+					break;
+				case Y2:
+					
+					break;
+				}
+					
 				Text pl = new Text(tick.tickText, x, y);
 				goc.addGraphicalObject(pl);
 			}

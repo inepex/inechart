@@ -13,6 +13,7 @@ import com.inepex.inechart.chartwidget.axes.Axis;
 import com.inepex.inechart.chartwidget.axes.Tick;
 import com.inepex.inechart.chartwidget.axes.Axis.AxisType;
 import com.inepex.inechart.chartwidget.linechart.LineChartProperties.PointSelectionMode;
+import com.inepex.inechart.chartwidget.misc.ColorSet;
 import com.inepex.inechart.chartwidget.properties.Color;
 import com.inepex.inechart.chartwidget.properties.LineProperties;
 import com.inepex.inechart.chartwidget.properties.LineProperties.LineStyle;
@@ -62,6 +63,8 @@ public class LineChart extends IneChartModul implements GraphicalObjectEventHand
 	 */
 	TreeMap<Curve, TreeMap<Point, GraphicalObjectContainer>> gosPerPoint = new  TreeMap<Curve, TreeMap<Point,GraphicalObjectContainer>>();
 		
+	ColorSet colors = new ColorSet();
+	
 	public LineChart(DrawingArea canvas, Axes axes) {
 		super(canvas);
 		if (canvas instanceof DrawingAreaImplCanvas)
@@ -77,11 +80,11 @@ public class LineChart extends IneChartModul implements GraphicalObjectEventHand
 		xAxis.setType(AxisType.X);
 		axes.addAxis(xAxis);
 		//TODO
-		double x = xMin;
-		for(int i=0;i<20;i++){
-			xAxis.addTick(new Tick(x, new LineProperties(1, new Color("grey")), LineProperties.getDefaultSolidLine(), 5, x+""));
-			x += (xMax - xMin) / 20;
-		}
+//		double x = xMin;
+//		for(int i=0;i<20;i++){
+//			xAxis.addTick(new Tick(x, new LineProperties(1, new Color("grey")), LineProperties.getDefaultSolidLine(), 5, x+""));
+//			x += (xMax - xMin) / 20;
+//		}
 		if(yAxis != null){
 			axes.removeAxis(yAxis);
 		}
@@ -91,11 +94,11 @@ public class LineChart extends IneChartModul implements GraphicalObjectEventHand
 		yAxis.setMax(yMax);
 		axes.addAxis(yAxis);
 		//TODO
-		double y = yMin;
-		for(int i=0;i<20;i++){
-			yAxis.addTick(new Tick(y, null, new LineProperties(2, new Color("red")), 3, y+""));
-			y += (yMax - yMin) / 20;
-		}
+//		double y = yMin;
+//		for(int i=0;i<20;i++){
+//			yAxis.addTick(new Tick(y, null, new LineProperties(2, new Color("red")), 3, y+""));
+//			y += (yMax - yMin) / 20;
+//		}
 		if(y2Axis != null){
 			axes.removeAxis(y2Axis);			
 		}
@@ -104,6 +107,7 @@ public class LineChart extends IneChartModul implements GraphicalObjectEventHand
 	public void addCurve(Curve curve) {
 		if(curves == null)
 			curves = new ArrayList<Curve>();
+		if (curve.getLineProperties().getLineColor() == null) curve.getLineProperties().setLineColor(new Color(colors.getNextColor()));
 		curves.add(curve);
 		if(curve.zIndex == Integer.MIN_VALUE)
 			curve.zIndex = ++highestZIndex;
@@ -118,6 +122,19 @@ public class LineChart extends IneChartModul implements GraphicalObjectEventHand
 		if(properties == null)
 			properties = LineChartProperties.getDefaultLineChartProperties();
 		
+		this.leftPadding = properties.getLeftPadding();
+		if (axes != null)
+			axes.setLeftPadding(properties.getLeftPadding());
+		
+		if (properties.isAutoCalcViewport()){
+			double max = 0.0;
+			for(Curve curve : curves){
+				if (curve.getxMax() > max) max = curve.getxMax();
+			}
+			setViewport(0, max);
+			if (axes != null) axes.setViewport(0, max);
+		}
+		
 		//update model
 		//if one curve's model changed we have to update extremes
 		for(Curve curve : curves){
@@ -128,6 +145,7 @@ public class LineChart extends IneChartModul implements GraphicalObjectEventHand
 				break;
 			}
 		}
+		
 		//if vp resized
 		if(viewportResized){
 			if(properties.precalculatePoints){

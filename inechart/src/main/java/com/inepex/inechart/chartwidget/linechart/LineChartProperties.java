@@ -17,7 +17,7 @@ public class LineChartProperties {
 	}
 	
 	public static LineChartProperties getDefaultLineChartProperties(){
-		return new LineChartProperties(false, false, 0, true, 15, PointSelectionMode.Closest_To_Cursor);
+		return new LineChartProperties(false, false, 0, true, 15, 30, PointSelectionMode.Closest_To_Cursor, false);
 	}
 	
 	boolean autoCreateAxes;
@@ -25,19 +25,24 @@ public class LineChartProperties {
 	int overlapFilterDistance;
 	boolean precalculatePoints;
 	int topPadding;
+	int leftPadding;
 	PointSelectionMode pointSelectionMode;
+	boolean autoCalcViewport;
 	
 	
 	public LineChartProperties(boolean autoCreateAxes,
 			boolean bringSelectedCurveToFront, int overlapFilterDistance,
-			boolean precalculatePoints, int topPadding,
-			PointSelectionMode pointSelectionMode) {
+			boolean precalculatePoints, int topPadding, int leftPadding,
+			PointSelectionMode pointSelectionMode,
+			boolean autoCalcViewport) {
 		this.autoCreateAxes = autoCreateAxes;
 		this.bringSelectedCurveToFront = bringSelectedCurveToFront;
 		this.overlapFilterDistance = overlapFilterDistance;
 		this.precalculatePoints = precalculatePoints;
 		this.topPadding = topPadding;
+		this.leftPadding = leftPadding;
 		this.pointSelectionMode = pointSelectionMode;
+		this.autoCalcViewport = autoCalcViewport;
 	}
 
 
@@ -99,7 +104,23 @@ public class LineChartProperties {
 	public void setPointSelectionMode(PointSelectionMode pointSelectionMode) {
 		this.pointSelectionMode = pointSelectionMode;
 	}
-	
-	
+
+
+	public boolean isAutoCalcViewport() {
+		return autoCalcViewport;
+	}
+
+
+	public void setAutoCalcViewport(boolean autoCalcViewport) {
+		this.autoCalcViewport = autoCalcViewport;
+	}
+
+	public int getLeftPadding() {
+		return leftPadding;
+	}
+
+	public void setLeftPadding(int leftPadding) {
+		this.leftPadding = leftPadding;
+	}
 	
 }

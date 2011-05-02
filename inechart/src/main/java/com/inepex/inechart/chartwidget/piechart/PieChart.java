@@ -86,7 +86,7 @@ public class PieChart extends IneChartModul implements GraphicalObjectEventHandl
 		for (String key : pie.getKeys()){
 			//add arcs
 			double pctg = percentages.get(key);
-			
+			if (pctg < 0.5) continue;
 			Double angle = 360.0 * pctg / 100.0;
 			finish = start + angle;
 			Double f1 = Math.min(90.0 - start, 90.0 - finish);

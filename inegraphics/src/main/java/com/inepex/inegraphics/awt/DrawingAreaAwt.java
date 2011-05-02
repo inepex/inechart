@@ -8,6 +8,7 @@ import java.awt.geom.Arc2D;
 import java.awt.geom.GeneralPath;
 import java.awt.image.BufferedImage;
 import java.io.File;
+import java.io.OutputStream;
 
 import javax.imageio.ImageIO;
 
@@ -116,6 +117,14 @@ public class DrawingAreaAwt extends DrawingArea {
 		g2.setBackground(ColorUtil.getColor(context.getFillColor()));
 		g2.setColor(ColorUtil.getColor(context.getStrokeColor()));
 	}
+	
+	public void saveToOutputStream(OutputStream outputStream) {
+		try {
+			ImageIO.write(image, "png", outputStream);
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+	}
 
 	public void saveToFile(String filename) {
 		try {
@@ -150,6 +159,10 @@ public class DrawingAreaAwt extends DrawingArea {
 	protected void drawText(Text text) {
 		applyContext(text.getContext());
 		g2.drawString(text.getText(), text.getBasePointX(), text.getBasePointY()); 
+	}
+	
+	public BufferedImage getImage(){
+		return image;
 	}
 
 }

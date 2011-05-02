@@ -23,7 +23,7 @@ import com.inepex.inegraphics.shared.gobjects.Path;
  * Represents a Line- or a Point- (or both) curve's model
  * Stores both the data, and the translated points.
  * 
- * @author Miklós Süveges / Inepex Ltd.
+ * @author MiklĂłs SĂĽveges / Inepex Ltd.
  *
  */
 public class Curve implements HasZIndex,HasShadow, Comparable<Curve>{
@@ -591,6 +591,10 @@ public class Curve implements HasZIndex,HasShadow, Comparable<Curve>{
 	 */
 	public void setSelectedPointShape(Shape selectedPointShape) {
 		this.selectedPointShape = selectedPointShape;
+	}
+
+	public double getxMax() {
+		return xMax;
 	}
 
 	@Override

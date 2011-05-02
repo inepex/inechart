@@ -1,5 +1,7 @@
 package com.inepex.inechart.awtchart;
 
+import java.awt.image.BufferedImage;
+import java.io.OutputStream;
 import java.util.ArrayList;
 
 import com.inepex.inechart.chartwidget.IneChartModul;
@@ -77,5 +79,13 @@ public class IneAwtChart {
 	
 	public void saveToFile(String filename){
 		((DrawingAreaAwt)drawingArea).saveToFile(filename);
+	}
+	
+	public void saveToOutputStream(OutputStream outputStream){
+		((DrawingAreaAwt)drawingArea).saveToOutputStream(outputStream);
+	}
+	
+	public BufferedImage getImage(){
+		return ((DrawingAreaAwt)drawingArea).getImage();
 	}
 }
