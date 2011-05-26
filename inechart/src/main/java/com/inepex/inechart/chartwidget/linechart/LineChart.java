@@ -7,19 +7,22 @@ import com.google.gwt.event.dom.client.MouseMoveEvent;
 import com.google.gwt.event.dom.client.MouseMoveHandler;
 import com.google.gwt.event.dom.client.MouseOutEvent;
 import com.google.gwt.event.dom.client.MouseOutHandler;
+import com.inepex.inechart.chartwidget.HasCoordinateSystem;
 import com.inepex.inechart.chartwidget.IneChartModul;
+import com.inepex.inechart.chartwidget.IneChartModul2D;
+import com.inepex.inechart.chartwidget.Viewport;
 import com.inepex.inechart.chartwidget.axes.Axes;
 import com.inepex.inechart.chartwidget.axes.Axis;
 import com.inepex.inechart.chartwidget.axes.Tick;
-import com.inepex.inechart.chartwidget.axes.Axis.AxisType;
-import com.inepex.inechart.chartwidget.linechart.LineChartProperties.PointSelectionMode;
+import com.inepex.inechart.chartwidget.axes.Axis.AxisDirection;
+import com.inepex.inechart.chartwidget.axes.TickFactory;
 import com.inepex.inechart.chartwidget.misc.ColorSet;
 import com.inepex.inechart.chartwidget.properties.Color;
 import com.inepex.inechart.chartwidget.properties.LineProperties;
 import com.inepex.inechart.chartwidget.properties.LineProperties.LineStyle;
 import com.inepex.inechart.chartwidget.shape.Circle;
 import com.inepex.inechart.chartwidget.shape.Rectangle;
-import com.inepex.inegraphics.impl.client.DrawingAreaImplCanvas;
+import com.inepex.inegraphics.impl.client.DrawingAreaGWT;
 import com.inepex.inegraphics.impl.client.GraphicalObjectEventHandler;
 import com.inepex.inegraphics.impl.client.InteractiveGraphicalObject;
 import com.inepex.inegraphics.shared.Context;
@@ -27,31 +30,52 @@ import com.inepex.inegraphics.shared.DrawingArea;
 import com.inepex.inegraphics.shared.GraphicalObjectContainer;
 import com.inepex.inegraphics.shared.gobjects.GraphicalObject;
 import com.inepex.inegraphics.shared.gobjects.Path;
+import com.inepex.inegraphics.shared.gobjects.PathElement;
 
-public class LineChart extends IneChartModul implements GraphicalObjectEventHandler, MouseMoveHandler, MouseOutHandler{
+public class LineChart extends IneChartModul2D implements
+		GraphicalObjectEventHandler, MouseMoveHandler, MouseOutHandler {
+
+	public enum PointSelectionMode {
+		/**
+		 * The closest point to the cursor will be selected
+		 */
+		Closest_To_Cursor,
+		/**
+		 * The clicked point will be selected
+		 */
+		On_Point_Click,
+		/**
+		 * The mouse overed point will be selected
+		 */
+		On_Point_Over
+	}
+
+	//defaults
+	final ColorSet colors = new ColorSet();
+	public static final double defaultLineWidth = 2.88;
 	
-	LineChartProperties properties = null;
-
-	//model fields
+	public static final double defaultShadowOffsetX = 1.2;
+	public static final double defaultShadowOffsetY = 2.4;
+	public static final Color defaultShadowColor =  new Color("#D8D8D8", 0.74);
+	
+	// model fields
 	ArrayList<Curve> curves;
-	Axis xAxis;
-	Axis yAxis;
-	Axis y2Axis;
-	Axes axes;
-	double yMax, y2Max, xMax, yMin, y2Min, xMin, yRatio, y2Ratio, xRatio;
 	int highestZIndex = 1;
-	final int DEFAULT_VERTICAL_TICK_DISTANCE = 50;
-	final int DEFAULT_HORIZONTAL_TICK_DISTANCE = 20;
-	
-	
-	
-	//interactivity and graphicalobjects
+	int overlapFilterDistance;
+	boolean precalculatePoints;
+	boolean autoCreateTicks;
+	Viewport precalculationBaseViewport;
+	PointSelectionMode pointSelectionMode;
+
+	// interactivity and graphicalobjects
 	/**
-	 * A collection containing mouseOver related points, whose implements {@link InteractiveGraphicalObject}
+	 * A collection containing mouseOver related points, whose implements
+	 * {@link InteractiveGraphicalObject}
 	 */
 	TreeMap<GraphicalObject, Point> interactivePoints = new TreeMap<GraphicalObject, Point>();
 	/**
-	 * should contain all of the selected-state points (outside the actual vp too)
+	 * should contain all of the selected-state points (outside the actual vp
+	 * too)
 	 */
 	ArrayList<Point> selectedPoints = new ArrayList<Point>();
 	/**
@@ -61,512 +85,562 @@ public class LineChart extends IneChartModul implements GraphicalObjectEventHand
 	/**
 	 * all gos per point, should contain only points inside vp!
 	 */
-	TreeMap<Curve, TreeMap<Point, GraphicalObjectContainer>> gosPerPoint = new  TreeMap<Curve, TreeMap<Point,GraphicalObjectContainer>>();
-		
-	ColorSet colors = new ColorSet();
+	TreeMap<Curve, TreeMap<Point, GraphicalObjectContainer>> gosPerPoint = new TreeMap<Curve, TreeMap<Point, GraphicalObjectContainer>>();
+	/**
+	 * If a path is to be clipped, the final {@link GraphicalObject}'s reference
+	 * is stored in this container.
+	 */
+	TreeMap<Path, Path> clippedPaths = new TreeMap<Path, Path>();
 	
+
 	public LineChart(DrawingArea canvas, Axes axes) {
-		super(canvas);
-		if (canvas instanceof DrawingAreaImplCanvas)
-			((DrawingAreaImplCanvas)canvas).addGraphicalObjectEventHandler(this);
-		this.axes = axes;
+		this(canvas, axes, new Viewport());
+		autoScaleViewport = true;
 	}
 
-	public void calculateAxes(){
-		if(xAxis != null){
-			axes.removeAxis(xAxis);
+	public LineChart(DrawingArea canvas, Axes axes, Viewport vp) {
+		super(canvas, axes, vp);
+		if (canvas instanceof DrawingAreaGWT) {
+			((DrawingAreaGWT) canvas).addGraphicalObjectEventHandler(this);
+			((DrawingAreaGWT) canvas).addMouseMoveHandler(this);
+			((DrawingAreaGWT) canvas).addMouseOutHandler(this);
 		}
-		xAxis = new Axis(LineProperties.getDefaultSolidLine());
-		xAxis.setType(AxisType.X);
-		axes.addAxis(xAxis);
-		//TODO
-//		double x = xMin;
-//		for(int i=0;i<20;i++){
-//			xAxis.addTick(new Tick(x, new LineProperties(1, new Color("grey")), LineProperties.getDefaultSolidLine(), 5, x+""));
-//			x += (xMax - xMin) / 20;
-//		}
-		if(yAxis != null){
-			axes.removeAxis(yAxis);
-		}
-		yAxis = new Axis(LineProperties.getDefaultSolidLine());
-		yAxis.setType(AxisType.Y);
-		yAxis.setMin(yMin);
-		yAxis.setMax(yMax);
-		axes.addAxis(yAxis);
-		//TODO
-//		double y = yMin;
-//		for(int i=0;i<20;i++){
-//			yAxis.addTick(new Tick(y, null, new LineProperties(2, new Color("red")), 3, y+""));
-//			y += (yMax - yMin) / 20;
-//		}
-		if(y2Axis != null){
-			axes.removeAxis(y2Axis);			
-		}
+
+		// defaults
+		pointSelectionMode = PointSelectionMode.Closest_To_Cursor;
+		overlapFilterDistance = 0;
+		precalculatePoints = false;
+		autoScaleViewport = false;
+		autoCreateTicks = true;
 	}
+
+	
 
 	public void addCurve(Curve curve) {
-		if(curves == null)
+		if (curve == null)
+			return;
+		if (curves == null)
 			curves = new ArrayList<Curve>();
-		if (curve.getLineProperties().getLineColor() == null) curve.getLineProperties().setLineColor(new Color(colors.getNextColor()));
-		curves.add(curve);
-		if(curve.zIndex == Integer.MIN_VALUE)
-			curve.zIndex = ++highestZIndex;
-		else if(curve.zIndex > highestZIndex)
-			highestZIndex = curve.zIndex;
-		
-	}	
-	
-	@Override
-	public void update() {
-		//if no property defined yet, then use the default
-		if(properties == null)
-			properties = LineChartProperties.getDefaultLineChartProperties();
-		
-		this.leftPadding = properties.getLeftPadding();
-		if (axes != null)
-			axes.setLeftPadding(properties.getLeftPadding());
-		
-		if (properties.isAutoCalcViewport()){
-			double max = 0.0;
-			for(Curve curve : curves){
-				if (curve.getxMax() > max) max = curve.getxMax();
-			}
-			setViewport(0, max);
-			if (axes != null) axes.setViewport(0, max);
+		if (curve.getLineProperties() == null){
+			curve.setLineProperties(new LineProperties(defaultLineWidth, colors
+					.getNextColor()));
+			curve.setShadowOffsetY(defaultShadowOffsetX);
+			curve.setShadowOffsetX(defaultShadowOffsetY);
+			curve.setShadowColor(defaultShadowColor);
 		}
+		curves.add(curve);
+		if (curve.zIndex == Integer.MIN_VALUE)
+			curve.zIndex = ++highestZIndex;
+		else if (curve.zIndex > highestZIndex)
+			highestZIndex = curve.zIndex;
+		redrawNeeded = true;
+		curve.modelChanged = true;
+	}
+
+	public void removeCurve(Curve curve) {
+		if (curve == null)
+			return;
+		curves.remove(curve);
+		removeAllGORelatedToCurve(curve);
+		redrawNeeded = true;
+	}
+
+	@Override
+	protected void update() {
+		if (curves == null || curves.size() == 0)
+			return;
+		if (autoScaleViewport) {
+			viewport.set(curves.get(0).xMin, curves.get(0).yMin,
+					curves.get(0).xMax, curves.get(0).yMax);
+			for (Curve c : curves) {
+				if (c.xMax > viewport.getXMax())
+					viewport.setXMax(c.xMax);
+				if (c.yMax > viewport.getYMax())
+					viewport.setYMax(c.yMax);
+				if (c.xMin < viewport.getXMin())
+					viewport.setXMin(c.xMin);
+				if (c.yMin < viewport.getYMin())
+					viewport.setYMin(c.yMin);
+			}
+			autoScaleViewport = false;
+		}
+
+		// update axes and the viewport to match values
+		alignViewportAndAxes();
 		
-		//update model
-		//if one curve's model changed we have to update extremes
-		for(Curve curve : curves){
-			//this cond enough in case of newly added curve, too
-			if(curve.modelChanged){
-				updateExtremes();
-				updateRatios();
+
+		/**
+		 * update model
+		 */
+		// axes auto calc
+		if (autoCreateTicks) {
+			autoCreateAxes();
+		}
+
+		// if points are precalculated and the viewport is resized (not moved)
+		// we have to recalc all points
+		if (precalculatePoints) {
+			boolean recalcAll = false;
+			if (precalculationBaseViewport == null
+					|| (viewport.isChanged() && (viewport.getXRatio() != 1 || viewport
+							.getYRatio() != 1))) {
+				precalculationBaseViewport = new Viewport(viewport.getXMin(),
+						viewport.getYMin(), viewport.getXMax(),
+						viewport.getYMax());
+				recalcAll = true;
+			}
+			for (Curve curve : curves) {
+				if (recalcAll || curve.modelChanged) {
+					curve.calculatePoints(curve.xMin, curve.xMax, this);
+					curve.updateVisiblePoints(curve.xMin, curve.xMax,
+							overlapFilterDistance);
+					createLineChartGOs(curve);
+					createPointChartGOs(curve);
+					displayPrecalculatedCurve(curve);
+				} else {
+					shiftCurve(curve);
+				}
+				curve.modelChanged = false;
+			}
+		} else {
+			for (Curve curve : curves) {
+				if (viewport.isChanged() || curve.modelChanged) {
+					curve.calculatePoints(viewport.getXMin(),
+							viewport.getXMax(), this);
+					curve.updateVisiblePoints(viewport.getXMin(),
+							viewport.getXMax(), overlapFilterDistance);
+					removeAndAddAllGO(curve);
+					curve.modelChanged = false;
+				}
+			}
+		}
+		redrawNeeded = false;
+		super.update();
+	}
+
+	void calculatePoint(Point point) {
+		if (xAxis.isHorizontal()) {
+			point.setPosX(getX(point.getDataX(), xAxis));
+			point.setPosY(getY(point.getDataY(), yAxis));
+		} else {
+			point.setPosX(getX(point.getDataY(), yAxis));
+			point.setPosY(getY(point.getDataX(), xAxis));
+		}
+	}
+
+	double getX(double value, Axis horizontalAxis) {
+		double totalWidth = canvas.getWidth() - leftPadding - rightPadding;
+		double visibleLength, visibleMin;
+		Viewport viewport;
+		if (precalculatePoints) {
+			viewport = precalculationBaseViewport;
+		} else {
+			viewport = this.viewport;
+		}
+		visibleLength = viewport.getWidth();
+		visibleMin = viewport.getXMin();
+		double pos;
+		if (horizontalAxis.getAxisDirection() == AxisDirection.Horizontal_Ascending_To_Right) {
+			pos =  ((value - visibleMin) * totalWidth / visibleLength)	+ leftPadding;
+		} else if (horizontalAxis.getAxisDirection() == AxisDirection.Horizontal_Ascending_To_Left) {
+			pos = totalWidth -  ((value - visibleMin) * totalWidth / visibleLength - rightPadding);
+		} else
+			return -1;
+		return pos;
+	}
+
+	double getY(double value, Axis verticalAxis) {
+		double totalHeight = canvas.getHeight() - topPadding - bottomPadding;
+		double visibleLength, visibleMin;
+		Viewport viewport;
+		if (precalculatePoints) {
+			viewport = precalculationBaseViewport;
+		} else {
+			viewport = this.viewport;
+		}
+		visibleLength = viewport.getHeight();
+		visibleMin = viewport.getYMin();
+		double pos;
+		if (verticalAxis.getAxisDirection() == AxisDirection.Vertical_Ascending_To_Bottom) {
+			pos = ((value - visibleMin) * totalHeight / visibleLength)
+					+ topPadding;
+		} else if (verticalAxis.getAxisDirection() == AxisDirection.Vertical_Ascending_To_Top) {
+			pos = totalHeight
+					-  ((value - visibleMin) * totalHeight / visibleLength - bottomPadding);
+		} else
+			return -1;
+		return pos;
+	}
+
+	/**
+	 * This method is used when: {@link #precalculatePoints} = true, and the
+	 * viewport is scrolled only (dx || dy change)
+	 * 
+	 * @param curve
+	 */
+	protected void shiftCurve(Curve curve) {
+		double dx, dy;
+		if (xAxis.isHorizontal()) {
+			dx = getCanvasX(viewport.getDX(), xAxis) - getCanvasX(0, xAxis);
+			dy = getCanvasY(viewport.getDY(), yAxis) - getCanvasY(0, yAxis);
+		} else {
+			dx = getCanvasY(viewport.getDX(), xAxis) - getCanvasY(0, xAxis);
+			dy = getCanvasX(viewport.getDY(), yAxis) - getCanvasX(0, yAxis);
+		}
+		if (dx != 0 || dy != 0) {
+			// shift !! the basepoints should moved with -dx, -dy
+			gosPerCurve.get(curve).moveBasePoints(-dx, -dy);
+			for (Point p : gosPerPoint.get(curve).keySet()) {
+				gosPerPoint.get(curve).get(p).moveBasePoints(-dx, -dy);
+			}
+			displayPrecalculatedCurve(curve);
+		}
+	}
+
+	protected void displayPrecalculatedCurve(Curve curve) {
+		// remove previos
+		removeAllGORelatedToCurve(curve);
+		// drop gos outside vp
+		for (GraphicalObject go : gosPerCurve.get(curve).getGraphicalObjects()) {
+			Path clipped = DrawingArea.clipPathWithRectangle((Path) go,
+					leftPadding, topPadding, getWidth(), getHeight());
+			graphicalObjectContainer.addGraphicalObject(clipped);
+			clippedPaths.put((Path) go, clipped);
+		}
+		for (Point p : gosPerPoint.get(curve).keySet()) {
+			graphicalObjectContainer.addAllGraphicalObject(gosPerPoint.get(
+					curve).get(p));
+		}
+		GraphicalObjectContainer.dropGraphicalObjectsOutsideRectangle(
+				graphicalObjectContainer, leftPadding, topPadding, getWidth(),
+				getHeight());
+	}
+
+	/**
+	 * (Re)creates the {@link GraphicalObject}s for this curve and puts them
+	 * into the main {@link GraphicalObjectContainer}. Any previous gos will be
+	 * dropped from the related containers.
+	 * 
+	 * @param curve
+	 */
+	protected void removeAndAddAllGO(Curve curve) {
+		removeAllGORelatedToCurve(curve);
+		createLineChartGOs(curve);
+		createPointChartGOs(curve);
+		if (gosPerCurve.get(curve) != null) {
+			for (GraphicalObject go : gosPerCurve.get(curve)
+					.getGraphicalObjects()) {
+				graphicalObjectContainer.addGraphicalObject(go);
+			}
+		}
+		if (gosPerPoint.get(curve) != null) {
+			for (Point point : gosPerPoint.get(curve).keySet()) {
+				graphicalObjectContainer.addAllGraphicalObject(gosPerPoint.get(
+						curve).get(point));
+			}
+		}
+	}
+
+	/**
+	 * Creates linechart {@link GraphicalObject}s and puts them into
+	 * {@link #gosPerCurve} container
+	 * 
+	 * @param curve
+	 */
+	protected void createLineChartGOs(Curve curve) {
+		GraphicalObjectContainer gos = new GraphicalObjectContainer();
+		Path path;
+		if (!precalculatePoints)
+			path = curve.getVisiblePath(leftPadding, topPadding,
+					canvas.getWidth() - leftPadding - rightPadding,
+					canvas.getHeight() - topPadding - bottomPadding);
+		else
+			path = curve.getVisiblePath();
+		if (path == null) {
+			return;
+		}
+		if (curve.getLineProperties() != null) {
+			Path line = new Path(path);
+			line.setContext(createLineContext(curve));
+			line.setStroke(true);
+			line.setzIndex(curve.getZIndex());
+			if (curve.getLineProperties().getStyle().equals(LineStyle.DASHED))
+				gos.addGraphicalObject(DrawingArea.createDashedLinePath(line,
+						curve.getLineProperties().getDashStrokeLength(), curve
+								.getLineProperties().getDashDistance()));
+			else
+				gos.addGraphicalObject(line);
+		}
+		if (curve.toCanvasYFills != null && curve.toCanvasYFills.size() > 0) {
+			// TODO axis direction
+			for (int i : curve.toCanvasYFills.keySet()) {
+				Path fill = new Path(path);
+				fill.lineTo(fill.getLastPathElement().getEndPointX(), i, false);
+				fill.lineTo(fill.getBasePointX(), i, false);
+				fill.lineToBasePoint();
+				fill.setFill(true);
+				fill.setzIndex(curve.getZIndex());
+				fill.setContext(createFillContext(curve.toCanvasYFills.get(i)));
+				gos.addGraphicalObject(fill);
+			}
+		}
+		if (curve.toCurveFills != null && curve.toCurveFills.size() > 0) {
+			for (Curve toCurve : curve.toCurveFills.keySet()) {
+				Path fill = new Path(path.getBasePointX(),
+						path.getBasePointY(), curve.getZIndex(),
+						createFillContext(curve.toCurveFills.get(toCurve)),
+						false, true);
+				Path otherPath;
+				if (!precalculatePoints)
+					otherPath = toCurve.getVisiblePath(leftPadding, topPadding,
+							canvas.getWidth() - leftPadding - rightPadding,
+							canvas.getHeight() - topPadding - bottomPadding);
+				else
+					otherPath = toCurve.getVisiblePath();
+				if (otherPath == null)
+					continue;
+				for (PathElement e : path.getPathElements()) {
+					fill.lineTo(e.getEndPointX(), e.getEndPointY(), false);
+				}
+				for (int i = otherPath.getPathElements().size() - 1; i >= 0; i--) {
+					PathElement e = otherPath.getPathElements().get(i);
+					fill.lineTo(e.getEndPointX(), e.getEndPointY(), false);
+				}
+				fill.lineTo(otherPath.getBasePointX(),
+						otherPath.getBasePointY(), false);
+				fill.lineToBasePoint();
+				gos.addGraphicalObject(fill);
+			}
+		}
+		if (curve.toYFills != null && curve.toYFills.size() > 0) {
+			for (double i : curve.toYFills.keySet()) {
+				Path fill = new Path(path);
+				Point tmp = new Point(0, i);
+				calculatePoint(tmp);
+				fill.lineTo(fill.getLastPathElement().getEndPointX(),
+						tmp.getPosY(), false);
+				fill.lineTo(fill.getBasePointX(), tmp.getPosY(), false);
+				fill.lineToBasePoint();
+				fill.setFill(true);
+				fill.setzIndex(curve.getZIndex());
+				fill.setContext(createFillContext(curve.toYFills.get(i)));
+				gos.addGraphicalObject(fill);
+			}
+		}
+		gosPerCurve.put(curve, gos);
+	}
+
+	/**
+	 * Creates pointchart {@link GraphicalObject}s and puts them into
+	 * {@link #gosPerPoint} container
+	 * 
+	 * @param curve
+	 */
+	protected void createPointChartGOs(Curve curve) {
+		// if the curve has any shape defined for pointChart
+		if (curve.normalPointShape != null || curve.selectedPointShape != null) {
+			if (!gosPerPoint.containsKey(curve)) {
+				TreeMap<Point, GraphicalObjectContainer> pointsGOs = new TreeMap<Point, GraphicalObjectContainer>();
+				gosPerPoint.put(curve, pointsGOs);
+			}
+			ArrayList<Point> visiblePoints = curve.getVisiblePoints(
+					viewport.getYMin(), viewport.getYMax());
+			// check if we got displayable points
+			if (visiblePoints != null && visiblePoints.size() > 0) {
+				// if the point can be selected via mouseOver, then we register
+				// as interactive GO
+				boolean mouseOverRelatedSelection = pointSelectionMode == PointSelectionMode.On_Point_Click
+						|| pointSelectionMode == PointSelectionMode.On_Point_Over;
+				for (Point point : visiblePoints) {
+					gosPerPoint.get(curve)
+							.put(point,
+									createGOsForPoint(point,
+											mouseOverRelatedSelection));
+				}
+			}
+		}
+	}
+
+	/**
+	 * Removes all {@link GraphicalObject} from this modul's
+	 * {@link GraphicalObjectContainer} based on {@link #gosPerCurve} and
+	 * {@link #gosPerPoint} containers.
+	 * 
+	 * @param curve
+	 */
+	protected void removeAllGORelatedToCurve(Curve curve) {
+		if (gosPerCurve.containsKey(curve)) {
+			for (GraphicalObject go : gosPerCurve.get(curve)
+					.getGraphicalObjects()) {
+				graphicalObjectContainer.removeGraphicalObject(go);
+				if (clippedPaths.containsKey(go)) {
+					graphicalObjectContainer.removeGraphicalObject(clippedPaths
+							.get(go));
+					clippedPaths.remove(go);
+				}
+			}
+		}
+		if (gosPerPoint.containsKey(curve) && gosPerPoint.get(curve) != null) {
+			for (Point p : gosPerPoint.get(curve).keySet()) {
+				removeAllGORelatedToPoint(p);
+			}
+			gosPerPoint.get(curve).clear();
+		}
+	}
+
+	protected void removeAllGORelatedToPoint(Point point) {
+		for (GraphicalObject go : gosPerPoint.get(point.parent).get(point)
+				.getGraphicalObjects())
+			graphicalObjectContainer.removeGraphicalObject(go);
+		gosPerPoint.get(point.parent).get(point).removeAllGraphicalObject();
+		GraphicalObject igo = null;
+		for (GraphicalObject go : interactivePoints.keySet()) {
+			if (interactivePoints.get(go).equals(point)) {
+				igo = go;
+				// max 1 igo present per point
 				break;
 			}
 		}
-		
-		//if vp resized
-		if(viewportResized){
-			if(properties.precalculatePoints){
-				//calc all points
-				for(Curve curve : curves){
-					curve.calculatePoints(curve.xMin-1, curve.xMax+1, false, this);
-					curve.uncalculatedPoints.clear();
-				}
-			}
-			else{
-				//calc visible points
-				for(Curve curve : curves){
-					curve.calculatePoints(viewportMin, viewportMax, false, this);
-					curve.updateUncalculatedPoints(viewportMin, viewportMax);
-				}
-			}
-			for(Curve curve : curves){
-				curve.updateVisiblePoints(viewportMin, viewportMax, properties.overlapFilterDistance);
-			}
-		}
-		//no vp resize
-		else{
-			//viewport moved
-			if(viewportMoved){
-				//if precalculatePoints is true we dont have to calc
-				if(!properties.precalculatePoints){
-					for(Curve curve : curves){
-						curve.calculatePoints(viewportMin,viewportMax, true, this);
-					}
-				}	
-				for(Curve curve : curves){
-					curve.updateVisiblePoints(viewportMin, viewportMax, properties.overlapFilterDistance);
-				}
-			}
-		}
-		
-		//update graphics
-		for(Curve curve : curves){
-			curveToGOs(curve);
-		}		
-		//reset indicator fields
-		viewportMoved = false;
-		viewportResized = false;
-		redrawNeeded = false;
-		
-		for(Curve curve : curves){
-			curve.modelChanged = false;
-		}
-		
+		if (igo != null)
+			interactivePoints.remove(igo);
 	}
-	
-	protected void updateExtremes(){
-		xMax = xMin = y2Max = y2Min = yMin = yMax = 0;
-		for(Curve curve : curves){
-			if(curve.zIndex > highestZIndex)
-				highestZIndex = curve.zIndex;
-			if(xMin == xMax && xMax == 0){
-				xMax = curve.xMax;
-				xMin = curve.xMin;
+
+	GraphicalObjectContainer createGOsForPoint(Point point,
+			boolean mouseOverRelatedSelection) {
+		GraphicalObjectContainer gocForPoint = new GraphicalObjectContainer();
+		if (point == null)
+			return gocForPoint;
+		if (point.parent.setCurveShadowForPoint) {
+			if (point.parent.selectedPointShape != null) {
+				point.parent.selectedPointShape
+						.setShadowColor(point.parent.shadowColor);
+				point.parent.selectedPointShape
+						.setShadowOffsetX(point.parent.shadowOffsetX);
+				point.parent.selectedPointShape
+						.setShadowOffsetY(point.parent.shadowOffsetY);
 			}
-			else{
-				if(xMax < curve.xMax)
-					xMax = curve.xMax;
-				if(xMin > curve.xMin)
-					xMin = curve.xMin;
-			}
-			if(curve.getyAxis() == AxisType.Y){
-				if(yMin == yMax && yMax == 0){
-					yMax = curve.yMax;
-					yMin = curve.yMin;
-				}
-				else{
-					if(yMax < curve.yMax)
-						yMax = curve.yMax;
-					if(yMin > curve.yMin)
-						yMin = curve.yMin;
-				}
-			}
-			else if(curve.getyAxis() == AxisType.Y2){
-				if(y2Min == y2Max  && y2Max == 0){
-					y2Max = curve.yMax;
-					y2Min = curve.yMin;
-				}
-				else{
-					if(y2Max < curve.yMax)
-						y2Max = curve.yMax;
-					if(y2Min > curve.yMin)
-						y2Min = curve.yMin;
-				}
+			if (point.parent.normalPointShape != null) {
+				point.parent.normalPointShape
+						.setShadowColor(point.parent.shadowColor);
+				point.parent.normalPointShape
+						.setShadowOffsetX(point.parent.shadowOffsetX);
+				point.parent.normalPointShape
+						.setShadowOffsetY(point.parent.shadowOffsetY);
 			}
 		}
-		if(xAxis != null){
-			xAxis.setMax(xMax);
-			xAxis.setMin(xMin);
-		}
-		if(yAxis != null){
-			yAxis.setMax(yMax);
-			yAxis.setMin(yMin);
-		}
-		if(y2Axis != null){
-			y2Axis.setMax(y2Max);
-			y2Axis.setMin(y2Min);
-		}
-	}
-	
-	protected void updateRatios(){
-		xRatio  = (canvas.getWidth() - leftPadding - rightPadding)/ (viewportMax - viewportMin);
-		yRatio = (canvas.getHeight() - properties.topPadding - topPadding - bottomPadding)  / (yMax - yMin);
-		y2Ratio = (canvas.getHeight() - properties.topPadding - topPadding - bottomPadding)  / (y2Max - y2Min);
-	}
-	
-	void calculatePoint(Point point, AxisType axis){
-		point.setPosX((int) (xRatio * (point.getDataX() - xMin)) + leftPadding);
-		if(axis == AxisType.Y){
-			point.setPosY((int) (yRatio * (yMax - point.getDataY())) + properties.topPadding + topPadding);
-		}
-		else if(axis == AxisType.Y2){
-			point.setPosY((int) (y2Ratio * (y2Max - point.getDataY())) + properties.topPadding + topPadding);
-		} 
-	}
-	
-	protected void curveToGOs(Curve curve){
-		boolean change = false;
-		/* LINECHART */
-		//if no change in vp and point we should not update linechart gobjects
-		if(viewportMoved || viewportResized || curve.modelChanged || !gosPerCurve.containsKey(curve)){
-			GraphicalObjectContainer gos = new  GraphicalObjectContainer();
-			Path path = curve.getVisiblePath(-getViewportMinInPX(), leftPadding, canvas.getWidth() - rightPadding);
-			if(path == null)
-				return;
-			if(curve.getLineProperties() != null){
-				Path line = new Path(path);
-				line.setContext(createLineContext(curve));
-				line.setStroke(true);
-				line.setzIndex(curve.getZIndex());
-				if(curve.getLineProperties().getStyle().equals(LineStyle.DASHED))
-					gos.addGraphicalObject(DrawingArea.createDashedLinePath(line, curve.getLineProperties().getDashStrokeLength(), curve.getLineProperties().getDashDistance()));
-				else
-					gos.addGraphicalObject(line);
-			}
-			if(curve.toCanvasYFills != null && curve.toCanvasYFills.size() > 0){
-				for(int i : curve.toCanvasYFills.keySet()){
-					Path fill = new Path(path);
-					fill.lineTo(fill.getLastPathElement().getEndPointX(), i, false);
-					fill.lineTo(fill.getBasePointX(), i, false);
-					fill.lineToBasePoint();
-					fill.setFill(true);
-					fill.setzIndex(curve.getZIndex());
-					fill.setContext(createFillContext(curve.toCanvasYFills.get(i)));
-					gos.addGraphicalObject(fill);
-				}
-			}
-			if(curve.toCurveFills != null && curve.toCurveFills.size() > 0){
-				for(Curve toCurve : curve.toCurveFills.keySet()){
-					Path fill = new Path(path);
-					Path otherPath = toCurve.getVisiblePath(-getViewportMinInPX(), leftPadding, canvas.getWidth() - rightPadding);
-					if(otherPath == null)
-						continue;
-					for(int i = otherPath.getPathElements().size()-1; i >= 0; i--){
-						fill.getPathElements().add(otherPath.getPathElements().get(i));
-					}
-					fill.lineToBasePoint();
-					fill.setzIndex(curve.getZIndex());
-					fill.setContext(createFillContext(curve.toCurveFills.get(toCurve)));
-					fill.setFill(true);
-					gos.addGraphicalObject(fill);
-				}
-			}
-			if(curve.toYFills != null && curve.toYFills.size() > 0){
-				for(double i : curve.toYFills.keySet()){
-					Path fill = new Path(path);
-					Point tmp = new Point(0, i);
-					calculatePoint(tmp, curve.yAxis);
-					fill.lineTo(fill.getLastPathElement().getEndPointX(), tmp.getPosY(), false);
-					fill.lineTo(fill.getBasePointX(), tmp.getPosY(), false);
-					fill.lineToBasePoint();
-					fill.setFill(true);
-					fill.setzIndex(curve.getZIndex());
-					fill.setContext(createFillContext(curve.toYFills.get(i)));
-					gos.addGraphicalObject(fill);
-				}
-			}
-			
-			this.gosPerCurve.put(curve, gos);
-			change = true;
-			
-		}
-		
-		/* POINTCHART */
-		//if no shape defined for neither state, it means its only a linechart 
-		if(curve.normalPointShape != null || curve.selectedPointShape != null){
-			TreeMap<Point, GraphicalObjectContainer> pointsGOs = new TreeMap<Point, GraphicalObjectContainer>();
-			ArrayList<Point> visiblePoints = curve.getVisiblePoints();
-			//if vp or model changed we clear our related container
-			if(viewportMoved || viewportResized || curve.modelChanged || !gosPerPoint.containsKey(curve)){
-				this.gosPerPoint.put(curve, pointsGOs);
-				this.interactivePoints.clear();
-			}
-			
-			//check if we got displayable points
-			if(visiblePoints != null && visiblePoints.size() > 0 && gosPerPoint.get(curve).size() == 0){
-				//if the point can be selected via mouseOver, then we register as interactive GO
-				boolean mouseOverRelatedSelection = properties.pointSelectionMode == PointSelectionMode.On_Point_Click ||
-						properties.pointSelectionMode == PointSelectionMode.On_Point_Over;				
-				for(Point point : visiblePoints){
-					createGOsForPoint(point, mouseOverRelatedSelection);
-				}
-			}
-			change = true;
-		}
-		if(change){
-			removeAllGORelatedToCurve(curve);
-			for(GraphicalObject go : gosPerCurve.get(curve).getGraphicalObjects()){
-				graphicalObjectContainer.addGraphicalObject(go);
-			}
-			if (gosPerPoint.get(curve) != null) {
-				for(Point point : gosPerPoint.get(curve).keySet()){
-					for(GraphicalObject go : gosPerPoint.get(curve).get(point).getGraphicalObjects()){
-						graphicalObjectContainer.addGraphicalObject(go);
-					}
-				}
-			}
-		}
-		
-	}
-	
-	void removeAllGORelatedToCurve(Curve curve){
-		for(GraphicalObject go : gosPerCurve.get(curve).getGraphicalObjects())
-			graphicalObjectContainer.removeGraphicalObject(go);
-		if (gosPerPoint.get(curve) != null){
-			for(Point p : gosPerPoint.get(curve).keySet())
-				removeAllGORelatedToPoint(p);
-		}
-		
-	}
-	
-	void removeAllGORelatedToPoint(Point point){
-		
-		for(Point p : gosPerPoint.get(point.parent).keySet())
-			for(GraphicalObject go : gosPerPoint.get(point.parent).get(p).getGraphicalObjects())
-				graphicalObjectContainer.removeGraphicalObject(go);
-		
-	}
-	
-	void createGOsForPoint(Point point, boolean mouseOverRelatedSelection){
-		if(point == null)
-			return;
-		//selected state
-		GraphicalObjectContainer gocForPoint = new GraphicalObjectContainer(); 
-		if(selectedPoints.contains(point)){
-			//if selectedPointShape is null we do not draw
-			if(point.parent.selectedPointShape != null){
-				ArrayList<GraphicalObject> gosOfPoint = point.parent.selectedPointShape.toGraphicalObjects();
-				//set the proper pos for gos
-				for(GraphicalObject go : gosOfPoint){
-					if(point.parent.selectedPointShape instanceof Circle){
-						go.setBasePointX(getCanvasXForPoint(point));
+		// selected state
+		if (selectedPoints.contains(point)) {
+			// if selectedPointShape is null we do not draw
+			if (point.parent.selectedPointShape != null) {
+				ArrayList<GraphicalObject> gosOfPoint = point.parent.selectedPointShape
+						.toGraphicalObjects();
+				// set the proper pos for gos
+				for (GraphicalObject go : gosOfPoint) {
+					if (point.parent.selectedPointShape instanceof Circle) {
+						go.setBasePointX(point.getPosX());
 						go.setBasePointY(point.getPosY());
 						go.setzIndex(point.parent.zIndex);
-					}
-					else if(point.parent.selectedPointShape instanceof Rectangle){
-						go.setBasePointX(getCanvasXForPoint(point) - ((Rectangle)point.parent.selectedPointShape).getWidth()/2);
-						go.setBasePointY(point.getPosY() - ((Rectangle)point.parent.selectedPointShape).getHeight()/2);
+					} else if (point.parent.selectedPointShape instanceof Rectangle) {
+						go.setBasePointX(point.getPosX()
+								- ((Rectangle) point.parent.selectedPointShape)
+										.getWidth() / 2);
+						go.setBasePointY(point.getPosY()
+								- ((Rectangle) point.parent.selectedPointShape)
+										.getHeight() / 2);
 						go.setzIndex(point.parent.zIndex);
 					}
 					gocForPoint.addGraphicalObject(go);
 				}
-				if(mouseOverRelatedSelection){
-					GraphicalObject interactivePoint = point.parent.selectedPointShape.toInterActiveGraphicalObject();
+				if (mouseOverRelatedSelection
+						&& canvas instanceof DrawingAreaGWT) {
+					GraphicalObject interactivePoint = point.parent.selectedPointShape
+							.toInterActiveGraphicalObject();
 					interactivePoints.put(interactivePoint, point);
+					((DrawingAreaGWT) canvas)
+							.addInteractiveGO(interactivePoint);
 				}
 			}
 		}
-		//normal state
-		else{
-			if(point.parent.normalPointShape != null){
-				ArrayList<GraphicalObject> gosOfPoint = point.parent.normalPointShape.toGraphicalObjects();
-				//set the proper pos for gos
-				for(GraphicalObject go : gosOfPoint){
-					if(point.parent.normalPointShape instanceof Circle){
-						go.setBasePointX(getCanvasXForPoint(point));
+		// normal state
+		else {
+			if (point.parent.normalPointShape != null) {
+				ArrayList<GraphicalObject> gosOfPoint = point.parent.normalPointShape
+						.toGraphicalObjects();
+				// set the proper pos for gos
+				for (GraphicalObject go : gosOfPoint) {
+					if (point.parent.normalPointShape instanceof Circle) {
+						go.setBasePointX(point.getPosX());
 						go.setBasePointY(point.getPosY());
 						go.setzIndex(point.parent.zIndex);
-					}
-					else if(point.parent.normalPointShape instanceof Rectangle){
-						go.setBasePointX(getCanvasXForPoint(point) - ((Rectangle)point.parent.normalPointShape).getWidth()/2);
-						go.setBasePointY(point.getPosY() - ((Rectangle)point.parent.normalPointShape).getHeight()/2);
+					} else if (point.parent.normalPointShape instanceof Rectangle) {
+						go.setBasePointX(point.getPosX()
+								- ((Rectangle) point.parent.normalPointShape)
+										.getWidth() / 2);
+						go.setBasePointY(point.getPosY()
+								- ((Rectangle) point.parent.normalPointShape)
+										.getHeight() / 2);
 						go.setzIndex(point.parent.zIndex);
 					}
 					gocForPoint.addGraphicalObject(go);
 				}
-				if(mouseOverRelatedSelection){
-					GraphicalObject interactivePoint = point.parent.selectedPointShape.toInterActiveGraphicalObject();
+				if (mouseOverRelatedSelection
+						&& canvas instanceof DrawingAreaGWT) {
+					GraphicalObject interactivePoint = point.parent.normalPointShape
+							.toInterActiveGraphicalObject();
 					interactivePoints.put(interactivePoint, point);
+					((DrawingAreaGWT) canvas)
+							.addInteractiveGO(interactivePoint);
 				}
 			}
-			//if we do not have normal-state point but the points get selected via mouseOver
-			//we should add a transparent interactiveGO to recieve mouseEvents
-			else if(mouseOverRelatedSelection && point.parent.selectedPointShape != null){
-				GraphicalObject interactivePoint = point.parent.selectedPointShape.toInterActiveGraphicalObject();
-				if(point.parent.selectedPointShape instanceof Circle){
-					interactivePoint.setBasePointX(getCanvasXForPoint(point));
+			// if we do not have normal-state point but the points get selected
+			// via mouseOver
+			// we should add a transparent interactiveGO to recieve mouseEvents
+			else if (mouseOverRelatedSelection
+					&& point.parent.selectedPointShape != null) {
+				GraphicalObject interactivePoint = point.parent.selectedPointShape
+						.toInterActiveGraphicalObject();
+				if (point.parent.selectedPointShape instanceof Circle) {
+					interactivePoint.setBasePointX(point.getPosX());
 					interactivePoint.setBasePointY(point.getPosY());
 					interactivePoint.setzIndex(point.parent.zIndex);
-				}
-				else if(point.parent.selectedPointShape instanceof Rectangle){
-					interactivePoint.setBasePointX(getCanvasXForPoint(point) - ((Rectangle)point.parent.selectedPointShape).getWidth()/2);
-					interactivePoint.setBasePointY(point.getPosY() - ((Rectangle)point.parent.selectedPointShape).getHeight()/2);
+				} else if (point.parent.selectedPointShape instanceof Rectangle) {
+					interactivePoint.setBasePointX(point.getPosX()
+							- ((Rectangle) point.parent.selectedPointShape)
+									.getWidth() / 2);
+					interactivePoint.setBasePointY(point.getPosY()
+							- ((Rectangle) point.parent.selectedPointShape)
+									.getHeight() / 2);
 					interactivePoint.setzIndex(point.parent.zIndex);
 				}
-				//make it transparent
-				interactivePoint.getContext().setAlpha(0d);
 				interactivePoints.put(interactivePoint, point);
+				((DrawingAreaGWT) canvas).addInteractiveGO(interactivePoint);
 			}
 		}
-		if(!gosPerPoint.containsKey(point.parent))
-			gosPerPoint.put(point.parent, new TreeMap<Point, GraphicalObjectContainer>());
-		gosPerPoint.get(point.parent).put(point, gocForPoint);
+		return gocForPoint;
 	}
-	
-	int getCanvasXForPoint(Point point){
-		return point.getPosX() - getViewportMinInPX(); 
-	}
-	
-	int getViewportMinInPX(){
-		return (int) ((viewportMin - xMin) * xRatio + leftPadding);
-	}
-	
-	static Context createFillContext(Color fillColor){
-		return new Context(
-				fillColor.getAlpha(),
-				fillColor.getColor(),
-				0,
-				Color.DEFAULT_COLOR,
-				0,
-				0,
-				0,
+
+	static Context createFillContext(Color fillColor) {
+		return new Context(fillColor.getAlpha(), Color.DEFAULT_COLOR, 0,
+				fillColor.getColor(), 0, 0, Color.DEFAULT_ALPHA,
 				Color.DEFAULT_COLOR);
 	}
 
-	static Context createLineContext(Curve curve){
-		return new Context(
-				curve.lineProperties.getLineColor().getAlpha(),
+	static Context createLineContext(Curve curve) {
+		return new Context(curve.lineProperties.getLineColor().getAlpha(),
 				curve.lineProperties.getLineColor().getColor(),
-				curve.lineProperties.getLineWidth(),
-				Color.DEFAULT_COLOR,
-				curve.shadowOffsetX,
-				curve.shadowOffsetY,
-				curve.shadowColor == null ? Color.DEFAULT_ALPHA : curve.shadowColor.getAlpha(),
-				curve.shadowColor == null ? Color.DEFAULT_COLOR : curve.shadowColor.getColor());
-	}
-	
-	/**
-	 * @return the xAxis
-	 */
-	public Axis getxAxis() {
-		return xAxis;
-	}
-	
-	/**
-	 * @param xAxis the xAxis to set
-	 */
-	public void setxAxis(Axis xAxis) {
-		this.xAxis = xAxis;
-	}
-
-	/**
-	 * @return the yAxis
-	 */
-	public Axis getyAxis() {
-		return yAxis;
-	}
-
-	/**
-	 * @param yAxis the yAxis to set
-	 */
-	public void setyAxis(Axis yAxis) {
-		this.yAxis = yAxis;
-	}
-
-	/**
-	 * @return the y2Axis
-	 */
-	public Axis getY2Axis() {
-		return y2Axis;
-	}
-
-	/**
-	 * @param y2Axis the y2Axis to set
-	 */
-	public void setY2Axis(Axis y2Axis) {
-		this.y2Axis = y2Axis;
-	}
-
-	/**
-	 * @return the properties
-	 */
-	public LineChartProperties getProperties() {
-		return properties;
-	}
-	
-	/**
-	 * 
-	 * @param properties
-	 */
-	public void setProperties(LineChartProperties properties){
-		this.properties = properties;
-		if (canvas instanceof DrawingAreaImplCanvas) {
-			if(properties.pointSelectionMode == PointSelectionMode.Closest_To_Cursor){
-				((DrawingAreaImplCanvas) canvas).addMouseMoveHandler(this);
-				((DrawingAreaImplCanvas) canvas).addMouseOutHandler(this);
-			}
-			else
-				((DrawingAreaImplCanvas) canvas).addGraphicalObjectEventHandler(this);
-		}
+				curve.lineProperties.getLineWidth(), Color.DEFAULT_COLOR,
+				curve.shadowOffsetX, curve.shadowOffsetY,
+				curve.shadowColor == null ? Color.DEFAULT_ALPHA
+						: curve.shadowColor.getAlpha(),
+				curve.shadowColor == null ? Color.DEFAULT_COLOR
+						: curve.shadowColor.getColor());
 	}
 
 	@Override
 	public void onMouseClick(ArrayList<GraphicalObject> sourceGOs) {
-		if(properties.pointSelectionMode == PointSelectionMode.On_Point_Click){
-			for(GraphicalObject go : sourceGOs){
+		if (canHandleEvents
+				&& pointSelectionMode == PointSelectionMode.On_Point_Click) {
+			for (GraphicalObject go : sourceGOs) {
 				Point point = interactivePoints.get(go);
 				selectedPoints.add(point);
 				interactivePoints.remove(go);
@@ -576,16 +650,18 @@ public class LineChart extends IneChartModul implements GraphicalObjectEventHand
 	}
 
 	@Override
-	public void onMouseMove(ArrayList<GraphicalObject> mouseOver, ArrayList<GraphicalObject> mouseOut) {
-		if(properties.pointSelectionMode == PointSelectionMode.On_Point_Over){
-			for(GraphicalObject go : mouseOver){
+	public void onMouseMove(ArrayList<GraphicalObject> mouseOver,
+			ArrayList<GraphicalObject> mouseOut) {
+		if (canHandleEvents
+				&& pointSelectionMode == PointSelectionMode.On_Point_Over) {
+			for (GraphicalObject go : mouseOver) {
 				Point point = interactivePoints.get(go);
 				selectedPoints.add(point);
 				interactivePoints.remove(go);
 				createGOsForPoint(point, true);
 				redrawNeeded = true;
 			}
-			for(GraphicalObject go : mouseOut){
+			for (GraphicalObject go : mouseOut) {
 				Point point = interactivePoints.get(go);
 				selectedPoints.remove(point);
 				interactivePoints.remove(go);
@@ -597,74 +673,160 @@ public class LineChart extends IneChartModul implements GraphicalObjectEventHand
 
 	@Override
 	public void onMouseMove(MouseMoveEvent event) {
-		if(properties.pointSelectionMode == PointSelectionMode.Closest_To_Cursor){
+		if (canHandleEvents
+				&& pointSelectionMode == PointSelectionMode.Closest_To_Cursor) {
 			ArrayList<Point> actualSelection = new ArrayList<Point>();
-			final int mouseX = event.getRelativeX(((DrawingAreaImplCanvas) this.canvas).getCanvas().getElement());
-			for(Curve curve : curves){
+			final int mouseX = event
+					.getRelativeX(((DrawingAreaGWT) this.canvas)
+							.getCanvasWidget().getElement());
+			for (Curve curve : curves) {
 				int d = Integer.MAX_VALUE;
 				int actualD;
 				Point last = null;
-				for(Point point : curve.getVisiblePoints()){
-					actualD = Math.abs(getCanvasXForPoint(point) - mouseX);
-					if(d > actualD){
+				for (Point point : curve.getVisiblePoints(viewport.getYMin(),
+						viewport.getYMax())) {
+					actualD = (int) Math.abs(point.getPosX() - mouseX);
+					if (d > actualD) {
 						d = actualD;
-					}
-					else {
+					} else {
 						break;
 					}
 					last = point;
 				}
-				if(last != null)
+				if (last != null)
 					actualSelection.add(last);
 			}
 			ArrayList<Point> stateChangedPoints = new ArrayList<Point>();
-			for(Point p : actualSelection){
-				if(!selectedPoints.contains(p)){
+			for (Point p : actualSelection) {
+				if (!selectedPoints.contains(p)) {
 					stateChangedPoints.add(p);
 					removeAllGORelatedToPoint(p);
 				}
 			}
-			for(Point p : selectedPoints){
-				if(!actualSelection.contains(p)){
+			for (Point p : selectedPoints) {
+				if (!actualSelection.contains(p)) {
 					stateChangedPoints.add(p);
 					removeAllGORelatedToPoint(p);
 				}
 			}
 			selectedPoints = actualSelection;
-		
-			
-			if(stateChangedPoints.size() > 0){
+
+			if (stateChangedPoints.size() > 0) {
 				redrawNeeded = true;
-				for(Point p : stateChangedPoints){
-					createGOsForPoint(p, false);
+				for (Point p : stateChangedPoints) {
+					graphicalObjectContainer
+							.addAllGraphicalObject(createGOsForPoint(p, false));
 				}
 			}
-		}			
+		}
 	}
 
 	@Override
 	public void onMouseOut(MouseOutEvent event) {
-		if(properties.pointSelectionMode == PointSelectionMode.Closest_To_Cursor){
+		if (canHandleEvents
+				&& pointSelectionMode == PointSelectionMode.Closest_To_Cursor) {
 			ArrayList<Point> stateChanged = new ArrayList<Point>();
-			for(Point point : selectedPoints){
+			for (Point point : selectedPoints) {
 				removeAllGORelatedToPoint(point);
 				stateChanged.add(point);
 			}
-			if(stateChanged.size() > 0){
+			if (stateChanged.size() > 0) {
 				redrawNeeded = true;
 				selectedPoints.clear();
-				for(Point point : stateChanged){
-					createGOsForPoint(point, false);
+				for (Point point : stateChanged) {
+					graphicalObjectContainer
+							.addAllGraphicalObject(createGOsForPoint(point,
+									false));
 				}
 			}
-			
 		}
-		
 	}
 
+	public PointSelectionMode getPointSelectionMode() {
+		return pointSelectionMode;
+	}
 
-	
-	
-	
-	
+	public void setPointSelectionMode(PointSelectionMode pointSelectionMode) {
+		this.pointSelectionMode = pointSelectionMode;
+	}
+
+	/**
+	 * @return the overlapFilterDistance
+	 */
+	public int getOverlapFilterDistance() {
+		return overlapFilterDistance;
+	}
+
+	/**
+	 * @param overlapFilterDistance
+	 *            the overlapFilterDistance to set
+	 */
+	public void setOverlapFilterDistance(int overlapFilterDistance) {
+		if (this.overlapFilterDistance != overlapFilterDistance) {
+			redrawNeeded = true;
+			setCurvesModelChanged();
+		}
+		this.overlapFilterDistance = overlapFilterDistance;
+	}
+
+	private void setCurvesModelChanged() {
+		for (Curve c : curves)
+			c.modelChanged = true;
+	}
+
+	/**
+	 * @return the precalculatePoints
+	 */
+	public boolean isPrecalculatePoints() {
+		return precalculatePoints;
+	}
+
+//	/**
+//	 * @param precalculatePoints
+//	 *            the precalculatePoints to set
+//	 */
+//	public void setPrecalculatePoints(boolean precalculatePoints) {
+//		if (this.precalculatePoints != precalculatePoints)
+//			redrawNeeded = true;
+//		this.precalculatePoints = precalculatePoints;
+//	}
+
+	/**
+	 * @return the autoCreateTicks
+	 */
+	public boolean isAutoCreateTicks() {
+		return autoCreateTicks;
+	}
+
+	/**
+	 * @param autoCreateTicks
+	 *            the autoCreateTicks to set
+	 */
+	public void setAutoCreateTicks(boolean autoCreateTicks) {
+		if (this.autoCreateTicks != autoCreateTicks)
+			redrawNeeded = true;
+		this.autoCreateTicks = autoCreateTicks;
+	}
+
+	/**
+	 * @param otherLineChart
+	 */
+	public void cloneProperties(LineChart otherLineChart) {
+		autoScaleViewport = otherLineChart.autoScaleViewport;
+		autoCreateTicks = otherLineChart.autoCreateTicks;
+		pointSelectionMode = otherLineChart.pointSelectionMode;
+		precalculatePoints = otherLineChart.precalculatePoints;
+		useViewport = otherLineChart.useViewport;
+		overlapFilterDistance = otherLineChart.overlapFilterDistance;
+		redrawNeeded = true;
+		setCurvesModelChanged();
+	}
+
+	@Override
+	protected boolean redrawNeeded() {
+		for (Curve c : curves)
+			if (c.modelChanged)
+				return true;
+		return super.redrawNeeded();
+	}
 }

@@ -5,6 +5,7 @@ import java.io.OutputStream;
 import java.util.ArrayList;
 
 import com.inepex.inechart.chartwidget.IneChartModul;
+import com.inepex.inechart.chartwidget.Viewport;
 import com.inepex.inechart.chartwidget.axes.Axes;
 import com.inepex.inechart.chartwidget.linechart.LineChart;
 import com.inepex.inechart.chartwidget.linechart.LineChartProperties;
@@ -15,77 +16,86 @@ public class IneAwtChart {
 
 	private ArrayList<IneChartModul> moduls;
 	private DrawingAreaAwt drawingArea;
-	
-	//properties
+
+	// properties
 	private static final int DEFAULT_PADDING = 30;
 	private int widgetWidth;
 	private int widgetHeight;
 	private int canvasWidth;
 	private int canvasHeight;
-	
+	private final Viewport viewport;
+
 	public IneAwtChart(int width, int height) {
 		canvasHeight = height - DEFAULT_PADDING / 2;
 		canvasWidth = width - DEFAULT_PADDING / 2;
 		widgetHeight = height;
 		widgetWidth = width;
-
-		this.drawingArea = new DrawingAreaAwt(canvasWidth,canvasHeight);
+		viewport = new Viewport(0, 0, 1, 1);
+		this.drawingArea = new DrawingAreaAwt(canvasWidth, canvasHeight);
 		moduls = new ArrayList<IneChartModul>();
 	}
-	
+
 	/*
-	 *  Moduls
+	 * Moduls
 	 */
-	
-	public LineChart createLineChart(){
-		Axes axes = new Axes(drawingArea);
-		LineChart chart = new LineChart(drawingArea,axes);
+
+	public LineChart createLineChart() {
+		LineChart chart = new LineChart(drawingArea, getAxes(), viewport);
 		moduls.add(chart);
-		moduls.add(axes);
+		chart.setProperties(LineChartProperties.getDefaultLineChartProperties());
 		return chart;
 	}
-	
-	public LineChart createLineChart(LineChartProperties properties){
+
+	public LineChart createLineChart(LineChartProperties properties) {
 		LineChart chart = createLineChart();
 		chart.setProperties(properties);
 		return chart;
 	}
-	
-	public PieChart createPieChart(){
+
+	public PieChart createPieChart() {
 		PieChart chart = new PieChart(drawingArea);
 		moduls.add(chart);
 		return chart;
 	}
-	
-	/* public methods */
-	public void setViewport(double startX, double stopX){
-		for(IneChartModul modul : moduls)
-			modul.setViewport(startX, stopX);
+
+	public Axes getAxes() {
+		for (IneChartModul m : moduls)
+			if (m instanceof Axes)
+				return (Axes) m;
+		Axes n = new Axes(drawingArea, viewport);
+		moduls.add(n);
+		return n;
 	}
-	public void moveViewport(double dX){
-		for(IneChartModul modul : moduls)
-			modul.moveViewport(dX);
+
+	public void addModul(IneChartModul modul) {
+		if (modul != null)
+			moduls.add(modul);
 	}
-	
-	public void update(){
-		//update model, create GOs per modul
-		for(IneChartModul modul : moduls){
+
+	public Viewport getViewport() {
+		return viewport;
+	}
+
+	public void update() {
+		// update model, create GOs per modul
+		for (IneChartModul modul : moduls) {
 			modul.update();
-			drawingArea.addAllGraphicalObject(modul.getGraphicalObjectContainer());
+			drawingArea.addAllGraphicalObject(modul
+					.getGraphicalObjectContainer());
 		}
-		//draw
+		// draw
 		drawingArea.update();
 	}
-	
-	public void saveToFile(String filename){
-		((DrawingAreaAwt)drawingArea).saveToFile(filename);
+
+	public void saveToFile(String filename) {
+		((DrawingAreaAwt) drawingArea).saveToFile(filename);
 	}
-	
-	public void saveToOutputStream(OutputStream outputStream){
-		((DrawingAreaAwt)drawingArea).saveToOutputStream(outputStream);
+
+	public void saveToOutputStream(OutputStream outputStream) {
+		((DrawingAreaAwt) drawingArea).saveToOutputStream(outputStream);
 	}
-	
-	public BufferedImage getImage(){
-		return ((DrawingAreaAwt)drawingArea).getImage();
+
+	public BufferedImage getImage() {
+		return ((DrawingAreaAwt) drawingArea).getImage();
 	}
 }

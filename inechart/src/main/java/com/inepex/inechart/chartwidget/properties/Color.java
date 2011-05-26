@@ -6,19 +6,16 @@ public class Color {
 	public static final String DEFAULT_COLOR = "#000000";
 	private String color;
 	private double alpha;
-	
-	
+
 	public Color(String color) {
 		this.color = color;
 		this.alpha = DEFAULT_ALPHA;
 	}
 
-
 	public Color(String color, double alpha) {
 		this.color = color;
 		this.alpha = alpha;
 	}
-
 
 	/**
 	 * @return the color
@@ -27,14 +24,13 @@ public class Color {
 		return color;
 	}
 
-
 	/**
-	 * @param color the color to set
+	 * @param color
+	 *            the color to set
 	 */
 	public void setColor(String color) {
 		this.color = color;
 	}
-
 
 	/**
 	 * @return the alpha
@@ -43,13 +39,12 @@ public class Color {
 		return alpha;
 	}
 
-
 	/**
-	 * @param alpha the alpha to set
+	 * @param alpha
+	 *            the alpha to set
 	 */
 	public void setAlpha(double alpha) {
 		this.alpha = alpha;
 	}
-	
-	
+
 }

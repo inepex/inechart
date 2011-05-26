@@ -3,70 +3,165 @@ package com.inepex.inechart.chartwidget.axes;
 import java.util.ArrayList;
 import java.util.TreeMap;
 
+import com.inepex.inechart.chartwidget.IneChart;
+import com.inepex.inechart.chartwidget.IneChartModul;
+import com.inepex.inechart.chartwidget.IneChartModul2D;
+import com.inepex.inechart.chartwidget.misc.HasZIndex;
 import com.inepex.inechart.chartwidget.properties.Color;
 import com.inepex.inechart.chartwidget.properties.LineProperties;
 
-public class Axis implements Comparable<Axis>{
-	public static enum AxisType{
-		X,
-		Y,
-		Y2
+public class Axis implements Comparable<Axis>, HasZIndex {
+
+	/**
+	 * Defines the direction of an {@link Axis}
+	 */
+	public static enum AxisDirection {
+		Horizontal_Ascending_To_Right(1, 1), Horizontal_Ascending_To_Left(1, -1), Vertical_Ascending_To_Top(
+				-1, 1), Vertical_Ascending_To_Bottom(-1, -1);
+		private final int ascending;
+		private final int direction;
+
+		private AxisDirection(int direction, int ascending) {
+			this.ascending = ascending;
+			this.direction = direction;
+		}
+
+		public int getAscending() {
+			return ascending;
+		}
+
+		public int getDirection() {
+			return direction;
+		}
+
+		/**
+		 * Determines whether the given axes are perpendicular
+		 * 
+		 * @param axis1
+		 * @param axis2
+		 * @return
+		 */
+		public static boolean isPerpendicular(Axis axis1, Axis axis2) {
+			if (axis1.axisDirection.direction + axis2.axisDirection.direction == 0)
+				return true;
+			return false;
+		}
 	}
 
+	/**
+	 * Defines the position of the axis related to perpendicular main axis as:
+	 * its line and its {@link Tick}s with their labels will be aligned, but the
+	 * grids are unaffected (they will run through the modul's drawing area).
+	 * 
+	 */
+	public static enum AxisPosition {
+		/**
+		 * in case of horizontal axis -> at the bottom '' vertical axis -> at
+		 * the left
+		 */
+		Minimum,
+		/**
+		 * at the middle of the drawing area
+		 */
+		Middle,
+		/**
+		 * in case of horizontal axis -> at the top '' vertical axis -> at the
+		 * right
+		 */
+		Maximum,
+		/**
+		 * Display axis at a fix position
+		 */
+		Fixed,
+		/**
+		 * Display axis at a fix position, but if it would be invisible dock to
+		 * Min/Max, which is closer to its fix position
+		 */
+		Fixed_Dock_If_Not_Visible
+	}
+
+	public static enum AxisDataType {
+		Number, Time
+	}
+
+	AxisDataType axisDataType;
+	/**
+	 * The axis will be aligned to this modul *
+	 */
+	IneChartModul2D modulToAlign;
+	double fixedPosition;
+	int zIndex;
 	ArrayList<Tick> ticks;
 	ArrayList<Object[]> gridFills;
 	boolean changed = true;
-	AxisType type;
 	LineProperties lineProperties;
 	/**
-	 * min and max is only matters in case of vertical (Y, Y2) axes
+	 * min and max values defines the visible part of this axis
 	 */
 	double min, max;
-	
-	//comparing helper fields
-	private static int highestComparableNo = 0; 
+	AxisDirection axisDirection;
+	AxisPosition axisPosition;
+	/**
+	 * if false the axis and all its objects will NOT displayed
+	 */
+	boolean isVisible;
+	/**
+	 * If you want to display this axis as a finite line, set these values, and
+	 * the axis (and its ticks and their grids) will be displayed between these
+	 * values
+	 */
+	double lowerEnd, upperEnd;
+
+	// comparison helper fields
+	private static int highestComparableNo = 0;
 	private int comparableNo;
-	
-	
+
 	public Axis() {
 		this(LineProperties.getDefaultSolidLine());
 	}
-	
+
 	public Axis(LineProperties lineProperties) {
 		this.lineProperties = lineProperties;
 		ticks = new ArrayList<Tick>();
 		gridFills = new ArrayList<Object[]>();
 		comparableNo = Axis.highestComparableNo++;
+
+		// defaults
+		axisPosition = AxisPosition.Minimum;
+		axisDirection = AxisDirection.Horizontal_Ascending_To_Right;
+		axisDataType = AxisDataType.Number;
+		lowerEnd = -Double.MAX_VALUE;
+		upperEnd = Double.MAX_VALUE;
 	}
-	
-	public void addTick(Tick tick){
+
+	public void addTick(Tick tick) {
 		ticks.add(tick);
 		changed = true;
 	}
-	
-	public void clearTicks(){
+
+	public void clearTicks() {
 		ticks.clear();
 		changed = true;
 	}
-	
- 	public void fillBetweenTicks(Tick tick1, Tick tick2, Color color){
-		if(color == null)
+
+	public void fillBetweenTicks(Tick tick1, Tick tick2, Color color) {
+		if (color == null)
 			return;
 		switch (tick1.compareTo(tick2)) {
 		case 0:
 			return;
 		case 1:
-			gridFills.add(new Object[]{tick2, tick1, color});
+			gridFills.add(new Object[] { tick2, tick1, color });
 			break;
 		case -1:
-			gridFills.add(new Object[]{tick1, tick2, color});
+			gridFills.add(new Object[] { tick1, tick2, color });
 			break;
 		}
 		changed = true;
 	}
-	
-	public void removeFill(Tick tick1, Tick tick2){
-		Tick lower = null,upper = null;
+
+	public void removeFill(Tick tick1, Tick tick2) {
+		Tick lower = null, upper = null;
 		switch (tick1.compareTo(tick2)) {
 		case 0:
 			return;
@@ -80,29 +175,16 @@ public class Axis implements Comparable<Axis>{
 			break;
 		}
 		Object[] toRemove = null;
-		for(Object[] triple : gridFills){
-			if(((Tick)triple[0]).position == lower.position && ((Tick)triple[1]).position == upper.position){
+		for (Object[] triple : gridFills) {
+			if (((Tick) triple[0]).position == lower.position
+					&& ((Tick) triple[1]).position == upper.position) {
 				toRemove = triple;
 				break;
 			}
 		}
-		if(toRemove != null)
+		if (toRemove != null)
 			gridFills.remove(toRemove);
 		changed = true;
-	}
-
-	/**
-	 * @return the type
-	 */
-	public AxisType getType() {
-		return type;
-	}
-
-	/**
-	 * @param type the type to set
-	 */
-	public void setType(AxisType type) {
-		this.type = type;
 	}
 
 	/**
@@ -113,19 +195,21 @@ public class Axis implements Comparable<Axis>{
 	}
 
 	/**
-	 * @param lineProperties the lineProperties to set
+	 * @param lineProperties
+	 *            the lineProperties to set
 	 */
 	public void setLineProperties(LineProperties lineProperties) {
 		this.lineProperties = lineProperties;
+		changed = true;
 	}
-	
-	public ArrayList<Tick> getVisibleTicks(double min, double max){
+
+	public ArrayList<Tick> getVisibleTicks() {
 		java.util.Collections.sort(ticks);
 		ArrayList<Tick> vTicks = new ArrayList<Tick>();
-		for(Tick tick : ticks){
-			if(tick.position > max)
+		for (Tick tick : ticks) {
+			if (tick.position > max || tick.position > upperEnd)
 				break;
-			else if (tick.position >= min)
+			else if (tick.position >= min && tick.position >= lowerEnd)
 				vTicks.add(tick);
 		}
 		return vTicks;
@@ -139,10 +223,12 @@ public class Axis implements Comparable<Axis>{
 	}
 
 	/**
-	 * @param max the max to set
+	 * @param max
+	 *            the max to set
 	 */
 	public void setMax(double max) {
 		this.max = max;
+		changed = true;
 	}
 
 	/**
@@ -153,32 +239,157 @@ public class Axis implements Comparable<Axis>{
 	}
 
 	/**
-	 * @param min the min to set
+	 * @param min
+	 *            the min to set
 	 */
 	public void setMin(double min) {
 		this.min = min;
+		changed = true;
 	}
 
 	@Override
 	public int compareTo(Axis o) {
 		return comparableNo - o.comparableNo;
-//		if(type == AxisType.X){
-//			if(o.type != AxisType.X)
-//				return 1;
-//			else if(ticks.size() > o.ticks.size()){
-//				return 1;
-//			}
-//			else
-//				return -1;
-//		}
-//		else if(o.type == AxisType.X){
-//			return -1;
-//		}
-//		else if(ticks.size() > o.ticks.size()){
-//			return 1;
-//		}
-//		else
-//			return -1;
-		
+	}
+
+	@Override
+	public void setZIndex(int zIndex) {
+		this.zIndex = zIndex;
+		changed = true;
+	}
+
+	@Override
+	public int getZIndex() {
+		return zIndex;
+	}
+
+	/**
+	 * @return the ticks
+	 */
+	public ArrayList<Tick> getTicks() {
+		return ticks;
+	}
+
+	/**
+	 * @param ticks
+	 *            the ticks to set
+	 */
+	public void setTicks(ArrayList<Tick> ticks) {
+		this.ticks = ticks;
+		changed = true;
+	}
+
+	/**
+	 * @return the axisOrientation
+	 */
+	public AxisDirection getAxisDirection() {
+		return axisDirection;
+
+	}
+
+	/**
+	 * @param axisOrientation
+	 *            the axisOrientation to set
+	 */
+	public void setAxisDirection(AxisDirection axisDirection) {
+		this.axisDirection = axisDirection;
+		changed = true;
+	}
+
+	/**
+	 * @return the axisPosition
+	 */
+	public AxisPosition getAxisPosition() {
+		return axisPosition;
+	}
+
+	/**
+	 * @param axisPosition
+	 *            the axisPosition to set
+	 */
+	public void setAxisPosition(AxisPosition axisPosition) {
+		this.axisPosition = axisPosition;
+		changed = true;
+	}
+
+	/**
+	 * @return the lowerEnd
+	 */
+	public double getLowerEnd() {
+		return lowerEnd;
+	}
+
+	/**
+	 * @param lowerEnd
+	 *            the lowerEnd to set
+	 */
+	public void setLowerEnd(double lowerEnd) {
+		this.lowerEnd = lowerEnd;
+		changed = true;
+	}
+
+	/**
+	 * @return the upperEnd
+	 */
+	public double getUpperEnd() {
+		return upperEnd;
+	}
+
+	/**
+	 * @param upperEnd
+	 *            the upperEnd to set
+	 */
+	public void setUpperEnd(double upperEnd) {
+		this.upperEnd = upperEnd;
+		changed = true;
+	}
+
+	/**
+	 * @return the changed
+	 */
+	public boolean isChanged() {
+		return changed;
+	}
+
+	/**
+	 * @return the isVisible
+	 */
+	public boolean isVisible() {
+		return isVisible;
+	}
+
+	/**
+	 * @param isVisible
+	 *            the isVisible to set
+	 */
+	public void setVisible(boolean isVisible) {
+		this.isVisible = isVisible;
+		changed = isVisible;
+	}
+
+	public boolean isHorizontal() {
+		if (axisDirection.getDirection() == 1)
+			return true;
+		else
+			return false;
+	}
+
+	/**
+	 * @return the modulToAlign
+	 */
+	public IneChartModul2D getModulToAlign() {
+		return modulToAlign;
+	}
+
+	/**
+	 * Do NOT use this method, it will be automatically set whenever you set a
+	 * {@link IneChartModul2D}'s axis
+	 * 
+	 * @param modulToAlign
+	 *            the modulToAlign to set
+	 */
+	public void setModulToAlign(IneChartModul2D modulToAlign) {
+		this.modulToAlign = modulToAlign;
+		changed = true;
 	}
 }

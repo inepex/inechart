@@ -9,32 +9,35 @@ import com.inepex.inechart.chartwidget.properties.ShapeProperties;
 import com.inepex.inegraphics.impl.client.InteractiveGraphicalObject;
 import com.inepex.inegraphics.shared.gobjects.GraphicalObject;
 
-public abstract class Shape implements HasShadow, HasZIndex{
+public abstract class Shape implements HasShadow, HasZIndex {
 
 	ShapeProperties properties;
-	
+
 	int zIndex;
 	double shadowOffsetX = 0, shadowOffsetY = 0;
 	Color shadowColor = null;
-	
-	protected Shape (ShapeProperties prop){
+
+	protected Shape(ShapeProperties prop) {
 		properties = prop;
 	}
-	
+
 	/**
-	 * When called the Shape creates (new) {@link GraphicalObject}s representing itself.
+	 * When called the Shape creates (new) {@link GraphicalObject}s representing
+	 * itself.
+	 * 
 	 * @return
 	 */
 	abstract public ArrayList<GraphicalObject> toGraphicalObjects();
-	
+
 	/**
-	 * This method created an {@link InteractiveGraphicalObject} 
-	 * from one of the {@link GraphicalObject} returned by calling (or a previously called)
+	 * This method created an {@link InteractiveGraphicalObject} from one of the
+	 * {@link GraphicalObject} returned by calling (or a previously called)
 	 * toGraphicalObjects() method
+	 * 
 	 * @return
 	 */
 	abstract public GraphicalObject toInterActiveGraphicalObject();
-	
+
 	@Override
 	public void setZIndex(int zIndex) {
 		this.zIndex = zIndex;
@@ -64,17 +67,15 @@ public abstract class Shape implements HasShadow, HasZIndex{
 	public double getShadowOffsetY() {
 		return shadowOffsetY;
 	}
-	
+
 	@Override
 	public Color getShadowColor() {
 		return this.shadowColor;
 	}
-	
+
 	@Override
 	public void setShadowColor(Color shadowColor) {
 		this.shadowColor = shadowColor;
 	}
-	
-	
+
 }
- 

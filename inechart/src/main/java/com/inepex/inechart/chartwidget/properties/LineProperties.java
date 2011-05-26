@@ -2,36 +2,36 @@ package com.inepex.inechart.chartwidget.properties;
 
 public class LineProperties {
 	/**
-	 * Drawing style of the line 
+	 * Drawing style of the line
 	 */
-	public enum LineStyle{
+	public enum LineStyle {
 		/**
 		 * simple line
 		 */
 		SOLID,
 		/**
-		 * dashed line, may not be supported
-		 * in all case of use
+		 * dashed line, may not be supported in all case of use
 		 */
 		DASHED
 	}
-	
-	public static LineProperties getDefaultSolidLine(){
+
+	public static LineProperties getDefaultSolidLine() {
 		return new LineProperties(1, new Color("#000000"));
 	}
 
-	public static LineProperties getDefaultDashedLine(){
-		return new LineProperties(1, new Color("#000000"),DEFAULT_DASH_STROKE_LENGTH,DEFAULT_DASH_DISTANCE);
+	public static LineProperties getDefaultDashedLine() {
+		return new LineProperties(1, new Color("#000000"),
+				DEFAULT_DASH_STROKE_LENGTH, DEFAULT_DASH_DISTANCE);
 	}
 
 	public static final double DEFAULT_DASH_STROKE_LENGTH = 3.5;
 	public static final double DEFAULT_DASH_DISTANCE = 2.2;
-	private int lineWidth;
-	private Color  lineColor;
+	private double lineWidth;
+	private Color lineColor;
 	private LineStyle style;
 	private double dashStrokeLength, dashDistance;
-	
-	public LineProperties(int lineWidth, Color lineColor) {
+
+	public LineProperties(double lineWidth, Color lineColor) {
 		this.lineWidth = lineWidth;
 		this.lineColor = lineColor;
 		this.dashStrokeLength = 0;
@@ -39,7 +39,7 @@ public class LineProperties {
 		this.style = LineStyle.SOLID;
 	}
 
-	public LineProperties(int lineWidth, Color lineColor,
+	public LineProperties(double lineWidth, Color lineColor,
 			double dashStrokeLength, double dashDistance) {
 		this.lineWidth = lineWidth;
 		this.lineColor = lineColor;
@@ -51,14 +51,15 @@ public class LineProperties {
 	/**
 	 * @return the lineWidth
 	 */
-	public int getLineWidth() {
+	public double getLineWidth() {
 		return lineWidth;
 	}
 
 	/**
-	 * @param lineWidth the lineWidth to set
+	 * @param lineWidth
+	 *            the lineWidth to set
 	 */
-	public void setLineWidth(int lineWidth) {
+	public void setLineWidth(double lineWidth) {
 		this.lineWidth = lineWidth;
 	}
 
@@ -70,7 +71,8 @@ public class LineProperties {
 	}
 
 	/**
-	 * @param lineColor the lineColor to set
+	 * @param lineColor
+	 *            the lineColor to set
 	 */
 	public void setLineColor(Color lineColor) {
 		this.lineColor = lineColor;
@@ -84,7 +86,8 @@ public class LineProperties {
 	}
 
 	/**
-	 * @param style the style to set
+	 * @param style
+	 *            the style to set
 	 */
 	public void setStyle(LineStyle style) {
 		this.style = style;
@@ -98,7 +101,8 @@ public class LineProperties {
 	}
 
 	/**
-	 * @param dashStrokeLength the dashStrokeLength to set
+	 * @param dashStrokeLength
+	 *            the dashStrokeLength to set
 	 */
 	public void setDashStrokeLength(double dashStrokeLength) {
 		this.dashStrokeLength = dashStrokeLength;
@@ -112,12 +116,11 @@ public class LineProperties {
 	}
 
 	/**
-	 * @param dashDistance the dashDistance to set
+	 * @param dashDistance
+	 *            the dashDistance to set
 	 */
 	public void setDashDistance(double dashDistance) {
 		this.dashDistance = dashDistance;
 	}
-	
-	
-	
+
 }

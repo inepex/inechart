@@ -1,16 +1,32 @@
 package com.inepex.inechart.chartwidget.misc;
 
+import com.inepex.inechart.chartwidget.properties.Color;
+
 public class ColorSet {
 
-	String[] colors = {"#edc240", "#afd8f8", "#cb4b4b", "#4da74d", "#9440ed", "#9440ed", "#9440ed", "#9440ed"};
-	
+	static final Color[] defaultColors = { new Color("#edc240"),
+			new Color("#afd8f8"), new Color("#cb4b4b"), new Color("#4da74d"),
+			new Color("#9440ed"), new Color("#9440ed"), new Color("#9440ed"),
+			new Color("#9440ed") };
+	Color[] colors;
 	int actual = 0;
-	
+
 	public ColorSet() {
+		this(defaultColors);
 	}
-	
-	public String getNextColor(){
+
+	public ColorSet(Color... colors) {
+		if (colors != null && colors.length > 0)
+			this.colors = colors;
+	}
+
+	public String getNextColorName() {
+		return getNextColor().getColor();
+	}
+
+	public Color getNextColor() {
+		if (actual >= colors.length)
+			actual = 0;
 		return colors[actual++];
 	}
-	
 }
