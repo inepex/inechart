@@ -2,9 +2,9 @@ package com.inepex.inegraphics.shared.gobjects;
 
 public class QuadraticCurveTo extends MoveTo {
 	
-	private int controlPointX, controlPointY;
+	private double controlPointX, controlPointY;
 
-	public QuadraticCurveTo(int endPointX, int endPointY, int controlPointX, int controlPointY) {
+	public QuadraticCurveTo(double endPointX, double endPointY, double controlPointX, double controlPointY) {
 		super(endPointX, endPointY);
 		this.controlPointX = controlPointX;
 		this.controlPointY = controlPointY;
@@ -13,28 +13,28 @@ public class QuadraticCurveTo extends MoveTo {
 	/**
 	 * @return the controlPointX
 	 */
-	public int getControlPointX() {
+	public double getControlPointX() {
 		return controlPointX;
 	}
 
 	/**
 	 * @param controlPointX the controlPointX to set
 	 */
-	public void setControlPointX(int controlPointX) {
+	public void setControlPointX(double controlPointX) {
 		this.controlPointX = controlPointX;
 	}
 
 	/**
 	 * @return the controlPointY
 	 */
-	public int getControlPointY() {
+	public double getControlPointY() {
 		return controlPointY;
 	}
 
 	/**
 	 * @param controlPointY the controlPointY to set
 	 */
-	public void setControlPointY(int controlPointY) {
+	public void setControlPointY(double controlPointY) {
 		this.controlPointY = controlPointY;
 	}
 

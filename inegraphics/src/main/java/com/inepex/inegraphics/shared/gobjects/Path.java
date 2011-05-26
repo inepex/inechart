@@ -7,6 +7,7 @@ import com.inepex.inegraphics.shared.Context;
 public class Path extends GraphicalObject {
 	
 	protected ArrayList<PathElement> elements;
+	protected boolean alignElementsWithBasePoint;
 
 	/**
 	 * Deep copy a {@link Path} object.
@@ -18,15 +19,17 @@ public class Path extends GraphicalObject {
 		for(Object e : copy.elements.toArray()){
 			elements.add((PathElement) e);
 		}
+		alignElementsWithBasePoint = copy.alignElementsWithBasePoint;
 	}
 	
-	public Path(int basePointX, int basePointY, int zIndex, Context context,
+	public Path(double basePointX, double basePointY, int zIndex, Context context,
 			boolean stroke, boolean fill) {
 		super(basePointX, basePointY, zIndex, context, stroke, fill);
 		this.elements = new ArrayList<PathElement>();
+		alignElementsWithBasePoint = true;
 	}
 
-	public Path moveTo(int x, int y, boolean relativeCoords){
+	public Path moveTo(double x, double y, boolean relativeCoords){
 		if(relativeCoords){
 			if( getLastPathElement() != null){
 				x += getLastPathElement().endPointX;
@@ -82,7 +85,7 @@ public class Path extends GraphicalObject {
 			return null;
 	}
 	
-	public Path lineTo(int x, int y, boolean relativeCoords){
+	public Path lineTo(double x, double y, boolean relativeCoords){
 		if(relativeCoords){
 			if( getLastPathElement() != null){
 				x += getLastPathElement().endPointX;
@@ -97,7 +100,7 @@ public class Path extends GraphicalObject {
 		return this;
 	}
 	
-	public Path quadraticCurveTo(int x, int y, int cpX, int cpY, boolean relativeCoords){
+	public Path quadraticCurveTo(double x, double y, double cpX, double cpY, boolean relativeCoords){
 		if(relativeCoords && getLastPathElement() != null){
 			x += getLastPathElement().endPointX;
 			y += getLastPathElement().endPointY;
@@ -120,9 +123,65 @@ public class Path extends GraphicalObject {
 		return elements;
 	}
 
+	/**
+	 * Adds the given paths's elements to this path's {@link PathElement} container
+	 * @param otherPath
+	 */
 	public void concatenatePath(Path otherPath){
 		for(PathElement element : otherPath.elements){
 			elements.add(element);
 		}
 	}
+
+	/**
+	 * @return the alignElementsWithBasePoint
+	 */
+	public boolean isAlignElementsWithBasePoint() {
+		return alignElementsWithBasePoint;
+	}
+
+	/**
+	 * @param alignElementsWithBasePoint the alignElementsWithBasePoint to set
+	 */
+	public void setAlignElementsWithBasePoint(boolean alignElementsWithBasePoint) {
+		this.alignElementsWithBasePoint = alignElementsWithBasePoint;
+	}
+
+	
+	/* (non-Javadoc)
+	 * @see com.inepex.inegraphics.shared.gobjects.GraphicalObject#setBasePointX(double)
+	 */
+	@Override
+	public void setBasePointX(double basePointX) {
+		if(alignElementsWithBasePoint){
+			double dx = basePointX - this.basePointX;
+			for(PathElement element : elements){
+				element.setEndPointX(element.getEndPointX() + dx);
+				if(element instanceof QuadraticCurveTo){
+					((QuadraticCurveTo) element).setControlPointX(((QuadraticCurveTo) element).getControlPointX() + dx);
+				}
+			}
+		}
+		super.setBasePointX(basePointX);
+	}
+
+
+	/* (non-Javadoc)
+	 * @see com.inepex.inegraphics.shared.gobjects.GraphicalObject#setBasePointY(double)
+	 */
+	@Override
+	public void setBasePointY(double basePointY) {
+		if(alignElementsWithBasePoint){
+			double dy = basePointY - this.basePointY;
+			for(PathElement element : elements){
+				element.setEndPointY(element.getEndPointY() + dy);
+				if(element instanceof QuadraticCurveTo){
+					((QuadraticCurveTo) element).setControlPointY(((QuadraticCurveTo) element).getControlPointY() + dy);
+				}
+			}
+		}
+		super.setBasePointY(basePointY);
+	}
+
+	
 }

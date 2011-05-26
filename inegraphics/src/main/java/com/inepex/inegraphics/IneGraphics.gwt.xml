@@ -4,6 +4,8 @@
 	<inherits name="com.google.gwt.user.User" />
 	<inherits name="com.inepex.inegraphics.impl.IneCanvas"/>
 	
+	
+	
 	<source path="impl"/>
 	<source path="shared"/>
 </module>

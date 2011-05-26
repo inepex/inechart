@@ -6,16 +6,16 @@ public class Arc extends GraphicalObject {
 
 	double startAngle;
 	double arcAngle;
-	int radius;
+	double radius;
 
 	public Arc(
-			int basePointX,
-			int basePointY,
+			double basePointX,
+			double basePointY,
 			int zIndex,
 			Context context,
 			boolean stroke,
 			boolean fill,
-			int radius,
+			double radius,
 			double startAngle,
 			double arcAngle) {
 		super(basePointX, basePointY, zIndex, context, stroke, fill);
@@ -40,11 +40,11 @@ public class Arc extends GraphicalObject {
 		this.arcAngle = arcAngle;
 	}
 
-	public int getRadius() {
+	public double getRadius() {
 		return radius;
 	}
 
-	public void setRadius(int radius) {
+	public void setRadius(double radius) {
 		this.radius = radius;
 	}
 

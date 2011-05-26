@@ -2,10 +2,8 @@ package com.inepex.inegraphics.shared.gobjects;
 
 import com.inepex.inegraphics.shared.Context;
 
-public class Text extends GraphicalObject implements Comparable<Text>{
-	//comparing helper fields
-	private static int highestComparatorID = Integer.MIN_VALUE;
-	private int comparatorID;
+public class Text extends GraphicalObject{
+	
 	//TODO font style, size, etc
 	protected String text;
 	protected String fontFamily;
@@ -38,16 +36,16 @@ public class Text extends GraphicalObject implements Comparable<Text>{
 	//font color is stored in context color
 	protected final static Context DEFAULT_FONT_CONTEXT = new Context(1, "#ffffff", 1, "#ffffff", 0, 0, 0,  "#ffffff");
 	protected final static String DEFAULT_FONT_FAMILY = "Calibri, Verdana, Arial, sans-serif";
-	protected final static int DEFAULT_FONT_SIZE = 11;
+	protected final static int DEFAULT_FONT_SIZE = 13;
 	protected final static String DEFAULT_FONT_STYLE = "normal";
 	protected final static String DEFAULT_FONT_WEIGHT = "normal";
 	
-	public Text(String text,int basePointX, int basePointY){
+	public Text(String text,double basePointX, double basePointY){
 		this(basePointX, basePointY, text, DEFAULT_FONT_FAMILY, DEFAULT_FONT_SIZE, DEFAULT_FONT_STYLE, DEFAULT_FONT_WEIGHT, BasePointXPosition.LEFT, BasePointYPosition.TOP);
 	}
 	
 	
-	public Text(String text,int basePointX, int basePointY, BasePointXPosition basePointXPosition,	BasePointYPosition basePointYPosition){
+	public Text(String text,double basePointX, double basePointY, BasePointXPosition basePointXPosition,	BasePointYPosition basePointYPosition){
 		this(basePointX, basePointY, text, DEFAULT_FONT_FAMILY, DEFAULT_FONT_SIZE, DEFAULT_FONT_STYLE, DEFAULT_FONT_WEIGHT, basePointXPosition, basePointYPosition);
 	}
 
@@ -62,11 +60,10 @@ public class Text extends GraphicalObject implements Comparable<Text>{
 	 * @param basePointXPosition {@link BasePointXPosition}
 	 * @param basePointYPosition {@link BasePointYPosition}
 	 */
-	public Text(int basePointX, int basePointY, String text,
+	public Text(double basePointX, double basePointY, String text,
 			String fontFamily,int fontSize, String fontStyle, String fontWeight, 
 			BasePointXPosition basePointXPosition,	BasePointYPosition basePointYPosition) {
 		super(basePointX, basePointY, 0, DEFAULT_FONT_CONTEXT, false, false);
-		this.comparatorID = highestComparatorID++;
 		this.text = text;
 		this.fontFamily = fontFamily;
 		this.fontSize = fontSize;
@@ -91,11 +88,6 @@ public class Text extends GraphicalObject implements Comparable<Text>{
 		this.text = text;
 	}
 
-	
-	@Override
-	public int compareTo(Text other) {
-		return comparatorID - other.comparatorID;
-	}
 
 
 	/**

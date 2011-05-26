@@ -4,10 +4,10 @@ import com.inepex.inegraphics.shared.Context;
 
 public class Rectangle extends GraphicalObject {
 
-	protected int roundedCornerRadius;
-	protected int width, height;
+	protected double roundedCornerRadius;
+	protected double width, height;
 	
-	public Rectangle(int basePointX, int basePointY, int width, int height, int roundedCornerRadius, int zIndex, Context context,
+	public Rectangle(double basePointX, double basePointY, double width, double height, double roundedCornerRadius, int zIndex, Context context,
 			boolean stroke, boolean fill) {
 		super(basePointX, basePointY, zIndex, context, stroke, fill);
 		this.roundedCornerRadius = roundedCornerRadius;
@@ -18,21 +18,21 @@ public class Rectangle extends GraphicalObject {
 	/**
 	 * @return the roundedCornerRadius
 	 */
-	public int getRoundedCornerRadius() {
+	public double getRoundedCornerRadius() {
 		return roundedCornerRadius;
 	}
 
 	/**
 	 * @param roundedCornerRadius the roundedCornerRadius to set
 	 */
-	public void setRoundedCornerRadius(int roundedCornerRadius) {
+	public void setRoundedCornerRadius(double roundedCornerRadius) {
 		this.roundedCornerRadius = roundedCornerRadius;
 	}
 
 	/**
 	 * @return the width
 	 */
-	public int getWidth() {
+	public double getWidth() {
 		return width;
 	}
 
@@ -46,14 +46,14 @@ public class Rectangle extends GraphicalObject {
 	/**
 	 * @return the height
 	 */
-	public int getHeight() {
+	public double getHeight() {
 		return height;
 	}
 
 	/**
 	 * @param height the height to set
 	 */
-	public void setHeight(int height) {
+	public void setHeight(double height) {
 		this.height = height;
 	}
 

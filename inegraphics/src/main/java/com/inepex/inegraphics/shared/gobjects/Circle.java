@@ -4,10 +4,10 @@ import com.inepex.inegraphics.shared.Context;
 
 public class Circle extends GraphicalObject {
 	
-	protected int radius;
+	protected double radius;
 
-	public Circle(int basePointX, int basePointY, int zIndex, Context context,
-			boolean stroke, boolean fill, int radius) {
+	public Circle(double basePointX, double basePointY, int zIndex, Context context,
+			boolean stroke, boolean fill, double radius) {
 		super(basePointX, basePointY, zIndex, context, stroke, fill);
 		this.radius = radius;
 	}
@@ -15,14 +15,14 @@ public class Circle extends GraphicalObject {
 	/**
 	 * @return the radius
 	 */
-	public int getRadius() {
+	public double getRadius() {
 		return radius;
 	}
 
 	/**
 	 * @param radius the radius to set
 	 */
-	public void setRadius(int radius) {
+	public void setRadius(double radius) {
 		this.radius = radius;
 	}
 

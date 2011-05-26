@@ -4,9 +4,9 @@ import com.inepex.inegraphics.shared.Context;
 
 public class Line extends GraphicalObject {
 
-	protected int endPointX;
-	protected int endPointY;
-	public Line(int basePointX, int basePointY, int endPointX, int endPointY, int zIndex, Context context) {
+	protected double endPointX;
+	protected double endPointY;
+	public Line(double basePointX, double basePointY, double endPointX, double endPointY, int zIndex, Context context) {
 		super(basePointX, basePointY, zIndex, context, true, true);
 		this.endPointX = endPointX;
 		this.endPointY = endPointY;
@@ -14,25 +14,25 @@ public class Line extends GraphicalObject {
 	/**
 	 * @return the endPointX
 	 */
-	public int getEndPointX() {
+	public double getEndPointX() {
 		return endPointX;
 	}
 	/**
 	 * @param endPointX the endPointX to set
 	 */
-	public void setEndPointX(int endPointX) {
+	public void setEndPointX(double endPointX) {
 		this.endPointX = endPointX;
 	}
 	/**
 	 * @return the endPointY
 	 */
-	public int getEndPointY() {
+	public double getEndPointY() {
 		return endPointY;
 	}
 	/**
 	 * @param endPointY the endPointY to set
 	 */
-	public void setEndPointY(int endPointY) {
+	public void setEndPointY(double endPointY) {
 		this.endPointY = endPointY;
 	}
 	

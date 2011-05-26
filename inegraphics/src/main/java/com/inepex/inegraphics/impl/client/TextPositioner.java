@@ -62,7 +62,8 @@ public class TextPositioner {
 			RootPanel.get().remove(lbl);
 		}
 		
-		int x = 1,y = 1;
+		double x = 1;
+		double y = 1;
 		switch(text.getBasePointXPosition()){
 		case LEFT:
 			x = text.getBasePointX() + text.getLeftPadding();
@@ -86,7 +87,7 @@ public class TextPositioner {
 			break;
 		}
 		InlineLabel lbl = createLabel(text);
-		panel.add(lbl, x, y);
+		panel.add(lbl,(int) x, (int) y);
 		texts.put(text, lbl);
 	}
 	
@@ -96,7 +97,7 @@ public class TextPositioner {
 		if(texts.get(text) != null){
 			panel.remove(texts.get(text));
 		}
-		int x = 1,y = 1;
+		double x = 1,y = 1;
 		switch(text.getBasePointXPosition()){
 		case LEFT:
 			x = text.getBasePointX() + text.getLeftPadding();
@@ -120,7 +121,7 @@ public class TextPositioner {
 			break;
 		}
 		InlineLabel lbl = createLabel(text);
-		panel.add(lbl, x, y);
+		panel.add(lbl, (int)x, (int) y);
 		texts.put(text, lbl);
 	}
 	

@@ -2,7 +2,7 @@ package com.inepex.inegraphics.shared.gobjects;
 
 public class LineTo extends MoveTo {
 
-	public LineTo(int endPointX, int endPointY) {
+	public LineTo(double endPointX, double endPointY) {
 		super(endPointX, endPointY);
 	}
 

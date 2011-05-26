@@ -17,7 +17,7 @@ public class Context {
 	
 	protected double alpha;
 	protected String strokeColor;
-	protected int strokeWidth;
+	protected double strokeWidth;
 	protected String fillColor;
 	protected double shadowOffsetX;
 	protected double shadowOffsetY;
@@ -26,7 +26,7 @@ public class Context {
 //	protected double scaleX, scaleY;
 	
 	
-	public Context(double alpha, String strokeColor, int strokeWidth,
+	public Context(double alpha, String strokeColor, double strokeWidth,
 			String fillColor, double shadowOffsetX, double shadowOffsetY,
 			double shadowAlpha, String shadowColor) {
 		
@@ -55,7 +55,7 @@ public class Context {
 	/**
 	 * @return the strokeWidth
 	 */
-	public int getStrokeWidth() {
+	public double getStrokeWidth() {
 		return strokeWidth;
 	}
 	/**
@@ -106,7 +106,7 @@ public class Context {
 	/**
 	 * @param strokeWidth the strokeWidth to set
 	 */
-	public void setStrokeWidth(int strokeWidth) {
+	public void setStrokeWidth(double strokeWidth) {
 		this.strokeWidth = strokeWidth;
 	}
 

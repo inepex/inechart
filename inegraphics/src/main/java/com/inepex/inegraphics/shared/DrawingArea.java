@@ -42,8 +42,7 @@ public abstract class DrawingArea extends GraphicalObjectContainer{
 	 */
 	protected Context actualContext;
 	protected int actualzIndex; 
-	
-	
+		
 	/**
 	 * Constructs an empty surface with default {@link Context}
 	 * @param width
@@ -135,17 +134,17 @@ public abstract class DrawingArea extends GraphicalObjectContainer{
 				0, 0, 0, go.getContext().shadowColor);
 		if(go instanceof Line){
 			Line lineShadow = new Line(
-					go.getBasePointX() + (int)go.getContext().getShadowOffsetX(),
-					go.getBasePointY() + (int)go.getContext().getShadowOffsetY(),
-					((Line) go).getEndPointX() + (int)go.getContext().getShadowOffsetX(),
-					((Line) go).getEndPointX() + (int)go.getContext().getShadowOffsetY(),
+					go.getBasePointX() + go.getContext().getShadowOffsetX(),
+					go.getBasePointY() + go.getContext().getShadowOffsetY(),
+					((Line) go).getEndPointX() + go.getContext().getShadowOffsetX(),
+					((Line) go).getEndPointX() + go.getContext().getShadowOffsetY(),
 					go.getzIndex(), context);
 			drawLine(lineShadow);
 		}
 		else if(go instanceof Circle){
 			Circle circleShadow = new Circle(
-					(int)go.getBasePointX() + (int)go.getContext().getShadowOffsetX(),
-					(int)go.getBasePointY() + (int)go.getContext().getShadowOffsetY(),
+					go.getBasePointX() + go.getContext().getShadowOffsetX(),
+					go.getBasePointY() + go.getContext().getShadowOffsetY(),
 					go.getzIndex(), context,
 					go.hasStroke(), go.hasFill(),
 					((Circle) go).getRadius());
@@ -153,8 +152,8 @@ public abstract class DrawingArea extends GraphicalObjectContainer{
 		}
 		else if(go instanceof Rectangle){
 			Rectangle rectangleShadow = new Rectangle(
-					(int)go.getBasePointX() + (int)go.getContext().getShadowOffsetX(),
-					(int)go.getBasePointY() + (int)go.getContext().getShadowOffsetY(),
+					go.getBasePointX() + go.getContext().getShadowOffsetX(),
+					go.getBasePointY() + go.getContext().getShadowOffsetY(),
 					((Rectangle) go).getWidth(), ((Rectangle) go).getHeight(),
 					((Rectangle) go).getRoundedCornerRadius(),
 					go.getzIndex(), context,	go.hasStroke(), go.hasFill());
@@ -162,8 +161,8 @@ public abstract class DrawingArea extends GraphicalObjectContainer{
 		}
 		else if(go instanceof Path){
 			Path pathShadow = new Path(
-					(int)go.getBasePointX() + (int)go.getContext().getShadowOffsetX(),
-					(int)go.getBasePointY() + (int)go.getContext().getShadowOffsetY(),
+					go.getBasePointX() + go.getContext().getShadowOffsetX(),
+					go.getBasePointY() + go.getContext().getShadowOffsetY(),
 					go.getzIndex(), context,
 					go.hasStroke(), go.hasFill());
 			for(PathElement pe :((Path) go).getPathElements()){
@@ -171,22 +170,22 @@ public abstract class DrawingArea extends GraphicalObjectContainer{
 				if(pe instanceof QuadraticCurveTo){
 					QuadraticCurveTo qTo = (QuadraticCurveTo) pe;
 					pathElementShadow = new QuadraticCurveTo(
-							qTo.getEndPointX() + (int)go.getContext().getShadowOffsetX(),
-							qTo.getEndPointY() + (int)go.getContext().getShadowOffsetY(),
-							qTo.getControlPointX() + (int)go.getContext().getShadowOffsetX(),
-							qTo.getControlPointY() + (int)go.getContext().getShadowOffsetY());
+							qTo.getEndPointX() + go.getContext().getShadowOffsetX(),
+							qTo.getEndPointY() + go.getContext().getShadowOffsetY(),
+							qTo.getControlPointX() + go.getContext().getShadowOffsetX(),
+							qTo.getControlPointY() + go.getContext().getShadowOffsetY());
 				}
 				else if(pe instanceof LineTo){
 					LineTo lTo = (LineTo) pe;
 					pathElementShadow = new LineTo(
-							lTo.getEndPointX() + (int)go.getContext().getShadowOffsetX(),
-							lTo.getEndPointY() + (int)go.getContext().getShadowOffsetY());
+							lTo.getEndPointX() + go.getContext().getShadowOffsetX(),
+							lTo.getEndPointY() + go.getContext().getShadowOffsetY());
 				}
 				else if(pe instanceof MoveTo){
 					MoveTo mTo = (MoveTo) pe;
 					pathElementShadow = new MoveTo(
-							mTo.getEndPointX() + (int)go.getContext().getShadowOffsetX(),
-							mTo.getEndPointY() + (int)go.getContext().getShadowOffsetY());
+							mTo.getEndPointX() + go.getContext().getShadowOffsetX(),
+							mTo.getEndPointY() + go.getContext().getShadowOffsetY());
 				}
 				pathShadow.getPathElements().add(pathElementShadow);
 			}
@@ -227,13 +226,13 @@ public abstract class DrawingArea extends GraphicalObjectContainer{
 				solidLinePath.getContext(),
 				solidLinePath.hasStroke(),
 				solidLinePath.hasFill());
-		int lastX = solidLinePath.getBasePointX(), lastY = solidLinePath.getBasePointY();
+		double lastX = solidLinePath.getBasePointX(), lastY = solidLinePath.getBasePointY();
 		for(PathElement e : solidLinePath.getPathElements()){
 			
 			if(e instanceof LineTo){
 				final double length = calculateDistance(lastX, lastY, e.getEndPointX(), e.getEndPointY());
 				final double theta = calculateAngle(lastX, lastY, e.getEndPointX(), e.getEndPointY());
-				int count = (int) (length / (dashLength + dashDistance)*2);
+				int count =  (int) (length / (dashLength + dashDistance)*2);
 				if(length > (dashLength + dashDistance) * count + dashLength)
 					count++;
 				double lineDX =  (dashLength * Math.cos(theta));
@@ -246,12 +245,12 @@ public abstract class DrawingArea extends GraphicalObjectContainer{
 					if(i % 2 == 0){
 						x += lineDX;
 						y += lineDY;
-						dashedPath.lineTo((int)x,(int)y, false);
+						dashedPath.lineTo(x,y, false);
 					}
 					else{
 						x += moveDX;
 						y +=  moveDY;
-						dashedPath.moveTo((int)x,(int)y, false);
+						dashedPath.moveTo(x,y, false);
 					}
 				
 				}
@@ -295,6 +294,10 @@ public abstract class DrawingArea extends GraphicalObjectContainer{
 		return (y2 - y1) / (x2 - x1) * (x - x1) + y1;
 	}
 	
+	protected static double getXIntercept(double y, double x1, double y1, double x2, double y2){
+		return  (x2 - x1) / (y2 - y1) * (y - y1) + x1;
+	}
+	
 	/**
 	 * The given path must have only {@link LineTo}, and {@link MoveTo} elements with ascending endPointXes.
 	 * @param x
@@ -310,7 +313,7 @@ public abstract class DrawingArea extends GraphicalObjectContainer{
 		if(!clipLeft && path.getBasePointX() > x)
 			return null;
 		Path clippedPath = null;
-		int lastX = path.getBasePointX(), lastY = path.getBasePointY();
+		double lastX = path.getBasePointX(), lastY = path.getBasePointY();
 		boolean clipped = false;
 		if(clipLeft){
 			for(PathElement e : path.getPathElements()){
@@ -318,7 +321,7 @@ public abstract class DrawingArea extends GraphicalObjectContainer{
 					clippedPath.getPathElements().add(e);
 				}
 				else if(e.getEndPointX() >= x){
-					clippedPath = new Path((int)x, (int)getYIntercept(x, lastX, lastY, e.getEndPointX(), e.getEndPointY()), path.getzIndex(),  path.getContext(), path.hasStroke(), path.hasFill());
+					clippedPath = new Path(x, getYIntercept(x, lastX, lastY, e.getEndPointX(), e.getEndPointY()), path.getzIndex(),  path.getContext(), path.hasStroke(), path.hasFill());
 					clippedPath.getPathElements().add(e);
 					clipped = true;
 				}
@@ -332,10 +335,10 @@ public abstract class DrawingArea extends GraphicalObjectContainer{
 				if(e.getEndPointX() >= x){
 					PathElement clippedElement;
 					if(e instanceof LineTo){
-						clippedElement = new LineTo((int)x, (int)getYIntercept(x,lastX, lastY, e.getEndPointX(), e.getEndPointY()));
+						clippedElement = new LineTo(x, getYIntercept(x,lastX, lastY, e.getEndPointX(), e.getEndPointY()));
 					}
 					else{
-						clippedElement = new MoveTo((int)x, (int)getYIntercept(x,lastX, lastY, e.getEndPointX(), e.getEndPointY()));
+						clippedElement = new MoveTo(x, getYIntercept(x,lastX, lastY, e.getEndPointX(), e.getEndPointY()));
 					}
 					clippedPath.getPathElements().add(clippedElement);
 					break;
@@ -348,5 +351,204 @@ public abstract class DrawingArea extends GraphicalObjectContainer{
 			}
 		}
 		return clippedPath;
+	} 
+	
+	public static Path clipPathWithRectangle(Path pathToBeClipped, double x, double y, double width, double height){
+		Path clippedPath = null;
+		if(pathToBeClipped == null)
+			return null;
+		double lastX, lastY, actX, actY;
+		int elementNo = -1;
+		//first find a basepoint
+		boolean basepointSet = false;
+		if(isPointInRectengle(pathToBeClipped.getBasePointX(), pathToBeClipped.getBasePointY(), x, y, width, height)){
+			clippedPath = new Path(pathToBeClipped.getBasePointX(), pathToBeClipped.getBasePointY(), pathToBeClipped.getzIndex(), pathToBeClipped.getContext(), pathToBeClipped.hasStroke(), pathToBeClipped.hasFill());
+			basepointSet = true;
+		}
+		else{
+			elementNo++;
+		}
+		lastX = pathToBeClipped.getBasePointX();
+		lastY = pathToBeClipped.getBasePointY();
+		for(PathElement e : pathToBeClipped.getPathElements()){
+			actX = e.getEndPointX();
+			actY = e.getEndPointY();
+			double[] clipped = getIntersection(lastX, lastY, actX, actY, x, y, width, height);
+			if(clipped != null){
+				if(!basepointSet){
+					clippedPath = new Path(clipped[0], clipped[1], pathToBeClipped.getzIndex(), pathToBeClipped.getContext(), pathToBeClipped.hasStroke(), pathToBeClipped.hasFill());
+					if(e instanceof LineTo){
+						clippedPath.lineTo(clipped[2],  clipped[3], false);
+					}
+					else if(e instanceof MoveTo){
+						clippedPath.moveTo(clipped[2], clipped[3], false);
+					}
+					basepointSet = true;
+				}
+				else{
+					if(e instanceof LineTo){
+						clippedPath.lineTo(clipped[2], clipped[3], false);
+					}
+					else if(e instanceof MoveTo){
+						clippedPath.moveTo(clipped[2], clipped[3], false);
+					}
+				}
+			}
+			//actual element has no point in rect, but the path is set,
+			//we 'follow' the step's change with moveTo -> the path's fill will be correct only in this case
+			if(clippedPath != null && (clipped == null || clipped[2] != actX || clipped[3] != actY)){
+				double yTo =  (actY > y + height ? y + height : (actY < y ? y : actY));
+				double xTo =  (actX > x + width ? x + width : (actX < x ? x : actX));
+				//ends left to the rect
+				if(x > actX){					
+					clippedPath.moveTo(x, yTo, false);
+				}
+				//ends right to the rect
+				else if(actX > x + width){
+					clippedPath.moveTo( (x + width), yTo, false);
+				}
+				//bot to rect
+				if(actY > y + height){
+					clippedPath.moveTo(xTo, (y + height), false);
+				}
+				else if(actY < y ){
+					clippedPath.moveTo(xTo, (y), false);
+				}
+			}
+			lastX = actX;
+			lastY = actY;
+		}
+		return clippedPath;
+	}
+	
+	/**
+	 * Clips a line to fit the given rectangle.
+	 * @param x1 x of the start point of the line
+	 * @param y1 y of the start point of the line
+	 * @param x2 x of the end point of the line
+	 * @param y2 y of the end point of the line
+	 * @param rX x of the rectangle's upper-left corner
+	 * @param rY y of the rectangle's upper-left corner
+	 * @param width width of the rectangle
+	 * @param height height of the rectangle
+	 * @return null if the line has no points inside the rectangle, else the [x1, y1, x2, y2] coords of the new (clipped) line
+	 */
+	public static double[] getIntersection(double x1, double y1, double x2, double y2, double rX, double rY, double width, double height){
+		//if both endpoint are inside, we return the line
+		if(isPointInRectengle(x1, y1, rX, rY, width, height) && isPointInRectengle(x2, y2, rX, rY, width, height))
+			return new double[]{x1,y1, x2, y2};
+		if( (x1 < rX && x2 < rX) ||
+			(x1 > rX + width && x2 > rX + width) ||
+			(y1 < rY && y2 < rY) ||
+			(y1 > rY + height && y2 > rY + height)){
+			return null;
+		}
+		//vertical line
+		if(x1 == x2){
+			 if(y1 > rY + height)
+				 y1 = rY + height;
+			 if(y2 > rY + height)
+				 y2 = rY + height;
+			 if(y1 < rY)
+				 y1 = rY;
+			 if(y2 < rY)
+				 y2 = rY;
+			 if(y1 == y2)
+				 return null;
+			 else
+				 return new double[]{x1, y1, x2, y2};
+		}
+		//horizontal
+		if(y1 == y2){
+			 if(x1 > rX + width)
+				 x1 = rX + width;
+			 if(x2 > rX + width)
+				 x2 = rX + width;
+			 if(x1 < rX)
+				 x1 = rX;
+			 if(x2 < rX)
+				 x2 = rX;
+			 if(x1 == x2)
+				 return null;
+			 else
+				 return new double[]{x1, y1, x2, y2};
+		}
+		double left = getYIntercept(rX, x1, y1, x2, y2);
+		double right = getYIntercept(rX+width, x1, y1, x2, y2);
+		double top = getXIntercept(rY, x1, y1, x2, y2);
+		double bottom = getXIntercept(rY+height, x1, y1, x2, y2);
+		
+		//if the line has no points inside the rectangle
+		if( (left > rY + height && right > rY + height) ||
+			(left < rY  && right < rY)	|| 
+			(top < rX && bottom < rX) ||
+			(top > rX + width && bottom > rX + width)){
+			return null;
+		}
+		
+		double a1,a2,b1,b2;
+		
+		if(x1 < x2){ 
+			if(top < bottom){
+				a1 = Math.max(Math.max(x1, top), rX);
+				a2 = Math.min(Math.min(bottom, x2), rX+width);
+			}
+			else{
+				a1 = Math.max(Math.max(x1, bottom), rX);
+				a2 = Math.min(Math.min(top, x2), rX+width);
+			}
+		}
+		else{
+			if(top > bottom){
+				a1 = Math.min(Math.min(top, x1), rX+width);
+				a2 = Math.max(Math.max(bottom, x2), rX);
+			}
+			else{
+				a1 = Math.min(Math.min(bottom, x1), rX+width);
+				a2 = Math.max(Math.max(top, x2), rX);
+			}
+		}
+		if(y1 < y2){
+			if(left < right){
+				b1 = Math.max(Math.max(y1, left), rY);
+				b2 = Math.min(Math.min(y2, right), rY+height);
+			}
+			else{
+				b1 = Math.max(Math.max(y1, right), rY);
+				b2 = Math.min(Math.min(y2, left), rY+height);
+			}
+		}
+		else{
+			if(left > right){
+				b1 = Math.min(Math.min(y1, rY+height), left);
+				b2 = Math.max(Math.max(y2, right), rY);
+			}
+			else{
+				b1 = Math.min(Math.min(rY+height, right), y1);
+				b2 = Math.max(Math.max(rY, left), y2);
+			}
+		}
+		return new double[]{a1,b1,a2,b2};
+	}
+
+
+	public static boolean isPointInRectengle(double pointX, double pointY, double x, double y, double width, double height){
+		if(pointX >= x && pointX <= x + width && pointY >= y && pointY <= y+height)
+			return true;
+		return false;
+	}
+
+	/**
+	 * @return the createShadows
+	 */
+	public boolean isCreateShadows() {
+		return createShadows;
+	}
+
+	/**
+	 * @param createShadows the createShadows to set
+	 */
+	public void setCreateShadows(boolean createShadows) {
+		this.createShadows = createShadows;
 	}
 }

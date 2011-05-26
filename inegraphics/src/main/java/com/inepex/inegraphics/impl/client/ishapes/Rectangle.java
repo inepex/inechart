@@ -8,7 +8,7 @@ public class Rectangle extends com.inepex.inegraphics.shared.gobjects.Rectangle 
 		
 
 	
-	public Rectangle(int basePointX, int basePointY, int width, int height, int roundedCornerRadius, int zIndex, Context context,
+	public Rectangle(double basePointX, double basePointY, double width, double height, double roundedCornerRadius, int zIndex, Context context,
 			boolean stroke, boolean fill) {
 		super(basePointX, basePointY, width, height, roundedCornerRadius, zIndex, context, stroke, fill);
 		

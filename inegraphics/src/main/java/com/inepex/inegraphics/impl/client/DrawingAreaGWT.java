@@ -3,6 +3,8 @@ package com.inepex.inegraphics.impl.client;
 import java.util.ArrayList;
 import java.util.Collections;
 
+import com.google.gwt.canvas.client.Canvas;
+import com.google.gwt.canvas.dom.client.Context2d;
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;
 import com.google.gwt.event.dom.client.MouseDownEvent;
@@ -21,7 +23,6 @@ import com.google.gwt.event.shared.HandlerManager;
 import com.google.gwt.event.shared.HandlerRegistration;
 import com.google.gwt.user.client.ui.AbsolutePanel;
 import com.google.gwt.user.client.ui.Widget;
-import com.inepex.inegraphics.impl.client.GraphicalObjectEvent.GraphicalObjectEventType;
 import com.inepex.inegraphics.impl.client.canvas.CanvasWidget;
 import com.inepex.inegraphics.shared.Context;
 import com.inepex.inegraphics.shared.DrawingArea;
@@ -37,9 +38,24 @@ import com.inepex.inegraphics.shared.gobjects.QuadraticCurveTo;
 import com.inepex.inegraphics.shared.gobjects.Rectangle;
 import com.inepex.inegraphics.shared.gobjects.Text;
 
-public class DrawingAreaImplCanvas extends DrawingArea implements ClickHandler, MouseDownHandler, MouseMoveHandler, MouseOutHandler, MouseOverHandler, MouseUpHandler, MouseWheelHandler{
+/**
+ * 
+ * A client-side {@link DrawingArea} implementation.
+ * Can be used with both HTML5 canvas implementation:
+ * 		- GWT 2.2+ / {@link Canvas} ('modern' browser support)
+ * 		- IneGraphics / {@link CanvasWidget} (supports IE6-IE8 browsers too)
+ * 
+ * @author Miklós Süveges / Inepex Ltd.
+ *
+ */
+public class DrawingAreaGWT extends DrawingArea implements ClickHandler, MouseDownHandler, MouseMoveHandler, MouseOutHandler, MouseOverHandler, MouseUpHandler, MouseWheelHandler{
+	
+	public static boolean isHTML5Compatible(){
+		return Canvas.isSupported();		
+	}
 	
 	protected CanvasWidget canvas;
+	protected Canvas canvasGWT;
 	protected AbsolutePanel panel;
 	protected TextPositioner textPositioner;
 	protected boolean mouseOverCanvas = false;
@@ -48,21 +64,38 @@ public class DrawingAreaImplCanvas extends DrawingArea implements ClickHandler, 
 	protected ArrayList<GraphicalObject> mouseOverGOs;
 	protected HandlerManager hm;
 	protected boolean singleMouseSelection = false;
+
 	
 	/**
 	 * Creates a {@link DrawingArea} with the given dimensions
 	 * @param width px
 	 * @param height px
+	 * @param useCanvas TODO
 	 */
-	public DrawingAreaImplCanvas(int width, int height) {
-		this(new CanvasWidget(width, height));
+	public DrawingAreaGWT(int width, int height, boolean useCanvas) {
+		super(width, height);
+		this.panel = new AbsolutePanel();
+		panel.setPixelSize(width, height);
+		if(useCanvas && Canvas.isSupported()){
+			canvasGWT = Canvas.createIfSupported();
+			//TODO
+		}
+		else{
+			CanvasWidget canvas = new CanvasWidget(width, height);
+			this.canvas = canvas;
+			textPositioner = new TextPositioner(panel);
+		}
+		
+		panel.add(canvas, 0, 0);
+		initEvents();
+		clear();
 	}
 	
 	/**
 	 * Creates a {@link DrawingArea}
 	 * @param canvas {@link CanvasWidget} used for drawing
 	 */
-	public DrawingAreaImplCanvas(CanvasWidget canvas) {
+	public DrawingAreaGWT(CanvasWidget canvas) {
 		super(canvas.getWidth(), canvas.getHeight());
 		this.canvas = canvas;
 		this.panel = new AbsolutePanel();
@@ -73,18 +106,49 @@ public class DrawingAreaImplCanvas extends DrawingArea implements ClickHandler, 
 		clear();
 	}
 
-
+	public DrawingAreaGWT(Canvas canvas){
+		super(canvas.getCanvasElement().getWidth(), canvas.getCanvasElement().getHeight());
+		this.canvasGWT = canvas;
+		this.panel = new AbsolutePanel();
+		panel.setPixelSize(width, height);
+		panel.add(canvas, 0, 0);
+		initEvents();
+		clear();
+	}
+	
+	/**
+	 * Use this method to add this to a panel
+	 * if it uses {@link Canvas} 
+	 * else an {@link AbsolutePanel} containing a {@link CanvasWidget} 
+	 * @return 
+	 */
 	public Widget getWidget(){
-		return panel;
+		if(canvasGWT != null){
+			return canvasGWT;
+		}
+		else{
+			return panel;
+		}
 	}
 	
 	/**
 	 * Use this method for explicitly draw on the canvas.
 	 * Use getWidget() method for adding it to the document.
-	 * @return the {@link CanvasWidget} used for drawing
+	 * @return the {@link CanvasWidget} used for drawing or null
 	 */
-	public CanvasWidget getCanvas() {
+	public CanvasWidget getCanvasWidget() {
+
 		return canvas;
+	}
+	
+	/**
+	 * If {@link Canvas} is used as view
+	 * return its {@link Context2d} 
+	 * @return
+	 */
+	public Context2d getContext2d(){
+		return null;
+		
 	}
 	
 	@Override
@@ -116,8 +180,8 @@ public class DrawingAreaImplCanvas extends DrawingArea implements ClickHandler, 
 			else if(pe instanceof MoveTo){
 				MoveTo mTo = (MoveTo) pe;
 				//we have to stroke
-				if(path.hasStroke())
-					canvas.stroke();
+//				if(path.hasStroke())
+//					canvas.stroke();
 				canvas.moveTo(mTo.getEndPointX(), mTo.getEndPointY());
 			}
 		}
@@ -133,7 +197,7 @@ public class DrawingAreaImplCanvas extends DrawingArea implements ClickHandler, 
 	@Override
 	protected void drawRectangle(Rectangle rectangle) {
 		applyContext(rectangle.getContext());
-		int x = rectangle.getBasePointX(), y = rectangle.getBasePointY(), width = rectangle.getWidth(), height = rectangle.getHeight(), roundedCornerRadius = rectangle.getRoundedCornerRadius();
+		double x = rectangle.getBasePointX(), y = rectangle.getBasePointY(), width = rectangle.getWidth(), height = rectangle.getHeight(), roundedCornerRadius = rectangle.getRoundedCornerRadius();
 		canvas.beginPath();
 		if(roundedCornerRadius == 0){
 			if(rectangle.hasFill()){
@@ -192,16 +256,28 @@ public class DrawingAreaImplCanvas extends DrawingArea implements ClickHandler, 
 	 * @param context
 	 */
 	protected void applyContext(Context context){
-		canvas.setLineJoin("round");
-		canvas.setLineCap("square");
-		canvas.setGlobalAlpha(context.getAlpha());
-		canvas.setFillStyle(context.getFillColor());
-//		canvas.setShadowBlur(context.getShadowBlur());
-//		canvas.setShadowColor(context.getShadowColor());
-//		canvas.setShadowOffsetX(context.getShadowOffsetX());
-//		canvas.setShadowOffsetY(context.getShadowOffsetY());
-		canvas.setStrokeStyle(context.getStrokeColor());
-		canvas.setLineWidth(context.getStrokeWidth());
+		if(canvas != null){
+			canvas.setLineJoin("round");
+			canvas.setLineCap("square");
+			canvas.setGlobalAlpha(context.getAlpha());
+			canvas.setFillStyle(context.getFillColor());
+			canvas.setStrokeStyle(context.getStrokeColor());
+			canvas.setLineWidth(context.getStrokeWidth());
+			if(!createShadows && (context.getShadowOffsetX() != 0 || context.getShadowOffsetY() != 0)){
+				canvas.setShadowColor(context.getShadowColor());
+				canvas.setShadowOffsetX(context.getShadowOffsetX());
+				canvas.setShadowOffsetY(context.getShadowOffsetY());
+				
+			}
+		}
+		else{
+			canvasGWT.getContext2d().setLineJoin("round");
+			canvasGWT.getContext2d().setLineCap("square");
+			canvasGWT.getContext2d().setGlobalAlpha(context.getAlpha());
+			canvasGWT.getContext2d().setFillStyle(context.getFillColor());
+			canvasGWT.getContext2d().setStrokeStyle(context.getStrokeColor());
+			canvasGWT.getContext2d().setLineWidth(context.getStrokeWidth());
+		}
 		
 	}
 
@@ -221,14 +297,13 @@ public class DrawingAreaImplCanvas extends DrawingArea implements ClickHandler, 
 	
 	/**
 	 * Adds a {@link GraphicalObject} which must implement {@link InteractiveGraphicalObject},
-	 *  so when an event occurs on this element
-	 * the registered and related handlers will be notified
+	 *  so when an event occurs on this element the registered and related handlers will be notified.
+	 *  This method itself will NOT display the {@link InteractiveGraphicalObject}. 
 	 * @param igo
 	 */
 	public void addInteractiveGO(GraphicalObject igo){
 		if(igo instanceof InteractiveGraphicalObject){
 			interactiveGOs.add(igo);
-			graphicalObjects.add(igo);
 		}
 	}
 	
@@ -238,7 +313,6 @@ public class DrawingAreaImplCanvas extends DrawingArea implements ClickHandler, 
 	 */
 	public void removeInteractiveGO(GraphicalObject igo){
 		this.interactiveGOs.remove(igo);
-		this.graphicalObjects.remove(igo);
 		
 	}
 	
@@ -282,10 +356,11 @@ public class DrawingAreaImplCanvas extends DrawingArea implements ClickHandler, 
 	public void onMouseMove(MouseMoveEvent event) {
 		mouseX = event.getRelativeX(canvas.getElement());
 		mouseY = event.getRelativeY(canvas.getElement());
-		hm.fireEvent(event);
+		
 		if(mouseOverCanvas){
 			updateMouseOverIGOsAndFireMouseOverEvents();
 		}
+		hm.fireEvent(event);
 	}
 
 	@Override
@@ -333,6 +408,7 @@ public class DrawingAreaImplCanvas extends DrawingArea implements ClickHandler, 
 	}
 	
 	public HandlerRegistration addGraphicalObjectEventHandler(GraphicalObjectEventHandler handler){
+		
 		return hm.addHandler(GraphicalObjectEvent.TYPE, handler);
 	}
 
@@ -352,7 +428,9 @@ public class DrawingAreaImplCanvas extends DrawingArea implements ClickHandler, 
 	
 	@Override
 	protected void drawText(Text text) {
-		textPositioner.addText(text);		
+		if(textPositioner != null)
+			textPositioner.addText(text);
+		//TODO gwtcanvas impl
 	}
 
 	@Override

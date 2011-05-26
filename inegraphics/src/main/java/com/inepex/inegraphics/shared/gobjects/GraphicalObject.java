@@ -5,8 +5,10 @@ import java.util.Comparator;
 import com.inepex.inegraphics.shared.Context;
 
 
-public abstract class GraphicalObject {
-	
+public abstract class GraphicalObject implements Comparable<GraphicalObject>{
+	//comparing helper fields
+	private static int highestComparatorID = Integer.MIN_VALUE;
+	private int comparatorID;
 	/**
 	 * Comparator based on z indices
 	 * @return 
@@ -16,7 +18,12 @@ public abstract class GraphicalObject {
 			
 			@Override
 			public int compare(GraphicalObject o1, GraphicalObject o2) {
-				return o1.zIndex - o2.zIndex;
+				if(o1.zIndex > o2.zIndex)
+					return 1;
+				else if(o1.zIndex == o2.zIndex)
+					return 0;
+				else 
+					return -1;
 			}
 		};
 	}
@@ -30,7 +37,29 @@ public abstract class GraphicalObject {
 			
 			@Override
 			public int compare(GraphicalObject o1, GraphicalObject o2) {
-				return o1.basePointX - o2.basePointX;
+				double diff = o1.basePointX - o2.basePointX;
+				if(diff > 0)
+					return 1;
+				else if(diff < 0)
+					return -1;
+				else 
+					return 0;
+			}
+		};
+	}
+	
+	public static Comparator<GraphicalObject> getZComparator(){
+		return new Comparator<GraphicalObject>() {
+			
+			@Override
+			public int compare(GraphicalObject o1, GraphicalObject o2) {
+				double diff = o1.zIndex - o2.zIndex;
+				if(o1.zIndex > o2.zIndex)
+					return 1;
+				else if(o1.zIndex < o2.zIndex)
+					return -1;
+				else 
+					return 0;
 			}
 		};
 	}
@@ -44,51 +73,52 @@ public abstract class GraphicalObject {
 			
 			@Override
 			public int compare(GraphicalObject o1, GraphicalObject o2) {
-				int zDiff = o1.zIndex - o2.zIndex;
+				int zDiff = getZComparator().compare(o1, o2);
 				if(zDiff == 0)
-					return o1.basePointX - o2.basePointX;
+					zDiff = getBasePointXComparator().compare(o1, o2);
 				return zDiff;
 			}
 		};
 	}
 
-	protected int basePointX;
-	protected int basePointY;
+	protected double basePointX;
+	protected double basePointY;
 	protected int zIndex;
 	protected Context context;
 	protected boolean stroke;
 	protected boolean fill;
 	
-	protected GraphicalObject(int basePointX, int basePointY, int zIndex, Context context, boolean stroke, boolean fill) {
+	protected GraphicalObject(double basePointX, double basePointY, int zIndex, Context context, boolean stroke, boolean fill) {
 		this.basePointX = basePointX;
 		this.basePointY = basePointY;
 		this.zIndex = zIndex;
 		this.stroke = stroke;
 		this.fill = fill;
 		this.context = context;
+		this.comparatorID = highestComparatorID++;
 	}
 	/**
 	 * @return the basePointX
 	 */
-	public int getBasePointX() {
+	public double getBasePointX() {
 		return basePointX;
 	}
 	/**
 	 * @param basePointX the basePointX to set
 	 */
-	public void setBasePointX(int basePointX) {
+	public void setBasePointX(double basePointX) {
 		this.basePointX = basePointX;
 	}
 	/**
 	 * @return the basePointY
 	 */
-	public int getBasePointY() {
+	public double getBasePointY() {
 		return basePointY;
 	}
 	/**
 	 * @param basePointY the basePointY to set
 	 */
-	public void setBasePointY(int basePointY) {
+	public void setBasePointY(double basePointY) {
 		this.basePointY = basePointY;
 	}
 	/**
@@ -144,6 +174,15 @@ public abstract class GraphicalObject {
 	public String toString() {
 		return "GraphicalObject [basePointX=" + basePointX + ", basePointY=" + basePointY + ", zIndex=" + zIndex + ", context="
 				+ context + ", stroke=" + stroke + ", fill=" + fill + "]";
+	}
+
+	
+	/* (non-Javadoc)
+	 * @see java.lang.Comparable#compareTo(java.lang.Object)
+	 */
+	@Override
+	public int compareTo(GraphicalObject other) {
+		return comparatorID - other.comparatorID;
 	}
 	
 	

@@ -48,18 +48,18 @@ public class DrawingAreaAwt extends DrawingArea {
 		if (path.getPathElements().size() == 0) return;
 		applyContext(path.getContext());
 		
-		int startX = path.getBasePointX();
-		int startY = path.getBasePointY();
+		double startX = path.getBasePointX();
+		double startY = path.getBasePointY();
 		
-		int endX = path.getPathElements().get(0).getEndPointX();
-		int endY = path.getPathElements().get(0).getEndPointY();
+		double endX = path.getPathElements().get(0).getEndPointX();
+		double endY = path.getPathElements().get(0).getEndPointY();
 		
-		g2.drawLine(startX, startY, endX, endY);
+		g2.drawLine((int)startX, (int)startY,(int) endX,(int) endY);
 		
 		for (int i = 0; i < path.getPathElements().size() - 1; i++) {
 			PathElement start = path.getPathElements().get(i);
 			PathElement end = path.getPathElements().get(i + 1);
-			g2.drawLine(start.getEndPointX(), start.getEndPointY(), end.getEndPointX(), end.getEndPointY());
+			g2.drawLine((int)start.getEndPointX(),(int) start.getEndPointY(),(int) end.getEndPointX(),(int) end.getEndPointY());
 		}
 
 	}
@@ -68,11 +68,11 @@ public class DrawingAreaAwt extends DrawingArea {
 	protected void drawRectangle(Rectangle rectangle) {
 		applyContext(rectangle.getContext());
 		g2.setColor(ColorUtil.getColor(rectangle.getContext().getFillColor()));
-		int x = rectangle.getBasePointX();
-		int y = rectangle.getBasePointY();
-		int width = rectangle.getWidth();
-		int height = rectangle.getHeight();
-		int roundedCornerRadius = rectangle.getRoundedCornerRadius();
+		double x = rectangle.getBasePointX();
+		double y = rectangle.getBasePointY();
+		double width = rectangle.getWidth();
+		double height = rectangle.getHeight();
+		double roundedCornerRadius = rectangle.getRoundedCornerRadius();
 		
 		if (height < 0) {
 			height = height * -1;
@@ -80,13 +80,13 @@ public class DrawingAreaAwt extends DrawingArea {
 		}
 		
 		if(roundedCornerRadius > 0 && !rectangle.hasFill()){
-			g2.drawRoundRect(x, y, width, height, roundedCornerRadius, roundedCornerRadius);
+			g2.drawRoundRect((int)x,(int) y, (int)width, (int)height,(int) roundedCornerRadius,(int) roundedCornerRadius);
 		} else if (roundedCornerRadius > 0 && rectangle.hasFill()){
-			g2.fillRoundRect(x, y, width, height, roundedCornerRadius, roundedCornerRadius);
+			g2.fillRoundRect((int)x,(int) y,(int) width, (int)height, (int)roundedCornerRadius, (int)roundedCornerRadius);
 		} else if (roundedCornerRadius == 0 && !rectangle.hasFill()){
-			g2.drawRect(x, y, width, height);
+			g2.drawRect((int)x,(int) y,(int) width,(int) height);
 		} else if (roundedCornerRadius == 0 && rectangle.hasFill()){
-			g2.fillRect(x, y, width, height);
+			g2.fillRect((int)x,(int) y, (int)width,(int) height);
 		}
 	}
 
@@ -94,16 +94,16 @@ public class DrawingAreaAwt extends DrawingArea {
 	protected void drawCircle(Circle circle) {
 		applyContext(circle.getContext());
 		if (circle.hasFill()){
-			g2.fillOval(circle.getBasePointX(), circle.getBasePointY(), circle.getRadius(), circle.getRadius());
+			g2.fillOval((int)circle.getBasePointX(), (int)circle.getBasePointY(), (int)circle.getRadius(), (int)circle.getRadius());
 		} else {
-			g2.drawOval(circle.getBasePointX(), circle.getBasePointY(), circle.getRadius(), circle.getRadius());
+			g2.drawOval((int)circle.getBasePointX(),(int) circle.getBasePointY(), (int)circle.getRadius(),(int) circle.getRadius());
 		}
 	}
 
 	@Override
 	protected void drawLine(Line line) {
 		applyContext(line.getContext());
-		g2.drawLine(line.getBasePointX(), line.getBasePointY(), line.getEndPointX(), line.getEndPointY());
+		g2.drawLine((int)line.getBasePointX(), (int)line.getBasePointY(),(int) line.getEndPointX(), (int)line.getEndPointY());
 
 	}
 	
@@ -113,7 +113,7 @@ public class DrawingAreaAwt extends DrawingArea {
 	 * @param context
 	 */
 	protected void applyContext(Context context){
-		g2.setStroke(new BasicStroke(context.getStrokeWidth(), BasicStroke.CAP_SQUARE, BasicStroke.JOIN_ROUND));
+		g2.setStroke(new BasicStroke((int)context.getStrokeWidth(), BasicStroke.CAP_SQUARE, BasicStroke.JOIN_ROUND));
 		g2.setBackground(ColorUtil.getColor(context.getFillColor()));
 		g2.setColor(ColorUtil.getColor(context.getStrokeColor()));
 	}
@@ -139,8 +139,8 @@ public class DrawingAreaAwt extends DrawingArea {
 	protected void drawArc(Arc arc) {
 		applyContext(arc.getContext());
 		//awt uses basepoint as the top left corner of the arc
-		int basepointX = arc.getBasePointX() - arc.getRadius();
-		int basepointY = arc.getBasePointY() - arc.getRadius();
+		double basepointX = arc.getBasePointX() - arc.getRadius();
+		double basepointY = arc.getBasePointY() - arc.getRadius();
 		Arc2D arcPath = new Arc2D.Double(
 				basepointX, 
 				basepointY,
@@ -158,7 +158,7 @@ public class DrawingAreaAwt extends DrawingArea {
 	@Override
 	protected void drawText(Text text) {
 		applyContext(text.getContext());
-		g2.drawString(text.getText(), text.getBasePointX(), text.getBasePointY()); 
+		g2.drawString(text.getText(), (int)text.getBasePointX(), (int)text.getBasePointY()); 
 	}
 	
 	public BufferedImage getImage(){
