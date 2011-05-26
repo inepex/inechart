@@ -8,6 +8,7 @@ import com.google.gwt.user.client.ui.RootPanel;
 import com.inepex.inechart.chartwidget.IneChart;
 import com.inepex.inechart.chartwidget.linechart.Curve;
 import com.inepex.inechart.chartwidget.linechart.LineChart;
+import com.inepex.inechart.chartwidget.linechart.LineChart.PointSelectionMode;
 import com.inepex.inechart.chartwidget.properties.Color;
 import com.inepex.inechart.chartwidget.properties.LineProperties;
 import com.inepex.inechart.chartwidget.properties.ShapeProperties;
@@ -27,6 +28,7 @@ public class IneChartingNewImplTest{
 		 fp.add(chart);
 		
 		 lineChart = chart.createLineChart();
+		 lineChart.setPointSelectionMode(PointSelectionMode.On_Point_Over);
 		 Curve curve1 = new Curve(createDataset());
 		 Color c = new Color("#9900dd");
 		 LineProperties lp = new LineProperties(3, c);
@@ -38,27 +40,26 @@ public class IneChartingNewImplTest{
 		 curve1.setShadowOffsetY(2);
 		 curve1.setShadowColor(new Color("grey"));
 		 
-		 Curve curve2 = new Curve(DataGenerator.generateRandomSpeedDataForChart(0, 1000, 250));
-		 c = new Color("#11ff11");
-		 lp = new LineProperties(3, c);
-		 curve2.setLineProperties(lp);
-		 sp  = new ShapeProperties(lp, new Color(c.getColor(), 0.3));
-//		 curve2.setNormalPointShape(new Rectangle(5, 5, sp));
-		 curve2.setNormalPointShape(null);
-		 curve2.setSelectedPointShape(new Rectangle(10, 10, sp));
-		 curve2.setShadowOffsetX(1.3);
-		 curve2.setShadowOffsetY(2);
-		 curve2.setShadowColor(new Color("grey"));
+//		 Curve curve2 = new Curve(DataGenerator.generateRandomSpeedDataForChart(0, 1000, 250));
+//		 c = new Color("#16dd16");
+//		 lp = new LineProperties(2, c);
+//		 curve2.setLineProperties(lp);
+//		 sp  = new ShapeProperties(lp, new Color(c.getColor(), 0.3));
+////		 curve2.setNormalPointShape(new Rectangle(5, 5, sp));
+//		 curve2.setNormalPointShape(null);
+//		 curve2.setSelectedPointShape(new Rectangle(10, 10, sp));
+//		 curve2.setShadowOffsetX(1.3);
+//		 curve2.setShadowOffsetY(2);
+//		 curve2.setShadowColor(new Color("grey"));
 		 
 		 
 		 lineChart.addCurve(curve1);
-		 lineChart.addCurve(curve2);
-		 chart.setViewport(-20, 201);
+//		 lineChart.addCurve(curve2);
+		 lineChart.getViewport().set(14, 50, 100, 220);
 		 
 		 fp.add(new Label(System.currentTimeMillis() - start +  "ms"));
 		 RootPanel.get().add(fp);
 		 chart.update();
-		 lineChart.calculateAxes();
 		 chart.setUpdateInterval(100);
 		
 	}

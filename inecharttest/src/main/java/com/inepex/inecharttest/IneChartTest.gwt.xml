@@ -3,6 +3,7 @@
   <inherits name='com.google.gwt.user.User'/>
   <inherits name='com.google.gwt.user.theme.standard.Standard'/>
  <inherits name='com.inepex.inechart.IneChart'/>
+ <inherits name='com.inepex.inegraphics.IneGraphics'/>
  
   <entry-point class='com.inepex.inecharttest.client.IneChartTest'/>
 
