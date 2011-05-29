@@ -6,15 +6,20 @@ import com.google.gwt.user.client.ui.Widget;
 public class CanvasWidget extends Widget {
 	
 	private Canvas impl = GWT.create(Canvas.class);
-	private boolean isIE = false; 
+	private boolean isUsingExCanvas = false; 
 	public CanvasWidget(int width, int height) {
+		if(impl instanceof CanvasImplIE)
+			isUsingExCanvas = true;
+		//force default impl when IE9
+		//TODO find better solution for not try using excanvas in ie9!
+		if(com.google.gwt.canvas.client.Canvas.isSupported() && isUsingExCanvas)
+			impl = new CanvasImplDefault();
 		setElement(impl.createElement());
 		impl.setWidth(width);
 		impl.setHeight(height);
-		if(impl instanceof CanvasImplIE)
-			isIE = true;
+		
 	}
-
+	
 	public void setWidth(int width) { impl.setWidth(width); }
 	public int getWidth() { return impl.getWidth(); }
 	public void setHeight(int height) { impl.setHeight(height); }
@@ -82,7 +87,7 @@ public class CanvasWidget extends Widget {
 	public void clip() { impl.clip(); }
 	public boolean isPointInPath(double x, double y) {return impl.isPointInPath(x,y);}
 
-	public boolean isIE() {
-		return isIE;
+	public boolean isUsingExCanvas() {
+		return isUsingExCanvas;
 	}
 }

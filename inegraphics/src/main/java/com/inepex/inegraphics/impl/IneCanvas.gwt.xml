@@ -4,19 +4,21 @@
 
 	<inherits name="com.google.gwt.user.User" />
 
+	<replace-with class="com.google.gwt.canvas.client.Canvas.CanvasElementSupportDetectedMaybe">
+        <when-type-is class="com.google.gwt.canvas.client.Canvas.CanvasElementSupportDetector"/>
+    </replace-with>
 
 	<replace-with class="com.inepex.inegraphics.impl.client.canvas.CanvasImplDefault">
 		<when-type-is class="com.inepex.inegraphics.impl.client.canvas.Canvas" />
 	</replace-with>
+	
 	<replace-with class="com.inepex.inegraphics.impl.client.canvas.CanvasImplIE">
 		<when-type-is class="com.inepex.inegraphics.impl.client.canvas.Canvas" />
 		<any>
 			<when-property-is name="user.agent" value="ie6" />
 			<when-property-is name="user.agent" value="ie8" />
-<!--			<when-property-is name="user.agent" value="ie9" />-->
 		</any>
 	</replace-with>
-
 
 	<script src='excanvas.js' />
 	<source path="client" />

@@ -421,6 +421,99 @@ public abstract class DrawingArea extends GraphicalObjectContainer{
 		return clippedPath;
 	}
 	
+	public static GraphicalObjectContainer clipRectanglesWithRectangle(GraphicalObjectContainer container, double x, double y, double width, double height){
+		GraphicalObjectContainer filtered = new GraphicalObjectContainer();
+		for(GraphicalObject go : container.graphicalObjects){
+			if(go instanceof Rectangle){
+				Rectangle r = clipRectangleWithRectangle((Rectangle) go, x, y, width, height);
+				if(r != null){
+					filtered.addGraphicalObject(r);
+				}
+			}
+			else{
+				filtered.addGraphicalObject(go);
+			}
+		}
+		return filtered;
+	}
+	/**
+	 * 
+	 * @param rectangleToClip
+	 * @param x
+	 * @param y
+	 * @param width
+	 * @param height
+	 * @return null if the two rectangles have no common points.
+	 */
+	public static Rectangle clipRectangleWithRectangle(Rectangle rectangleToClip, double x, double y, double width, double height){
+		if(rectangleToClip.getBasePointX() > x && rectangleToClip.getBasePointY() > y &&
+				rectangleToClip.getBasePointX() + rectangleToClip.getWidth() < x + width && 
+				rectangleToClip.getBasePointY() + rectangleToClip.getHeight() < y + height)
+			return rectangleToClip;
+		double[] clipTop = getIntersection(
+				rectangleToClip.getBasePointX(), rectangleToClip.getBasePointY(),
+				rectangleToClip.getBasePointX()+rectangleToClip.getWidth(), rectangleToClip.getBasePointY(),
+				x, y, width, height);
+		double[] clipBottom = getIntersection(
+				rectangleToClip.getBasePointX(), rectangleToClip.getBasePointY()+ rectangleToClip.getHeight(),
+				rectangleToClip.getBasePointX()+rectangleToClip.getWidth(), rectangleToClip.getBasePointY() + rectangleToClip.getHeight(),
+				x, y, width, height);
+		double[] clipLeft = getIntersection(
+				rectangleToClip.getBasePointX(), rectangleToClip.getBasePointY(),
+				rectangleToClip.getBasePointX(), rectangleToClip.getBasePointY() + rectangleToClip.getHeight(),
+				x, y, width, height);
+		double[] clipRight = getIntersection(
+				rectangleToClip.getBasePointX()+rectangleToClip.getWidth(), rectangleToClip.getBasePointY(),
+				rectangleToClip.getBasePointX()+rectangleToClip.getWidth(), rectangleToClip.getBasePointY() + rectangleToClip.getHeight(),
+				x, y, width, height);
+		
+		if(clipTop == null && clipBottom == null && clipLeft == null && clipRight == null){
+			//the viewport is inside the rectangle
+			if(rectangleToClip.getBasePointX() < x && rectangleToClip.getBasePointY() < y &&
+					rectangleToClip.getBasePointX() + rectangleToClip.getWidth() > x + width && 
+					rectangleToClip.getBasePointY() + rectangleToClip.getHeight() > y + height)
+				return new Rectangle(x, y, width, height, rectangleToClip.getRoundedCornerRadius(), rectangleToClip.getzIndex(), rectangleToClip.getContext(), rectangleToClip.hasStroke(),rectangleToClip.hasFill());
+			else
+				return null;
+		}
+		Double clippedX=null, clippedY=null, clippedW=null, clippedH=null;
+		if(clipTop != null){
+			clippedX = clipTop[0];
+			clippedY = clipTop[1];
+			clippedW = clipTop[2] - clipTop[0];
+		}
+		if(clipLeft != null){
+			clippedX = clipLeft[0];
+			clippedY = clipLeft[1];
+			clippedH = clipLeft[3] - clipLeft[1];
+		}
+		if(clipBottom != null){
+			clippedX = clipBottom[0];
+			clippedW = clipBottom[2] - clipBottom[0];
+		}
+		if(clipRight != null){
+			clippedY = clipRight[1];
+			clippedH = clipRight[3] - clipRight[1];
+		}
+		
+		if(clippedX == null){
+			clippedX = clipRight[0];
+			clippedW = 0d;
+		}
+		if(clippedY == null){
+			clippedY = clipBottom[1];
+			clippedH = 0d;
+		}
+		if(clippedW == null){
+			clippedW = 0d;
+		}
+		if(clippedH == null){
+			clippedH = 0d;
+		}
+		
+		return new Rectangle(clippedX, clippedY, clippedW, clippedH, rectangleToClip.getRoundedCornerRadius(), rectangleToClip.getzIndex(), rectangleToClip.getContext(), rectangleToClip.hasStroke(), rectangleToClip.hasFill());
+	}
+	
 	/**
 	 * Clips a line to fit the given rectangle.
 	 * @param x1 x of the start point of the line
@@ -530,7 +623,6 @@ public abstract class DrawingArea extends GraphicalObjectContainer{
 		}
 		return new double[]{a1,b1,a2,b2};
 	}
-
 
 	public static boolean isPointInRectengle(double pointX, double pointY, double x, double y, double width, double height){
 		if(pointX >= x && pointX <= x + width && pointY >= y && pointY <= y+height)
