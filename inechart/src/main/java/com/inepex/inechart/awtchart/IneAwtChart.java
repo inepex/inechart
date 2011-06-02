@@ -4,35 +4,34 @@ import java.awt.image.BufferedImage;
 import java.io.OutputStream;
 import java.util.ArrayList;
 
+import com.inepex.inechart.chartwidget.HasCoordinateSystem;
 import com.inepex.inechart.chartwidget.IneChartModul;
 import com.inepex.inechart.chartwidget.Viewport;
 import com.inepex.inechart.chartwidget.axes.Axes;
+import com.inepex.inechart.chartwidget.barchart.BarChart;
 import com.inepex.inechart.chartwidget.linechart.LineChart;
-import com.inepex.inechart.chartwidget.linechart.LineChartProperties;
 import com.inepex.inechart.chartwidget.piechart.PieChart;
 import com.inepex.inegraphics.awt.DrawingAreaAwt;
 
 public class IneAwtChart {
-
 	private ArrayList<IneChartModul> moduls;
+	Axes axes;
+	private ArrayList<Viewport> modulViewports;
 	private DrawingAreaAwt drawingArea;
+	private IneChartModul focus;
 
 	// properties
-	private static final int DEFAULT_PADDING = 30;
-	private int widgetWidth;
-	private int widgetHeight;
 	private int canvasWidth;
 	private int canvasHeight;
-	private final Viewport viewport;
 
 	public IneAwtChart(int width, int height) {
-		canvasHeight = height - DEFAULT_PADDING / 2;
-		canvasWidth = width - DEFAULT_PADDING / 2;
-		widgetHeight = height;
-		widgetWidth = width;
-		viewport = new Viewport(0, 0, 1, 1);
+		canvasHeight = height;
+		canvasWidth = width;
 		this.drawingArea = new DrawingAreaAwt(canvasWidth, canvasHeight);
+
 		moduls = new ArrayList<IneChartModul>();
+		axes = new Axes(drawingArea);
+		modulViewports = new ArrayList<Viewport>();
 	}
 
 	/*
@@ -40,15 +39,14 @@ public class IneAwtChart {
 	 */
 
 	public LineChart createLineChart() {
-		LineChart chart = new LineChart(drawingArea, getAxes(), viewport);
+		LineChart chart = new LineChart(drawingArea, getAxes());
 		moduls.add(chart);
-		chart.setProperties(LineChartProperties.getDefaultLineChartProperties());
 		return chart;
 	}
 
-	public LineChart createLineChart(LineChartProperties properties) {
-		LineChart chart = createLineChart();
-		chart.setProperties(properties);
+	public LineChart createLineChart(Viewport viewport) {
+		LineChart chart = new LineChart(drawingArea, getAxes(), viewport);
+		moduls.add(chart);
 		return chart;
 	}
 
@@ -58,33 +56,108 @@ public class IneAwtChart {
 		return chart;
 	}
 
-	public Axes getAxes() {
-		for (IneChartModul m : moduls)
-			if (m instanceof Axes)
-				return (Axes) m;
-		Axes n = new Axes(drawingArea, viewport);
-		moduls.add(n);
-		return n;
+	public BarChart createBarChart() {
+		BarChart bc = new BarChart(drawingArea, getAxes());
+		moduls.add(bc);
+		return bc;
 	}
 
-	public void addModul(IneChartModul modul) {
-		if (modul != null)
-			moduls.add(modul);
+	Axes getAxes() {
+		return axes;
 	}
 
-	public Viewport getViewport() {
-		return viewport;
+	/* public methods */
+
+	private void focusModul(IneChartModul modul) {
+		for (IneChartModul m : moduls) {
+			if (m != modul)
+				m.setCanHandleEvents(false);
+			else
+				m.setCanHandleEvents(true);
+		}
+		focus = modul;
+	}
+
+	private void releaseFocusIfPossible() {
+		if (focus != null) {
+			for (IneChartModul m : moduls) {
+				if (focus == m && m.isRequestFocus() == false) {
+					for (IneChartModul m1 : moduls) {
+						m1.setCanHandleEvents(true);
+					}
+					focus = null;
+					return;
+				}
+			}
+		}
 	}
 
 	public void update() {
-		// update model, create GOs per modul
-		for (IneChartModul modul : moduls) {
-			modul.update();
-			drawingArea.addAllGraphicalObject(modul
-					.getGraphicalObjectContainer());
+		releaseFocusIfPossible();
+		// grant focus
+		if (focus == null) {
+			for (IneChartModul modul : moduls) {
+				if (modul.isVisible() && modul.isRequestFocus()) {
+					focusModul(modul);
+					break;
+				}
+			}
 		}
-		// draw
-		drawingArea.update();
+		boolean doRedraw = false;
+		// if present update only focused
+		if (focus != null) {
+			if (focus.redrawNeeded()) {
+				focus.update();
+				doRedraw = true;
+			}
+		} else {
+			for (IneChartModul modul : moduls) {
+				if (modul.redrawNeeded()) {
+					modul.update();
+					if (modul instanceof HasCoordinateSystem
+							&& !modulViewports
+									.contains(((HasCoordinateSystem) modul)
+											.getViewport()))
+						modulViewports.add(((HasCoordinateSystem) modul)
+								.getViewport());
+					doRedraw = true;
+				}
+			}
+		}
+		// axes modul should always be updated
+		if (axes.redrawNeeded()) {
+			((IneChartModul)axes).update();
+			doRedraw = true;
+		}
+		if (doRedraw) {
+			drawingArea.removeAllGraphicalObject();
+			for (IneChartModul modul : moduls) {
+				if (modul.isVisible())
+					drawingArea
+							.addAllGraphicalObject(modul.getGraphicalObjectContainer());
+			}
+			drawingArea.addAllGraphicalObject(axes.getGraphicalObjectContainer());
+			drawingArea.update();
+		}
+		for (Viewport vp : modulViewports) {
+			boolean canResetVP = true;
+			for (IneChartModul m : vp.getUserModuls().keySet()) {
+				if (vp.getUserModuls().get(m)) {
+					canResetVP = false;
+					break;
+				}
+			}
+			if (canResetVP)
+				vp.resetChanged();
+		}
+	}
+
+	public boolean redrawNeeded() {
+		for (IneChartModul modul : moduls) {
+			if (modul.redrawNeeded())
+				return true;
+		}
+		return axes.redrawNeeded();
 	}
 
 	public void saveToFile(String filename) {

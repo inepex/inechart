@@ -1,10 +1,7 @@
 package com.inepex.inechart.chartwidget.axes;
 
 import java.util.ArrayList;
-import java.util.TreeMap;
 
-import com.inepex.inechart.chartwidget.IneChart;
-import com.inepex.inechart.chartwidget.IneChartModul;
 import com.inepex.inechart.chartwidget.IneChartModul2D;
 import com.inepex.inechart.chartwidget.misc.HasZIndex;
 import com.inepex.inechart.chartwidget.properties.Color;
@@ -111,6 +108,8 @@ public class Axis implements Comparable<Axis>, HasZIndex {
 	 * values
 	 */
 	double lowerEnd, upperEnd;
+	
+	private boolean filterFrequentTicks = false;
 
 	// comparison helper fields
 	private static int highestComparableNo = 0;
@@ -391,5 +390,13 @@ public class Axis implements Comparable<Axis>, HasZIndex {
 	public void setModulToAlign(IneChartModul2D modulToAlign) {
 		this.modulToAlign = modulToAlign;
 		changed = true;
+	}
+	
+	public boolean isFilterFrequentTicks() {
+		return filterFrequentTicks;
+	}
+
+	public void setFilterFrequentTicks(boolean filterFrequentTicks) {
+		this.filterFrequentTicks = filterFrequentTicks;
 	}
 }

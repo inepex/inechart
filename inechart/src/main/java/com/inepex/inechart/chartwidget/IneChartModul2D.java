@@ -274,7 +274,7 @@ public abstract class IneChartModul2D extends IneChartModul implements
 	}
 
 	@Override
-	protected boolean redrawNeeded() {
+	public boolean redrawNeeded() {
 		if (redrawNeeded || xAxis.isChanged() || yAxis.isChanged()
 				|| viewport.isChanged())
 			return true;

@@ -1,4 +1,4 @@
-package com.inepex.inechart;
+package com.inepex.inecharttest.ineawtcharttest;
 
 import java.util.SortedMap;
 import java.util.TreeMap;

@@ -25,8 +25,9 @@ public class BarChartTest extends AbsolutePanel {
 		this.add(chart3, 0, 800);
 		this.setPixelSize(800, 1200);
 		
-		
+			
 		BarChart bc = chart1.createBarChart();
+		bc.setAutoCreateTicks(true);
 		bc.addDataSet(dataSet1);
 		bc.addDataSet(dataSet2);
 		bc.addDataSet(dataSet3);

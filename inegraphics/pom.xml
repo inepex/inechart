@@ -6,7 +6,7 @@
 	<groupId>com.inepex</groupId>
 	<artifactId>inegraphics</artifactId>
 	<packaging>jar</packaging>
-	<version>1.0-SNAPSHOT</version>
+	<version>1.2</version>
 	<name>inegraphics</name>
 	<url>http://maven.apache.org</url>
 	<properties>
@@ -45,4 +45,12 @@
 			</plugin>
 		</plugins>
 	</build>
+	<distributionManagement>
+    <repository>
+      <id>inepex</id>
+      <name>Inepex Repository</name>
+      <url>http://maven.inepex.com:8081/nexus/content/repositories/releases</url>
+    </repository>
+  </distributionManagement>
+
 </project>

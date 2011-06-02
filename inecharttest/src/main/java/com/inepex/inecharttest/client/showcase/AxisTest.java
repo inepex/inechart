@@ -5,7 +5,6 @@ import java.util.TreeMap;
 import com.google.gwt.core.client.Scheduler;
 import com.google.gwt.core.client.Scheduler.RepeatingCommand;
 import com.google.gwt.user.client.Random;
-import com.google.gwt.user.client.Timer;
 import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.ui.FlowPanel;
 import com.inepex.inechart.chartwidget.IneChart;
@@ -27,6 +26,8 @@ public class AxisTest extends FlowPanel {
 	IneChart chart3;
 	IneChart chart4;
 	TreeMap<Double, Double> dataSet;
+	
+	RepeatingCommand c;
 	
 	public AxisTest() {
 		fillDataSet();
@@ -93,7 +94,7 @@ public class AxisTest extends FlowPanel {
 		
 		
 	
-		RepeatingCommand c = new RepeatingCommand() {
+		c = new RepeatingCommand() {
 			
 			@Override
 			public boolean execute() {
@@ -107,8 +108,18 @@ public class AxisTest extends FlowPanel {
 				return true;
 			}
 		};
-		Scheduler.get().scheduleFixedDelay(c, 100);
 
+	}
+	
+	@Override
+	protected void onLoad() {
+		Scheduler.get().scheduleFixedDelay(c, 100);
+		super.onLoad();
+	}
+	
+	@Override
+	protected void onUnload() {
+		super.onUnload();
 	}
 
 	void fillDataSet(){

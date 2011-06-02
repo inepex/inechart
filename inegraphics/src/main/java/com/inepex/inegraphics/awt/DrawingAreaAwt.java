@@ -12,6 +12,7 @@ import java.io.OutputStream;
 
 import javax.imageio.ImageIO;
 
+import com.inepex.inegraphics.impl.client.TextPositionerBase;
 import com.inepex.inegraphics.shared.Context;
 import com.inepex.inegraphics.shared.DrawingArea;
 import com.inepex.inegraphics.shared.gobjects.Arc;
@@ -158,9 +159,17 @@ public class DrawingAreaAwt extends DrawingArea {
 	@Override
 	protected void drawText(Text text) {
 		applyContext(text.getContext());
-		g2.drawString(text.getText(), (int)text.getBasePointX(), (int)text.getBasePointY()); 
+		g2.setColor(Color.BLACK);
+		updateTextDimensions(text);
+		TextPositionerBase.calcTextPosition(text);
+		g2.drawString(text.getText(), (int)text.getBasePointX(), (int)text.getBasePointY() + 8); 
 	}
 	
+	private void updateTextDimensions(Text text) {
+		text.setWidth(text.getText().length() * 7);
+		text.setHeight(12);
+	}
+
 	public BufferedImage getImage(){
 		return image;
 	}

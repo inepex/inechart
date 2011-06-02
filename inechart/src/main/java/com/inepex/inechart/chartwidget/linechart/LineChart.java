@@ -7,15 +7,11 @@ import com.google.gwt.event.dom.client.MouseMoveEvent;
 import com.google.gwt.event.dom.client.MouseMoveHandler;
 import com.google.gwt.event.dom.client.MouseOutEvent;
 import com.google.gwt.event.dom.client.MouseOutHandler;
-import com.inepex.inechart.chartwidget.HasCoordinateSystem;
-import com.inepex.inechart.chartwidget.IneChartModul;
 import com.inepex.inechart.chartwidget.IneChartModul2D;
 import com.inepex.inechart.chartwidget.Viewport;
 import com.inepex.inechart.chartwidget.axes.Axes;
 import com.inepex.inechart.chartwidget.axes.Axis;
-import com.inepex.inechart.chartwidget.axes.Tick;
 import com.inepex.inechart.chartwidget.axes.Axis.AxisDirection;
-import com.inepex.inechart.chartwidget.axes.TickFactory;
 import com.inepex.inechart.chartwidget.misc.ColorSet;
 import com.inepex.inechart.chartwidget.properties.Color;
 import com.inepex.inechart.chartwidget.properties.LineProperties;
@@ -128,6 +124,9 @@ public class LineChart extends IneChartModul2D implements
 			curve.setShadowOffsetX(defaultShadowOffsetY);
 			curve.setShadowColor(defaultShadowColor);
 		}
+		if (curve.getLineProperties().getLineColor() == null){
+			curve.getLineProperties().setLineColor(colors.getNextColor());
+		}
 		curves.add(curve);
 		if (curve.zIndex == Integer.MIN_VALUE)
 			curve.zIndex = ++highestZIndex;
@@ -146,12 +145,14 @@ public class LineChart extends IneChartModul2D implements
 	}
 
 	@Override
-	protected void update() {
+	public void update() {
 		if (curves == null || curves.size() == 0)
 			return;
 		if (autoScaleViewport) {
-			viewport.set(curves.get(0).xMin, curves.get(0).yMin,
-					curves.get(0).xMax, curves.get(0).yMax);
+			double yMin = Math.min(yAxis.getMin(), curves.get(0).yMin);
+			double yMax = Math.max(yAxis.getMax(), curves.get(0).yMax);
+			viewport.set(curves.get(0).xMin, yMin,
+					curves.get(0).xMax, yMax);
 			for (Curve c : curves) {
 				if (c.xMax > viewport.getXMax())
 					viewport.setXMax(c.xMax);
@@ -823,7 +824,7 @@ public class LineChart extends IneChartModul2D implements
 	}
 
 	@Override
-	protected boolean redrawNeeded() {
+	public boolean redrawNeeded() {
 		for (Curve c : curves)
 			if (c.modelChanged)
 				return true;

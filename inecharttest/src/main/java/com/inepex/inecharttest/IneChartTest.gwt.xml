@@ -8,5 +8,6 @@
   <entry-point class='com.inepex.inecharttest.client.IneChartTest'/>
 
   <source path='client'/>
+  <source path='shared'/>
 
 </module>

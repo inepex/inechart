@@ -254,4 +254,10 @@ public class Viewport {
 		yMin = axis.getMin();
 		yMax = axis.getMax();
 	}
+
+	public TreeMap<IneChartModul, Boolean> getUserModuls() {
+		return userModuls;
+	}
+	
+	
 }

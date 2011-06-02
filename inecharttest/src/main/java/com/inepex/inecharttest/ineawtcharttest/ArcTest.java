@@ -1,4 +1,4 @@
-package com.inepex.inechart;
+package com.inepex.inecharttest.ineawtcharttest;
 
 import com.inepex.inegraphics.awt.DrawingAreaAwt;
 import com.inepex.inegraphics.shared.Context;

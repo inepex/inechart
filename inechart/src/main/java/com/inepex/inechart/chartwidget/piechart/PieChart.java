@@ -58,7 +58,7 @@ public class PieChart extends IneChartModul implements
 	}
 
 	@Override
-	protected void update() {
+	public void update() {
 		if (pie == null)
 			throw new RuntimeException(
 					"There is nothing to show. You should call setPie on PieChart!");
@@ -110,6 +110,7 @@ public class PieChart extends IneChartModul implements
 			Double textX = basePointX + d * Math.sin(f);
 			Double textY = basePointY + d * Math.cos(f);
 			Text label = new Text(key, textX.intValue(), textY.intValue());
+			label.setzIndex(2);
 			label.setContext(getTextContext());
 			Text pctgLabel = new Text(Math.round(pctg) + "%", textX.intValue(),
 					textY.intValue() + 15);
@@ -126,9 +127,9 @@ public class PieChart extends IneChartModul implements
 	}
 
 	@Override
-	protected boolean redrawNeeded() {
+	public boolean redrawNeeded() {
 		// TODO Auto-generated method stub
-		return false;
+		return true;
 	}
 
 }

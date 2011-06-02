@@ -67,7 +67,7 @@ public abstract class IneChartModul implements Comparable<IneChartModul> {
 		border = defaultBorder;
 	}
 
-	protected void update(){
+	public void update(){
 		//border
 		if(border != null){
 			graphicalObjectContainer.addGraphicalObject(
@@ -101,7 +101,7 @@ public abstract class IneChartModul implements Comparable<IneChartModul> {
 		this.leftPadding = leftPadding;
 	}
 
-	protected abstract boolean redrawNeeded();
+	public abstract boolean redrawNeeded();
 
 	/**
 	 * @return the topPadding
