@@ -1,5 +1,6 @@
 package com.inepex.inecharttest.shared;
 
+import com.inepex.inechart.chartwidget.IneChartModul2D;
 import com.inepex.inechart.chartwidget.axes.Tick;
 import com.inepex.inechart.chartwidget.barchart.BarChart;
 import com.inepex.inechart.chartwidget.linechart.Curve;
@@ -48,7 +49,7 @@ public class TestLineChartCreator {
 	}
 	
 	public static void setTestBars(BarChart bc){
-		bc.setAutoScaleViewport(true);
+		bc.setAutoScaleViewport(false);
 		bc.setLeftPadding(50);
 		bc.getYAxis().setMin(0.0);
 		bc.getYAxis().setMax(5.0);
@@ -69,6 +70,10 @@ public class TestLineChartCreator {
 		return c;
 	}
 	
+	public static void setUseSameViewports(IneChartModul2D viewportHost, IneChartModul2D viewportPeer){
+		viewportPeer.setViewport(viewportHost.getViewport());
+		viewportPeer.setAutoScaleViewport(false);
+	}
 	
 	private static Curve getTestCurve(String color){
 		Curve c = new Curve();

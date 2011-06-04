@@ -14,6 +14,7 @@ public class LineAndBarChartTest extends FlowPanel {
 		TestLineChartCreator.setupTestLines(lc);
 		BarChart bc = chart.createBarChart();
 		TestLineChartCreator.setTestBars(bc);
+		TestLineChartCreator.setUseSameViewports(lc, bc);
 		add(chart.asWidget());
 		chart.update();
 	}
