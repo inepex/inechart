@@ -5,7 +5,6 @@ import java.awt.Color;
 import java.awt.Graphics2D;
 import java.awt.RenderingHints;
 import java.awt.geom.Arc2D;
-import java.awt.geom.GeneralPath;
 import java.awt.image.BufferedImage;
 import java.io.File;
 import java.io.OutputStream;
@@ -162,8 +161,17 @@ public class DrawingAreaAwt extends DrawingArea {
 		g2.setColor(Color.BLACK);
 		updateTextDimensions(text);
 		TextPositionerBase.calcTextPosition(text);
-		g2.drawString(text.getText(), (int)text.getBasePointX(), (int)text.getBasePointY() + 8); 
+		drawString(text.getText(), (int)text.getBasePointX(), (int)text.getBasePointY() + 10); 
 	}
+	
+	private void drawString(String text, int x, int y) {
+        for (String line : text.split("\n"))
+        {
+            g2.drawString(line, x, y);
+        	y += g2.getFontMetrics().getHeight();
+        }
+    }
+
 	
 	private void updateTextDimensions(Text text) {
 		text.setWidth(text.getText().length() * 7);

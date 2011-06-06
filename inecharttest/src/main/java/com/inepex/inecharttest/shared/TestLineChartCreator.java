@@ -17,27 +17,28 @@ public class TestLineChartCreator {
 		lc.setAutoScaleViewport(true);
 		lc.setLeftPadding(50);
 		lc.setAutoCreateTicks(false);
-		lc.getYAxis().setMin(0.0);
-		lc.getYAxis().setMax(5.0);
+//		lc.getYAxis().setMin(0.0);
+//		lc.getYAxis().setMax(5.0);
 //		lc.getViewport().setYMin(0.0);
 //		lc.getViewport().setXMin(0.0);
 		
-//		lc.addCurve(getTestCurve("#0055FF"));
+		lc.addCurve(getTestCurve("#0055FF"));
 		lc.addCurve(getFixCurve());
-//		lc.addCurve(getTestCurve2("#363A42"));
+		lc.addCurve(getTestCurve2("#363A42"));
 
 //		TODO: set axis labels
 		lc.getYAxis().setFilterFrequentTicks(true);
 		lc.getXAxis().setFilterFrequentTicks(true);
 		
 		lc.getYAxis().addTick(new Tick(10.0, "1"));
-		lc.getXAxis().addTick(new Tick(0.0, "0"));
-//		lc.getXAxis().addTick(new Tick(1.0, "2010.jan"));
+//		lc.getXAxis().addTick(new Tick(0.0, "0"));
+		lc.getXAxis().addTick(new Tick(1.0, "2010.jan"));
 		lc.getXAxis().addTick(new Tick(2.0, LineProperties.getDefaultSolidLine(), null, 5,  "2010.feb"));
-//		lc.getXAxis().addTick(new Tick(4.0, null, null, 5,  "2010.márc"));
-//		lc.getXAxis().addTick(new Tick(6.0, null, null, 5,  "2010.ápr"));
-//		lc.getXAxis().addTick(new Tick(7.0, null, null, 5,  "2010.május"));
-//		lc.getXAxis().addTick(new Tick(9.0, null, null, 5,  "2010.június"));
+		lc.getXAxis().addTick(new Tick(3.0, null, null, 5,  "2010.márc"));
+		lc.getXAxis().addTick(new Tick(3.1, LineProperties.getDefaultSolidLine(), null, 5,  "").setUnfiltereble(true));
+		lc.getXAxis().addTick(new Tick(4.0, null, null, 5,  "2010.ápr"));
+		lc.getXAxis().addTick(new Tick(5.0, null, null, 5,  "2010.május"));
+		lc.getXAxis().addTick(new Tick(6.0, null, null, 5,  "2010.június"));
 //		
 		lc.getYAxis().addTick(new Tick(0.3, "min min"));
 		lc.getYAxis().addTick(new Tick(4.3, "na"));

@@ -151,8 +151,10 @@ public class LineChart extends IneChartModul2D implements
 		if (autoScaleViewport) {
 			double yMin = Math.min(yAxis.getMin(), curves.get(0).yMin);
 			double yMax = Math.max(yAxis.getMax(), curves.get(0).yMax);
-			viewport.set(curves.get(0).xMin, yMin,
-					curves.get(0).xMax, yMax);
+			double xMin = Math.max(xAxis.getMin(), curves.get(0).xMin);
+			double xMax = Math.min(xAxis.getMax(), curves.get(0).xMax);
+			viewport.set(xMin, yMin,
+					xMax, yMax);
 			for (Curve c : curves) {
 				if (c.xMax > viewport.getXMax())
 					viewport.setXMax(c.xMax);
@@ -163,6 +165,8 @@ public class LineChart extends IneChartModul2D implements
 				if (c.yMin < viewport.getYMin())
 					viewport.setYMin(c.yMin);
 			}
+			if (xMin > viewport.getXMin()) viewport.setXMin(xMin);
+			if (xMax < viewport.getXMax()) viewport.setXMax(xMax);
 			autoScaleViewport = false;
 		}
 

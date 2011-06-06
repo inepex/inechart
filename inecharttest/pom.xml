@@ -33,7 +33,7 @@
 		<dependency>
 			<groupId>com.inepex</groupId>
 			<artifactId>inechart</artifactId>
-			<version>1.0.2</version>
+			<version>1.0.4</version>
 			<scope>compile</scope>
 		</dependency>
 		<dependency>
@@ -46,7 +46,7 @@
 		<dependency>
 			<groupId>com.inepex</groupId>
 			<artifactId>inegraphics</artifactId>
-			<version>1.2</version>
+			<version>1.2.2</version>
 			<type>jar</type>
 			<scope>compile</scope>
 		</dependency>

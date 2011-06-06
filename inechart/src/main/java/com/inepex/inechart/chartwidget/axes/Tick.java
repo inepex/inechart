@@ -41,6 +41,11 @@ public class Tick implements Comparable<Tick> {
 	 * the tick's label
 	 */
 	String tickText;
+	
+	/**
+	 * if set to true filterFrequentTicks won't filter out this tick
+	 */
+	boolean unfiltereble = false;
 
 	/**
 	 * Constructs a tick with default look, without label
@@ -161,6 +166,15 @@ public class Tick implements Comparable<Tick> {
 	 */
 	public void setTickText(String tickText) {
 		this.tickText = tickText;
+	}
+
+	public boolean isUnfiltereble() {
+		return unfiltereble;
+	}
+
+	public Tick setUnfiltereble(boolean unfiltereble) {
+		this.unfiltereble = unfiltereble;
+		return this;
 	}
 
 	@Override

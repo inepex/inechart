@@ -1,5 +1,6 @@
 package com.inepex.inechart.chartwidget.axes;
 
+import java.awt.image.RasterOp;
 import java.util.ArrayList;
 import java.util.TreeMap;
 
@@ -38,7 +39,7 @@ public class Axes extends IneChartModul {
 	private static final int tickFillZIndex = Integer.MIN_VALUE;
 	private static final int gridLineZIndex = tickFillZIndex + 1;	
 	private static final int axisLineZIndex = gridLineZIndex + 1;	
-	private static final int tickLineZIndex = tickFillZIndex + 1;
+	private static final int tickLineZIndex = axisLineZIndex + 1;
 	
 	
 	public Axes(DrawingArea canvas) {
@@ -319,7 +320,7 @@ public class Axes extends IneChartModul {
 				x = axis.getModulToAlign().getLeftPadding();
 				x2 = canvas.getWidth() - axis.getModulToAlign().getRightPadding();
 				y = axis.getModulToAlign().getCanvasY(((Tick) tickPair[0]).position, axis);
-				y2 = axis.getModulToAlign().getCanvasY(((Tick) tickPair[1]).position, axis);
+				y2 = Math.max(0.0 + axis.getModulToAlign().getTopPadding(), axis.getModulToAlign().getCanvasY(((Tick) tickPair[1]).position, axis));
 			}
 			Rectangle fill = new Rectangle(
 					x,
@@ -371,8 +372,13 @@ public class Axes extends IneChartModul {
 		ArrayList<Tick> filteredTicks = new ArrayList<Tick>();
 		if (avgDistanceBetweenTicks < avgTextWidth) {
 			Long ratio = Math.round(avgTextWidth / avgDistanceBetweenTicks);
-			for (int i = 0; i<visibleTicks.size(); i = i+ratio.intValue()){
-				filteredTicks.add(visibleTicks.get(i));
+			int counter = ratio.intValue();
+			for (int i = 0; i<visibleTicks.size(); i++){
+				if (visibleTicks.get(i).isUnfiltereble() || counter == ratio.intValue()) {
+					filteredTicks.add(visibleTicks.get(i));
+					counter = 0;
+				}
+				counter++;	
 			}
 		} else {
 			filteredTicks.addAll(visibleTicks);

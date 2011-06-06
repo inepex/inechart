@@ -5,7 +5,7 @@
 	<groupId>com.inepex</groupId>
 	<artifactId>inechart</artifactId>
 	<packaging>jar</packaging>
-	<version>1.0.2</version>
+	<version>1.0.4</version>
 	<name>inechart</name>
 	<url>http://maven.apache.org</url>
 	<repositories>
@@ -37,7 +37,7 @@
 		<dependency>
 			<groupId>com.inepex</groupId>
 			<artifactId>inegraphics</artifactId>
-			<version>1.2</version>
+			<version>1.2.2</version>
 			<scope>compile</scope>
 		</dependency>
 	</dependencies>

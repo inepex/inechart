@@ -1,8 +1,6 @@
 package com.inepex.inechart.chartwidget.piechart;
 
 import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.Map;
 import java.util.SortedMap;
 import java.util.TreeMap;
 
@@ -20,12 +18,24 @@ import com.inepex.inegraphics.shared.gobjects.Text;
 
 public class PieChart extends IneChartModul implements
 		GraphicalObjectEventHandler, MouseMoveHandler, MouseOutHandler {
+	
+	public static interface PieLabeler {
+		public String getLabel(String name, String value, String pctg);
+	}
 
 	Pie pie;
 	SortedMap<String, Double> percentages = new TreeMap<String, Double>();
+	PieLabeler pieLabeler;
 
 	public PieChart(DrawingArea canvas) {
 		super(canvas);
+		pieLabeler = new PieLabeler() {
+			
+			@Override
+			public String getLabel(String name, String value, String pctg) {
+				return name + "\n" + pctg + "%";
+			}
+		};
 	}
 
 	public void setPie(Pie pie) {
@@ -109,16 +119,14 @@ public class PieChart extends IneChartModul implements
 			double d = radius * 0.7;
 			Double textX = basePointX + d * Math.sin(f);
 			Double textY = basePointY + d * Math.cos(f);
-			Text label = new Text(key, textX.intValue(), textY.intValue());
+			String pieLabel = pieLabeler.getLabel(key, "" + pie.getDataMap().get(key), "" + Math.round(pctg));
+			Double offsetY = pieLabel.split("\n").length * 10.0;
+			
+			Text label = new Text(pieLabel, textX.intValue(), textY.intValue()  - offsetY.intValue());
 			label.setzIndex(2);
 			label.setContext(getTextContext());
-			Text pctgLabel = new Text(Math.round(pctg) + "%", textX.intValue(),
-					textY.intValue() + 15);
-			label.setContext(getTextContext());
-			;
 			getGraphicalObjectContainer().addGraphicalObject(label);
-			getGraphicalObjectContainer().addGraphicalObject(pctgLabel);
-			// add labels
+
 		}
 	}
 
@@ -131,5 +139,11 @@ public class PieChart extends IneChartModul implements
 		// TODO Auto-generated method stub
 		return true;
 	}
+
+	public void setPieLabeler(PieLabeler pieLabeler) {
+		this.pieLabeler = pieLabeler;
+	}
+	
+	
 
 }

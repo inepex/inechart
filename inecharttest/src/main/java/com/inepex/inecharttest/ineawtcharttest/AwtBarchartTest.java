@@ -12,6 +12,7 @@ public class AwtBarchartTest {
 		LineChart lc = chart.createLineChart();
 		TestLineChartCreator.setupTestLines(lc);
 		BarChart bc = chart.createBarChart();
+		TestLineChartCreator.setUseSameViewports(lc, bc);
 		TestLineChartCreator.setTestBars(bc);
 		//TODO: draw some kind of legend
 		
