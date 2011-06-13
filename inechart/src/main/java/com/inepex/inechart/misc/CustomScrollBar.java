@@ -1,4 +1,4 @@
-package com.inepex.inechart.chartwidget.misc;
+package com.inepex.inechart.misc;
 
 import com.google.gwt.core.client.Scheduler;
 import com.google.gwt.core.client.Scheduler.RepeatingCommand;

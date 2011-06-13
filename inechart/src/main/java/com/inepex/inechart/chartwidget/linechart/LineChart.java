@@ -786,16 +786,6 @@ public class LineChart extends IneChartModul2D implements
 		return precalculatePoints;
 	}
 
-//	/**
-//	 * @param precalculatePoints
-//	 *            the precalculatePoints to set
-//	 */
-//	public void setPrecalculatePoints(boolean precalculatePoints) {
-//		if (this.precalculatePoints != precalculatePoints)
-//			redrawNeeded = true;
-//		this.precalculatePoints = precalculatePoints;
-//	}
-
 	/**
 	 * @return the autoCreateTicks
 	 */

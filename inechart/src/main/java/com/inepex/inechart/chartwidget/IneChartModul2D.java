@@ -146,13 +146,8 @@ public abstract class IneChartModul2D extends IneChartModul implements
 	public double getCanvasX(double value, Axis horizontalAxis) {
 		int totalWidth = canvas.getWidth() - leftPadding - rightPadding;
 		double visibleLength, visibleMin;
-		if (useViewport) {
-			visibleLength = viewport.getWidth();
-			visibleMin = viewport.getXMin();
-		} else {
-			visibleLength = horizontalAxis.getMax() - horizontalAxis.getMin();
-			visibleMin = horizontalAxis.getMin();
-		}
+		visibleLength = horizontalAxis.getMax() - horizontalAxis.getMin();
+		visibleMin = horizontalAxis.getMin();
 		double pos;
 		if (horizontalAxis.getAxisDirection() == AxisDirection.Horizontal_Ascending_To_Right) {
 			pos =  (value - visibleMin) * totalWidth / visibleLength	+ leftPadding;
@@ -177,13 +172,8 @@ public abstract class IneChartModul2D extends IneChartModul implements
 	public double getCanvasY(double value, Axis verticalAxis) {
 		int totalHeight = canvas.getHeight() - topPadding - bottomPadding;
 		double visibleLength, visibleMin;
-		if (useViewport) {
-			visibleLength = viewport.getHeight();
-			visibleMin = viewport.getYMin();
-		} else {
-			visibleLength = verticalAxis.getMax() - verticalAxis.getMin();
-			visibleMin = verticalAxis.getMin();
-		}
+		visibleLength = verticalAxis.getMax() - verticalAxis.getMin();
+		visibleMin = verticalAxis.getMin();
 		double pos;
 		if (verticalAxis.getAxisDirection() == AxisDirection.Vertical_Ascending_To_Bottom) {
 			pos = ((value - visibleMin) * totalHeight / visibleLength)
@@ -237,6 +227,7 @@ public abstract class IneChartModul2D extends IneChartModul implements
 			}
 		}
 	}
+	
 	protected void alignViewportAndAxes(){
 		if (useViewport) {
 			if (viewport.getXMin() != xAxis.getMin())

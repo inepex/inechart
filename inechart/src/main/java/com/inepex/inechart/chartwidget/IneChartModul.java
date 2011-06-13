@@ -49,7 +49,7 @@ public abstract class IneChartModul implements Comparable<IneChartModul> {
 	
 	protected LineProperties border = null;
 	protected Color backgroundColor = null;
-	public static final LineProperties defaultBorder = new LineProperties(2.4, new Color("#000", 1));
+	public static final LineProperties defaultBorder = new LineProperties(1, new Color("#000", 1.0));
 	
 	
 	
@@ -71,8 +71,12 @@ public abstract class IneChartModul implements Comparable<IneChartModul> {
 		//border
 		if(border != null){
 			graphicalObjectContainer.addGraphicalObject(
-					new Rectangle(leftPadding, topPadding, getWidth(), getHeight(),
-							0, 
+					new Rectangle(
+							leftPadding //- border.getLineWidth()
+							,topPadding //- border.getLineWidth()
+							,getWidth()// + 2*border.getLineWidth()
+							,getHeight()//+ 2*border.getLineWidth()
+							,0, 
 							borderZIndex,
 							new Context(border.getLineColor().getAlpha(),
 									border.getLineColor().getColor(),
@@ -94,6 +98,23 @@ public abstract class IneChartModul implements Comparable<IneChartModul> {
 									0,0,0,
 									Color.DEFAULT_COLOR),
 							false, true));
+		}
+	}
+	
+	protected boolean isInsideModul(double posOnCanvas, boolean isX){
+		//y
+		if(!isX){
+			if(posOnCanvas < topPadding  || posOnCanvas > canvas.getHeight() - bottomPadding){
+				return false;
+			}
+			return true;
+		}
+		//x
+		else{
+			if(posOnCanvas > leftPadding && posOnCanvas < canvas.getWidth()-rightPadding){
+				return true;
+			}
+			return false;
 		}
 	}
 

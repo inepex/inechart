@@ -116,7 +116,7 @@ public class Axis implements Comparable<Axis>, HasZIndex {
 	private int comparableNo;
 
 	public Axis() {
-		this(LineProperties.getDefaultSolidLine());
+		this(null);
 	}
 
 	public Axis(LineProperties lineProperties) {

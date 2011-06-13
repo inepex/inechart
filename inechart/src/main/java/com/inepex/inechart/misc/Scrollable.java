@@ -1,4 +1,4 @@
-package com.inepex.inechart.chartwidget.misc;
+package com.inepex.inechart.misc;
 
 public interface Scrollable {
 

@@ -1,18 +1,13 @@
 package com.inepex.inechart.chartwidget.barchart;
 
 import java.util.ArrayList;
-import java.util.Collection;
 import java.util.Collections;
 import java.util.Iterator;
 import java.util.TreeMap;
 
-import com.google.gwt.uibinder.elementparsers.AbsolutePanelParser;
-import com.inepex.inechart.chartwidget.IneChartModul;
 import com.inepex.inechart.chartwidget.IneChartModul2D;
 import com.inepex.inechart.chartwidget.Viewport;
 import com.inepex.inechart.chartwidget.axes.Axes;
-import com.inepex.inechart.chartwidget.axes.Tick;
-import com.inepex.inechart.chartwidget.axes.TickFactory;
 import com.inepex.inechart.chartwidget.axes.Axis.AxisDirection;
 import com.inepex.inechart.chartwidget.linechart.Curve;
 import com.inepex.inechart.chartwidget.linechart.Point;
@@ -28,7 +23,7 @@ import com.inepex.inegraphics.shared.GraphicalObjectContainer;
 
 public class BarChart extends IneChartModul2D implements HasShadow, HasZIndex {
 	public enum BarChartType {
-		Stacked, Simple
+		Stacked, Simple, Sorted;
 	}
 
 	/**
@@ -39,7 +34,6 @@ public class BarChart extends IneChartModul2D implements HasShadow, HasZIndex {
 		After, Before, Over
 	}
 	
-
 	protected BarChartType barChartType;
 	protected BarSequencePosition barSequencePosition;
 	/**
@@ -68,10 +62,7 @@ public class BarChart extends IneChartModul2D implements HasShadow, HasZIndex {
 	 * (One side of the squares representing the chart)
 	 */
 	protected double baseY;
-	
-	protected boolean divideSameValueStackedBars;
-	
-
+	protected boolean divideSameValueSortedBars;
 	protected Color shadowColor;
 	protected double shadowOffsetX = 0, shadowOffsetY = 0;
 	/**
@@ -122,7 +113,7 @@ public class BarChart extends IneChartModul2D implements HasShadow, HasZIndex {
 		this.maxBarWidth = 18;
 		this.minBarWidth = 3;
 		this.fixedBarWidth = -1;
-		this.divideSameValueStackedBars = true;
+		this.divideSameValueSortedBars = true;
 	}
 
 	protected void updateLookOut() {
@@ -241,13 +232,19 @@ public class BarChart extends IneChartModul2D implements HasShadow, HasZIndex {
 			keys.add(xMax);
 		}
 		double yMin = Double.MAX_VALUE, yMax = -Double.MAX_VALUE;
+		double maxSumY = -Double.MAX_VALUE;
 		for (double x : dataSets.keySet()) {
+			double sumY = 0;
 			for (double y : dataSets.get(x)) {
 				if (y > yMax)
 					yMax = y;
 				if (y < yMin)
 					yMin = y;
+				if(y >= 0)
+					sumY +=y;			
 			}
+			if(sumY > maxSumY)
+				maxSumY = sumY;
 		}
 		if (xMax == xMin) {// one element
 			xMin--;
@@ -267,6 +264,12 @@ public class BarChart extends IneChartModul2D implements HasShadow, HasZIndex {
 				break;
 			}
 		}
+		if (yMin > baseY && yMax > baseY)
+			yMin = baseY;
+		if (yMin < baseY && yMax < baseY)
+			yMax = baseY;
+		if (barChartType == BarChartType.Stacked)
+			yMax = maxSumY;
 		if (xMax != viewport.getXMax())
 			viewport.setXMax(xMax);
 		if (yMax != viewport.getYMax())
@@ -302,6 +305,9 @@ public class BarChart extends IneChartModul2D implements HasShadow, HasZIndex {
 				switch (barChartType) {
 				case Simple:
 					graphicalObjectContainer.addAllGraphicalObject(createNormalBarSequence(viewport.getXMin(), viewport.getXMax(), this.dataSets.get(xes.get(0))));
+					break;
+				case Sorted:
+					graphicalObjectContainer.addAllGraphicalObject(createSortedBarSequence(viewport.getXMin(), viewport.getXMax(), this.dataSets.get(xes.get(0))));
 					break;
 				case Stacked:
 					graphicalObjectContainer.addAllGraphicalObject(createStackedBarSequence(viewport.getXMin(), viewport.getXMax(), this.dataSets.get(xes.get(0))));
@@ -353,17 +359,20 @@ public class BarChart extends IneChartModul2D implements HasShadow, HasZIndex {
 					case Stacked:
 						graphicalObjectContainer.addAllGraphicalObject(createStackedBarSequence(from, to, dataSets.get(x)));
 						break;
+					case Sorted:
+						graphicalObjectContainer.addAllGraphicalObject(createSortedBarSequence(from, to, dataSets.get(x)));
+						break;
 					}
 					i++;
 				}
 			}
-			redrawNeeded = false;
+			graphicalObjectContainer = DrawingArea.clipRectanglesWithRectangle(graphicalObjectContainer, leftPadding, topPadding, getWidth(), getHeight());
 		}
 		redrawNeeded = false;
 		super.update();
 	}
 
-	protected GraphicalObjectContainer createStackedBarSequence(double fromX,
+	protected GraphicalObjectContainer createSortedBarSequence(double fromX,
 			double toX, ArrayList<Double> yValues) {
 		GraphicalObjectContainer goc = new GraphicalObjectContainer();
 		double sequenceWidth = getWidthOnCanvas(fromX, toX);
@@ -382,21 +391,22 @@ public class BarChart extends IneChartModul2D implements HasShadow, HasZIndex {
 		}
 		Double leftTopX = null, leftTopY = null, width = null, height = null;
 		double distanceFromSequenceStart = sequenceWidth / 2 - (barWidth + 2 * barSpacing) / 2;
+		
 		switch (xAxis.getAxisDirection()) {
 		case Horizontal_Ascending_To_Left:
-			leftTopX = getCanvasX(toX, xAxis) + distanceFromSequenceStart;
+			leftTopX = getCanvasX(toX, xAxis) + distanceFromSequenceStart + barSpacing;
 			width = (double) barWidth;
 			break;
 		case Horizontal_Ascending_To_Right:
-			leftTopX = getCanvasX(fromX, xAxis)+ distanceFromSequenceStart;
+			leftTopX = getCanvasX(fromX, xAxis) - distanceFromSequenceStart - barSpacing;
 			width = (double) barWidth;
 			break;
 		case Vertical_Ascending_To_Bottom:
-			leftTopY = getCanvasY(fromX, yAxis)+ distanceFromSequenceStart;
+			leftTopY = getCanvasY(fromX, xAxis)+ distanceFromSequenceStart + barSpacing;
 			height = (double) barWidth;
 			break;
 		case Vertical_Ascending_To_Top:
-			leftTopY = getCanvasY(toX, yAxis) + distanceFromSequenceStart;
+			leftTopY = getCanvasY(toX, xAxis) - distanceFromSequenceStart - barSpacing;
 			height = (double) barWidth;
 			break;
 		}
@@ -415,7 +425,7 @@ public class BarChart extends IneChartModul2D implements HasShadow, HasZIndex {
 		if (xAxis.isHorizontal()) {
 			last = getCanvasY(baseY,yAxis);
 		} else {
-			last = getCanvasX(baseY, xAxis);
+			last = getCanvasX(baseY, yAxis);
 		}
 		//positive stack
 		for(int i = 0; i<upperValues.size();i++){
@@ -426,7 +436,7 @@ public class BarChart extends IneChartModul2D implements HasShadow, HasZIndex {
 				sameValueCount ++;
 				i++;
 			}
-			if(!divideSameValueStackedBars)
+			if(!divideSameValueSortedBars)
 				sameValueCount = 1;
 			if (xAxis.isHorizontal()) {
 				leftTopY = getCanvasY(y, yAxis);
@@ -449,7 +459,7 @@ public class BarChart extends IneChartModul2D implements HasShadow, HasZIndex {
 				}
 				last = leftTopY;
 			} else {
-				leftTopX = getCanvasX(y, xAxis);
+				leftTopX = getCanvasX(y, yAxis);
 				width = Math.abs(leftTopX - last);
 				
 				for(int j = 0;j<sameValueCount;j++){
@@ -473,7 +483,7 @@ public class BarChart extends IneChartModul2D implements HasShadow, HasZIndex {
 		if (xAxis.isHorizontal()) {
 			last = getCanvasY(baseY,yAxis);
 		} else {
-			last = getCanvasX(baseY, xAxis);
+			last = getCanvasX(baseY, yAxis);
 		}
 		//negative stack
 		for(int i = 0; i<lowerValues.size();i++){
@@ -484,7 +494,7 @@ public class BarChart extends IneChartModul2D implements HasShadow, HasZIndex {
 				sameValueCount ++;
 				i++;
 			}
-			if(!divideSameValueStackedBars)
+			if(!divideSameValueSortedBars)
 				sameValueCount = 1;
 			if (xAxis.isHorizontal()) {
 				leftTopY = last;
@@ -508,7 +518,7 @@ public class BarChart extends IneChartModul2D implements HasShadow, HasZIndex {
 				last = leftTopY + height;
 			} else {
 				leftTopX = last;
-				width =  Math.abs(getCanvasX(y, xAxis) - leftTopX);
+				width =  Math.abs(getCanvasX(y, yAxis) - leftTopX);
 				
 				for(int j = 0;j<sameValueCount;j++){
 					int index = 0, k=0;
@@ -527,6 +537,101 @@ public class BarChart extends IneChartModul2D implements HasShadow, HasZIndex {
 				}
 				last = leftTopX + width;
 			}
+		}
+		return goc;
+	}
+	
+	protected GraphicalObjectContainer createStackedBarSequence(double fromX,
+			double toX, ArrayList<Double> yValues) {
+		GraphicalObjectContainer goc = new GraphicalObjectContainer();
+		double sequenceWidth = getWidthOnCanvas(fromX, toX);
+		int barWidth;
+		if(fixedBarWidth <= 0){
+			barWidth = (int) (sequenceWidth - 2 * barSpacing);
+			if (barWidth < minBarWidth){
+				barWidth = minBarWidth;
+			}
+			else if (barWidth > maxBarWidth){
+				barWidth = maxBarWidth;
+			}
+		}
+		else{
+			barWidth = fixedBarWidth;
+		}
+		Double leftTopX = null, leftTopY = null, width = null, height = null;
+		double distanceFromSequenceStart = sequenceWidth / 2 - (barWidth + 2 * barSpacing) / 2;
+		switch (xAxis.getAxisDirection()) {
+		case Horizontal_Ascending_To_Left:
+			leftTopX = getCanvasX(toX, xAxis) + distanceFromSequenceStart + barSpacing;
+			width = (double) barWidth;
+			break;
+		case Horizontal_Ascending_To_Right:
+			leftTopX = getCanvasX(fromX, xAxis)+ distanceFromSequenceStart + barSpacing;
+			width = (double) barWidth;
+			break;
+		case Vertical_Ascending_To_Bottom:
+			leftTopY = getCanvasY(fromX, xAxis)+ distanceFromSequenceStart + barSpacing;
+			height = (double) barWidth;
+			break;
+		case Vertical_Ascending_To_Top:
+			leftTopY = getCanvasY(toX, xAxis) + distanceFromSequenceStart + barSpacing;
+			height = (double) barWidth;
+			break;
+		}
+		double last;
+		boolean finished = false;
+		if (xAxis.isHorizontal()) {
+			last = getCanvasY(baseY,yAxis);
+			if( (last < topPadding && yAxis.getAxisDirection() == AxisDirection.Vertical_Ascending_To_Top) ||
+				(last > getHeight() - bottomPadding && yAxis.getAxisDirection() == AxisDirection.Vertical_Ascending_To_Bottom) ){
+				finished = true;
+			}
+		} else {
+			last = getCanvasX(baseY, yAxis);
+			if( (last > canvas.getWidth() - rightPadding && xAxis.getAxisDirection() == AxisDirection.Horizontal_Ascending_To_Right) ||
+				(last < leftPadding && xAxis.getAxisDirection() == AxisDirection.Horizontal_Ascending_To_Left) ){
+				finished = true;
+			}
+		}
+		double lastY = baseY;
+		int barSpacing = 0;
+		for(int i = 0; i<yValues.size() && !finished;i++){
+			double y = yValues.get(i);
+			//we do not display negative values
+			if(y < 0)
+				continue;
+			ShapeProperties sp = lookOut.get(names.get(i));
+			if (xAxis.isHorizontal()) {
+				leftTopY = getCanvasY(y + lastY, yAxis);
+				if( leftTopY < topPadding && yAxis.getAxisDirection() == AxisDirection.Vertical_Ascending_To_Top){
+					finished = true;
+				}
+				height = Math.abs(leftTopY - last);
+				if( leftTopY + height > canvas.getHeight() - bottomPadding && yAxis.getAxisDirection() == AxisDirection.Vertical_Ascending_To_Bottom){
+					finished = true;
+				}
+				last = leftTopY ;
+				if(yAxis.getAxisDirection() == AxisDirection.Vertical_Ascending_To_Bottom)
+					last += height + barSpacing;
+				else
+					last -= barSpacing;
+			} else {
+				leftTopX = getCanvasX(y + lastY, yAxis);
+				if(leftTopX > canvas.getWidth()-rightPadding && xAxis.getAxisDirection() == AxisDirection.Horizontal_Ascending_To_Right){
+					finished = true;
+				}
+				width = Math.abs(leftTopX - last);
+				if(leftTopX < leftPadding && xAxis.getAxisDirection() ==  AxisDirection.Horizontal_Ascending_To_Left){
+					finished = true;
+				}
+				last = leftTopX ;
+				if(xAxis.getAxisDirection() ==  AxisDirection.Horizontal_Ascending_To_Right)
+					last += width + barSpacing;
+				else
+					last -= barSpacing;
+			}
+			goc.addAllGraphicalObject(new Rectangle(width, height, leftTopX, leftTopY, sp).toGraphicalObjects());
+			lastY += y;
 		}
 		return goc;
 	}
@@ -568,11 +673,11 @@ public class BarChart extends IneChartModul2D implements HasShadow, HasZIndex {
 			distanceBetweenBarStart = (sequenceWidth - 2*ySequence.size()*barSpacing)/(ySequence.size()+1);
 			switch (xAxis.getAxisDirection()) {
 			case Horizontal_Ascending_To_Left:
-				leftTopX = getCanvasX(toX, xAxis) + barSpacing;
+				leftTopX = getCanvasX(toX, xAxis) - barSpacing;
 				width = (double) barWidth;
 				break;
 			case Horizontal_Ascending_To_Right:
-				leftTopX = getCanvasX(fromX, xAxis)+ barSpacing;
+				leftTopX = getCanvasX(fromX, xAxis) + barSpacing;
 				width = (double) barWidth;
 				break;
 			case Vertical_Ascending_To_Bottom:
@@ -580,7 +685,7 @@ public class BarChart extends IneChartModul2D implements HasShadow, HasZIndex {
 				height = (double) barWidth;
 				break;
 			case Vertical_Ascending_To_Top:
-				leftTopY = getCanvasY(toX, yAxis) + barSpacing;
+				leftTopY = getCanvasY(toX, yAxis) - barSpacing;
 				height = (double) barWidth;
 				break;
 			}
@@ -592,19 +697,19 @@ public class BarChart extends IneChartModul2D implements HasShadow, HasZIndex {
 			double distanceFromSequenceStart = sequenceWidth / 2 - realSequenceWidth / 2;
 			switch (xAxis.getAxisDirection()) {
 			case Horizontal_Ascending_To_Left:
-				leftTopX = getCanvasX(toX, xAxis) + distanceFromSequenceStart;
+				leftTopX = getCanvasX(toX, xAxis) - distanceFromSequenceStart - barSpacing;
 				width = (double) barWidth;
 				break;
 			case Horizontal_Ascending_To_Right:
-				leftTopX = getCanvasX(fromX, xAxis) + distanceFromSequenceStart;
+				leftTopX = getCanvasX(fromX, xAxis) + distanceFromSequenceStart + barSpacing;
 				width = (double) barWidth;
 				break;
 			case Vertical_Ascending_To_Bottom:
-				leftTopY = getCanvasY(fromX, yAxis) + distanceFromSequenceStart;
+				leftTopY = getCanvasY(fromX, xAxis) + distanceFromSequenceStart + barSpacing;
 				height = (double) barWidth;
 				break;
 			case Vertical_Ascending_To_Top:
-				leftTopY = getCanvasY(toX, yAxis) + distanceFromSequenceStart;
+				leftTopY = getCanvasY(toX, xAxis) - distanceFromSequenceStart - barSpacing;
 				height = (double) barWidth;
 				break;
 			}
@@ -658,7 +763,6 @@ public class BarChart extends IneChartModul2D implements HasShadow, HasZIndex {
 			return Math.abs(getCanvasY(to, xAxis) - getCanvasY(from, xAxis));
 	}
 
-	
 /* Getters & Setters */
 	@Override
 	public void setShadowOffsetX(double offsetX) {

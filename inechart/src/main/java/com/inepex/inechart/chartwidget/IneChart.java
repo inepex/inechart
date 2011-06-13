@@ -5,16 +5,20 @@ import java.util.ArrayList;
 import com.google.gwt.core.client.Scheduler;
 import com.google.gwt.core.client.Scheduler.RepeatingCommand;
 import com.google.gwt.user.client.Timer;
+import com.google.gwt.user.client.ui.AbsolutePanel;
 import com.google.gwt.user.client.ui.Composite;
 import com.inepex.inechart.chartwidget.axes.Axes;
 import com.inepex.inechart.chartwidget.barchart.BarChart;
 import com.inepex.inechart.chartwidget.linechart.LineChart;
 import com.inepex.inechart.chartwidget.piechart.PieChart;
+import com.inepex.inechart.chartwidget.selection.Selection;
 import com.inepex.inegraphics.impl.client.DrawingAreaGWT;
 
 public class IneChart extends Composite {
+	private AbsolutePanel mainPanel;
 	private ArrayList<IneChartModul> moduls;
-	Axes axes;
+	private Axes axes;
+	private Selection selection = null;
 	private ArrayList<Viewport> modulViewports;
 	private DrawingAreaGWT drawingArea;
 	private RepeatingCommand updateCommand = null;
@@ -29,13 +33,16 @@ public class IneChart extends Composite {
 	public IneChart(int width, int height) {
 		canvasHeight = height;
 		canvasWidth = width;
+		mainPanel = new AbsolutePanel();
+		mainPanel.setPixelSize(width, height);
 		this.drawingArea = new DrawingAreaGWT(canvasWidth, canvasHeight, false);
 		if (DrawingAreaGWT.isHTML5Compatible())
 			drawingArea.setCreateShadows(false);
 		moduls = new ArrayList<IneChartModul>();
 		axes = new Axes(drawingArea);
 		modulViewports = new ArrayList<Viewport>();
-		this.initWidget(drawingArea.getWidget());
+		mainPanel.add(drawingArea.getWidget(), 0, 0);
+		this.initWidget(mainPanel);
 	}
 
 	/*
@@ -69,6 +76,23 @@ public class IneChart extends Composite {
 	Axes getAxes() {
 		return axes;
 	}
+	
+	public Selection getSelection(){
+		if(selection == null){
+			DrawingAreaGWT selectionLayer = new DrawingAreaGWT(canvasWidth, canvasHeight, false);
+			this.selection = new Selection(selectionLayer);
+			mainPanel.add(selectionLayer.getWidget(), 0, 0);
+			IneChartModul2D modulToSelectFrom = null;
+			for(IneChartModul m : moduls){
+				if(m instanceof IneChartModul2D){
+					modulToSelectFrom = (IneChartModul2D) m;
+					break;
+				}
+			}
+			selection.setModulToSelectFrom(modulToSelectFrom);
+		}
+		return selection;
+	}
 
 	/* public methods */
 
@@ -97,6 +121,9 @@ public class IneChart extends Composite {
 	}
 
 	public void update() {
+		if(selection != null && selection.requestFocus){
+			return;
+		}
 		releaseFocusIfPossible();
 		// grant focus
 		if (focus == null) {

@@ -1,6 +1,5 @@
 package com.inepex.inechart.chartwidget.axes;
 
-import java.awt.image.RasterOp;
 import java.util.ArrayList;
 import java.util.TreeMap;
 
