@@ -12,6 +12,7 @@ import com.inepex.inecharttest.client.showcase.AxisTest;
 import com.inepex.inecharttest.client.showcase.BarChartTest;
 import com.inepex.inecharttest.client.showcase.LineAndBarChartTest;
 import com.inepex.inecharttest.client.showcase.LineChartTest;
+import com.inepex.inecharttest.client.showcase.MultiLineChart;
 import com.inepex.inecharttest.client.showcase.SpeedTest;
 
 
@@ -30,10 +31,11 @@ public class IneChartTest implements EntryPoint {
 		RootPanel.get().add(panel);
 		
 		addTest("linechartTest", new LineChartTest());
-		addTest("axisTest", new AxisTest());
+//		addTest("axisTest", new AxisTest());
 		addTest("barchartTest", new BarChartTest());
 		addTest("speedTest", new SpeedTest());
 		addTest("lineAndBar", new LineAndBarChartTest());
+		addTest("multiLineChart", new MultiLineChart());
 		
 	}
 	

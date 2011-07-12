@@ -35,12 +35,14 @@ public class BarChartTest extends AbsolutePanel {
 		bc.setBarChartType(BarChartType.Stacked);
 		
 		bc = chart2.createBarChart();
+		bc.setAutoCreateTicks(true);
 		bc.addDataSet(dataSet1);
 		bc.addDataSet(dataSet2);
 		bc.addDataSet(dataSet3);
 		bc.setBarSequencePosition(BarSequencePosition.Over);
 		
 		bc = chart3.createBarChart();
+		bc.setAutoCreateTicks(true);
 		bc.addDataSet(dataSet1);
 		bc.addDataSet(dataSet2);
 		bc.addDataSet(dataSet3);
