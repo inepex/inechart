@@ -17,7 +17,7 @@ public abstract class IneChartModul implements Comparable<IneChartModul> {
 	private final int modulComparatorID;
 	protected GraphicalObjectContainer graphicalObjectContainer;
 	protected DrawingArea canvas;
-	protected static final int DEFAULT_PADDING_H = 36;
+	protected static final int DEFAULT_PADDING_H = 46;
 	protected static final int DEFAULT_PADDING_V = 28;
 	protected int topPadding = DEFAULT_PADDING_V,
 			leftPadding = DEFAULT_PADDING_H,
