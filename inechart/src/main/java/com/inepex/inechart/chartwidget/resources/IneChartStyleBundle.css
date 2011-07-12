@@ -1,0 +1,42 @@
+@CHARSET "UTF-8";
+
+
+
+
+.chartTitle{
+	
+}
+
+.chartTitle .title{
+	font-family: Arial, sans-serif;
+	font-size: 18pt;
+	font-weight: bold;
+	color: black;
+}
+
+.chartTitle .description{
+	font-family: Arial, sans-serif;
+	font-size: 12pt;
+	font-weight: normal;
+	color: #8d8d8d;
+}
+
+.legend{
+	
+}
+
+.legend .legendEntry{
+	
+}
+
+.legend .legendEntry .text{
+	font-family: Arial, sans-serif;
+	font-size: 10pt;
+	font-weight: normal;
+	color: #8d8d8d;
+}
+
+.legend .legendEntry .color{
+	height: 7px;
+	width: 28px;
+}

@@ -1,0 +1,73 @@
+package com.inepex.inechart.chartwidget.legend;
+
+import java.util.ArrayList;
+import java.util.List;
+
+import com.google.gwt.user.client.ui.ComplexPanel;
+import com.google.gwt.user.client.ui.FlowPanel;
+import com.google.gwt.user.client.ui.IsWidget;
+import com.google.gwt.user.client.ui.Label;
+import com.google.gwt.user.client.ui.Widget;
+import com.inepex.inechart.chartwidget.resources.ResourceHelper;
+
+/** 
+ * Client side chart legend implementation
+ * 
+ * @author Miklós Süveges / Inepex Ltd.
+ *
+ */
+public class Legend implements IsWidget{
+	
+	ComplexPanel mainPanel;
+	List<LegendEntry> entries;
+	boolean autoDisplay = true;
+	
+	
+	public Legend(){
+		this(new ArrayList<LegendEntry>());
+	}
+	
+	public Legend(List<LegendEntry> entries) {
+		this.entries = entries;
+		mainPanel = new FlowPanel();
+		mainPanel.setStyleName(ResourceHelper.getRes().style().legend());
+	}
+
+	public List<LegendEntry> getEntries() {
+		return entries;
+	}
+
+	public void setEntries(List<LegendEntry> entries) {
+		this.entries = entries;
+	}
+	
+	void update(){
+		mainPanel.clear();
+		for(LegendEntry e : entries){
+			FlowPanel fp = new FlowPanel();
+			fp.setStyleName(ResourceHelper.getRes().style().legendEntry());
+			Label lbl = new  Label(e.getTitle().getTitle() == null ? "" : e.getTitle().getTitle());
+			lbl.setStyleName(ResourceHelper.getRes().style().text());
+			fp.add(lbl);
+			lbl = new Label();
+			lbl.setStyleName(ResourceHelper.getRes().style().color());
+			lbl.getElement().getStyle().setBackgroundColor(e.getColor().getColor());
+			fp.add(lbl);
+			mainPanel.add(fp);
+		}
+	}
+
+	@Override
+	public Widget asWidget() {
+		return mainPanel;
+	}
+
+	public boolean isAutoDisplay() {
+		return autoDisplay;
+	}
+
+	public void setAutoDisplay(boolean autoDisplay) {
+		this.autoDisplay = autoDisplay;
+	}
+
+}

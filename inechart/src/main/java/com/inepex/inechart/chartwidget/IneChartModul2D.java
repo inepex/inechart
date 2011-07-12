@@ -22,7 +22,7 @@ public abstract class IneChartModul2D extends IneChartModul implements
 	protected boolean useViewport;
 	protected boolean redrawNeeded;
 	protected boolean autoScaleViewport;
-	public static final LineProperties defaultGridLine = new LineProperties(0.8, new Color("#C8C8C8", 1));
+	public static final LineProperties defaultGridLine = new LineProperties(1.8, new Color("#E8E8E8", 1),4,4);
 	
 	protected IneChartModul2D(DrawingArea canvas, Axes axes) {
 		this(canvas, axes, new Viewport());

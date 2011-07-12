@@ -1,6 +1,7 @@
 package com.inepex.inechart.chartwidget.linechart;
 
 import java.util.ArrayList;
+import java.util.List;
 import java.util.TreeMap;
 
 import com.google.gwt.event.dom.client.MouseMoveEvent;
@@ -12,6 +13,8 @@ import com.inepex.inechart.chartwidget.Viewport;
 import com.inepex.inechart.chartwidget.axes.Axes;
 import com.inepex.inechart.chartwidget.axes.Axis;
 import com.inepex.inechart.chartwidget.axes.Axis.AxisDirection;
+import com.inepex.inechart.chartwidget.legend.HasLegendEntries;
+import com.inepex.inechart.chartwidget.legend.LegendEntry;
 import com.inepex.inechart.chartwidget.misc.ColorSet;
 import com.inepex.inechart.chartwidget.properties.Color;
 import com.inepex.inechart.chartwidget.properties.LineProperties;
@@ -29,7 +32,7 @@ import com.inepex.inegraphics.shared.gobjects.GraphicalObject;
 import com.inepex.inegraphics.shared.gobjects.Path;
 import com.inepex.inegraphics.shared.gobjects.PathElement;
 
-public class LineChart extends IneChartModul2D implements
+public class LineChart extends IneChartModul2D implements HasLegendEntries,
 		GraphicalObjectEventHandler, MouseMoveHandler, MouseOutHandler {
 
 	public enum PointSelectionMode {
@@ -886,4 +889,14 @@ public class LineChart extends IneChartModul2D implements
 				return true;
 		return super.redrawNeeded();
 	}
+
+	@Override
+	public List<LegendEntry> getEntries() {
+		ArrayList< LegendEntry> entries = new ArrayList<LegendEntry>();
+		for(Curve c : curves){
+			entries.add(new LegendEntry(c, c.getLineProperties().getLineColor()));
+		}
+		return entries;
+	}
+	
 }

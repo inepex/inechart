@@ -3,11 +3,12 @@ package com.inepex.inechart.chartwidget.axes;
 import java.util.ArrayList;
 
 import com.inepex.inechart.chartwidget.IneChartModul2D;
+import com.inepex.inechart.chartwidget.misc.HasTitle;
 import com.inepex.inechart.chartwidget.misc.HasZIndex;
 import com.inepex.inechart.chartwidget.properties.Color;
 import com.inepex.inechart.chartwidget.properties.LineProperties;
 
-public class Axis implements Comparable<Axis>, HasZIndex {
+public class Axis implements Comparable<Axis>, HasZIndex, HasTitle {
 
 	/**
 	 * Defines the direction of an {@link Axis}
@@ -80,6 +81,9 @@ public class Axis implements Comparable<Axis>, HasZIndex {
 	public static enum AxisDataType {
 		Number, Time
 	}
+	
+	String title;
+	String description;
 
 	AxisDataType axisDataType;
 	/**
@@ -398,5 +402,25 @@ public class Axis implements Comparable<Axis>, HasZIndex {
 
 	public void setFilterFrequentTicks(boolean filterFrequentTicks) {
 		this.filterFrequentTicks = filterFrequentTicks;
+	}
+
+	@Override
+	public void setTitle(String title) {
+		this.title = title;	
+	}
+
+	@Override
+	public String getTitle() {
+		return title;
+	}
+
+	@Override
+	public void setDescription(String description) {
+		this.description = description;
+	}
+
+	@Override
+	public String getDescription() {
+		return description;
 	}
 }

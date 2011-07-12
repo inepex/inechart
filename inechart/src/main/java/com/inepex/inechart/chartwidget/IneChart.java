@@ -9,12 +9,15 @@ import com.google.gwt.user.client.ui.AbsolutePanel;
 import com.google.gwt.user.client.ui.Composite;
 import com.inepex.inechart.chartwidget.axes.Axes;
 import com.inepex.inechart.chartwidget.barchart.BarChart;
+import com.inepex.inechart.chartwidget.legend.LegendFactory;
 import com.inepex.inechart.chartwidget.linechart.LineChart;
 import com.inepex.inechart.chartwidget.piechart.PieChart;
 import com.inepex.inechart.chartwidget.selection.Selection;
 import com.inepex.inegraphics.impl.client.DrawingAreaGWT;
 
 public class IneChart extends Composite {
+	private static final int DEFAULT_WIDTH = 470;
+	private static final int DEFAULT_HEIGHT = 380;
 	private AbsolutePanel mainPanel;
 	private ArrayList<IneChartModul> moduls;
 	private Axes axes;
@@ -25,10 +28,15 @@ public class IneChart extends Composite {
 	private int updateInterval = DEFAULT_UPDATE_INTERVAL;
 	public static final int DEFAULT_UPDATE_INTERVAL = 800;
 	private IneChartModul focus;
+	private LegendFactory legendFactory;
 
 	// properties
 	private int canvasWidth;
 	private int canvasHeight;
+	
+	public IneChart(){
+		this(DEFAULT_WIDTH, DEFAULT_HEIGHT);
+	}
 
 	public IneChart(int width, int height) {
 		canvasHeight = height;
@@ -43,6 +51,11 @@ public class IneChart extends Composite {
 		modulViewports = new ArrayList<Viewport>();
 		mainPanel.add(drawingArea.getWidget(), 0, 0);
 		this.initWidget(mainPanel);
+		legendFactory = new LegendFactory(mainPanel);
+	}
+	
+	public void setSize(int width, int height){
+		//TODO
 	}
 
 	/*

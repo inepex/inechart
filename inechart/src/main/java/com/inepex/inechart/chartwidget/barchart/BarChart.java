@@ -170,7 +170,7 @@ public class BarChart extends IneChartModul2D implements HasShadow, HasZIndex {
 	}
 
 	public String addDataSet(Curve curve) {
-		return addDataSet(curve, curve.getName());
+		return addDataSet(curve, curve.getTitle());
 	}
 
 	public String addDataSet(TreeMap<Double, Double> dataSet, String name) {

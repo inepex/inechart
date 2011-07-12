@@ -17,6 +17,8 @@ import com.inepex.inechart.chartwidget.shape.Rectangle;
 import com.inepex.inegraphics.impl.client.DrawingAreaGWT;
 import com.inepex.inegraphics.shared.DrawingArea;
 
+
+//TODO Selection should not be a modul (it is only used on client side, and it does not fit)
 public class Selection extends IneChartModul implements MouseDownHandler, MouseMoveHandler, MouseUpHandler{
 
 	public enum SelectionMode{

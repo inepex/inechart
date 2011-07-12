@@ -8,6 +8,7 @@ import java.util.TreeMap;
 import com.inepex.inechart.chartwidget.axes.Axis;
 import com.inepex.inechart.chartwidget.axes.Tick;
 import com.inepex.inechart.chartwidget.misc.HasShadow;
+import com.inepex.inechart.chartwidget.misc.HasTitle;
 import com.inepex.inechart.chartwidget.misc.HasZIndex;
 import com.inepex.inechart.chartwidget.misc.ZIndexComparator;
 import com.inepex.inechart.chartwidget.properties.Color;
@@ -27,11 +28,10 @@ import com.inepex.inegraphics.shared.gobjects.Path;
  * @author Miklós Süveges / Inepex Ltd.
  * 
  */
-public class Curve implements HasZIndex, HasShadow, Comparable<Curve> {
+public class Curve implements HasZIndex, HasShadow, Comparable<Curve>, HasTitle {
 
 	
-	
-	String name;
+
 	static int autoNameNo = 0;
 
 	/**
@@ -69,12 +69,14 @@ public class Curve implements HasZIndex, HasShadow, Comparable<Curve> {
 	int zIndex = Integer.MIN_VALUE;
 	boolean modelChanged = false;
 	double xMin, xMax, yMin, yMax, vpMin, vpMax;
+	
+	String title, description;
 
 	/**
 	 * Creates an empty (without points) curve
 	 */
 	public Curve() {
-		name = autoNameNo++ + "";
+		title = autoNameNo++ + "";
 	}
 
 	/**
@@ -88,7 +90,7 @@ public class Curve implements HasZIndex, HasShadow, Comparable<Curve> {
 		for (TreeMap<Double, Double> dataSet : dataSets) {
 			addDataSet(dataSet);
 		}
-		name = autoNameNo++ + "";
+		title = autoNameNo++ + "";
 	}
 
 	/**
@@ -98,7 +100,7 @@ public class Curve implements HasZIndex, HasShadow, Comparable<Curve> {
 	 */
 	public Curve(TreeMap<Double, Double> dataSet) {
 		addDataSet(dataSet);
-		name = autoNameNo++ + "";
+		title = autoNameNo++ + "";
 	}
 
 	/**
@@ -607,20 +609,6 @@ public class Curve implements HasZIndex, HasShadow, Comparable<Curve> {
 		}
 	}
 
-	/**
-	 * @return the name
-	 */
-	public String getName() {
-		return name;
-	}
-
-	/**
-	 * @param name
-	 *            the name to set
-	 */
-	public void setName(String name) {
-		this.name = name;
-	}
 
 	public boolean isAutoFill() {
 		return autoFill;
@@ -644,6 +632,26 @@ public class Curve implements HasZIndex, HasShadow, Comparable<Curve> {
 
 	public void setUseDefaultPointShape(boolean useDefaultPointShape) {
 		this.useDefaultPointShape = useDefaultPointShape;
+	}
+	
+	@Override
+	public void setTitle(String title) {
+		this.title = title;	
+	}
+
+	@Override
+	public String getTitle() {
+		return title;
+	}
+
+	@Override
+	public void setDescription(String description) {
+		this.description = description;
+	}
+
+	@Override
+	public String getDescription() {
+		return description;
 	}
 
 }
