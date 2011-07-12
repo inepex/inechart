@@ -78,4 +78,12 @@ public abstract class Shape implements HasShadow, HasZIndex {
 		this.shadowColor = shadowColor;
 	}
 
+	public ShapeProperties getProperties() {
+		return properties;
+	}
+
+	public void setProperties(ShapeProperties properties) {
+		this.properties = properties;
+	}
+
 }

@@ -23,6 +23,7 @@ public class ColorSet {
 		new Color("#eba626"),
 		new Color("#f15b1f")
 	};
+	
 	Color[] colors;
 	int actual = 0;
 

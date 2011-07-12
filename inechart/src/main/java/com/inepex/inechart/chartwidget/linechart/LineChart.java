@@ -16,6 +16,7 @@ import com.inepex.inechart.chartwidget.misc.ColorSet;
 import com.inepex.inechart.chartwidget.properties.Color;
 import com.inepex.inechart.chartwidget.properties.LineProperties;
 import com.inepex.inechart.chartwidget.properties.LineProperties.LineStyle;
+import com.inepex.inechart.chartwidget.properties.ShapeProperties;
 import com.inepex.inechart.chartwidget.shape.Circle;
 import com.inepex.inechart.chartwidget.shape.Rectangle;
 import com.inepex.inegraphics.impl.client.DrawingAreaGWT;
@@ -48,7 +49,7 @@ public class LineChart extends IneChartModul2D implements
 
 	//defaults
 	final ColorSet colors = new ColorSet();
-	public static final double defaultLineWidth = 2.88;
+	public static final double defaultLineWidth = 2.1;
 	
 	public static final double defaultShadowOffsetX = 1.2;
 	public static final double defaultShadowOffsetY = 2.4;
@@ -58,8 +59,10 @@ public class LineChart extends IneChartModul2D implements
 	ArrayList<Curve> curves;
 	int highestZIndex = 1;
 	int overlapFilterDistance;
+	@Deprecated
 	boolean precalculatePoints;
 	boolean autoCreateTicks;
+	@Deprecated
 	Viewport precalculationBaseViewport;
 	PointSelectionMode pointSelectionMode;
 
@@ -109,8 +112,6 @@ public class LineChart extends IneChartModul2D implements
 		autoScaleViewport = false;
 		autoCreateTicks = true;
 	}
-
-	
 
 	public void addCurve(Curve curve) {
 		if (curve == null)
@@ -173,7 +174,6 @@ public class LineChart extends IneChartModul2D implements
 		// update axes and the viewport to match values
 		alignViewportAndAxes();
 		
-
 		/**
 		 * update model
 		 */
@@ -283,6 +283,7 @@ public class LineChart extends IneChartModul2D implements
 	 * 
 	 * @param curve
 	 */
+	@Deprecated
 	protected void shiftCurve(Curve curve) {
 		double dx, dy;
 		if (xAxis.isHorizontal()) {
@@ -302,6 +303,7 @@ public class LineChart extends IneChartModul2D implements
 		}
 	}
 
+	@Deprecated
 	protected void displayPrecalculatedCurve(Curve curve) {
 		// remove previos
 		removeAllGORelatedToCurve(curve);
@@ -347,8 +349,10 @@ public class LineChart extends IneChartModul2D implements
 	}
 
 	/**
-	 * Creates linechart {@link GraphicalObject}s and puts them into
-	 * {@link #gosPerCurve} container
+	 * Creates linechart {@link GraphicalObject}s:
+	 *  -lines,
+	 *  -fills
+	 *  and puts them into {@link #gosPerCurve} container
 	 * 
 	 * @param curve
 	 */
@@ -375,6 +379,27 @@ public class LineChart extends IneChartModul2D implements
 								.getLineProperties().getDashDistance()));
 			else
 				gos.addGraphicalObject(line);
+		}
+		if (curve.autoFill) {
+			Path fill = new Path(path);
+			Point tmp = new Point(0, viewport.getYMin());
+			calculatePoint(tmp);
+			fill.lineTo(fill.getLastPathElement().getEndPointX(),
+					tmp.getPosY(), false);
+			fill.lineTo(fill.getBasePointX(), tmp.getPosY(), false);
+			fill.lineToBasePoint();
+			fill.setFill(true);
+			fill.setzIndex(curve.getZIndex());
+			Color c;
+			if (curve.getLineProperties() != null){
+				c = curve.getLineProperties().getLineColor();
+			}
+			else {
+				c = colors.getNextColor();
+			}
+			c.setAlpha(0.45);
+			fill.setContext(createFillContext(c));
+			gos.addGraphicalObject(fill);
 		}
 		if (curve.toCanvasYFills != null && curve.toCanvasYFills.size() > 0) {
 			// TODO axis direction
@@ -443,7 +468,7 @@ public class LineChart extends IneChartModul2D implements
 	 */
 	protected void createPointChartGOs(Curve curve) {
 		// if the curve has any shape defined for pointChart
-		if (curve.normalPointShape != null || curve.selectedPointShape != null) {
+		if (curve.normalPointShape != null || curve.selectedPointShape != null || curve.isUseDefaultPointShape()) {
 			if (!gosPerPoint.containsKey(curve)) {
 				TreeMap<Point, GraphicalObjectContainer> pointsGOs = new TreeMap<Point, GraphicalObjectContainer>();
 				gosPerPoint.put(curve, pointsGOs);
@@ -515,110 +540,144 @@ public class LineChart extends IneChartModul2D implements
 		GraphicalObjectContainer gocForPoint = new GraphicalObjectContainer();
 		if (point == null)
 			return gocForPoint;
-		if (point.parent.setCurveShadowForPoint) {
-			if (point.parent.selectedPointShape != null) {
-				point.parent.selectedPointShape
-						.setShadowColor(point.parent.shadowColor);
-				point.parent.selectedPointShape
-						.setShadowOffsetX(point.parent.shadowOffsetX);
-				point.parent.selectedPointShape
-						.setShadowOffsetY(point.parent.shadowOffsetY);
+		if(point.parent.useDefaultPointShape){
+			if(point.parent.hasShadow){
+				point.parent.defaultPointShape.setShadowColor(point.parent.shadowColor);
+				point.parent.defaultPointShape.setShadowOffsetX(point.parent.shadowOffsetX);
+				point.parent.defaultPointShape.setShadowOffsetY(point.parent.shadowOffsetY);
 			}
-			if (point.parent.normalPointShape != null) {
-				point.parent.normalPointShape
-						.setShadowColor(point.parent.shadowColor);
-				point.parent.normalPointShape
-						.setShadowOffsetX(point.parent.shadowOffsetX);
-				point.parent.normalPointShape
-						.setShadowOffsetY(point.parent.shadowOffsetY);
+			if(point.parent.lineProperties != null){
+				ShapeProperties sp = new ShapeProperties(point.parent.lineProperties);
+				sp.setFillColor(sp.getLineProperties().getLineColor());
+				sp.getFillColor().setAlpha(1);
+				sp.getLineProperties().getLineColor().setAlpha(1);
+				sp.getLineProperties().setLineWidth(0);
+				point.parent.defaultPointShape.setProperties(sp);
+			}
+			// set the proper pos for gos
+			for (GraphicalObject go : point.parent.defaultPointShape.toGraphicalObjects()) {
+				if (point.parent.defaultPointShape instanceof Circle) {
+					go.setBasePointX(point.getPosX());
+					go.setBasePointY(point.getPosY());
+					go.setzIndex(point.parent.zIndex);
+				} else if (point.parent.defaultPointShape instanceof Rectangle) {
+					go.setBasePointX(point.getPosX()
+							- ((Rectangle) point.parent.defaultPointShape)
+									.getWidth() / 2);
+					go.setBasePointY(point.getPosY()
+							- ((Rectangle) point.parent.defaultPointShape)
+									.getHeight() / 2);
+					go.setzIndex(point.parent.zIndex);
+				}
+				gocForPoint.addGraphicalObject(go);
 			}
 		}
-		// selected state
-		if (selectedPoints.contains(point)) {
-			// if selectedPointShape is null we do not draw
-			if (point.parent.selectedPointShape != null) {
-				ArrayList<GraphicalObject> gosOfPoint = point.parent.selectedPointShape
-						.toGraphicalObjects();
-				// set the proper pos for gos
-				for (GraphicalObject go : gosOfPoint) {
-					if (point.parent.selectedPointShape instanceof Circle) {
-						go.setBasePointX(point.getPosX());
-						go.setBasePointY(point.getPosY());
-						go.setzIndex(point.parent.zIndex);
-					} else if (point.parent.selectedPointShape instanceof Rectangle) {
-						go.setBasePointX(point.getPosX()
-								- ((Rectangle) point.parent.selectedPointShape)
-										.getWidth() / 2);
-						go.setBasePointY(point.getPosY()
-								- ((Rectangle) point.parent.selectedPointShape)
-										.getHeight() / 2);
-						go.setzIndex(point.parent.zIndex);
-					}
-					gocForPoint.addGraphicalObject(go);
+		else {
+			if (point.parent.setCurveShadowForPoint) {
+				if (point.parent.selectedPointShape != null) {
+					point.parent.selectedPointShape
+							.setShadowColor(point.parent.shadowColor);
+					point.parent.selectedPointShape
+							.setShadowOffsetX(point.parent.shadowOffsetX);
+					point.parent.selectedPointShape
+							.setShadowOffsetY(point.parent.shadowOffsetY);
 				}
-				if (mouseOverRelatedSelection
-						&& canvas instanceof DrawingAreaGWT) {
+				if (point.parent.normalPointShape != null) {
+					point.parent.normalPointShape
+							.setShadowColor(point.parent.shadowColor);
+					point.parent.normalPointShape
+							.setShadowOffsetX(point.parent.shadowOffsetX);
+					point.parent.normalPointShape
+							.setShadowOffsetY(point.parent.shadowOffsetY);
+				}
+			}
+			// selected state
+			if (selectedPoints.contains(point)) {
+				// if selectedPointShape is null we do not draw
+				if (point.parent.selectedPointShape != null) {
+					ArrayList<GraphicalObject> gosOfPoint = point.parent.selectedPointShape
+							.toGraphicalObjects();
+					// set the proper pos for gos
+					for (GraphicalObject go : gosOfPoint) {
+						if (point.parent.selectedPointShape instanceof Circle) {
+							go.setBasePointX(point.getPosX());
+							go.setBasePointY(point.getPosY());
+							go.setzIndex(point.parent.zIndex);
+						} else if (point.parent.selectedPointShape instanceof Rectangle) {
+							go.setBasePointX(point.getPosX()
+									- ((Rectangle) point.parent.selectedPointShape)
+											.getWidth() / 2);
+							go.setBasePointY(point.getPosY()
+									- ((Rectangle) point.parent.selectedPointShape)
+											.getHeight() / 2);
+							go.setzIndex(point.parent.zIndex);
+						}
+						gocForPoint.addGraphicalObject(go);
+					}
+					if (mouseOverRelatedSelection
+							&& canvas instanceof DrawingAreaGWT) {
+						GraphicalObject interactivePoint = point.parent.selectedPointShape
+								.toInterActiveGraphicalObject();
+						interactivePoints.put(interactivePoint, point);
+						((DrawingAreaGWT) canvas)
+								.addInteractiveGO(interactivePoint);
+					}
+				}
+			}
+			// normal state
+			else {
+				if (point.parent.normalPointShape != null) {
+					ArrayList<GraphicalObject> gosOfPoint = point.parent.normalPointShape
+							.toGraphicalObjects();
+					// set the proper pos for gos
+					for (GraphicalObject go : gosOfPoint) {
+						if (point.parent.normalPointShape instanceof Circle) {
+							go.setBasePointX(point.getPosX());
+							go.setBasePointY(point.getPosY());
+							go.setzIndex(point.parent.zIndex);
+						} else if (point.parent.normalPointShape instanceof Rectangle) {
+							go.setBasePointX(point.getPosX()
+									- ((Rectangle) point.parent.normalPointShape)
+											.getWidth() / 2);
+							go.setBasePointY(point.getPosY()
+									- ((Rectangle) point.parent.normalPointShape)
+											.getHeight() / 2);
+							go.setzIndex(point.parent.zIndex);
+						}
+						gocForPoint.addGraphicalObject(go);
+					}
+					if (mouseOverRelatedSelection
+							&& canvas instanceof DrawingAreaGWT) {
+						GraphicalObject interactivePoint = point.parent.normalPointShape
+								.toInterActiveGraphicalObject();
+						interactivePoints.put(interactivePoint, point);
+						((DrawingAreaGWT) canvas)
+								.addInteractiveGO(interactivePoint);
+					}
+				}
+				// if we do not have normal-state point but the points get selected
+				// via mouseOver
+				// we should add a transparent interactiveGO to recieve mouseEvents
+				else if (mouseOverRelatedSelection
+						&& point.parent.selectedPointShape != null) {
 					GraphicalObject interactivePoint = point.parent.selectedPointShape
 							.toInterActiveGraphicalObject();
-					interactivePoints.put(interactivePoint, point);
-					((DrawingAreaGWT) canvas)
-							.addInteractiveGO(interactivePoint);
-				}
-			}
-		}
-		// normal state
-		else {
-			if (point.parent.normalPointShape != null) {
-				ArrayList<GraphicalObject> gosOfPoint = point.parent.normalPointShape
-						.toGraphicalObjects();
-				// set the proper pos for gos
-				for (GraphicalObject go : gosOfPoint) {
-					if (point.parent.normalPointShape instanceof Circle) {
-						go.setBasePointX(point.getPosX());
-						go.setBasePointY(point.getPosY());
-						go.setzIndex(point.parent.zIndex);
-					} else if (point.parent.normalPointShape instanceof Rectangle) {
-						go.setBasePointX(point.getPosX()
-								- ((Rectangle) point.parent.normalPointShape)
+					if (point.parent.selectedPointShape instanceof Circle) {
+						interactivePoint.setBasePointX(point.getPosX());
+						interactivePoint.setBasePointY(point.getPosY());
+						interactivePoint.setzIndex(point.parent.zIndex);
+					} else if (point.parent.selectedPointShape instanceof Rectangle) {
+						interactivePoint.setBasePointX(point.getPosX()
+								- ((Rectangle) point.parent.selectedPointShape)
 										.getWidth() / 2);
-						go.setBasePointY(point.getPosY()
-								- ((Rectangle) point.parent.normalPointShape)
+						interactivePoint.setBasePointY(point.getPosY()
+								- ((Rectangle) point.parent.selectedPointShape)
 										.getHeight() / 2);
-						go.setzIndex(point.parent.zIndex);
+						interactivePoint.setzIndex(point.parent.zIndex);
 					}
-					gocForPoint.addGraphicalObject(go);
-				}
-				if (mouseOverRelatedSelection
-						&& canvas instanceof DrawingAreaGWT) {
-					GraphicalObject interactivePoint = point.parent.normalPointShape
-							.toInterActiveGraphicalObject();
 					interactivePoints.put(interactivePoint, point);
-					((DrawingAreaGWT) canvas)
-							.addInteractiveGO(interactivePoint);
+					((DrawingAreaGWT) canvas).addInteractiveGO(interactivePoint);
 				}
-			}
-			// if we do not have normal-state point but the points get selected
-			// via mouseOver
-			// we should add a transparent interactiveGO to recieve mouseEvents
-			else if (mouseOverRelatedSelection
-					&& point.parent.selectedPointShape != null) {
-				GraphicalObject interactivePoint = point.parent.selectedPointShape
-						.toInterActiveGraphicalObject();
-				if (point.parent.selectedPointShape instanceof Circle) {
-					interactivePoint.setBasePointX(point.getPosX());
-					interactivePoint.setBasePointY(point.getPosY());
-					interactivePoint.setzIndex(point.parent.zIndex);
-				} else if (point.parent.selectedPointShape instanceof Rectangle) {
-					interactivePoint.setBasePointX(point.getPosX()
-							- ((Rectangle) point.parent.selectedPointShape)
-									.getWidth() / 2);
-					interactivePoint.setBasePointY(point.getPosY()
-							- ((Rectangle) point.parent.selectedPointShape)
-									.getHeight() / 2);
-					interactivePoint.setzIndex(point.parent.zIndex);
-				}
-				interactivePoints.put(interactivePoint, point);
-				((DrawingAreaGWT) canvas).addInteractiveGO(interactivePoint);
 			}
 		}
 		return gocForPoint;
@@ -631,10 +690,13 @@ public class LineChart extends IneChartModul2D implements
 	}
 
 	static Context createLineContext(Curve curve) {
-		return new Context(curve.lineProperties.getLineColor().getAlpha(),
+		return new Context(
+				curve.lineProperties.getLineColor().getAlpha(),
 				curve.lineProperties.getLineColor().getColor(),
-				curve.lineProperties.getLineWidth(), Color.DEFAULT_COLOR,
-				curve.shadowOffsetX, curve.shadowOffsetY,
+				curve.lineProperties.getLineWidth(),
+				Color.DEFAULT_COLOR,
+				curve.hasShadow ? curve.shadowOffsetX : 0,
+				curve.hasShadow ? curve.shadowOffsetY : 0,
 				curve.shadowColor == null ? Color.DEFAULT_ALPHA
 						: curve.shadowColor.getAlpha(),
 				curve.shadowColor == null ? Color.DEFAULT_COLOR

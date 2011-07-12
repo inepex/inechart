@@ -13,8 +13,10 @@ import com.inepex.inechart.chartwidget.misc.ZIndexComparator;
 import com.inepex.inechart.chartwidget.properties.Color;
 import com.inepex.inechart.chartwidget.properties.LineProperties;
 import com.inepex.inechart.chartwidget.properties.ShapeProperties;
+import com.inepex.inechart.chartwidget.shape.Circle;
 import com.inepex.inechart.chartwidget.shape.Shape;
 import com.inepex.inegraphics.shared.DrawingArea;
+import com.inepex.inegraphics.shared.gobjects.GraphicalObject;
 import com.inepex.inegraphics.shared.gobjects.Path;
 
 /**
@@ -27,6 +29,8 @@ import com.inepex.inegraphics.shared.gobjects.Path;
  */
 public class Curve implements HasZIndex, HasShadow, Comparable<Curve> {
 
+	
+	
 	String name;
 	static int autoNameNo = 0;
 
@@ -51,13 +55,17 @@ public class Curve implements HasZIndex, HasShadow, Comparable<Curve> {
 	TreeMap<Double, Color> toYFills;
 	// line
 	LineProperties lineProperties;
+	boolean autoFill = false;
 	// points
+	final Shape defaultPointShape = new Circle(3.5);
 	Shape normalPointShape;
 	Shape selectedPointShape;
 	boolean setCurveShadowForPoint = true;
+	boolean useDefaultPointShape = true;
 	// shadow
 	Color shadowColor;
 	double shadowOffsetX = 0, shadowOffsetY = 0;
+	boolean hasShadow = true;
 	int zIndex = Integer.MIN_VALUE;
 	boolean modelChanged = false;
 	double xMin, xMax, yMin, yMax, vpMin, vpMax;
@@ -612,6 +620,30 @@ public class Curve implements HasZIndex, HasShadow, Comparable<Curve> {
 	 */
 	public void setName(String name) {
 		this.name = name;
+	}
+
+	public boolean isAutoFill() {
+		return autoFill;
+	}
+
+	public void setAutoFill(boolean autoFill) {
+		this.autoFill = autoFill;
+	}
+
+	public boolean isHasShadow() {
+		return hasShadow;
+	}
+
+	public void setHasShadow(boolean hasShadow) {
+		this.hasShadow = hasShadow;
+	}
+
+	public boolean isUseDefaultPointShape() {
+		return useDefaultPointShape;
+	}
+
+	public void setUseDefaultPointShape(boolean useDefaultPointShape) {
+		this.useDefaultPointShape = useDefaultPointShape;
 	}
 
 }
