@@ -1,6 +1,5 @@
 package com.inepex.inechart.chartwidget;
 
-import java.util.ArrayList;
 import java.util.TreeMap;
 
 import com.inepex.inechart.chartwidget.axes.Axis;
@@ -185,10 +184,12 @@ public class Viewport {
 
 	private void changed() {
 		changed = true;
-		ArrayList<IneChartModul> ms = new ArrayList<IneChartModul>();
+//		ArrayList<IneChartModul> ms = new ArrayList<IneChartModul>();
+//		for (IneChartModul m : userModuls.keySet())
+//			ms.add(m);
+//		for (IneChartModul m : ms)
+//			userModuls.put(m, true);
 		for (IneChartModul m : userModuls.keySet())
-			ms.add(m);
-		for (IneChartModul m : ms)
 			userModuls.put(m, true);
 
 	}
@@ -214,6 +215,7 @@ public class Viewport {
 	void setDefaultParameters() {
 		dx = dy = 0;
 		xRatio = yRatio = 1;
+		changed = false;
 	}
 
 	/**

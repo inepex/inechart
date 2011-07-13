@@ -68,6 +68,7 @@ public class LineChart extends IneChartModul2D implements HasLegendEntries,
 	@Deprecated
 	Viewport precalculationBaseViewport;
 	PointSelectionMode pointSelectionMode;
+	boolean showLegend = true;
 
 	// interactivity and graphicalobjects
 	/**
@@ -897,6 +898,14 @@ public class LineChart extends IneChartModul2D implements HasLegendEntries,
 			entries.add(new LegendEntry(c, c.getLineProperties().getLineColor()));
 		}
 		return entries;
+	}
+
+	public boolean showLegend() {
+		return showLegend;
+	}
+
+	public void setShowLegend(boolean showLegend) {
+		this.showLegend = showLegend;
 	}
 	
 }

@@ -16,21 +16,22 @@ import com.inepex.inechart.chartwidget.resources.ResourceHelper;
  * @author Miklós Süveges / Inepex Ltd.
  *
  */
-public class Legend implements IsWidget{
+public class LegendWidget implements IsWidget{
 	
 	ComplexPanel mainPanel;
 	List<LegendEntry> entries;
 	boolean autoDisplay = true;
 	
 	
-	public Legend(){
+	public LegendWidget(){
 		this(new ArrayList<LegendEntry>());
 	}
 	
-	public Legend(List<LegendEntry> entries) {
+	public LegendWidget(List<LegendEntry> entries) {
 		this.entries = entries;
 		mainPanel = new FlowPanel();
 		mainPanel.setStyleName(ResourceHelper.getRes().style().legend());
+		update();
 	}
 
 	public List<LegendEntry> getEntries() {
@@ -39,6 +40,7 @@ public class Legend implements IsWidget{
 
 	public void setEntries(List<LegendEntry> entries) {
 		this.entries = entries;
+		update();
 	}
 	
 	void update(){

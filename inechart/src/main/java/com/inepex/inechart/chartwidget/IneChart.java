@@ -11,11 +11,12 @@ import com.inepex.inechart.chartwidget.axes.Axes;
 import com.inepex.inechart.chartwidget.barchart.BarChart;
 import com.inepex.inechart.chartwidget.legend.LegendFactory;
 import com.inepex.inechart.chartwidget.linechart.LineChart;
+import com.inepex.inechart.chartwidget.misc.HasTitle;
 import com.inepex.inechart.chartwidget.piechart.PieChart;
 import com.inepex.inechart.chartwidget.selection.Selection;
 import com.inepex.inegraphics.impl.client.DrawingAreaGWT;
 
-public class IneChart extends Composite {
+public class IneChart extends Composite implements HasTitle{
 	private static final int DEFAULT_WIDTH = 470;
 	private static final int DEFAULT_HEIGHT = 380;
 	private AbsolutePanel mainPanel;
@@ -29,6 +30,7 @@ public class IneChart extends Composite {
 	public static final int DEFAULT_UPDATE_INTERVAL = 800;
 	private IneChartModul focus;
 	private LegendFactory legendFactory;
+	private String title, description;
 
 	// properties
 	private int canvasWidth;
@@ -65,12 +67,14 @@ public class IneChart extends Composite {
 	public LineChart createLineChart() {
 		LineChart chart = new LineChart(drawingArea, getAxes());
 		moduls.add(chart);
+		legendFactory.addHasLegendEntries(chart);
 		return chart;
 	}
 
 	public LineChart createLineChart(Viewport viewport) {
 		LineChart chart = new LineChart(drawingArea, getAxes(), viewport);
 		moduls.add(chart);
+		legendFactory.addHasLegendEntries(chart);
 		return chart;
 	}
 
@@ -194,6 +198,7 @@ public class IneChart extends Composite {
 			if (canResetVP)
 				vp.resetChanged();
 		}
+		legendFactory.updateLegends();
 	}
 
 	public boolean redrawNeeded() {
@@ -220,6 +225,28 @@ public class IneChart extends Composite {
 		};
 		Scheduler.get().scheduleFixedDelay(updateCommand, ms);
 
+	}
+
+	@Override
+	public void setDescription(String description) {
+		this.description = description;
+		legendFactory.updateChartTitle();
+	}
+
+	@Override
+	public String getDescription() {
+		return description;
+	}
+
+	@Override
+	public void setTitle(String title) {
+		this.title = title;	
+		legendFactory.updateChartTitle();
+	}
+
+	@Override
+	public String getTitle() {
+		return title;
 	}
 
 }
