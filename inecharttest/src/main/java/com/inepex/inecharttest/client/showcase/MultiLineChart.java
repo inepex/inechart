@@ -14,7 +14,6 @@ public class MultiLineChart extends FlowPanel{
 		super();
 		init();
 		this.add(chart);
-		chart.update();
 	}
 	
 	private void init(){
@@ -31,5 +30,15 @@ public class MultiLineChart extends FlowPanel{
 		lineChart.setAutoScaleViewport(true);
 		lineChart.autoCreateAxes();	
 	}
+
+	/**
+	 * IE 6-8 hack
+	 */
+	@Override
+	protected void onLoad() {
+		chart.update();
+		super.onLoad();
+	}
+	
 
 }
