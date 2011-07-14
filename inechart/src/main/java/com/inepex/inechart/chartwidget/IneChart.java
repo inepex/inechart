@@ -13,14 +13,20 @@ import com.inepex.inechart.chartwidget.legend.LegendFactory;
 import com.inepex.inechart.chartwidget.linechart.LineChart;
 import com.inepex.inechart.chartwidget.misc.HasTitle;
 import com.inepex.inechart.chartwidget.piechart.PieChart;
+import com.inepex.inechart.chartwidget.resources.ResourceHelper;
 import com.inepex.inechart.chartwidget.selection.Selection;
 import com.inepex.inegraphics.impl.client.DrawingAreaGWT;
+import com.inepex.inegraphics.shared.DrawingAreaAssist;
+import com.inepex.inegraphics.shared.gobjects.GraphicalObject;
 
 public class IneChart extends Composite implements HasTitle{
 	private static final int DEFAULT_WIDTH = 470;
 	private static final int DEFAULT_HEIGHT = 380;
 	private AbsolutePanel mainPanel;
 	private ArrayList<IneChartModul> moduls;
+	/**
+	 * singleton per {@link IneChart} instance
+	 */
 	private Axes axes;
 	private Selection selection = null;
 	private ArrayList<Viewport> modulViewports;
@@ -31,6 +37,9 @@ public class IneChart extends Composite implements HasTitle{
 	private IneChartModul focus;
 	private LegendFactory legendFactory;
 	private String title, description;
+	private boolean autoScaleModuls = true;
+	private boolean includeLegendInPadding = true;
+	private boolean includeTitleInPadding = true;
 
 	// properties
 	private int canvasWidth;
@@ -53,7 +62,8 @@ public class IneChart extends Composite implements HasTitle{
 		modulViewports = new ArrayList<Viewport>();
 		mainPanel.add(drawingArea.getWidget(), 0, 0);
 		this.initWidget(mainPanel);
-		legendFactory = new LegendFactory(mainPanel);
+		legendFactory = new LegendFactory(mainPanel, this);
+		drawingArea.getCanvasWidget().setStyleName(ResourceHelper.getRes().style().chartWidget());
 	}
 	
 	public void setSize(int width, int height){
@@ -136,13 +146,13 @@ public class IneChart extends Composite implements HasTitle{
 			}
 		}
 	}
-
-	public void update() {
+	
+ 	public void update() {
 		if(selection != null && selection.requestFocus){
 			return;
 		}
 		releaseFocusIfPossible();
-		// grant focus
+		// grant focus if possible and requested
 		if (focus == null) {
 			for (IneChartModul modul : moduls) {
 				if (modul.isVisible && modul.requestFocus) {
@@ -151,42 +161,61 @@ public class IneChart extends Composite implements HasTitle{
 				}
 			}
 		}
+
+		if (autoScaleModuls){
+			for (IneChartModul modul : moduls) {
+				if(modul instanceof IneChartModul2D){
+					((IneChartModul2D) modul).updateModulsAxes();
+				}
+			}
+		}
+		
 		boolean doRedraw = false;
-		// if present update only focused
+		// axes should be updated even if a modul has been focused
+		if (axes.redrawNeeded()) {
+			axes.update();
+			doRedraw = true;
+		}
+		
+		//scale moduls 
+		if (autoScaleModuls){
+			for (IneChartModul modul : moduls) {
+				if(modul instanceof IneChartModul2D){
+					((IneChartModul2D) modul).calculatePadding(legendFactory.getPadding(includeTitleInPadding, includeLegendInPadding));
+				}
+			}
+			axes.forcedUpdate();
+		}
+		
+		// update moduls if present, update only focused
 		if (focus != null) {
 			if (focus.redrawNeeded()) {
 				focus.update();
 				doRedraw = true;
 			}
-		} else {
+		} 
+		else {
 			for (IneChartModul modul : moduls) {
 				if (modul.redrawNeeded()) {
 					modul.update();
-					if (modul instanceof HasCoordinateSystem
-							&& !modulViewports
-									.contains(((HasCoordinateSystem) modul)
-											.getViewport()))
-						modulViewports.add(((HasCoordinateSystem) modul)
-								.getViewport());
+					if (modul instanceof HasCoordinateSystem && !modulViewports.contains(((HasCoordinateSystem) modul).getViewport()))
+						modulViewports.add(((HasCoordinateSystem) modul).getViewport());
 					doRedraw = true;
 				}
 			}
 		}
-		// axes modul should always be updated
-		if (axes.redrawNeeded()) {
-			((IneChartModul)axes).update();
-			doRedraw = true;
-		}
+		// draw graphics
 		if (doRedraw) {
 			drawingArea.removeAllGraphicalObject();
 			for (IneChartModul modul : moduls) {
-				if (modul.isVisible)
-					drawingArea
-							.addAllGraphicalObject(modul.graphicalObjectContainer);
+				if (modul.isVisible){
+					drawingArea.addAllGraphicalObject(modul.graphicalObjectContainer);
+				}
 			}
 			drawingArea.addAllGraphicalObject(axes.graphicalObjectContainer);
 			drawingArea.update();
 		}
+		//reset viewports 
 		for (Viewport vp : modulViewports) {
 			boolean canResetVP = true;
 			for (IneChartModul m : vp.userModuls.keySet()) {
@@ -198,6 +227,8 @@ public class IneChart extends Composite implements HasTitle{
 			if (canResetVP)
 				vp.resetChanged();
 		}
+		
+		legendFactory.updateChartTitle();
 		legendFactory.updateLegends();
 	}
 
@@ -230,7 +261,6 @@ public class IneChart extends Composite implements HasTitle{
 	@Override
 	public void setDescription(String description) {
 		this.description = description;
-		legendFactory.updateChartTitle();
 	}
 
 	@Override
@@ -241,7 +271,6 @@ public class IneChart extends Composite implements HasTitle{
 	@Override
 	public void setTitle(String title) {
 		this.title = title;	
-		legendFactory.updateChartTitle();
 	}
 
 	@Override

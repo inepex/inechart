@@ -11,8 +11,7 @@ import com.inepex.inechart.chartwidget.properties.Color;
 import com.inepex.inechart.chartwidget.properties.LineProperties;
 import com.inepex.inegraphics.shared.DrawingArea;
 
-public abstract class IneChartModul2D extends IneChartModul implements
-		HasCoordinateSystem {
+public abstract class IneChartModul2D extends IneChartModul implements	HasCoordinateSystem {
 
 	protected Axis xAxis;
 	protected Axis yAxis;
@@ -23,6 +22,7 @@ public abstract class IneChartModul2D extends IneChartModul implements
 	protected boolean redrawNeeded;
 	protected boolean autoScaleViewport;
 	public static final LineProperties defaultGridLine = new LineProperties(1.8, new Color("#E8E8E8", 1),4,4);
+	protected boolean autocalcPadding = true;
 	
 	protected IneChartModul2D(DrawingArea canvas, Axes axes) {
 		this(canvas, axes, new Viewport());
@@ -49,6 +49,34 @@ public abstract class IneChartModul2D extends IneChartModul implements
 		extraAxes = new ArrayList<Axis>();
 	}
 
+	protected abstract void updateModulsAxes();
+	
+	protected void calculatePadding(double[] minPadding){
+		if(!autocalcPadding)
+			return;
+		double[] padding = mergePaddings(new double[]{DEFAULT_PADDING_V,DEFAULT_PADDING_H,DEFAULT_PADDING_V,DEFAULT_PADDING_H}, minPadding);
+		if(xAxis.isVisible())
+			padding = mergePaddings(padding, axes.getPaddingForAxis(xAxis));
+		if(yAxis.isVisible())
+			padding = mergePaddings(padding, axes.getPaddingForAxis(yAxis));
+		for(Axis axis : extraAxes){
+			if(axis.isVisible())
+				padding = mergePaddings(padding, axes.getPaddingForAxis(axis));
+		}
+		topPadding = (int) padding[0];
+		rightPadding = (int) padding[1];
+		bottomPadding = (int) padding[2];
+		leftPadding = (int) padding[3];		
+	}
+	
+	private double[] mergePaddings(double[] first, double[] second){
+		double[] ret = new double[4];
+		for(int i=0;i<4;i++){
+			ret[i] = Math.max(first[i], second [i]);
+		}
+		return ret;
+	}
+	
 	@Override
 	public void setXAxis(Axis xAxis) {
 		axes.removeAxis(this.xAxis);
@@ -151,9 +179,11 @@ public abstract class IneChartModul2D extends IneChartModul implements
 		double pos;
 		if (horizontalAxis.getAxisDirection() == AxisDirection.Horizontal_Ascending_To_Right) {
 			pos =  (value - visibleMin) * totalWidth / visibleLength	+ leftPadding;
-		} else if (horizontalAxis.getAxisDirection() == AxisDirection.Horizontal_Ascending_To_Left) {
-			pos = totalWidth - ((value - visibleMin) * totalWidth / visibleLength - rightPadding);
-		} else
+		} 
+		else if (horizontalAxis.getAxisDirection() == AxisDirection.Horizontal_Ascending_To_Left) {
+			pos = (totalWidth -  ((value - visibleMin) * totalWidth / visibleLength)) + leftPadding;
+		}
+		else
 			return -1;
 		return pos;
 	}
@@ -176,12 +206,12 @@ public abstract class IneChartModul2D extends IneChartModul implements
 		visibleMin = verticalAxis.getMin();
 		double pos;
 		if (verticalAxis.getAxisDirection() == AxisDirection.Vertical_Ascending_To_Bottom) {
-			pos = ((value - visibleMin) * totalHeight / visibleLength)
-					+ topPadding;
-		} else if (verticalAxis.getAxisDirection() == AxisDirection.Vertical_Ascending_To_Top) {
-			pos = totalHeight
-					-  ((value - visibleMin) * totalHeight / visibleLength - bottomPadding);
-		} else
+			pos = ((value - visibleMin) * totalHeight / visibleLength)	+ topPadding;
+		}
+		else if (verticalAxis.getAxisDirection() == AxisDirection.Vertical_Ascending_To_Top) {
+			pos = (totalHeight - (value - visibleMin) * totalHeight / visibleLength) + topPadding;
+		}
+		else
 			return -1;
 		return pos;
 	}
@@ -206,7 +236,7 @@ public abstract class IneChartModul2D extends IneChartModul implements
 		return ret;
 	}
 
-	public void autoCreateAxes() {
+	public void createDefaultAxes() {
 		TickFactory tf = new TickFactory();
 		if (xAxis.isChanged()){
 			tf.autoCreateTicks(xAxis);
@@ -270,5 +300,13 @@ public abstract class IneChartModul2D extends IneChartModul implements
 				|| viewport.isChanged())
 			return true;
 		return false;
+	}
+
+	public boolean isAutocalcPadding() {
+		return autocalcPadding;
+	}
+
+	public void setAutocalcPadding(boolean autocalcPadding) {
+		this.autocalcPadding = autocalcPadding;
 	}
 }

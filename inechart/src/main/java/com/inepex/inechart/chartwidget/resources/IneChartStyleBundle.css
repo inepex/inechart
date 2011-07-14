@@ -1,10 +1,16 @@
 @CHARSET "UTF-8";
 
-
+.chartWidget{
+	z-index: 0;
+}
 
 
 .chartTitle{
-	
+	z-index: 11;
+/* 	background-color: #ffffff; */
+/* 	opacity: 0.8; */
+	float: left;
+	padding: 2px;
 }
 
 .chartTitle .title{
@@ -19,14 +25,21 @@
 	font-size: 12pt;
 	font-weight: normal;
 	color: #8d8d8d;
+	
 }
 
 .legend{
-	
+	z-index: 11;
+	display: block;
+/* 	background-color: #ffffff; */
+/* 	opacity: 0.8; */
+	float: right;
+	padding: 2px 4px 2px 4px;
 }
 
 .legend .legendEntry{
-	
+	float:left;
+	padding: 2px;
 }
 
 .legend .legendEntry .text{
@@ -34,9 +47,14 @@
 	font-size: 10pt;
 	font-weight: normal;
 	color: #8d8d8d;
+	float:left;
+	margin-left: 3px;
+	margin-right: 5px;
 }
 
 .legend .legendEntry .color{
 	height: 7px;
+	margin-top: 6px;
 	width: 28px;
+	float:left;
 }

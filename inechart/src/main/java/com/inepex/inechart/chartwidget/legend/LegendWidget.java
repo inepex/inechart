@@ -48,13 +48,16 @@ public class LegendWidget implements IsWidget{
 		for(LegendEntry e : entries){
 			FlowPanel fp = new FlowPanel();
 			fp.setStyleName(ResourceHelper.getRes().style().legendEntry());
-			Label lbl = new  Label(e.getTitle().getTitle() == null ? "" : e.getTitle().getTitle());
-			lbl.setStyleName(ResourceHelper.getRes().style().text());
-			fp.add(lbl);
-			lbl = new Label();
+			
+			Label lbl = new Label();
 			lbl.setStyleName(ResourceHelper.getRes().style().color());
 			lbl.getElement().getStyle().setBackgroundColor(e.getColor().getColor());
 			fp.add(lbl);
+			
+			lbl = new  Label(e.getTitle().getTitle() == null ? "" : e.getTitle().getTitle());
+			lbl.setStyleName(ResourceHelper.getRes().style().text());
+			fp.add(lbl);
+			
 			mainPanel.add(fp);
 		}
 	}

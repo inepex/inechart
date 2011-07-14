@@ -1,11 +1,8 @@
 package com.inepex.inechart.chartwidget.linechart;
 
 import java.util.ArrayList;
-import java.util.Collection;
-import java.util.Collections;
 import java.util.TreeMap;
 
-import com.inepex.inechart.chartwidget.axes.Axis;
 import com.inepex.inechart.chartwidget.axes.Tick;
 import com.inepex.inechart.chartwidget.misc.HasShadow;
 import com.inepex.inechart.chartwidget.misc.HasTitle;
@@ -13,11 +10,9 @@ import com.inepex.inechart.chartwidget.misc.HasZIndex;
 import com.inepex.inechart.chartwidget.misc.ZIndexComparator;
 import com.inepex.inechart.chartwidget.properties.Color;
 import com.inepex.inechart.chartwidget.properties.LineProperties;
-import com.inepex.inechart.chartwidget.properties.ShapeProperties;
 import com.inepex.inechart.chartwidget.shape.Circle;
 import com.inepex.inechart.chartwidget.shape.Shape;
-import com.inepex.inegraphics.shared.DrawingArea;
-import com.inepex.inegraphics.shared.gobjects.GraphicalObject;
+import com.inepex.inegraphics.shared.DrawingAreaAssist;
 import com.inepex.inegraphics.shared.gobjects.Path;
 
 /**
@@ -68,7 +63,11 @@ public class Curve implements HasZIndex, HasShadow, Comparable<Curve>, HasTitle 
 	boolean hasShadow = true;
 	int zIndex = Integer.MIN_VALUE;
 	boolean modelChanged = false;
-	double xMin, xMax, yMin, yMax, vpMin, vpMax;
+	double xMin = Double.MAX_VALUE;
+	double xMax = -Double.MAX_VALUE;
+	double yMin = Double.MAX_VALUE;
+	double yMax = -Double.MAX_VALUE;
+	double vpMin, vpMax;
 	
 	String title, description;
 
@@ -459,7 +458,7 @@ public class Curve implements HasZIndex, HasShadow, Comparable<Curve>, HasTitle 
 	}
 
 	Path getVisiblePath(int x, int y, double width, double height) {
-		return DrawingArea.clipPathWithRectangle(getVisiblePath(), x, y, width,
+		return DrawingAreaAssist.clipPathWithRectangle(getVisiblePath(), x, y, width,
 				height);
 	}
 

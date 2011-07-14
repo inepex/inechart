@@ -10,6 +10,10 @@ import com.inepex.inechart.chartwidget.properties.LineProperties;
 
 public class Axis implements Comparable<Axis>, HasZIndex, HasTitle {
 
+	// comparison helper fields
+	private static int highestComparableNo = 0;
+	private int comparableNo;
+
 	/**
 	 * Defines the direction of an {@link Axis}
 	 */
@@ -81,43 +85,43 @@ public class Axis implements Comparable<Axis>, HasZIndex, HasTitle {
 	public static enum AxisDataType {
 		Number, Time
 	}
-	
-	String title;
-	String description;
 
-	AxisDataType axisDataType;
+	protected String title;
+	protected String description;
+
+	protected AxisDataType axisDataType;
 	/**
 	 * The axis will be aligned to this modul *
 	 */
-	IneChartModul2D modulToAlign;
-	double fixedPosition;
-	int zIndex;
-	ArrayList<Tick> ticks;
-	ArrayList<Object[]> gridFills;
-	boolean changed = true;
-	LineProperties lineProperties;
+	protected IneChartModul2D modulToAlign;
+
+	protected int zIndex;
+	protected ArrayList<Tick> ticks;
+	protected ArrayList<Object[]> gridFills;
+	protected boolean changed = true;
+	protected LineProperties lineProperties;
 	/**
 	 * min and max values defines the visible part of this axis
 	 */
-	double min, max;
-	AxisDirection axisDirection;
-	AxisPosition axisPosition;
+	protected double min, max;
+	protected AxisDirection axisDirection;
+	protected AxisPosition axisPosition;
+	/**
+	 * only used when {@link AxisPosition#Fixed} or {@link AxisPosition#Fixed_Dock_If_Not_Visible}s
+	 */
+	protected double fixedPosition;
 	/**
 	 * if false the axis and all its objects will NOT displayed
 	 */
-	boolean isVisible;
+	protected boolean isVisible;
 	/**
 	 * If you want to display this axis as a finite line, set these values, and
 	 * the axis (and its ticks and their grids) will be displayed between these
 	 * values
 	 */
-	double lowerEnd, upperEnd;
-	
-	private boolean filterFrequentTicks = false;
+	protected double lowerEnd, upperEnd;
 
-	// comparison helper fields
-	private static int highestComparableNo = 0;
-	private int comparableNo;
+	protected  boolean filterFrequentTicks = false;
 
 	public Axis() {
 		this(null);
@@ -135,6 +139,7 @@ public class Axis implements Comparable<Axis>, HasZIndex, HasTitle {
 		axisDataType = AxisDataType.Number;
 		lowerEnd = -Double.MAX_VALUE;
 		upperEnd = Double.MAX_VALUE;
+		isVisible = true;
 	}
 
 	public void addTick(Tick tick) {
@@ -147,7 +152,7 @@ public class Axis implements Comparable<Axis>, HasZIndex, HasTitle {
 		changed = true;
 	}
 
-	public void fillBetweenTicks(Tick tick1, Tick tick2, Color color) {
+	public void fillBetween(Tick tick1, Tick tick2, Color color) {
 		if (color == null)
 			return;
 		switch (tick1.compareTo(tick2)) {
@@ -161,6 +166,10 @@ public class Axis implements Comparable<Axis>, HasZIndex, HasTitle {
 			break;
 		}
 		changed = true;
+	}
+
+	public void fillBetween(double value1, double value2, Color color){
+		fillBetween(new Tick(value1), new Tick(value2), color);
 	}
 
 	public void removeFill(Tick tick1, Tick tick2) {
@@ -190,6 +199,10 @@ public class Axis implements Comparable<Axis>, HasZIndex, HasTitle {
 		changed = true;
 	}
 
+	public void removeFill(double value1, double value2){
+		removeFill(new Tick(value1), new Tick(value2));
+	}
+	
 	/**
 	 * @return the lineProperties
 	 */
@@ -367,7 +380,7 @@ public class Axis implements Comparable<Axis>, HasZIndex, HasTitle {
 	 */
 	public void setVisible(boolean isVisible) {
 		this.isVisible = isVisible;
-		changed = isVisible;
+		changed = true;
 	}
 
 	public boolean isHorizontal() {

@@ -4,6 +4,8 @@ import com.google.gwt.resources.client.CssResource;
 
 public interface IneChartStyle extends CssResource {
 	
+	String chartWidget();
+	
 	String chartTitle();
 	String title();
 	String description();

@@ -19,6 +19,7 @@ import com.inepex.inechart.chartwidget.properties.LineProperties;
 import com.inepex.inechart.chartwidget.properties.ShapeProperties;
 import com.inepex.inechart.chartwidget.shape.Rectangle;
 import com.inepex.inegraphics.shared.DrawingArea;
+import com.inepex.inegraphics.shared.DrawingAreaAssist;
 import com.inepex.inegraphics.shared.GraphicalObjectContainer;
 
 public class BarChart extends IneChartModul2D implements HasShadow, HasZIndex {
@@ -284,15 +285,7 @@ public class BarChart extends IneChartModul2D implements HasShadow, HasZIndex {
 	public void update() {
 		if (dataSets.size() == 0)
 			return;
-		if (autoScaleViewport) {
-			scaleViewportToFitAllBars();
-			autoScaleViewport = false;
-		}
-
-		// update axes and viewport
-		alignViewportAndAxes();
-		if (autoCreateTicks)
-			autoCreateAxes();
+		
 		updateLookOut();
 
 		if (viewport.isChanged() || redrawNeeded) {
@@ -366,7 +359,7 @@ public class BarChart extends IneChartModul2D implements HasShadow, HasZIndex {
 					i++;
 				}
 			}
-			graphicalObjectContainer = DrawingArea.clipRectanglesWithRectangle(graphicalObjectContainer, leftPadding, topPadding, getWidth(), getHeight());
+			graphicalObjectContainer = DrawingAreaAssist.clipRectanglesWithRectangle(graphicalObjectContainer, leftPadding, topPadding, getWidth(), getHeight());
 		}
 		redrawNeeded = false;
 		super.update();
@@ -924,6 +917,22 @@ public class BarChart extends IneChartModul2D implements HasShadow, HasZIndex {
 		if (this.autoCreateTicks != autoCreateTicks)
 			redrawNeeded = true;
 		this.autoCreateTicks = autoCreateTicks;
+	}
+
+	@Override
+	protected void updateModulsAxes() {
+		if (dataSets.size() == 0)
+			return;
+		if (autoScaleViewport) {
+			scaleViewportToFitAllBars();
+			autoScaleViewport = false;
+		}
+
+		// update axes and viewport
+		alignViewportAndAxes();
+		if (autoCreateTicks)
+			createDefaultAxes();
+		
 	}
 
 }

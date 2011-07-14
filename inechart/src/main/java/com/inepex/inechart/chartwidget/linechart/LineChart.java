@@ -27,6 +27,7 @@ import com.inepex.inegraphics.impl.client.GraphicalObjectEventHandler;
 import com.inepex.inegraphics.impl.client.InteractiveGraphicalObject;
 import com.inepex.inegraphics.shared.Context;
 import com.inepex.inegraphics.shared.DrawingArea;
+import com.inepex.inegraphics.shared.DrawingAreaAssist;
 import com.inepex.inegraphics.shared.GraphicalObjectContainer;
 import com.inepex.inegraphics.shared.gobjects.GraphicalObject;
 import com.inepex.inegraphics.shared.gobjects.Path;
@@ -62,11 +63,7 @@ public class LineChart extends IneChartModul2D implements HasLegendEntries,
 	ArrayList<Curve> curves;
 	int highestZIndex = 1;
 	int overlapFilterDistance;
-	@Deprecated
-	boolean precalculatePoints;
-	boolean autoCreateTicks;
-	@Deprecated
-	Viewport precalculationBaseViewport;
+	boolean autoCreateAxes;
 	PointSelectionMode pointSelectionMode;
 	boolean showLegend = true;
 
@@ -112,9 +109,8 @@ public class LineChart extends IneChartModul2D implements HasLegendEntries,
 		// defaults
 		pointSelectionMode = PointSelectionMode.Closest_To_Cursor;
 		overlapFilterDistance = 0;
-		precalculatePoints = false;
 		autoScaleViewport = false;
-		autoCreateTicks = true;
+		autoCreateAxes = true;
 	}
 
 	public void addCurve(Curve curve) {
@@ -150,28 +146,26 @@ public class LineChart extends IneChartModul2D implements HasLegendEntries,
 	}
 
 	@Override
-	public void update() {
+	protected void updateModulsAxes() {
 		if (curves == null || curves.size() == 0)
 			return;
 		if (autoScaleViewport) {
-			double yMin = Math.min(yAxis.getMin(), curves.get(0).yMin);
-			double yMax = Math.max(yAxis.getMax(), curves.get(0).yMax);
-			double xMin = Math.max(xAxis.getMin(), curves.get(0).xMin);
-			double xMax = Math.min(xAxis.getMax(), curves.get(0).xMax);
-			viewport.set(xMin, yMin,
-					xMax, yMax);
+			double yMin = Double.MAX_VALUE;
+			double yMax = -Double.MAX_VALUE;
+			double xMin = Double.MAX_VALUE;
+			double xMax = -Double.MAX_VALUE;
+			
 			for (Curve c : curves) {
-				if (c.xMax > viewport.getXMax())
-					viewport.setXMax(c.xMax);
-				if (c.yMax > viewport.getYMax())
-					viewport.setYMax(c.yMax);
-				if (c.xMin < viewport.getXMin())
-					viewport.setXMin(c.xMin);
-				if (c.yMin < viewport.getYMin())
-					viewport.setYMin(c.yMin);
+				if (c.xMax > xMax)
+					xMax = c.xMax;
+				if (c.yMax > yMax)
+					yMax = c.yMax;
+				if (c.xMin < xMin)
+					xMin = c.xMin;
+				if (c.yMin < yMin)
+					yMin = c.yMin;
 			}
-			if (xMin > viewport.getXMin()) viewport.setXMin(xMin);
-			if (xMax < viewport.getXMax()) viewport.setXMax(xMax);
+			viewport.set(xMin, yMin, xMax, yMax);
 			autoScaleViewport = false;
 		}
 
@@ -182,47 +176,26 @@ public class LineChart extends IneChartModul2D implements HasLegendEntries,
 		 * update model
 		 */
 		// axes auto calc
-		if (autoCreateTicks) {
-			autoCreateAxes();
+		if (autoCreateAxes) {
+			createDefaultAxes();
 		}
-
-		// if points are precalculated and the viewport is resized (not moved)
-		// we have to recalc all points
-		if (precalculatePoints) {
-			boolean recalcAll = false;
-			if (precalculationBaseViewport == null
-					|| (viewport.isChanged() && (viewport.getXRatio() != 1 || viewport
-							.getYRatio() != 1))) {
-				precalculationBaseViewport = new Viewport(viewport.getXMin(),
-						viewport.getYMin(), viewport.getXMax(),
-						viewport.getYMax());
-				recalcAll = true;
-			}
-			for (Curve curve : curves) {
-				if (recalcAll || curve.modelChanged) {
-					curve.calculatePoints(curve.xMin, curve.xMax, this);
-					curve.updateVisiblePoints(curve.xMin, curve.xMax,
-							overlapFilterDistance);
-					createLineChartGOs(curve);
-					createPointChartGOs(curve);
-					displayPrecalculatedCurve(curve);
-				} else {
-					shiftCurve(curve);
-				}
+	}
+	
+	@Override
+	public void update() {
+		if (curves == null || curves.size() == 0)
+			return;
+		for (Curve curve : curves) {
+			if (viewport.isChanged() || curve.modelChanged) {
+				curve.calculatePoints(viewport.getXMin(),
+						viewport.getXMax(), this);
+				curve.updateVisiblePoints(viewport.getXMin(),
+						viewport.getXMax(), overlapFilterDistance);
+				removeAndAddAllGO(curve);
 				curve.modelChanged = false;
 			}
-		} else {
-			for (Curve curve : curves) {
-				if (viewport.isChanged() || curve.modelChanged) {
-					curve.calculatePoints(viewport.getXMin(),
-							viewport.getXMax(), this);
-					curve.updateVisiblePoints(viewport.getXMin(),
-							viewport.getXMax(), overlapFilterDistance);
-					removeAndAddAllGO(curve);
-					curve.modelChanged = false;
-				}
-			}
 		}
+
 		redrawNeeded = false;
 		super.update();
 	}
@@ -241,19 +214,17 @@ public class LineChart extends IneChartModul2D implements HasLegendEntries,
 		double totalWidth = canvas.getWidth() - leftPadding - rightPadding;
 		double visibleLength, visibleMin;
 		Viewport viewport;
-		if (precalculatePoints) {
-			viewport = precalculationBaseViewport;
-		} else {
-			viewport = this.viewport;
-		}
+		viewport = this.viewport;
 		visibleLength = viewport.getWidth();
 		visibleMin = viewport.getXMin();
 		double pos;
 		if (horizontalAxis.getAxisDirection() == AxisDirection.Horizontal_Ascending_To_Right) {
 			pos =  ((value - visibleMin) * totalWidth / visibleLength)	+ leftPadding;
-		} else if (horizontalAxis.getAxisDirection() == AxisDirection.Horizontal_Ascending_To_Left) {
-			pos = totalWidth -  ((value - visibleMin) * totalWidth / visibleLength - rightPadding);
-		} else
+		}
+		else if (horizontalAxis.getAxisDirection() == AxisDirection.Horizontal_Ascending_To_Left) {
+			pos = (totalWidth -  ((value - visibleMin) * totalWidth / visibleLength)) + leftPadding;
+		}
+		else
 			return -1;
 		return pos;
 	}
@@ -262,11 +233,7 @@ public class LineChart extends IneChartModul2D implements HasLegendEntries,
 		double totalHeight = canvas.getHeight() - topPadding - bottomPadding;
 		double visibleLength, visibleMin;
 		Viewport viewport;
-		if (precalculatePoints) {
-			viewport = precalculationBaseViewport;
-		} else {
-			viewport = this.viewport;
-		}
+		viewport = this.viewport;
 		visibleLength = viewport.getHeight();
 		visibleMin = viewport.getYMin();
 		double pos;
@@ -274,57 +241,10 @@ public class LineChart extends IneChartModul2D implements HasLegendEntries,
 			pos = ((value - visibleMin) * totalHeight / visibleLength)
 					+ topPadding;
 		} else if (verticalAxis.getAxisDirection() == AxisDirection.Vertical_Ascending_To_Top) {
-			pos = totalHeight
-					-  ((value - visibleMin) * totalHeight / visibleLength - bottomPadding);
+			pos = (totalHeight - (value - visibleMin) * totalHeight / visibleLength) + topPadding;
 		} else
 			return -1;
 		return pos;
-	}
-
-	/**
-	 * This method is used when: {@link #precalculatePoints} = true, and the
-	 * viewport is scrolled only (dx || dy change)
-	 * 
-	 * @param curve
-	 */
-	@Deprecated
-	protected void shiftCurve(Curve curve) {
-		double dx, dy;
-		if (xAxis.isHorizontal()) {
-			dx = getCanvasX(viewport.getDX(), xAxis) - getCanvasX(0, xAxis);
-			dy = getCanvasY(viewport.getDY(), yAxis) - getCanvasY(0, yAxis);
-		} else {
-			dx = getCanvasY(viewport.getDX(), xAxis) - getCanvasY(0, xAxis);
-			dy = getCanvasX(viewport.getDY(), yAxis) - getCanvasX(0, yAxis);
-		}
-		if (dx != 0 || dy != 0) {
-			// shift !! the basepoints should moved with -dx, -dy
-			gosPerCurve.get(curve).moveBasePoints(-dx, -dy);
-			for (Point p : gosPerPoint.get(curve).keySet()) {
-				gosPerPoint.get(curve).get(p).moveBasePoints(-dx, -dy);
-			}
-			displayPrecalculatedCurve(curve);
-		}
-	}
-
-	@Deprecated
-	protected void displayPrecalculatedCurve(Curve curve) {
-		// remove previos
-		removeAllGORelatedToCurve(curve);
-		// drop gos outside vp
-		for (GraphicalObject go : gosPerCurve.get(curve).getGraphicalObjects()) {
-			Path clipped = DrawingArea.clipPathWithRectangle((Path) go,
-					leftPadding, topPadding, getWidth(), getHeight());
-			graphicalObjectContainer.addGraphicalObject(clipped);
-			clippedPaths.put((Path) go, clipped);
-		}
-		for (Point p : gosPerPoint.get(curve).keySet()) {
-			graphicalObjectContainer.addAllGraphicalObject(gosPerPoint.get(
-					curve).get(p));
-		}
-		GraphicalObjectContainer.dropGraphicalObjectsOutsideRectangle(
-				graphicalObjectContainer, leftPadding, topPadding, getWidth(),
-				getHeight());
 	}
 
 	/**
@@ -353,7 +273,7 @@ public class LineChart extends IneChartModul2D implements HasLegendEntries,
 	}
 
 	/**
-	 * Creates linechart {@link GraphicalObject}s:
+	 * Creates line chart {@link GraphicalObject}s:
 	 *  -lines,
 	 *  -fills
 	 *  and puts them into {@link #gosPerCurve} container
@@ -363,12 +283,7 @@ public class LineChart extends IneChartModul2D implements HasLegendEntries,
 	protected void createLineChartGOs(Curve curve) {
 		GraphicalObjectContainer gos = new GraphicalObjectContainer();
 		Path path;
-		if (!precalculatePoints)
-			path = curve.getVisiblePath(leftPadding, topPadding,
-					canvas.getWidth() - leftPadding - rightPadding,
-					canvas.getHeight() - topPadding - bottomPadding);
-		else
-			path = curve.getVisiblePath();
+		path = curve.getVisiblePath();
 		if (path == null) {
 			return;
 		}
@@ -378,7 +293,7 @@ public class LineChart extends IneChartModul2D implements HasLegendEntries,
 			line.setStroke(true);
 			line.setzIndex(curve.getZIndex());
 			if (curve.getLineProperties().getStyle().equals(LineStyle.DASHED))
-				gos.addGraphicalObject(DrawingArea.createDashedLinePath(line,
+				gos.addGraphicalObject(DrawingAreaAssist.createDashedLine(line,
 						curve.getLineProperties().getDashStrokeLength(), curve
 								.getLineProperties().getDashDistance()));
 			else
@@ -386,10 +301,9 @@ public class LineChart extends IneChartModul2D implements HasLegendEntries,
 		}
 		if (curve.autoFill) {
 			Path fill = new Path(path);
-			Point tmp = new Point(0, viewport.getYMin());
+			Point tmp = new Point(viewport.getXMin(), viewport.getYMin());
 			calculatePoint(tmp);
-			fill.lineTo(fill.getLastPathElement().getEndPointX(),
-					tmp.getPosY(), false);
+			fill.lineTo(fill.getLastPathElement().getEndPointX(),tmp.getPosY(), false);
 			fill.lineTo(fill.getBasePointX(), tmp.getPosY(), false);
 			fill.lineToBasePoint();
 			fill.setFill(true);
@@ -424,13 +338,10 @@ public class LineChart extends IneChartModul2D implements HasLegendEntries,
 						path.getBasePointY(), curve.getZIndex(),
 						createFillContext(curve.toCurveFills.get(toCurve)),
 						false, true);
-				Path otherPath;
-				if (!precalculatePoints)
-					otherPath = toCurve.getVisiblePath(leftPadding, topPadding,
+				Path otherPath = toCurve.getVisiblePath(leftPadding, topPadding,
 							canvas.getWidth() - leftPadding - rightPadding,
 							canvas.getHeight() - topPadding - bottomPadding);
-				else
-					otherPath = toCurve.getVisiblePath();
+				
 				if (otherPath == null)
 					continue;
 				for (PathElement e : path.getPathElements()) {
@@ -465,7 +376,7 @@ public class LineChart extends IneChartModul2D implements HasLegendEntries,
 	}
 
 	/**
-	 * Creates pointchart {@link GraphicalObject}s and puts them into
+	 * Creates point chart {@link GraphicalObject}s and puts them into
 	 * {@link #gosPerPoint} container
 	 * 
 	 * @param curve
@@ -845,28 +756,18 @@ public class LineChart extends IneChartModul2D implements HasLegendEntries,
 			c.modelChanged = true;
 	}
 
-	/**
-	 * @return the precalculatePoints
-	 */
-	public boolean isPrecalculatePoints() {
-		return precalculatePoints;
+	public boolean isAutoCreateAxes() {
+		return autoCreateAxes;
 	}
 
 	/**
-	 * @return the autoCreateTicks
-	 */
-	public boolean isAutoCreateTicks() {
-		return autoCreateTicks;
-	}
-
-	/**
-	 * @param autoCreateTicks
+	 * @param autoCreateAxes
 	 *            the autoCreateTicks to set
 	 */
-	public void setAutoCreateTicks(boolean autoCreateTicks) {
-		if (this.autoCreateTicks != autoCreateTicks)
+	public void setAutoCreateAxes(boolean autoCreateAxes) {
+		if (this.autoCreateAxes != autoCreateAxes)
 			redrawNeeded = true;
-		this.autoCreateTicks = autoCreateTicks;
+		this.autoCreateAxes = autoCreateAxes;
 	}
 
 	/**
@@ -874,9 +775,8 @@ public class LineChart extends IneChartModul2D implements HasLegendEntries,
 	 */
 	public void cloneProperties(LineChart otherLineChart) {
 		autoScaleViewport = otherLineChart.autoScaleViewport;
-		autoCreateTicks = otherLineChart.autoCreateTicks;
+		autoCreateAxes = otherLineChart.autoCreateAxes;
 		pointSelectionMode = otherLineChart.pointSelectionMode;
-		precalculatePoints = otherLineChart.precalculatePoints;
 		useViewport = otherLineChart.useViewport;
 		overlapFilterDistance = otherLineChart.overlapFilterDistance;
 		redrawNeeded = true;

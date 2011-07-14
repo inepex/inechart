@@ -17,8 +17,8 @@ public abstract class IneChartModul implements Comparable<IneChartModul> {
 	private final int modulComparatorID;
 	protected GraphicalObjectContainer graphicalObjectContainer;
 	protected DrawingArea canvas;
-	protected static final int DEFAULT_PADDING_H = 46;
-	protected static final int DEFAULT_PADDING_V = 28;
+	protected static final int DEFAULT_PADDING_H = 8;
+	protected static final int DEFAULT_PADDING_V = 8;
 	protected int topPadding = DEFAULT_PADDING_V,
 			leftPadding = DEFAULT_PADDING_H,
 			bottomPadding = DEFAULT_PADDING_V,
@@ -51,8 +51,6 @@ public abstract class IneChartModul implements Comparable<IneChartModul> {
 	protected Color backgroundColor = null;
 	public static final LineProperties defaultBorder = new LineProperties(1, new Color("#000", 1.0));
 	
-	
-	
 	public GraphicalObjectContainer getGraphicalObjectContainer() {
 		return graphicalObjectContainer;
 	}
@@ -67,6 +65,12 @@ public abstract class IneChartModul implements Comparable<IneChartModul> {
 		border = defaultBorder;
 	}
 
+	/**
+	 * If a subclass is to be changed after creation, it should override this method.
+	 * If overridden, the subclass should update its {@link #graphicalObjectContainer} during this method,
+	 * so the container {@link IneChart} can display the up-to-date graphics.
+	 * Do not forget to call super.update()!
+	 */
 	public void update(){
 		//border
 		if(border != null){
@@ -123,6 +127,15 @@ public abstract class IneChartModul implements Comparable<IneChartModul> {
 	}
 
 	public abstract boolean redrawNeeded();
+	
+//	/**
+//	 * If a subclass stores any calculated objects (e.g.: {@link LineChart}'s posX, posY in class {@link Point}),
+//	 * should update its canvas based positions via this method.
+//	 * 
+//	 * @param dx
+//	 * @param dy
+//	 */
+//	protected abstract void moveCalculatedObjects(double dx, double dy);
 
 	/**
 	 * @return the topPadding
@@ -259,13 +272,5 @@ public abstract class IneChartModul implements Comparable<IneChartModul> {
 	public void setBackgroundColor(Color backgroundColor) {
 		this.backgroundColor = backgroundColor;
 	}
-
-	/**
-	 * @return the canHandleEvents
-	 */
-	public boolean isCanHandleEvents() {
-		return canHandleEvents;
-	}
-
 	
 }
