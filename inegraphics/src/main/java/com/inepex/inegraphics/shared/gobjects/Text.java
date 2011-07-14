@@ -34,11 +34,13 @@ public class Text extends GraphicalObject{
 		RIGHT
 	}
 	//font color is stored in context color
-	protected final static Context DEFAULT_FONT_CONTEXT = new Context(1, "#ffffff", 1, "#ffffff", 0, 0, 0,  "#ffffff");
+	protected final static Context DEFAULT_FONT_CONTEXT = new Context(1, "#000000", 1, "#000000", 0, 0, 0,  "#000000");
 	protected final static String DEFAULT_FONT_FAMILY = "Calibri, Verdana, Arial, sans-serif";
 	protected final static int DEFAULT_FONT_SIZE = 13;
 	protected final static String DEFAULT_FONT_STYLE = "normal";
 	protected final static String DEFAULT_FONT_WEIGHT = "normal";
+	
+	protected boolean changed = true;
 	
 	public Text(String text,double basePointX, double basePointY){
 		this(basePointX, basePointY, text, DEFAULT_FONT_FAMILY, DEFAULT_FONT_SIZE, DEFAULT_FONT_STYLE, DEFAULT_FONT_WEIGHT, BasePointXPosition.LEFT, BasePointYPosition.TOP);
@@ -86,6 +88,7 @@ public class Text extends GraphicalObject{
 	 */
 	public void setText(String text) {
 		this.text = text;
+		changed = true;
 	}
 
 
@@ -103,6 +106,7 @@ public class Text extends GraphicalObject{
 	 */
 	public void setFontFamily(String fontFamily) {
 		this.fontFamily = fontFamily;
+		changed = true;
 	}
 
 
@@ -119,6 +123,7 @@ public class Text extends GraphicalObject{
 	 */
 	public void setFontSize(int fontSize) {
 		this.fontSize = fontSize;
+		changed = true;
 	}
 
 
@@ -135,6 +140,7 @@ public class Text extends GraphicalObject{
 	 */
 	public void setFontStyle(String fontStyle) {
 		this.fontStyle = fontStyle;
+		changed = true;
 	}
 
 
@@ -151,6 +157,7 @@ public class Text extends GraphicalObject{
 	 */
 	public void setFontWeight(String fontWeight) {
 		this.fontWeight = fontWeight;
+		changed = true;
 	}
 
 
@@ -274,4 +281,14 @@ public class Text extends GraphicalObject{
 		return this.padding[3];
 	}
 
+	public boolean isChanged() {
+		return changed;
+	}
+	
+	/**
+	 * Do not use this method
+	 */
+	public void setChanged(boolean changed) {
+		this.changed = changed;
+	}
 }

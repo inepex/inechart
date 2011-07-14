@@ -438,4 +438,9 @@ public class DrawingAreaGWT extends DrawingArea implements ClickHandler, MouseDo
 		textPositioner.removeAllText();
 		super.update();
 	}
+
+	@Override
+	public void measureText(Text text) {
+		textPositioner.measureText(text);
+	}
 }

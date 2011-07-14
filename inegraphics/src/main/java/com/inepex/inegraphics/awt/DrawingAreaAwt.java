@@ -182,4 +182,10 @@ public class DrawingAreaAwt extends DrawingArea {
 		return image;
 	}
 
+	@Override
+	public void measureText(Text text) {
+		// TODO Auto-generated method stub
+		
+	}
+
 }
