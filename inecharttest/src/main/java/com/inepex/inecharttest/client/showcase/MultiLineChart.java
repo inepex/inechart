@@ -1,5 +1,6 @@
 package com.inepex.inecharttest.client.showcase;
 
+import com.google.gwt.dom.client.Style.Unit;
 import com.google.gwt.user.client.ui.FlowPanel;
 import com.inepex.inechart.chartwidget.IneChart;
 import com.inepex.inechart.chartwidget.linechart.Curve;
@@ -14,10 +15,13 @@ public class MultiLineChart extends FlowPanel{
 		super();
 		init();
 		this.add(chart);
+		chart.getElement().getStyle().setMarginLeft(14, Unit.PX);
 	}
 	
 	private void init(){
 		chart = new IneChart(670, 390);
+		chart.setTitle("Multi Line Chart");
+		chart.setDescription("Generated data, default lookout");
 		lineChart = chart.createLineChart();
 		for(int i=0;i<5;i++){
 			Curve c = new Curve(DataGenerator.generateRandomData(0, 10, 100, 600, 40, 15));
@@ -26,9 +30,9 @@ public class MultiLineChart extends FlowPanel{
 			c.setUseDefaultPointShape(true);
 			lineChart.addCurve(c);
 		}
-		lineChart.setAutoCreateTicks(true);
+		lineChart.setAutoCreateAxes(true);
 		lineChart.setAutoScaleViewport(true);
-		lineChart.autoCreateAxes();	
+		lineChart.createDefaultAxes();	
 	}
 
 	/**

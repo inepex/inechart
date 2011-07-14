@@ -30,11 +30,10 @@ public class IneChartTest implements EntryPoint {
 		RootPanel.get().add(menu);
 		RootPanel.get().add(panel);
 		
-		addTest("linechartTest", new LineChartTest());
-//		addTest("axisTest", new AxisTest());
-		addTest("barchartTest", new BarChartTest());
-		addTest("speedTest", new SpeedTest());
-		addTest("lineAndBar", new LineAndBarChartTest());
+//		addTest("linechartTest", new LineChartTest());
+//		addTest("barchartTest", new BarChartTest());
+//		addTest("speedTest", new SpeedTest());
+//		addTest("lineAndBar", new LineAndBarChartTest());
 		addTest("multiLineChart", new MultiLineChart());
 		
 	}
