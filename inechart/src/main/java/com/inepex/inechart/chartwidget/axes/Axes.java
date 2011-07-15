@@ -323,9 +323,9 @@ public class Axes extends IneChartModul {
 			break;
 		case Middle:
 			if (perpAxis.isHorizontal()) {
-				startX = endX = (canvas.getWidth() - leftPadding - rightPadding) / 2 + leftPadding;
+				startX = endX = (canvas.getWidth() - axis.modulToAlign.getLeftPadding() - axis.modulToAlign.getRightPadding()) / 2 + axis.modulToAlign.getLeftPadding();
 			} else {
-				startY = endY = (canvas.getHeight() - topPadding - bottomPadding) / 2 + topPadding;
+				startY = endY = (canvas.getHeight() - axis.modulToAlign.getTopPadding() - axis.modulToAlign.getBottomPadding()) / 2 + axis.modulToAlign.getTopPadding();
 			}
 			break;
 		case Fixed:

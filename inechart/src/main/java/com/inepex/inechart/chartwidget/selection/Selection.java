@@ -45,9 +45,7 @@ public class Selection extends IneChartModul implements MouseDownHandler, MouseM
 		selectionLookOut = defaultSelectionLookout;
 		modulToSelectFrom = null;
 		mouseDownCoords = null;
-		backgroundColor = null;
-		border = null;
-		
+
 		((DrawingAreaGWT)canvas).getWidget().addDomHandler(this, MouseDownEvent.getType());
 		((DrawingAreaGWT)canvas).getWidget().addDomHandler(this, MouseUpEvent.getType());
 		((DrawingAreaGWT)canvas).getWidget().addDomHandler(this, MouseMoveEvent.getType());

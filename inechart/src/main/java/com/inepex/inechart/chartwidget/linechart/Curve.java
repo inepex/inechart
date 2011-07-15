@@ -4,8 +4,9 @@ import java.util.ArrayList;
 import java.util.TreeMap;
 
 import com.inepex.inechart.chartwidget.axes.Tick;
+import com.inepex.inechart.chartwidget.label.HasTitle;
+import com.inepex.inechart.chartwidget.label.StyledLabel;
 import com.inepex.inechart.chartwidget.misc.HasShadow;
-import com.inepex.inechart.chartwidget.misc.HasTitle;
 import com.inepex.inechart.chartwidget.misc.HasZIndex;
 import com.inepex.inechart.chartwidget.misc.ZIndexComparator;
 import com.inepex.inechart.chartwidget.properties.Color;
@@ -69,13 +70,13 @@ public class Curve implements HasZIndex, HasShadow, Comparable<Curve>, HasTitle 
 	double yMax = -Double.MAX_VALUE;
 	double vpMin, vpMax;
 	
-	String title, description;
+	StyledLabel title, description;
 
 	/**
 	 * Creates an empty (without points) curve
 	 */
 	public Curve() {
-		title = autoNameNo++ + "";
+		title = new StyledLabel(autoNameNo++ + "");
 	}
 
 	/**
@@ -89,7 +90,7 @@ public class Curve implements HasZIndex, HasShadow, Comparable<Curve>, HasTitle 
 		for (TreeMap<Double, Double> dataSet : dataSets) {
 			addDataSet(dataSet);
 		}
-		title = autoNameNo++ + "";
+		title = new StyledLabel(autoNameNo++ + "");
 	}
 
 	/**
@@ -99,7 +100,7 @@ public class Curve implements HasZIndex, HasShadow, Comparable<Curve>, HasTitle 
 	 */
 	public Curve(TreeMap<Double, Double> dataSet) {
 		addDataSet(dataSet);
-		title = autoNameNo++ + "";
+		title = new StyledLabel(autoNameNo++ + "");
 	}
 
 	/**
@@ -608,7 +609,6 @@ public class Curve implements HasZIndex, HasShadow, Comparable<Curve>, HasTitle 
 		}
 	}
 
-
 	public boolean isAutoFill() {
 		return autoFill;
 	}
@@ -632,25 +632,23 @@ public class Curve implements HasZIndex, HasShadow, Comparable<Curve>, HasTitle 
 	public void setUseDefaultPointShape(boolean useDefaultPointShape) {
 		this.useDefaultPointShape = useDefaultPointShape;
 	}
-	
-	@Override
-	public void setTitle(String title) {
-		this.title = title;	
-	}
 
-	@Override
-	public String getTitle() {
+	public StyledLabel getName() {
 		return title;
 	}
 
-	@Override
-	public void setDescription(String description) {
-		this.description = description;
+	public void setName(StyledLabel name) {
+		this.title = name;
 	}
 
-	@Override
-	public String getDescription() {
+	public StyledLabel getDescription() {
 		return description;
 	}
+
+	public void setDescription(StyledLabel description) {
+		this.description = description;
+	}
+	
+
 
 }

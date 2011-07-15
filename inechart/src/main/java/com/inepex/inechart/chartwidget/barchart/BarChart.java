@@ -3,12 +3,14 @@ package com.inepex.inechart.chartwidget.barchart;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Iterator;
+import java.util.List;
 import java.util.TreeMap;
 
 import com.inepex.inechart.chartwidget.IneChartModul2D;
 import com.inepex.inechart.chartwidget.Viewport;
 import com.inepex.inechart.chartwidget.axes.Axes;
 import com.inepex.inechart.chartwidget.axes.Axis.AxisDirection;
+import com.inepex.inechart.chartwidget.label.LegendEntry;
 import com.inepex.inechart.chartwidget.linechart.Curve;
 import com.inepex.inechart.chartwidget.linechart.Point;
 import com.inepex.inechart.chartwidget.misc.ColorSet;
@@ -171,7 +173,7 @@ public class BarChart extends IneChartModul2D implements HasShadow, HasZIndex {
 	}
 
 	public String addDataSet(Curve curve) {
-		return addDataSet(curve, curve.getTitle());
+		return addDataSet(curve, curve.getName().getText());
 	}
 
 	public String addDataSet(TreeMap<Double, Double> dataSet, String name) {
@@ -933,6 +935,12 @@ public class BarChart extends IneChartModul2D implements HasShadow, HasZIndex {
 		if (autoCreateTicks)
 			createDefaultAxes();
 		
+	}
+
+	@Override
+	public List<LegendEntry> getLegendEntries() {
+		// TODO Auto-generated method stub
+		return null;
 	}
 
 }

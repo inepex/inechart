@@ -7,6 +7,10 @@ public class Color {
 	private String color;
 	private double alpha;
 
+	public Color(){
+		this(DEFAULT_COLOR);
+	}
+	
 	public Color(String color) {
 		this.color = color;
 		this.alpha = DEFAULT_ALPHA;

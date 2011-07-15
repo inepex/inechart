@@ -1,13 +1,12 @@
 package com.inepex.inechart.chartwidget;
 
-import com.inepex.inechart.chartwidget.properties.Color;
-import com.inepex.inechart.chartwidget.properties.LineProperties;
-import com.inepex.inegraphics.impl.client.ishapes.Rectangle;
-import com.inepex.inegraphics.shared.Context;
 import com.inepex.inegraphics.shared.DrawingArea;
 import com.inepex.inegraphics.shared.GraphicalObjectContainer;
 
 /**
+ * 
+ * An {@link IneChartModul} updates its model and (re)draw its graphics on {@link #update()} call.
+ * The graphics should be stored in graphicalObjectContainer.
  * 
  * @author Miklós Süveges / Inepex Ltd.
  * 
@@ -17,16 +16,7 @@ public abstract class IneChartModul implements Comparable<IneChartModul> {
 	private final int modulComparatorID;
 	protected GraphicalObjectContainer graphicalObjectContainer;
 	protected DrawingArea canvas;
-	protected static final int DEFAULT_PADDING_H = 8;
-	protected static final int DEFAULT_PADDING_V = 8;
-	protected int topPadding = DEFAULT_PADDING_V,
-			leftPadding = DEFAULT_PADDING_H,
-			bottomPadding = DEFAULT_PADDING_V,
-			rightPadding = DEFAULT_PADDING_H;
-	
-	protected static final int backgroundZIndex = Integer.MIN_VALUE + 100;
-	protected static final int borderZIndex = backgroundZIndex + 1;
-	
+		
 
 	/**
 	 * The modul should not recieve (handle) events when false
@@ -47,9 +37,7 @@ public abstract class IneChartModul implements Comparable<IneChartModul> {
 	 */
 	protected boolean isVisible;
 	
-	protected LineProperties border = null;
-	protected Color backgroundColor = null;
-	public static final LineProperties defaultBorder = new LineProperties(1, new Color("#000", 1.0));
+	
 	
 	public GraphicalObjectContainer getGraphicalObjectContainer() {
 		return graphicalObjectContainer;
@@ -62,7 +50,6 @@ public abstract class IneChartModul implements Comparable<IneChartModul> {
 		canHandleEvents = false;
 		requestFocus = false;
 		isVisible = true;
-		border = defaultBorder;
 	}
 
 	/**
@@ -71,132 +58,15 @@ public abstract class IneChartModul implements Comparable<IneChartModul> {
 	 * so the container {@link IneChart} can display the up-to-date graphics.
 	 * Do not forget to call super.update()!
 	 */
-	public void update(){
-		//border
-		if(border != null){
-			graphicalObjectContainer.addGraphicalObject(
-					new Rectangle(
-							leftPadding //- border.getLineWidth()
-							,topPadding //- border.getLineWidth()
-							,getWidth()// + 2*border.getLineWidth()
-							,getHeight()//+ 2*border.getLineWidth()
-							,0, 
-							borderZIndex,
-							new Context(border.getLineColor().getAlpha(),
-									border.getLineColor().getColor(),
-									border.getLineWidth(),
-									Color.DEFAULT_COLOR,
-									0,0,0,
-									Color.DEFAULT_COLOR),
-							true, false));
-		}
-		if(backgroundColor != null){
-			graphicalObjectContainer.addGraphicalObject(
-					new Rectangle(leftPadding, topPadding, getWidth(), getHeight(),
-							0, 
-							backgroundZIndex,
-							new Context(backgroundColor.getAlpha(),
-									Color.DEFAULT_COLOR,
-									0,
-									backgroundColor.getColor(),
-									0,0,0,
-									Color.DEFAULT_COLOR),
-							false, true));
-		}
-	}
+	public abstract void update();
 	
-	protected boolean isInsideModul(double posOnCanvas, boolean isX){
-		//y
-		if(!isX){
-			if(posOnCanvas < topPadding  || posOnCanvas > canvas.getHeight() - bottomPadding){
-				return false;
-			}
-			return true;
-		}
-		//x
-		else{
-			if(posOnCanvas > leftPadding && posOnCanvas < canvas.getWidth()-rightPadding){
-				return true;
-			}
-			return false;
-		}
-	}
-
-	public void setLeftPadding(int leftPadding) {
-		this.leftPadding = leftPadding;
-	}
-
+	/**
+	 * Tells the chart if the modul needs an {@link #update()} call
+	 * @return
+	 */
 	public abstract boolean redrawNeeded();
 	
-//	/**
-//	 * If a subclass stores any calculated objects (e.g.: {@link LineChart}'s posX, posY in class {@link Point}),
-//	 * should update its canvas based positions via this method.
-//	 * 
-//	 * @param dx
-//	 * @param dy
-//	 */
-//	protected abstract void moveCalculatedObjects(double dx, double dy);
-
-	/**
-	 * @return the topPadding
-	 */
-	public int getTopPadding() {
-		return topPadding;
-	}
-
-	/**
-	 * @param topPadding
-	 *            the topPadding to set
-	 */
-	public void setTopPadding(int topPadding) {
-		this.topPadding = topPadding;
-	}
-
-	/**
-	 * @return the bottomPadding
-	 */
-	public int getBottomPadding() {
-		return bottomPadding;
-	}
-
-	/**
-	 * @param bottomPadding
-	 *            the bottomPadding to set
-	 */
-	public void setBottomPadding(int bottomPadding) {
-		this.bottomPadding = bottomPadding;
-	}
-
-	/**
-	 * @return the rightPadding
-	 */
-	public int getRightPadding() {
-		return rightPadding;
-	}
-
-	/**
-	 * @param rightPadding
-	 *            the rightPadding to set
-	 */
-	public void setRightPadding(int rightPadding) {
-		this.rightPadding = rightPadding;
-	}
-
-	/**
-	 * @return the leftPadding
-	 */
-	public int getLeftPadding() {
-		return leftPadding;
-	}
-
-	public int getWidth() {
-		return canvas.getWidth() - leftPadding - rightPadding;
-	}
-
-	public int getHeight() {
-		return canvas.getHeight() - topPadding - bottomPadding;
-	}
-
+	
 	/**
 	 * @return the canHandleEvents
 	 */
@@ -245,32 +115,4 @@ public abstract class IneChartModul implements Comparable<IneChartModul> {
 		this.isVisible = isVisible;
 	}
 
-	/**
-	 * @return the border
-	 */
-	public LineProperties getBorder() {
-		return border;
-	}
-
-	/**
-	 * @param border the border to set
-	 */
-	public void setBorder(LineProperties border) {
-		this.border = border;
-	}
-
-	/**
-	 * @return the backgroundColor
-	 */
-	public Color getBackgroundColor() {
-		return backgroundColor;
-	}
-
-	/**
-	 * @param backgroundColor the backgroundColor to set
-	 */
-	public void setBackgroundColor(Color backgroundColor) {
-		this.backgroundColor = backgroundColor;
-	}
-	
 }

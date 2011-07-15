@@ -10,8 +10,10 @@ import com.inepex.inechart.chartwidget.IneChartModul2D;
 import com.inepex.inechart.chartwidget.Viewport;
 import com.inepex.inechart.chartwidget.axes.Axes;
 import com.inepex.inechart.chartwidget.barchart.BarChart;
+import com.inepex.inechart.chartwidget.label.HasTitle;
+import com.inepex.inechart.chartwidget.label.LabelFactoryBase;
+import com.inepex.inechart.chartwidget.label.StyledLabel;
 import com.inepex.inechart.chartwidget.linechart.LineChart;
-import com.inepex.inechart.chartwidget.misc.HasTitle;
 import com.inepex.inechart.chartwidget.piechart.PieChart;
 import com.inepex.inegraphics.awt.DrawingAreaAwt;
 
@@ -21,11 +23,10 @@ public class IneAwtChart implements HasTitle{
 	private ArrayList<Viewport> modulViewports;
 	private DrawingAreaAwt drawingArea;
 	private IneChartModul focus;
-	private String title, description;
+	private StyledLabel title, description;
 	private boolean autoScaleModuls = true;
-	private boolean includeLegendInPadding = true;
 	private boolean includeTitleInPadding = true;
-	private AwtLabelFactory legendFactory;
+	private LabelFactoryBase legendFactory;
 
 	// properties
 	private int canvasWidth;
@@ -36,7 +37,7 @@ public class IneAwtChart implements HasTitle{
 		canvasHeight = height;
 		canvasWidth = width;
 		this.drawingArea = new DrawingAreaAwt(canvasWidth, canvasHeight);
-		legendFactory = new AwtLabelFactory(drawingArea);
+		legendFactory = new LabelFactoryBase(drawingArea);
 		legendFactory.setChartTitle(this);
 		moduls = new ArrayList<IneChartModul>();
 		axes = new Axes(drawingArea);
@@ -50,12 +51,14 @@ public class IneAwtChart implements HasTitle{
 	public LineChart createLineChart() {
 		LineChart chart = new LineChart(drawingArea, getAxes());
 		moduls.add(chart);
+		legendFactory.addHasLegendEntries(chart);
 		return chart;
 	}
 
 	public LineChart createLineChart(Viewport viewport) {
 		LineChart chart = new LineChart(drawingArea, getAxes(), viewport);
 		moduls.add(chart);
+		legendFactory.addHasLegendEntries(chart);
 		return chart;
 	}
 
@@ -102,6 +105,8 @@ public class IneAwtChart implements HasTitle{
 	}
 
 	public void update() {
+
+		legendFactory.update();
 		releaseFocusIfPossible();
 		// grant focus if possible and requested
 		if (focus == null) {
@@ -132,7 +137,7 @@ public class IneAwtChart implements HasTitle{
 		if (autoScaleModuls){
 			for (IneChartModul modul : moduls) {
 				if(modul instanceof IneChartModul2D){
-					((IneChartModul2D) modul).calculatePadding(legendFactory.getPadding(includeTitleInPadding, includeLegendInPadding));
+					((IneChartModul2D) modul).calculatePadding(legendFactory.getPadding(includeTitleInPadding));
 				}
 			}
 			axes.forcedUpdate();
@@ -164,6 +169,7 @@ public class IneAwtChart implements HasTitle{
 				}
 			}
 			drawingArea.addAllGraphicalObject(axes.getGraphicalObjectContainer());
+			drawingArea.addAllGraphicalObject(legendFactory.getGraphicalObjectContainer());
 			drawingArea.update();
 		}
 		//reset viewports 
@@ -179,8 +185,6 @@ public class IneAwtChart implements HasTitle{
 				vp.resetChanged();
 		}
 		
-		legendFactory.updateChartTitle();
-		legendFactory.updateLegends();
 	}
 
 	public boolean redrawNeeded() {
@@ -220,22 +224,24 @@ public class IneAwtChart implements HasTitle{
 	}
 
 	@Override
-	public void setDescription(String description) {
+	public void setName(StyledLabel name) {
+		this.title = name;
+	}
+
+	@Override
+	public StyledLabel getName() {
+		return title;
+	}
+
+	@Override
+	public void setDescription(StyledLabel description) {
 		this.description = description;
 	}
 
 	@Override
-	public String getDescription() {
+	public StyledLabel getDescription() {
 		return description;
 	}
 
-	@Override
-	public void setTitle(String title) {
-		this.title = title;	
-	}
 
-	@Override
-	public String getTitle() {
-		return title;
-	}
 }

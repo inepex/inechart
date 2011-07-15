@@ -3,7 +3,8 @@ package com.inepex.inechart.chartwidget.axes;
 import java.util.ArrayList;
 
 import com.inepex.inechart.chartwidget.IneChartModul2D;
-import com.inepex.inechart.chartwidget.misc.HasTitle;
+import com.inepex.inechart.chartwidget.label.HasTitle;
+import com.inepex.inechart.chartwidget.label.StyledLabel;
 import com.inepex.inechart.chartwidget.misc.HasZIndex;
 import com.inepex.inechart.chartwidget.properties.Color;
 import com.inepex.inechart.chartwidget.properties.LineProperties;
@@ -86,8 +87,8 @@ public class Axis implements Comparable<Axis>, HasZIndex, HasTitle {
 		Number, Time
 	}
 
-	protected String title;
-	protected String description;
+	protected StyledLabel title;
+	protected StyledLabel description;
 
 	protected AxisDataType axisDataType;
 	/**
@@ -418,22 +419,22 @@ public class Axis implements Comparable<Axis>, HasZIndex, HasTitle {
 	}
 
 	@Override
-	public void setTitle(String title) {
-		this.title = title;	
+	public void setName(StyledLabel name) {
+		this.title = name;	
 	}
 
 	@Override
-	public String getTitle() {
+	public StyledLabel getName() {
 		return title;
 	}
 
 	@Override
-	public void setDescription(String description) {
+	public void setDescription(StyledLabel description) {
 		this.description = description;
 	}
 
 	@Override
-	public String getDescription() {
+	public StyledLabel getDescription() {
 		return description;
 	}
 }

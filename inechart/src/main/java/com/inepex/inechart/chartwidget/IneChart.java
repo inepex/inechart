@@ -9,9 +9,11 @@ import com.google.gwt.user.client.ui.AbsolutePanel;
 import com.google.gwt.user.client.ui.Composite;
 import com.inepex.inechart.chartwidget.axes.Axes;
 import com.inepex.inechart.chartwidget.barchart.BarChart;
-import com.inepex.inechart.chartwidget.legend.GWTLabelFactory;
+import com.inepex.inechart.chartwidget.label.GWTLabelFactory;
+import com.inepex.inechart.chartwidget.label.HasTitle;
+import com.inepex.inechart.chartwidget.label.StyledLabel;
+import com.inepex.inechart.chartwidget.label.LabelFactoryBase;
 import com.inepex.inechart.chartwidget.linechart.LineChart;
-import com.inepex.inechart.chartwidget.misc.HasTitle;
 import com.inepex.inechart.chartwidget.piechart.PieChart;
 import com.inepex.inechart.chartwidget.resources.ResourceHelper;
 import com.inepex.inechart.chartwidget.selection.Selection;
@@ -32,10 +34,9 @@ public class IneChart extends Composite implements HasTitle{
 	private ArrayList<Viewport> modulViewports;
 	private DrawingAreaGWT drawingArea;
 	private IneChartModul focus;
-	private GWTLabelFactory legendFactory;
-	private String title, description;
+	private LabelFactoryBase legendFactory;
+	private StyledLabel title, description;
 	private boolean autoScaleModuls = true;
-	private boolean includeLegendInPadding = true;
 	private boolean includeTitleInPadding = true;
 
 	// properties
@@ -59,7 +60,8 @@ public class IneChart extends Composite implements HasTitle{
 		modulViewports = new ArrayList<Viewport>();
 		mainPanel.add(drawingArea.getWidget(), 0, 0);
 		this.initWidget(mainPanel);
-		legendFactory = new GWTLabelFactory(mainPanel, this);
+//		legendFactory = new GWTLabelFactory(mainPanel, this, drawingArea);
+		legendFactory = new LabelFactoryBase(drawingArea);
 		drawingArea.getCanvasWidget().setStyleName(ResourceHelper.getRes().style().chartWidget());
 	}
 	
@@ -178,7 +180,7 @@ public class IneChart extends Composite implements HasTitle{
 		if (autoScaleModuls){
 			for (IneChartModul modul : moduls) {
 				if(modul instanceof IneChartModul2D){
-					((IneChartModul2D) modul).calculatePadding(legendFactory.getPadding(includeTitleInPadding, includeLegendInPadding));
+					((IneChartModul2D) modul).calculatePadding(legendFactory.getPadding(includeTitleInPadding));
 				}
 			}
 			axes.forcedUpdate();
@@ -225,8 +227,7 @@ public class IneChart extends Composite implements HasTitle{
 				vp.resetChanged();
 		}
 		
-		legendFactory.updateChartTitle();
-		legendFactory.updateLegends();
+		legendFactory.update();
 	}
 
 	public boolean redrawNeeded() {
@@ -242,23 +243,25 @@ public class IneChart extends Composite implements HasTitle{
 	}
 
 	@Override
-	public void setDescription(String description) {
+	public void setDescription(StyledLabel description) {
 		this.description = description;
 	}
 
 	@Override
-	public String getDescription() {
+	public StyledLabel getDescription() {
 		return description;
 	}
 
 	@Override
-	public void setTitle(String title) {
-		this.title = title;	
+	public void setName(StyledLabel name) {
+		this.title = name;	
 	}
 
 	@Override
-	public String getTitle() {
+	public StyledLabel getName() {
 		return title;
 	}
+
+	
 
 }

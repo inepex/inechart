@@ -31,6 +31,10 @@ public class LineProperties {
 	private LineStyle style;
 	private double dashStrokeLength, dashDistance;
 
+	public LineProperties(double lineWidth){
+		this(lineWidth, new Color("#000000"));
+	}
+	
 	public LineProperties(double lineWidth, Color lineColor) {
 		this.lineWidth = lineWidth;
 		this.lineColor = lineColor;

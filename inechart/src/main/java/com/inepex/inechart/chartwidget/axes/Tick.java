@@ -1,5 +1,7 @@
 package com.inepex.inechart.chartwidget.axes;
 
+import com.inepex.inechart.chartwidget.misc.HorizontalPosition;
+import com.inepex.inechart.chartwidget.misc.VerticalPosition;
 import com.inepex.inechart.chartwidget.properties.LineProperties;
 
 public class Tick implements Comparable<Tick> {
@@ -9,17 +11,9 @@ public class Tick implements Comparable<Tick> {
 		Cross, To_Upper_Values, To_Lower_Values;
 	}
 
-	public static enum TickTextVerticalPosition {
-		Top, Middle, Bottom, Auto;
-	}
-
-	public static enum TickTextHorizontalPosition {
-		Left, Middle, Right, Auto;
-	}
-
 	TickPosition tickPosition;
-	TickTextHorizontalPosition tickTextHorizontalPosition;
-	TickTextVerticalPosition tickTextVerticalPosition;
+	HorizontalPosition tickTextHorizontalPosition;
+	VerticalPosition tickTextVerticalPosition;
 
 	/**
 	 * the position of this tick on the parent axis
@@ -89,8 +83,8 @@ public class Tick implements Comparable<Tick> {
 		this.tickLength = tickLength;
 		this.tickText = tickText;
 		this.tickPosition = TickPosition.Cross;
-		tickTextHorizontalPosition = TickTextHorizontalPosition.Auto;
-		tickTextVerticalPosition = TickTextVerticalPosition.Auto;
+		tickTextHorizontalPosition =  HorizontalPosition.Auto;
+		tickTextVerticalPosition = VerticalPosition.Auto;
 	}
 
 	/**

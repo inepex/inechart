@@ -1,17 +1,23 @@
 package com.inepex.inechart.chartwidget;
 
 import java.util.ArrayList;
+import java.util.List;
 
 import com.inepex.inechart.chartwidget.axes.Axes;
 import com.inepex.inechart.chartwidget.axes.Axis;
 import com.inepex.inechart.chartwidget.axes.Tick;
 import com.inepex.inechart.chartwidget.axes.TickFactory;
 import com.inepex.inechart.chartwidget.axes.Axis.AxisDirection;
+import com.inepex.inechart.chartwidget.label.HasLegend;
+import com.inepex.inechart.chartwidget.label.Legend;
+import com.inepex.inechart.chartwidget.label.LegendEntry;
 import com.inepex.inechart.chartwidget.properties.Color;
 import com.inepex.inechart.chartwidget.properties.LineProperties;
+import com.inepex.inegraphics.impl.client.ishapes.Rectangle;
+import com.inepex.inegraphics.shared.Context;
 import com.inepex.inegraphics.shared.DrawingArea;
 
-public abstract class IneChartModul2D extends IneChartModul implements	HasCoordinateSystem {
+public abstract class IneChartModul2D extends IneChartModul implements	HasCoordinateSystem, HasLegend {
 
 	protected Axis xAxis;
 	protected Axis yAxis;
@@ -23,6 +29,23 @@ public abstract class IneChartModul2D extends IneChartModul implements	HasCoordi
 	protected boolean autoScaleViewport;
 	public static final LineProperties defaultGridLine = new LineProperties(1.8, new Color("#E8E8E8", 1),4,4);
 	protected boolean autocalcPadding = true;
+	
+	protected static final int DEFAULT_PADDING_H = 8;
+	protected static final int DEFAULT_PADDING_V = 8;
+	protected int topPadding = DEFAULT_PADDING_V,
+			leftPadding = DEFAULT_PADDING_H,
+			bottomPadding = DEFAULT_PADDING_V,
+			rightPadding = DEFAULT_PADDING_H;
+	
+	protected static final int backgroundZIndex = Integer.MIN_VALUE + 100;
+	protected static final int borderZIndex = backgroundZIndex + 1;
+	protected LineProperties border = null;
+	protected Color backgroundColor = null;
+	public static final LineProperties defaultBorder = new LineProperties(1, new Color("#000", 1.0));
+	
+	protected boolean showLegend = true;
+	protected Legend legend;
+	
 	
 	protected IneChartModul2D(DrawingArea canvas, Axes axes) {
 		this(canvas, axes, new Viewport());
@@ -47,9 +70,45 @@ public abstract class IneChartModul2D extends IneChartModul implements	HasCoordi
 		axes.addAxis(xAxis);
 		axes.addAxis(yAxis);
 		extraAxes = new ArrayList<Axis>();
+		border = defaultBorder;
+		legend = new Legend();
 	}
 
 	public abstract void updateModulsAxes();
+	
+	public void update(){
+		//border
+		if(border != null){
+			graphicalObjectContainer.addGraphicalObject(
+					new Rectangle(
+							leftPadding //- border.getLineWidth()
+							,topPadding //- border.getLineWidth()
+							,getWidth()// + 2*border.getLineWidth()
+							,getHeight()//+ 2*border.getLineWidth()
+							,0, 
+							borderZIndex,
+							new Context(border.getLineColor().getAlpha(),
+									border.getLineColor().getColor(),
+									border.getLineWidth(),
+									Color.DEFAULT_COLOR,
+									0,0,0,
+									Color.DEFAULT_COLOR),
+									true, false));
+		}
+		if(backgroundColor != null){
+			graphicalObjectContainer.addGraphicalObject(
+					new Rectangle(leftPadding, topPadding, getWidth(), getHeight(),
+							0, 
+							backgroundZIndex,
+							new Context(backgroundColor.getAlpha(),
+									Color.DEFAULT_COLOR,
+									0,
+									backgroundColor.getColor(),
+									0,0,0,
+									Color.DEFAULT_COLOR),
+									false, true));
+		}
+	}
 	
 	public void calculatePadding(double[] minPadding){
 		if(!autocalcPadding)
@@ -309,4 +368,100 @@ public abstract class IneChartModul2D extends IneChartModul implements	HasCoordi
 	public void setAutocalcPadding(boolean autocalcPadding) {
 		this.autocalcPadding = autocalcPadding;
 	}
+
+	protected boolean isInsideModul(double posOnCanvas, boolean isX){
+		//y
+		if(!isX){
+			if(posOnCanvas < topPadding  || posOnCanvas > canvas.getHeight() - bottomPadding){
+				return false;
+			}
+			return true;
+		}
+		//x
+		else{
+			if(posOnCanvas > leftPadding && posOnCanvas < canvas.getWidth()-rightPadding){
+				return true;
+			}
+			return false;
+		}
+	}
+
+	public void setLeftPadding(int leftPadding) {
+		this.leftPadding = leftPadding;
+	}
+
+	public int getWidth() {
+		return canvas.getWidth() - leftPadding - rightPadding;
+	}
+
+	public int getHeight() {
+		return canvas.getHeight() - topPadding - bottomPadding;
+	}
+
+	public int getTopPadding() {
+		return topPadding;
+	}
+
+	public void setTopPadding(int topPadding) {
+		this.topPadding = topPadding;
+	}
+
+	public int getBottomPadding() {
+		return bottomPadding;
+	}
+
+	public void setBottomPadding(int bottomPadding) {
+		this.bottomPadding = bottomPadding;
+	}
+
+	public int getRightPadding() {
+		return rightPadding;
+	}
+
+	public void setRightPadding(int rightPadding) {
+		this.rightPadding = rightPadding;
+	}
+
+	public LineProperties getBorder() {
+		return border;
+	}
+
+	public void setBorder(LineProperties border) {
+		this.border = border;
+	}
+
+	public Color getBackgroundColor() {
+		return backgroundColor;
+	}
+
+	public void setBackgroundColor(Color backgroundColor) {
+		this.backgroundColor = backgroundColor;
+	}
+
+	public int getLeftPadding() {
+		return leftPadding;
+	}
+
+
+	@Override
+	public boolean showLegend() {
+		return showLegend;
+	}
+
+	@Override
+	public void setShowLegend(boolean showLegend) {
+		this.showLegend = showLegend;
+	}
+
+	@Override
+	public Legend getLegend() {
+		return legend;
+	}
+
+	@Override
+	public void setLegend(Legend legend) {
+		this.legend = legend;
+	}
+
+	
 }

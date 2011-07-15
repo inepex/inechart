@@ -11,6 +11,12 @@ public class ShapeProperties {
 	private Color fillColor;
 
 	/**
+	 * A shape without line (border), filled with default Color (black)
+	 */
+	public ShapeProperties(){
+		this(new Color());
+	}
+	/**
 	 * 
 	 * @param lineProperties
 	 */
@@ -24,6 +30,13 @@ public class ShapeProperties {
 		this.fillColor = fillColor;
 	}
 
+	/**
+	 * A shape with fillColor and without line (border)
+	 * @param fillColor
+	 */
+	public ShapeProperties(Color fillColor){
+		this(null, fillColor) ;
+	}
 	/**
 	 * @return the lineProperties
 	 */

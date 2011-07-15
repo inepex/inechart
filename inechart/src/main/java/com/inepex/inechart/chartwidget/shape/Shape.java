@@ -17,7 +17,11 @@ public abstract class Shape implements HasShadow, HasZIndex {
 	double shadowOffsetX = 0, shadowOffsetY = 0;
 	Color shadowColor = null;
 
-	protected Shape(ShapeProperties prop) {
+	protected Shape(){
+		this(new ShapeProperties());
+	}
+	
+ 	protected Shape(ShapeProperties prop) {
 		properties = prop;
 	}
 
