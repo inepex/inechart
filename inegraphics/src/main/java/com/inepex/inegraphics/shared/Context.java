@@ -26,6 +26,8 @@ public class Context {
 //	protected double scaleX, scaleY;
 	
 	
+	
+	
 	public Context(double alpha, String strokeColor, double strokeWidth,
 			String fillColor, double shadowOffsetX, double shadowOffsetY,
 			double shadowAlpha, String shadowColor) {
@@ -38,6 +40,17 @@ public class Context {
 		this.shadowOffsetY = shadowOffsetY;
 		this.shadowAlpha = shadowAlpha;
 		this.shadowColor = shadowColor;
+	}
+
+	/**
+	 * Creates a context without defining shadows
+	 * @param alpha
+	 * @param strokeColor
+	 * @param strokeWidth
+	 * @param fillColor
+	 */
+	public Context(double alpha, String strokeColor, double strokeWidth, String fillColor) {
+		this(alpha, strokeColor, strokeWidth, fillColor, 0, 0, 0, strokeColor);
 	}
 
 	/**
