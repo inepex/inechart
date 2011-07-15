@@ -920,7 +920,7 @@ public class BarChart extends IneChartModul2D implements HasShadow, HasZIndex {
 	}
 
 	@Override
-	protected void updateModulsAxes() {
+	public void updateModulsAxes() {
 		if (dataSets.size() == 0)
 			return;
 		if (autoScaleViewport) {

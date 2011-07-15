@@ -49,9 +49,9 @@ public abstract class IneChartModul2D extends IneChartModul implements	HasCoordi
 		extraAxes = new ArrayList<Axis>();
 	}
 
-	protected abstract void updateModulsAxes();
+	public abstract void updateModulsAxes();
 	
-	protected void calculatePadding(double[] minPadding){
+	public void calculatePadding(double[] minPadding){
 		if(!autocalcPadding)
 			return;
 		double[] padding = mergePaddings(new double[]{DEFAULT_PADDING_V,DEFAULT_PADDING_H,DEFAULT_PADDING_V,DEFAULT_PADDING_H}, minPadding);

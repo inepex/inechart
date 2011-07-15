@@ -9,7 +9,7 @@ import com.google.gwt.user.client.ui.AbsolutePanel;
 import com.google.gwt.user.client.ui.Composite;
 import com.inepex.inechart.chartwidget.axes.Axes;
 import com.inepex.inechart.chartwidget.barchart.BarChart;
-import com.inepex.inechart.chartwidget.legend.LegendFactory;
+import com.inepex.inechart.chartwidget.legend.GWTLabelFactory;
 import com.inepex.inechart.chartwidget.linechart.LineChart;
 import com.inepex.inechart.chartwidget.misc.HasTitle;
 import com.inepex.inechart.chartwidget.piechart.PieChart;
@@ -31,11 +31,8 @@ public class IneChart extends Composite implements HasTitle{
 	private Selection selection = null;
 	private ArrayList<Viewport> modulViewports;
 	private DrawingAreaGWT drawingArea;
-	private RepeatingCommand updateCommand = null;
-	private int updateInterval = DEFAULT_UPDATE_INTERVAL;
-	public static final int DEFAULT_UPDATE_INTERVAL = 800;
 	private IneChartModul focus;
-	private LegendFactory legendFactory;
+	private GWTLabelFactory legendFactory;
 	private String title, description;
 	private boolean autoScaleModuls = true;
 	private boolean includeLegendInPadding = true;
@@ -62,7 +59,7 @@ public class IneChart extends Composite implements HasTitle{
 		modulViewports = new ArrayList<Viewport>();
 		mainPanel.add(drawingArea.getWidget(), 0, 0);
 		this.initWidget(mainPanel);
-		legendFactory = new LegendFactory(mainPanel, this);
+		legendFactory = new GWTLabelFactory(mainPanel, this);
 		drawingArea.getCanvasWidget().setStyleName(ResourceHelper.getRes().style().chartWidget());
 	}
 	
@@ -242,20 +239,6 @@ public class IneChart extends Composite implements HasTitle{
 
 	public DrawingAreaGWT getDrawingArea() {
 		return this.drawingArea;
-	}
-
-	public void setUpdateInterval(int ms) {
-
-		updateCommand = new RepeatingCommand() {
-
-			@Override
-			public boolean execute() {
-				update();
-				return true;
-			}
-		};
-		Scheduler.get().scheduleFixedDelay(updateCommand, ms);
-
 	}
 
 	@Override

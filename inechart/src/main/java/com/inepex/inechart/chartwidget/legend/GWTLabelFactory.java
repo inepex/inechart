@@ -18,7 +18,7 @@ import com.inepex.inechart.chartwidget.resources.ResourceHelper;
  * 
  * @author Miklós Süveges / Inepex Ltd.
  */
-public class LegendFactory {
+public class GWTLabelFactory implements LabelFactory{
 	private class LegendBinding{
 		HasLegendEntries modul;
 		LegendWidget view;
@@ -42,10 +42,10 @@ public class LegendFactory {
 	HasTitle chartTitle;
 	FlowPanel chartTitlePanel;
 	
-	public LegendFactory(AbsolutePanel chartMainPanel, HasTitle chartTitle) {
+	public GWTLabelFactory(AbsolutePanel chartMainPanel, HasTitle chartTitle) {
 		this.chartMainPanel = chartMainPanel;
 		this.chartTitle = chartTitle;
-		bindings = new ArrayList<LegendFactory.LegendBinding>();
+		bindings = new ArrayList<GWTLabelFactory.LegendBinding>();
 		chartTitlePanel = new FlowPanel();
 		chartTitlePanel.setStyleName(ResourceHelper.getRes().style().chartTitle());
 	}
@@ -63,6 +63,7 @@ public class LegendFactory {
 		}
 	}
 	
+	@Override
 	public void addHasLegendEntries(HasLegendEntries hasLegendEntries){
 		bindings.add(new LegendBinding(hasLegendEntries, new LegendWidget()));
 	}
@@ -108,6 +109,7 @@ public class LegendFactory {
 		return ret;
 	}
 	
+	@Override
 	public double[] getPadding(boolean includeTitle, boolean includeLegends){
 		double[] ret = new double[]{0,0,0,0};
 		if(includeTitle){
@@ -136,4 +138,12 @@ public class LegendFactory {
 		}
 		return ret;
 	}
+
+	
+	@Override
+	public void setChartTitle(HasTitle chartTitle) {
+		this.chartTitle = chartTitle;
+	}
+
+	
 }

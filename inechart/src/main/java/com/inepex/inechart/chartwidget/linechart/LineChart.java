@@ -146,7 +146,7 @@ public class LineChart extends IneChartModul2D implements HasLegendEntries,
 	}
 
 	@Override
-	protected void updateModulsAxes() {
+	public void updateModulsAxes() {
 		if (curves == null || curves.size() == 0)
 			return;
 		if (autoScaleViewport) {
