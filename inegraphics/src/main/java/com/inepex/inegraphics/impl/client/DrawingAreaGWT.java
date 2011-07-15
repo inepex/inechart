@@ -179,9 +179,6 @@ public class DrawingAreaGWT extends DrawingArea implements ClickHandler, MouseDo
 			}
 			else if(pe instanceof MoveTo){
 				MoveTo mTo = (MoveTo) pe;
-				//we have to stroke
-//				if(path.hasStroke())
-//					canvas.stroke();
 				canvas.moveTo(mTo.getEndPointX(), mTo.getEndPointY());
 			}
 		}
