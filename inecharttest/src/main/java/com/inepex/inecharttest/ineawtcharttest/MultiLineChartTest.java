@@ -13,6 +13,7 @@ import javax.swing.JFrame;
 import javax.swing.JPanel;
 
 import com.inepex.inechart.awtchart.IneAwtChart;
+import com.inepex.inechart.chartwidget.label.StyledLabel;
 import com.inepex.inechart.chartwidget.linechart.Curve;
 import com.inepex.inechart.chartwidget.linechart.LineChart;
 
@@ -93,8 +94,8 @@ public class MultiLineChartTest extends JFrame{
 	
 	private void init(){
 		chart = new IneAwtChart(630, 400);
-		chart.setTitle("Multi Line Chart");
-		chart.setDescription("Generated data, default lookout");
+		chart.setName(new StyledLabel("Multi Line Chart"));
+		chart.setDescription(new StyledLabel("Generated data, default lookout"));
 		LineChart lineChart = chart.createLineChart();
 		for(int i=0;i<5;i++){
 			Curve c = new Curve(generateRandomData(0, 10, 100, 600, 40, 15));

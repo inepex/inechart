@@ -3,6 +3,7 @@ package com.inepex.inecharttest.client.showcase;
 import com.google.gwt.dom.client.Style.Unit;
 import com.google.gwt.user.client.ui.FlowPanel;
 import com.inepex.inechart.chartwidget.IneChart;
+import com.inepex.inechart.chartwidget.label.StyledLabel;
 import com.inepex.inechart.chartwidget.linechart.Curve;
 import com.inepex.inechart.chartwidget.linechart.LineChart;
 
@@ -20,8 +21,8 @@ public class MultiLineChart extends FlowPanel{
 	
 	private void init(){
 		chart = new IneChart(670, 390);
-		chart.setTitle("Multi Line Chart");
-		chart.setDescription("Generated data, default lookout");
+		chart.setName(new StyledLabel("Multi Line Chart"));
+		chart.setDescription(new StyledLabel("Generated data, default lookout"));
 		lineChart = chart.createLineChart();
 		for(int i=0;i<5;i++){
 			Curve c = new Curve(DataGenerator.generateRandomData(0, 10, 100, 600, 40, 15));
