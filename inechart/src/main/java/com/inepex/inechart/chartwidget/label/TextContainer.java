@@ -3,15 +3,20 @@ package com.inepex.inechart.chartwidget.label;
 import com.inepex.inechart.chartwidget.misc.HorizontalPosition;
 import com.inepex.inechart.chartwidget.misc.VerticalPosition;
 import com.inepex.inechart.chartwidget.properties.Color;
-import com.inepex.inechart.chartwidget.properties.LineProperties;
 import com.inepex.inechart.chartwidget.properties.ShapeProperties;
 import com.inepex.inechart.chartwidget.properties.TextProperties;
 
+/**
+ * Base class for displaying text
+ * 
+ * @author Miklós Süveges / Inepex Ltd.
+ *
+ */
 public abstract class TextContainer implements Comparable<TextContainer>{
 	private static int highestComparatorID = Integer.MIN_VALUE;
 	private final int comparatorID;
 	static final TextProperties DEFAULT_TEXT_PROPERTIES = new TextProperties("Arial, sans-serif", 10);
-	static final ShapeProperties DEFAULT_BACKGROUND = new ShapeProperties(new LineProperties(1), new Color("#ffffff", 0.8));
+	static final ShapeProperties DEFAULT_BACKGROUND = new ShapeProperties( new Color("#ffffff", 0.8));
 	VerticalPosition verticalPosition;
 	HorizontalPosition horizontalPosition;
 	TextProperties textProperties;
@@ -57,9 +62,17 @@ public abstract class TextContainer implements Comparable<TextContainer>{
 	public void setBackground(ShapeProperties background) {
 		this.background = background;
 	}
+	/**
+	 * Valid only after it has been displayed
+	 * @return width in pixels
+	 */
 	public int getWidth() {
 		return width;
 	}
+	/**
+	 * Valid only after it has been displayed
+	 * @return height in pixels
+	 */
 	public int getHeight() {
 		return height;
 	}

@@ -632,23 +632,32 @@ public class Curve implements HasZIndex, HasShadow, Comparable<Curve>, HasTitle 
 	public void setUseDefaultPointShape(boolean useDefaultPointShape) {
 		this.useDefaultPointShape = useDefaultPointShape;
 	}
-
+	@Override
 	public StyledLabel getName() {
 		return title;
 	}
-
+	@Override
 	public void setName(StyledLabel name) {
 		this.title = name;
 	}
-
+	@Override
 	public StyledLabel getDescription() {
 		return description;
 	}
-
+	@Override
 	public void setDescription(StyledLabel description) {
 		this.description = description;
 	}
 	
+	@Override
+	public void setName(String name) {
+		setName(new StyledLabel(name));
+		
+	}
 
+	@Override
+	public void setDescription(String description) {
+		setDescription(new StyledLabel(description));
+	}
 
 }

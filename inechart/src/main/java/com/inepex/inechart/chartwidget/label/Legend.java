@@ -1,16 +1,34 @@
 package com.inepex.inechart.chartwidget.label;
 
+import com.inepex.inechart.chartwidget.IneChartModul2D;
 import com.inepex.inechart.chartwidget.misc.HorizontalPosition;
 import com.inepex.inechart.chartwidget.misc.VerticalPosition;
-import com.inepex.inechart.chartwidget.properties.Color;
 import com.inepex.inechart.chartwidget.properties.TextProperties;
 import com.inepex.inechart.chartwidget.shape.Rectangle;
 import com.inepex.inechart.chartwidget.shape.Shape;
 
+/**
+ * This class holds information about how to display a legend,
+ * without knowing its entries.
+ * 
+ * @author Miklós Süveges / Inepex Ltd.
+ *
+ */
 public class Legend extends TextContainer{
 	public enum LegendEntryLayout{
+		/**
+		 * Entries displayed along a horizontal line (default)
+		 */
 		ROW,
+		/**
+		 * Entries displayed along a vertical line
+		 */
 		COLUMN,
+		/**
+		 * Entries displayed in
+		 * 	- rows if {@link Legend#setMaxWidth(int)} is set, or
+		 *  - columns if {@link Legend#setMaxHeight(int)} is set.
+		 */
 		AUTO
 	}
 	LegendEntryLayout legendEntryLayout;
@@ -31,7 +49,7 @@ public class Legend extends TextContainer{
 		this.legendSymbol = legendSymbol;
 		this.textProperties = textProperties;
 		
-		verticalPosition = VerticalPosition.Top;
+		verticalPosition = VerticalPosition.Top; 
 		horizontalPosition = HorizontalPosition.Right;
 		//defaults
 		paddingBetweenEntries = 5;
@@ -76,24 +94,32 @@ public class Legend extends TextContainer{
 		return includeInPadding;
 	}
 
+	/**
+	 * If true the {@link IneChartModul2D#setAutocalcPadding(boolean)}s
+	 * @param includeInPadding
+	 */
 	public void setIncludeInPadding(boolean includeInPadding) {
 		this.includeInPadding = includeInPadding;
 	}
 
-
+	/**
+	 * Sets the horizontal position of the legend,
+	 * {@link #setHorizontalPosition(HorizontalPosition)} is disabled.
+	 * @param fixedX -1 to use {@link #setHorizontalPosition(HorizontalPosition)} (default)
+	 */
 	public void setFixedX(int fixedX) {
 		this.fixedX = fixedX;
-	}
-	
+	}	
 
+	/**
+	 * Sets the vertical position of the legend,
+	 * {@link #setVerticalPosition(VerticalPosition)} is disabled.
+	 * @param fixedY -1 to use {@link #setVerticalPosition(VerticalPosition)} (default)
+	 */
 	public void setFixedY(int fixedY) {
 		this.fixedY = fixedY;
 	}
 	
-	public int getWidth() {
-		return width;
-	}
-
 	/**
 	 * Maximum width for {@link LegendEntryLayout#AUTO}
 	 * if {@link #setMaxHeight(int)} was set too, this method overrides it.
@@ -102,10 +128,6 @@ public class Legend extends TextContainer{
 	public void setMaxWidth(int width) {
 		this.maxWidth = width;
 		this.maxHeight = -1;
-	}
-
-	public int getHeight() {
-		return height;
 	}
 
 	/**

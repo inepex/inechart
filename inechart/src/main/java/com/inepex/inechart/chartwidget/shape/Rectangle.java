@@ -2,6 +2,7 @@ package com.inepex.inechart.chartwidget.shape;
 
 import java.util.ArrayList;
 
+import com.inepex.inechart.chartwidget.Defaults;
 import com.inepex.inechart.chartwidget.properties.Color;
 import com.inepex.inechart.chartwidget.properties.ShapeProperties;
 import com.inepex.inegraphics.shared.Context;
@@ -16,12 +17,11 @@ public class Rectangle extends Shape {
 	Double baseX = null, baseY = null;
 
 	public Rectangle(double width, double height) {
-		this(width, height, ShapeProperties.defaultShapeProperties());
+		this(width, height, Defaults.shapeProperties());
 	}
 
 	public Rectangle(double width, double height, double roundedCornerR) {
-		this(width, height, roundedCornerR, ShapeProperties
-				.defaultShapeProperties());
+		this(width, height, roundedCornerR, Defaults.shapeProperties());
 	}
 
 	public Rectangle(double width, double height, ShapeProperties properties) {
@@ -51,14 +51,14 @@ public class Rectangle extends Shape {
 
 	@Override
 	public ArrayList<GraphicalObject> toGraphicalObjects() {
-		if (properties.getLineProperties().getLineWidth() > 0) {
+		if (properties.getLineProperties() != null && properties.getLineProperties().getLineWidth() > 0) {
 			Context outerContext = new Context(properties.getLineProperties()
 					.getLineColor().getAlpha(), properties.getLineProperties()
 					.getLineColor().getColor(), properties.getLineProperties()
-					.getLineWidth(), Color.DEFAULT_COLOR, shadowOffsetX,
+					.getLineWidth(), Defaults.colorString, shadowOffsetX,
 					shadowOffsetY, shadowColor == null ? 0d
 							: shadowColor.getAlpha(),
-					shadowColor == null ? Color.DEFAULT_COLOR : shadowColor
+					shadowColor == null ? Defaults.colorString : shadowColor
 							.getColor());
 			outer = new com.inepex.inegraphics.impl.client.ishapes.Rectangle(
 					baseX == null ? 0 : baseX, baseY == null ? 0 : baseY,
@@ -67,12 +67,12 @@ public class Rectangle extends Shape {
 		}
 		if (properties.getFillColor() != null) {
 			Context innerContext = new Context(properties.getFillColor()
-					.getAlpha(), Color.DEFAULT_COLOR, 0,
+					.getAlpha(), Defaults.colorString, 0,
 					properties.getFillColor().getColor(),
 					// shadowOffsetX,
 					// shadowOffsetY,
 					0, 0, shadowColor == null ? 0d : shadowColor.getAlpha(),
-					shadowColor == null ? Color.DEFAULT_COLOR : shadowColor
+					shadowColor == null ? Defaults.colorString : shadowColor
 							.getColor());
 			inner = new com.inepex.inegraphics.impl.client.ishapes.Rectangle(
 					baseX == null ? 0 : baseX, baseY == null ? 0 : baseY,

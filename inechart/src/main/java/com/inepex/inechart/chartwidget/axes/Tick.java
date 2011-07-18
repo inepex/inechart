@@ -1,8 +1,10 @@
 package com.inepex.inechart.chartwidget.axes;
 
+import com.inepex.inechart.chartwidget.Defaults;
 import com.inepex.inechart.chartwidget.misc.HorizontalPosition;
 import com.inepex.inechart.chartwidget.misc.VerticalPosition;
 import com.inepex.inechart.chartwidget.properties.LineProperties;
+import com.inepex.inechart.chartwidget.properties.TextProperties;
 
 public class Tick implements Comparable<Tick> {
 	public static final int DEFAULT_TICK_LENGTH = 7;
@@ -35,6 +37,7 @@ public class Tick implements Comparable<Tick> {
 	 * the tick's label
 	 */
 	String tickText;
+	TextProperties textProperties;
 	
 	/**
 	 * if set to true filterFrequentTicks won't filter out this tick
@@ -47,8 +50,7 @@ public class Tick implements Comparable<Tick> {
 	 * @param position
 	 */
 	public Tick(double position) {
-		this(position, null, LineProperties.getDefaultSolidLine(),
-				DEFAULT_TICK_LENGTH, "");
+		this(position, null, Defaults.solidLine(), DEFAULT_TICK_LENGTH, "");
 	}
 
 	/**
@@ -58,8 +60,7 @@ public class Tick implements Comparable<Tick> {
 	 * @param tickText
 	 */
 	public Tick(double position, String tickText) {
-		this(position, null, LineProperties.getDefaultSolidLine(),
-				DEFAULT_TICK_LENGTH, tickText);
+		this(position, null, Defaults.solidLine(), DEFAULT_TICK_LENGTH, tickText);
 	}
 
 	/**
@@ -82,6 +83,22 @@ public class Tick implements Comparable<Tick> {
 		this.tickLine = tickLine;
 		this.tickLength = tickLength;
 		this.tickText = tickText;
+		this.tickPosition = TickPosition.Cross;
+		tickTextHorizontalPosition =  HorizontalPosition.Auto;
+		tickTextVerticalPosition = VerticalPosition.Auto;
+		this.textProperties = Defaults.tickTextProperties();
+	}
+	
+	public Tick(double position, LineProperties gridLine,
+			LineProperties tickLine, int tickLength, String tickText,
+			TextProperties textProperties) {
+		super();
+		this.position = position;
+		this.gridLine = gridLine;
+		this.tickLine = tickLine;
+		this.tickLength = tickLength;
+		this.tickText = tickText;
+		this.textProperties = textProperties;
 		this.tickPosition = TickPosition.Cross;
 		tickTextHorizontalPosition =  HorizontalPosition.Auto;
 		tickTextVerticalPosition = VerticalPosition.Auto;
@@ -180,6 +197,14 @@ public class Tick implements Comparable<Tick> {
 			return 1;
 		else
 			return 0;
+	}
+
+	public TextProperties getTextProperties() {
+		return textProperties;
+	}
+
+	public void setTextProperties(TextProperties textProperties) {
+		this.textProperties = textProperties;
 	}
 
 }

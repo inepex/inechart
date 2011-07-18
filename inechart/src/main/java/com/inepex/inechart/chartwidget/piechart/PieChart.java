@@ -1,6 +1,7 @@
 package com.inepex.inechart.chartwidget.piechart;
 
 import java.util.ArrayList;
+import java.util.List;
 import java.util.SortedMap;
 import java.util.TreeMap;
 
@@ -9,6 +10,11 @@ import com.google.gwt.event.dom.client.MouseMoveHandler;
 import com.google.gwt.event.dom.client.MouseOutEvent;
 import com.google.gwt.event.dom.client.MouseOutHandler;
 import com.inepex.inechart.chartwidget.IneChartModul;
+import com.inepex.inechart.chartwidget.label.HasLegend;
+import com.inepex.inechart.chartwidget.label.Legend;
+import com.inepex.inechart.chartwidget.label.LegendEntry;
+import com.inepex.inechart.chartwidget.label.StyledLabel;
+import com.inepex.inechart.chartwidget.piechart.Pie.Slice;
 import com.inepex.inegraphics.impl.client.GraphicalObjectEventHandler;
 import com.inepex.inegraphics.shared.Context;
 import com.inepex.inegraphics.shared.DrawingArea;
@@ -16,8 +22,7 @@ import com.inepex.inegraphics.shared.gobjects.Arc;
 import com.inepex.inegraphics.shared.gobjects.GraphicalObject;
 import com.inepex.inegraphics.shared.gobjects.Text;
 
-public class PieChart extends IneChartModul implements
-		GraphicalObjectEventHandler, MouseMoveHandler, MouseOutHandler {
+public class PieChart extends IneChartModul implements HasLegend,GraphicalObjectEventHandler, MouseMoveHandler, MouseOutHandler {
 	
 	public static interface PieLabeler {
 		public String getLabel(String name, String value, String pctg);
@@ -26,6 +31,8 @@ public class PieChart extends IneChartModul implements
 	Pie pie;
 	SortedMap<String, Double> percentages = new TreeMap<String, Double>();
 	PieLabeler pieLabeler;
+	boolean showLegend = true;
+	Legend legend = new Legend();
 
 	public PieChart(DrawingArea canvas) {
 		super(canvas);
@@ -117,16 +124,18 @@ public class PieChart extends IneChartModul implements
 			start = finish;
 			double f = ((f1 + f2) / 2 + 90.0) * Math.PI / 180.0;
 			double d = radius * 0.7;
-			Double textX = basePointX + d * Math.sin(f);
-			Double textY = basePointY + d * Math.cos(f);
-			String pieLabel = pieLabeler.getLabel(key, "" + pie.getDataMap().get(key), "" + Math.round(pctg));
-			Double offsetY = pieLabel.split("\n").length * 10.0;
+//			Double textX = basePointX + d * Math.sin(f);
+//			Double textY = basePointY + d * Math.cos(f);
+//			String pieLabel = pieLabeler.getLabel(key, "" + pie.getDataMap().get(key), "" + Math.round(pctg));
+//			Double offsetY = pieLabel.split("\n").length * 10.0;
+//			
+//			Text label = new Text(pieLabel, textX.intValue(), textY.intValue()  - offsetY.intValue());
+//			label.setzIndex(2);
+//			label.setContext(getTextContext());
+//			getGraphicalObjectContainer().addGraphicalObject(label);
 			
-			Text label = new Text(pieLabel, textX.intValue(), textY.intValue()  - offsetY.intValue());
-			label.setzIndex(2);
-			label.setContext(getTextContext());
-			getGraphicalObjectContainer().addGraphicalObject(label);
-
+			Slice s = pie.sliceMap.get(key);
+			s.setName(new StyledLabel(s.getName().getText() + " " + pie.getDataMap().get(key) + " " + Math.round(pctg) + "%"));
 		}
 	}
 
@@ -142,6 +151,36 @@ public class PieChart extends IneChartModul implements
 
 	public void setPieLabeler(PieLabeler pieLabeler) {
 		this.pieLabeler = pieLabeler;
+	}
+
+	@Override
+	public List<LegendEntry> getLegendEntries() {
+		ArrayList<LegendEntry> entries = new ArrayList<LegendEntry>();
+		for(String key : pie.sliceMap.keySet()){
+			Slice s = pie.sliceMap.get(key);
+			entries.add(new LegendEntry(s, s.c));
+		}
+		return entries;
+	}
+
+	@Override
+	public boolean showLegend() {
+		return showLegend;
+	}
+
+	@Override
+	public void setShowLegend(boolean showLegend) {
+		this.showLegend = showLegend;
+	}
+
+	@Override
+	public Legend getLegend() {
+		return legend;
+	}
+
+	@Override
+	public void setLegend(Legend legend) {
+		this.legend = legend;
 	}
 	
 	

@@ -6,6 +6,12 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.TreeMap;
 
+import com.google.gwt.event.dom.client.ClickEvent;
+import com.google.gwt.event.dom.client.MouseDownEvent;
+import com.google.gwt.event.dom.client.MouseMoveEvent;
+import com.google.gwt.event.dom.client.MouseOutEvent;
+import com.google.gwt.event.dom.client.MouseOverEvent;
+import com.google.gwt.event.dom.client.MouseUpEvent;
 import com.inepex.inechart.chartwidget.IneChartModul2D;
 import com.inepex.inechart.chartwidget.Viewport;
 import com.inepex.inechart.chartwidget.axes.Axes;
@@ -389,19 +395,19 @@ public class BarChart extends IneChartModul2D implements HasShadow, HasZIndex {
 		
 		switch (xAxis.getAxisDirection()) {
 		case Horizontal_Ascending_To_Left:
-			leftTopX = getCanvasX(toX, xAxis) + distanceFromSequenceStart + barSpacing;
+			leftTopX = getCanvasX(toX) + distanceFromSequenceStart + barSpacing;
 			width = (double) barWidth;
 			break;
 		case Horizontal_Ascending_To_Right:
-			leftTopX = getCanvasX(fromX, xAxis) - distanceFromSequenceStart - barSpacing;
+			leftTopX = getCanvasX(fromX) - distanceFromSequenceStart - barSpacing;
 			width = (double) barWidth;
 			break;
 		case Vertical_Ascending_To_Bottom:
-			leftTopY = getCanvasY(fromX, xAxis)+ distanceFromSequenceStart + barSpacing;
+			leftTopY = getCanvasY(fromX)+ distanceFromSequenceStart + barSpacing;
 			height = (double) barWidth;
 			break;
 		case Vertical_Ascending_To_Top:
-			leftTopY = getCanvasY(toX, xAxis) - distanceFromSequenceStart - barSpacing;
+			leftTopY = getCanvasY(toX) - distanceFromSequenceStart - barSpacing;
 			height = (double) barWidth;
 			break;
 		}
@@ -418,9 +424,9 @@ public class BarChart extends IneChartModul2D implements HasShadow, HasZIndex {
 		Collections.reverse(lowerValues);
 		double last;
 		if (xAxis.isHorizontal()) {
-			last = getCanvasY(baseY,yAxis);
+			last = getCanvasY(baseY);
 		} else {
-			last = getCanvasX(baseY, yAxis);
+			last = getCanvasX(baseY);
 		}
 		//positive stack
 		for(int i = 0; i<upperValues.size();i++){
@@ -434,7 +440,7 @@ public class BarChart extends IneChartModul2D implements HasShadow, HasZIndex {
 			if(!divideSameValueSortedBars)
 				sameValueCount = 1;
 			if (xAxis.isHorizontal()) {
-				leftTopY = getCanvasY(y, yAxis);
+				leftTopY = getCanvasY(y);
 				height = Math.abs(leftTopY - last);
 				
 				for(int j = 0;j<sameValueCount;j++){
@@ -454,7 +460,7 @@ public class BarChart extends IneChartModul2D implements HasShadow, HasZIndex {
 				}
 				last = leftTopY;
 			} else {
-				leftTopX = getCanvasX(y, yAxis);
+				leftTopX = getCanvasX(y);
 				width = Math.abs(leftTopX - last);
 				
 				for(int j = 0;j<sameValueCount;j++){
@@ -476,9 +482,9 @@ public class BarChart extends IneChartModul2D implements HasShadow, HasZIndex {
 			}
 		}
 		if (xAxis.isHorizontal()) {
-			last = getCanvasY(baseY,yAxis);
+			last = getCanvasY(baseY);
 		} else {
-			last = getCanvasX(baseY, yAxis);
+			last = getCanvasX(baseY);
 		}
 		//negative stack
 		for(int i = 0; i<lowerValues.size();i++){
@@ -493,7 +499,7 @@ public class BarChart extends IneChartModul2D implements HasShadow, HasZIndex {
 				sameValueCount = 1;
 			if (xAxis.isHorizontal()) {
 				leftTopY = last;
-				height = Math.abs(getCanvasY(y, yAxis) - leftTopY);
+				height = Math.abs(getCanvasY(y) - leftTopY);
 				
 				for(int j = 0;j<sameValueCount;j++){
 					int index = 0, k=0;
@@ -513,7 +519,7 @@ public class BarChart extends IneChartModul2D implements HasShadow, HasZIndex {
 				last = leftTopY + height;
 			} else {
 				leftTopX = last;
-				width =  Math.abs(getCanvasX(y, yAxis) - leftTopX);
+				width =  Math.abs(getCanvasX(y) - leftTopX);
 				
 				for(int j = 0;j<sameValueCount;j++){
 					int index = 0, k=0;
@@ -557,32 +563,32 @@ public class BarChart extends IneChartModul2D implements HasShadow, HasZIndex {
 		double distanceFromSequenceStart = sequenceWidth / 2 - (barWidth + 2 * barSpacing) / 2;
 		switch (xAxis.getAxisDirection()) {
 		case Horizontal_Ascending_To_Left:
-			leftTopX = getCanvasX(toX, xAxis) + distanceFromSequenceStart + barSpacing;
+			leftTopX = getCanvasX(toX) + distanceFromSequenceStart + barSpacing;
 			width = (double) barWidth;
 			break;
 		case Horizontal_Ascending_To_Right:
-			leftTopX = getCanvasX(fromX, xAxis)+ distanceFromSequenceStart + barSpacing;
+			leftTopX = getCanvasX(fromX)+ distanceFromSequenceStart + barSpacing;
 			width = (double) barWidth;
 			break;
 		case Vertical_Ascending_To_Bottom:
-			leftTopY = getCanvasY(fromX, xAxis)+ distanceFromSequenceStart + barSpacing;
+			leftTopY = getCanvasY(fromX)+ distanceFromSequenceStart + barSpacing;
 			height = (double) barWidth;
 			break;
 		case Vertical_Ascending_To_Top:
-			leftTopY = getCanvasY(toX, xAxis) + distanceFromSequenceStart + barSpacing;
+			leftTopY = getCanvasY(toX) + distanceFromSequenceStart + barSpacing;
 			height = (double) barWidth;
 			break;
 		}
 		double last;
 		boolean finished = false;
 		if (xAxis.isHorizontal()) {
-			last = getCanvasY(baseY,yAxis);
+			last = getCanvasY(baseY);
 			if( (last < topPadding && yAxis.getAxisDirection() == AxisDirection.Vertical_Ascending_To_Top) ||
 				(last > getHeight() - bottomPadding && yAxis.getAxisDirection() == AxisDirection.Vertical_Ascending_To_Bottom) ){
 				finished = true;
 			}
 		} else {
-			last = getCanvasX(baseY, yAxis);
+			last = getCanvasX(baseY);
 			if( (last > canvas.getWidth() - rightPadding && xAxis.getAxisDirection() == AxisDirection.Horizontal_Ascending_To_Right) ||
 				(last < leftPadding && xAxis.getAxisDirection() == AxisDirection.Horizontal_Ascending_To_Left) ){
 				finished = true;
@@ -597,7 +603,7 @@ public class BarChart extends IneChartModul2D implements HasShadow, HasZIndex {
 				continue;
 			ShapeProperties sp = lookOut.get(names.get(i));
 			if (xAxis.isHorizontal()) {
-				leftTopY = getCanvasY(y + lastY, yAxis);
+				leftTopY = getCanvasY(y + lastY);
 				if( leftTopY < topPadding && yAxis.getAxisDirection() == AxisDirection.Vertical_Ascending_To_Top){
 					finished = true;
 				}
@@ -611,7 +617,7 @@ public class BarChart extends IneChartModul2D implements HasShadow, HasZIndex {
 				else
 					last -= barSpacing;
 			} else {
-				leftTopX = getCanvasX(y + lastY, yAxis);
+				leftTopX = getCanvasX(y + lastY);
 				if(leftTopX > canvas.getWidth()-rightPadding && xAxis.getAxisDirection() == AxisDirection.Horizontal_Ascending_To_Right){
 					finished = true;
 				}
@@ -668,19 +674,19 @@ public class BarChart extends IneChartModul2D implements HasShadow, HasZIndex {
 			distanceBetweenBarStart = (sequenceWidth - 2*ySequence.size()*barSpacing)/(ySequence.size()+1);
 			switch (xAxis.getAxisDirection()) {
 			case Horizontal_Ascending_To_Left:
-				leftTopX = getCanvasX(toX, xAxis) - barSpacing;
+				leftTopX = getCanvasX(toX) - barSpacing;
 				width = (double) barWidth;
 				break;
 			case Horizontal_Ascending_To_Right:
-				leftTopX = getCanvasX(fromX, xAxis) + barSpacing;
+				leftTopX = getCanvasX(fromX) + barSpacing;
 				width = (double) barWidth;
 				break;
 			case Vertical_Ascending_To_Bottom:
-				leftTopY = getCanvasY(fromX, yAxis)+ barSpacing;
+				leftTopY = getCanvasY(fromX)+ barSpacing;
 				height = (double) barWidth;
 				break;
 			case Vertical_Ascending_To_Top:
-				leftTopY = getCanvasY(toX, yAxis) - barSpacing;
+				leftTopY = getCanvasY(toX) - barSpacing;
 				height = (double) barWidth;
 				break;
 			}
@@ -692,19 +698,19 @@ public class BarChart extends IneChartModul2D implements HasShadow, HasZIndex {
 			double distanceFromSequenceStart = sequenceWidth / 2 - realSequenceWidth / 2;
 			switch (xAxis.getAxisDirection()) {
 			case Horizontal_Ascending_To_Left:
-				leftTopX = getCanvasX(toX, xAxis) - distanceFromSequenceStart - barSpacing;
+				leftTopX = getCanvasX(toX) - distanceFromSequenceStart - barSpacing;
 				width = (double) barWidth;
 				break;
 			case Horizontal_Ascending_To_Right:
-				leftTopX = getCanvasX(fromX, xAxis) + distanceFromSequenceStart + barSpacing;
+				leftTopX = getCanvasX(fromX) + distanceFromSequenceStart + barSpacing;
 				width = (double) barWidth;
 				break;
 			case Vertical_Ascending_To_Bottom:
-				leftTopY = getCanvasY(fromX, xAxis) + distanceFromSequenceStart + barSpacing;
+				leftTopY = getCanvasY(fromX) + distanceFromSequenceStart + barSpacing;
 				height = (double) barWidth;
 				break;
 			case Vertical_Ascending_To_Top:
-				leftTopY = getCanvasY(toX, xAxis) - distanceFromSequenceStart - barSpacing;
+				leftTopY = getCanvasY(toX) - distanceFromSequenceStart - barSpacing;
 				height = (double) barWidth;
 				break;
 			}
@@ -736,26 +742,26 @@ public class BarChart extends IneChartModul2D implements HasShadow, HasZIndex {
 	protected double getYOnCanvas(double a, double b, boolean lowerOnCanvas) {
 		if ((yAxis.getAxisDirection() == AxisDirection.Vertical_Ascending_To_Bottom && lowerOnCanvas)
 				|| (yAxis.getAxisDirection() == AxisDirection.Vertical_Ascending_To_Top && !lowerOnCanvas)) {
-			return getCanvasY(Math.min(a, b), yAxis);
+			return getCanvasY(Math.min(a, b));
 		} else {
-			return getCanvasY(Math.max(a, b), yAxis);
+			return getCanvasY(Math.max(a, b));
 		}
 	}
 
 	protected double getXOnCanvas(double a, double b, boolean lowerOnCanvas) {
 		if ((xAxis.getAxisDirection() == AxisDirection.Horizontal_Ascending_To_Right && lowerOnCanvas)
 				|| (xAxis.getAxisDirection() == AxisDirection.Horizontal_Ascending_To_Left && !lowerOnCanvas)) {
-			return getCanvasX(Math.min(a, b), xAxis);
+			return getCanvasX(Math.min(a, b));
 		} else {
-			return getCanvasX(Math.max(a, b), xAxis);
+			return getCanvasX(Math.max(a, b));
 		}
 	}
 
 	protected double getWidthOnCanvas(double from, double to) {
 		if (xAxis.isHorizontal())
-			return Math.abs(getCanvasX(to, xAxis) - getCanvasX(from, xAxis));
+			return Math.abs(getCanvasX(to) - getCanvasX(from));
 		else
-			return Math.abs(getCanvasY(to, xAxis) - getCanvasY(from, xAxis));
+			return Math.abs(getCanvasY(to) - getCanvasY(from));
 	}
 
 /* Getters & Setters */
@@ -941,6 +947,42 @@ public class BarChart extends IneChartModul2D implements HasShadow, HasZIndex {
 	public List<LegendEntry> getLegendEntries() {
 		// TODO Auto-generated method stub
 		return null;
+	}
+
+	@Override
+	protected void onClick(ClickEvent event) {
+		// TODO Auto-generated method stub
+		
+	}
+
+	@Override
+	protected void onMouseUp(MouseUpEvent event) {
+		// TODO Auto-generated method stub
+		
+	}
+
+	@Override
+	protected void onMouseOver(MouseOverEvent event) {
+		// TODO Auto-generated method stub
+		
+	}
+
+	@Override
+	protected void onMouseDown(MouseDownEvent event) {
+		// TODO Auto-generated method stub
+		
+	}
+
+	@Override
+	protected void onMouseOut(MouseOutEvent event) {
+		// TODO Auto-generated method stub
+		
+	}
+
+	@Override
+	protected void onMouseMove(MouseMoveEvent event) {
+		// TODO Auto-generated method stub
+		
 	}
 
 }

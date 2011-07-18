@@ -1,19 +1,19 @@
 package com.inepex.inechart.chartwidget.properties;
 
+import com.inepex.inechart.chartwidget.Defaults;
+
 public class Color {
 
-	public static final double DEFAULT_ALPHA = 1.0;
-	public static final String DEFAULT_COLOR = "#000000";
 	private String color;
 	private double alpha;
 
 	public Color(){
-		this(DEFAULT_COLOR);
+		this(Defaults.colorString);
 	}
 	
 	public Color(String color) {
 		this.color = color;
-		this.alpha = DEFAULT_ALPHA;
+		this.alpha = Defaults.alpha;
 	}
 
 	public Color(String color, double alpha) {

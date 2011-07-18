@@ -3,6 +3,7 @@ package com.inepex.inechart.chartwidget.axes;
 import java.util.ArrayList;
 import java.util.TreeMap;
 
+import com.inepex.inechart.chartwidget.Defaults;
 import com.inepex.inechart.chartwidget.IneChart;
 import com.inepex.inechart.chartwidget.IneChartModul;
 import com.inepex.inechart.chartwidget.IneChartModul2D;
@@ -23,18 +24,12 @@ import com.inepex.inegraphics.shared.gobjects.Text.BasePointYPosition;
 
 /**
  * 
- * A singleton modul per {@link IneChart}
+ * Should be singleton per {@link IneChart}.
  * 
- * @author Miklós Süveges / Inepex Ltd.
+ * @author Miklós Süveges, Tibor Somodi / Inepex Ltd.
  * 
  */
 public class Axes extends IneChartModul {
-	public class AxisDimensions{
-		int width;
-		
-		int height;
-		
-	}
 
 	private ArrayList<Axis> axes;
 
@@ -62,7 +57,7 @@ public class Axes extends IneChartModul {
 	}
 
 	public Axis createAxis(AxisDirection direction, IneChartModul2D modulToAlign) {
-		Axis a = new Axis(LineProperties.getDefaultSolidLine());
+		Axis a = new Axis(Defaults.solidLine());
 		a.isVisible = true;
 		a.modulToAlign = modulToAlign;
 		a.axisDirection = direction;
@@ -124,7 +119,7 @@ public class Axes extends IneChartModul {
 			// calculate the position
 			double tickStartX = 0, tickStartY = 0, tickEndX = 0, tickEndY = 0, gridStartX, gridStartY, gridEndX, gridEndY;
 			if (axis.isHorizontal()) {
-				gridEndX = gridStartX = tickStartX = tickEndX = axis.getModulToAlign().getCanvasX(tick.position, axis);
+				gridEndX = gridStartX = tickStartX = tickEndX = axis.getModulToAlign().getCanvasX(tick.position);
 				gridStartY = axis.getModulToAlign().getTopPadding();
 				gridEndY = canvas.getHeight() - axis.getModulToAlign().getBottomPadding();
 				switch (tick.tickPosition) {
@@ -150,7 +145,7 @@ public class Axes extends IneChartModul {
 					break;
 				}
 			} else {
-				gridEndY = gridStartY = tickStartY = tickEndY = axis.getModulToAlign().getCanvasY(tick.position, axis);
+				gridEndY = gridStartY = tickStartY = tickEndY = axis.getModulToAlign().getCanvasY(tick.position);
 				gridStartX = axis.getModulToAlign().getLeftPadding();
 				gridEndX = canvas.getWidth() - axis.getModulToAlign().getRightPadding();
 				switch (tick.tickPosition) {
@@ -232,7 +227,8 @@ public class Axes extends IneChartModul {
 			case Auto:
 				if (!axis.isHorizontal()) {
 					v = BasePointYPosition.MIDDLE;
-				} else {
+				}
+				else {
 					if (axis.getAxisPosition() == AxisPosition.Maximum
 							&& perpAxis.getAxisDirection() == AxisDirection.Vertical_Ascending_To_Bottom
 							|| axis.getAxisPosition() == AxisPosition.Minimum
@@ -256,6 +252,11 @@ public class Axes extends IneChartModul {
 				break;
 			}
 			Text text = new Text(tick.tickText, tickStartX, tickStartY, h, v);
+			text.setFontFamily(tick.getTextProperties().getFontFamily());
+			text.setFontStyle(tick.getTextProperties().getFontStyle());
+			text.setFontWeight(tick.getTextProperties().getFontWeight());
+			text.setColor(tick.getTextProperties().getColor().getColor());
+			text.setFontSize(tick.getTextProperties().getFontSize());
 			canvas.measureText(text);
 			goc.addGraphicalObject(text);
 		}
@@ -265,15 +266,15 @@ public class Axes extends IneChartModul {
 		double x, x2, y, y2;
 		for (Object[] tickPair : axis.gridFills) {
 			if (axis.getAxisDirection() == AxisDirection.Horizontal_Ascending_To_Right) {
-				x = axis.getModulToAlign().getCanvasX(((Tick) tickPair[0]).position, axis);
-				x2 = axis.getModulToAlign().getCanvasX(((Tick) tickPair[1]).position, axis);;
+				x = axis.getModulToAlign().getCanvasX(((Tick) tickPair[0]).position);
+				x2 = axis.getModulToAlign().getCanvasX(((Tick) tickPair[1]).position);;
 				y = axis.getModulToAlign().getTopPadding();
 				y2 = canvas.getHeight() - axis.getModulToAlign().getBottomPadding();
 			} else {
 				x = axis.getModulToAlign().getLeftPadding();
 				x2 = canvas.getWidth() - axis.getModulToAlign().getRightPadding();
-				y = axis.getModulToAlign().getCanvasY(((Tick) tickPair[0]).position, axis);
-				y2 = Math.max(0.0 + axis.getModulToAlign().getTopPadding(), axis.getModulToAlign().getCanvasY(((Tick) tickPair[1]).position, axis));
+				y = axis.getModulToAlign().getCanvasY(((Tick) tickPair[0]).position);
+				y2 = Math.max(0.0 + axis.getModulToAlign().getTopPadding(), axis.getModulToAlign().getCanvasY(((Tick) tickPair[1]).position));
 			}
 			Rectangle fill = new Rectangle(
 					x,
@@ -331,9 +332,9 @@ public class Axes extends IneChartModul {
 		case Fixed:
 			if (axis.fixedPosition >= perpAxis.min && axis.fixedPosition <= perpAxis.max) {
 				if (perpAxis.isHorizontal()) {
-					startX = endX = axis.modulToAlign.getCanvasX(axis.fixedPosition, perpAxis);
+					startX = endX = axis.modulToAlign.getCanvasX(axis.fixedPosition);
 				} else {
-					startY = endY = axis.modulToAlign.getCanvasY(axis.fixedPosition, perpAxis);
+					startY = endY = axis.modulToAlign.getCanvasY(axis.fixedPosition);
 				}
 			} else
 				isVisible = false;
@@ -346,9 +347,9 @@ public class Axes extends IneChartModul {
 				pos = perpAxis.max;
 			}
 			if (perpAxis.isHorizontal()) {
-				startX = endX = axis.modulToAlign.getCanvasX(pos, perpAxis);
+				startX = endX = axis.modulToAlign.getCanvasX(pos);
 			} else {
-				startY = endY = axis.modulToAlign.getCanvasY(pos, perpAxis);
+				startY = endY = axis.modulToAlign.getCanvasY(pos);
 			}
 			break;
 		}
@@ -397,13 +398,13 @@ public class Axes extends IneChartModul {
 			if (axis.getAxisDirection() == AxisDirection.Horizontal_Ascending_To_Right) {
 				double x = visibleTicks.get(i).getPosition();
 				double nextX =  visibleTicks.get(i + 1).getPosition();
-				sum += (axis.getModulToAlign().getCanvasX(nextX, axis) 
-						- axis.getModulToAlign().getCanvasX(x, axis));
+				sum += (axis.getModulToAlign().getCanvasX(nextX) 
+						- axis.getModulToAlign().getCanvasX(x));
 			} else if (axis.getAxisDirection() == AxisDirection.Vertical_Ascending_To_Top) {
 				double y = visibleTicks.get(i).getPosition();
 				double nextY =  visibleTicks.get(i + 1).getPosition();
-				sum += (axis.getModulToAlign().getCanvasY(y, axis) 
-						- axis.getModulToAlign().getCanvasY(nextY, axis));
+				sum += (axis.getModulToAlign().getCanvasY(y) 
+						- axis.getModulToAlign().getCanvasY(nextY));
 			}	
 		}
 		avgDistanceBetweenTicks = sum / new Double(visibleTicks.size());
@@ -434,23 +435,23 @@ public class Axes extends IneChartModul {
 				lineProperties.getLineColor().getAlpha(),
 				lineProperties.getLineColor().getColor(),
 				lineProperties.getLineWidth(),
-				Color.DEFAULT_COLOR,
+				Defaults.colorString,
 				0,
 				0,
-				Color.DEFAULT_ALPHA,
-				Color.DEFAULT_COLOR);
+				Defaults.alpha,
+				Defaults.colorString);
 	}
 	
 	Context createFillContext(Color color) {
 		return new Context(
-				Color.DEFAULT_ALPHA,
+				Defaults.alpha,
 				color.getColor(),
 				0,
 				color.getColor(),
 				0,
 				0,
-				Color.DEFAULT_ALPHA,
-				Color.DEFAULT_COLOR);
+				Defaults.alpha,
+				Defaults.colorString);
 	}
 
 	void removeAllGOAndLabelRelatedToAxis(Axis axis) {

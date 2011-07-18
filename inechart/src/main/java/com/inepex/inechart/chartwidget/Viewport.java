@@ -25,7 +25,6 @@ public class Viewport {
 	 */
 	boolean changed;
 	double dx, dy;
-	double xRatio, yRatio;
 	/**
 	 * Because multiple moduls -over multiple charts too- can share the same
 	 * viewport, we should register them, so when a modul/chart finished
@@ -33,7 +32,7 @@ public class Viewport {
 	 * value should be set to true by default when a modul finished its update()
 	 * it should be set to false
 	 */
-	TreeMap<IneChartModul, Boolean> userModuls = new TreeMap<IneChartModul, Boolean>();
+	TreeMap<IneChartModul2D, Boolean> userModuls = new TreeMap<IneChartModul2D, Boolean>();
 
 	public Viewport() {
 		this(0, 0, 1, 1);
@@ -77,8 +76,6 @@ public class Viewport {
 	public void set(double xMin, double yMin, double xMax, double yMax) {
 		if (xMin >= xMax || yMin >= yMax)
 			return;
-		xRatio *= (xMax - xMin) / (this.xMax - this.xMin);
-		yRatio *= (yMax - yMin) / (this.yMax - this.yMin);
 		dx += xMin - this.xMin;
 		dy += yMin - this.yMin;
 		this.xMin = xMin;
@@ -110,10 +107,8 @@ public class Viewport {
 	public void setXMin(double xMin) {
 		if (xMin >= xMax || xMin == this.xMin)
 			return;
-		xRatio = (xMax - xMin) / (this.xMax - this.xMin);
 		dx = xMin - this.xMin;
 		dy = 0;
-		yRatio = 1;
 		this.xMin = xMin;
 		changed();
 	}
@@ -132,8 +127,6 @@ public class Viewport {
 	public void setYMin(double yMin) {
 		if (yMin >= yMax || yMin == this.yMin)
 			return;
-		yRatio = (yMax - yMin) / (this.yMax - this.yMin);
-		xRatio = 1;
 		dx = 0;
 		dy = yMin - this.yMin;
 		this.yMin = yMin;
@@ -154,8 +147,6 @@ public class Viewport {
 	public void setXMax(double xMax) {
 		if (xMax <= xMin || xMax == this.xMax)
 			return;
-		xRatio = (xMax - xMin) / (this.xMax - this.xMin);
-		yRatio = 1;
 		dx = dy = 0;
 		changed();
 		this.xMax = xMax;
@@ -175,8 +166,6 @@ public class Viewport {
 	public void setYMax(double yMax) {
 		if (yMax <= yMin || yMax == this.yMax)
 			return;
-		yRatio = (yMax - yMin) / (this.yMax - this.yMin);
-		xRatio = 1;
 		dx = dy = 0;
 		changed();
 		this.yMax = yMax;
@@ -184,14 +173,8 @@ public class Viewport {
 
 	private void changed() {
 		changed = true;
-//		ArrayList<IneChartModul> ms = new ArrayList<IneChartModul>();
-//		for (IneChartModul m : userModuls.keySet())
-//			ms.add(m);
-//		for (IneChartModul m : ms)
-//			userModuls.put(m, true);
-		for (IneChartModul m : userModuls.keySet())
+		for (IneChartModul2D m : userModuls.keySet())
 			userModuls.put(m, true);
-
 	}
 
 	/**
@@ -214,7 +197,6 @@ public class Viewport {
 	 */
 	void setDefaultParameters() {
 		dx = dy = 0;
-		xRatio = yRatio = 1;
 		changed = false;
 	}
 
@@ -232,20 +214,6 @@ public class Viewport {
 		return dy;
 	}
 
-	/**
-	 * @return the xRatio
-	 */
-	public double getXRatio() {
-		return xRatio;
-	}
-
-	/**
-	 * @return the yRatio
-	 */
-	public double getYRatio() {
-		return yRatio;
-	}
-
 	public void setXValuesFromAxis(Axis axis) {
 		xMin = axis.getMin();
 		xMax = axis.getMax();
@@ -257,7 +225,7 @@ public class Viewport {
 		yMax = axis.getMax();
 	}
 
-	public TreeMap<IneChartModul, Boolean> getUserModuls() {
+	public TreeMap<IneChartModul2D, Boolean> getUserModuls() {
 		return userModuls;
 	}
 	

@@ -2,6 +2,7 @@ package com.inepex.inechart.chartwidget.shape;
 
 import java.util.ArrayList;
 
+import com.inepex.inechart.chartwidget.Defaults;
 import com.inepex.inechart.chartwidget.properties.Color;
 import com.inepex.inechart.chartwidget.properties.ShapeProperties;
 import com.inepex.inegraphics.shared.Context;
@@ -15,7 +16,7 @@ public class Circle extends Shape {
 	double radius;
 
 	public Circle(double radius) {
-		this(radius, ShapeProperties.defaultShapeProperties());
+		this(radius, Defaults.shapeProperties());
 	}
 
 	public Circle(double radius, ShapeProperties properties) {
@@ -25,26 +26,26 @@ public class Circle extends Shape {
 
 	@Override
 	public ArrayList<GraphicalObject> toGraphicalObjects() {
-		if (properties.getLineProperties().getLineWidth() > 0) {
+		if (properties.getLineProperties() != null && properties.getLineProperties().getLineWidth() > 0) {
 			Context outerContext = new Context(properties.getLineProperties()
 					.getLineColor().getAlpha(), properties.getLineProperties()
 					.getLineColor().getColor(), properties.getLineProperties()
-					.getLineWidth(), Color.DEFAULT_COLOR, shadowOffsetX,
+					.getLineWidth(), Defaults.colorString, shadowOffsetX,
 					shadowOffsetY, shadowColor == null ? 0d
 							: shadowColor.getAlpha(),
-					shadowColor == null ? Color.DEFAULT_COLOR : shadowColor
+					shadowColor == null ? Defaults.colorString : shadowColor
 							.getColor());
 			outer = new com.inepex.inegraphics.impl.client.ishapes.Circle(0, 0,
 					this.zIndex, outerContext, true, false, this.radius);
 		}
 		if (properties.getFillColor() != null) {
 			Context innerContext = new Context(properties.getFillColor()
-					.getAlpha(), Color.DEFAULT_COLOR, 0,
+					.getAlpha(), Defaults.colorString, 0,
 					properties.getFillColor().getColor(),
 					// shadowOffsetX,
 					// shadowOffsetY,
 					0, 0, shadowColor == null ? 0d : shadowColor.getAlpha(),
-					shadowColor == null ? Color.DEFAULT_COLOR : shadowColor
+					shadowColor == null ? Defaults.colorString : shadowColor
 							.getColor());
 			inner = new com.inepex.inegraphics.impl.client.ishapes.Circle(0, 0,
 					this.zIndex, innerContext, false, true,

@@ -4,10 +4,15 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.TreeMap;
 
+import com.google.gwt.event.dom.client.ClickEvent;
+import com.google.gwt.event.dom.client.MouseDownEvent;
 import com.google.gwt.event.dom.client.MouseMoveEvent;
 import com.google.gwt.event.dom.client.MouseMoveHandler;
 import com.google.gwt.event.dom.client.MouseOutEvent;
 import com.google.gwt.event.dom.client.MouseOutHandler;
+import com.google.gwt.event.dom.client.MouseOverEvent;
+import com.google.gwt.event.dom.client.MouseUpEvent;
+import com.inepex.inechart.chartwidget.Defaults;
 import com.inepex.inechart.chartwidget.IneChartModul2D;
 import com.inepex.inechart.chartwidget.Viewport;
 import com.inepex.inechart.chartwidget.axes.Axes;
@@ -597,9 +602,9 @@ public class LineChart extends IneChartModul2D implements GraphicalObjectEventHa
 	}
 
 	static Context createFillContext(Color fillColor) {
-		return new Context(fillColor.getAlpha(), Color.DEFAULT_COLOR, 0,
-				fillColor.getColor(), 0, 0, Color.DEFAULT_ALPHA,
-				Color.DEFAULT_COLOR);
+		return new Context(fillColor.getAlpha(), Defaults.colorString, 0,
+				fillColor.getColor(), 0, 0, Defaults.alpha,
+				Defaults.colorString);
 	}
 
 	static Context createLineContext(Curve curve) {
@@ -607,12 +612,12 @@ public class LineChart extends IneChartModul2D implements GraphicalObjectEventHa
 				curve.lineProperties.getLineColor().getAlpha(),
 				curve.lineProperties.getLineColor().getColor(),
 				curve.lineProperties.getLineWidth(),
-				Color.DEFAULT_COLOR,
+				Defaults.colorString,
 				curve.hasShadow ? curve.shadowOffsetX : 0,
 				curve.hasShadow ? curve.shadowOffsetY : 0,
-				curve.shadowColor == null ? Color.DEFAULT_ALPHA
+				curve.shadowColor == null ? Defaults.alpha
 						: curve.shadowColor.getAlpha(),
-				curve.shadowColor == null ? Color.DEFAULT_COLOR
+				curve.shadowColor == null ? Defaults.colorString
 						: curve.shadowColor.getColor());
 	}
 
@@ -798,6 +803,30 @@ public class LineChart extends IneChartModul2D implements GraphicalObjectEventHa
 			entries.add(e);
 		}
 		return entries;
+	}
+
+	@Override
+	protected void onClick(ClickEvent event) {
+		// TODO Auto-generated method stub
+		
+	}
+
+	@Override
+	protected void onMouseUp(MouseUpEvent event) {
+		// TODO Auto-generated method stub
+		
+	}
+
+	@Override
+	protected void onMouseOver(MouseOverEvent event) {
+		// TODO Auto-generated method stub
+		
+	}
+
+	@Override
+	protected void onMouseDown(MouseDownEvent event) {
+		// TODO Auto-generated method stub
+		
 	}
 
 }

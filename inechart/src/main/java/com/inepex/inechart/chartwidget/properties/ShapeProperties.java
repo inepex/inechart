@@ -2,11 +2,6 @@ package com.inepex.inechart.chartwidget.properties;
 
 public class ShapeProperties {
 
-	public static ShapeProperties defaultShapeProperties() {
-		return new ShapeProperties(LineProperties.getDefaultSolidLine(),
-				new Color("#FFFFFF", 0.8));
-	}
-
 	private LineProperties lineProperties;
 	private Color fillColor;
 

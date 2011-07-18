@@ -4,6 +4,7 @@ import java.awt.image.BufferedImage;
 import java.io.OutputStream;
 import java.util.ArrayList;
 
+import com.inepex.inechart.chartwidget.Defaults;
 import com.inepex.inechart.chartwidget.HasCoordinateSystem;
 import com.inepex.inechart.chartwidget.IneChartModul;
 import com.inepex.inechart.chartwidget.IneChartModul2D;
@@ -27,6 +28,7 @@ public class IneAwtChart implements HasTitle{
 	private boolean autoScaleModuls = true;
 	private boolean includeTitleInPadding = true;
 	private LabelFactoryBase legendFactory;
+	
 
 	// properties
 	private int canvasWidth;
@@ -65,6 +67,7 @@ public class IneAwtChart implements HasTitle{
 	public PieChart createPieChart() {
 		PieChart chart = new PieChart(drawingArea);
 		moduls.add(chart);
+		legendFactory.addHasLegendEntries(chart);
 		return chart;
 	}
 
@@ -105,8 +108,7 @@ public class IneAwtChart implements HasTitle{
 	}
 
 	public void update() {
-
-		legendFactory.update();
+		
 		releaseFocusIfPossible();
 		// grant focus if possible and requested
 		if (focus == null) {
@@ -133,6 +135,7 @@ public class IneAwtChart implements HasTitle{
 			doRedraw = true;
 		}
 		
+		legendFactory.update();
 		//scale moduls 
 		if (autoScaleModuls){
 			for (IneChartModul modul : moduls) {
@@ -242,6 +245,16 @@ public class IneAwtChart implements HasTitle{
 	public StyledLabel getDescription() {
 		return description;
 	}
+	
+	@Override
+	public void setName(String name) {
+		setName(new StyledLabel(name, Defaults.chartTitle_Name, 1, Defaults.chartTitleBackground));
+		
+	}
 
+	@Override
+	public void setDescription(String description) {
+		setDescription(new StyledLabel(description, Defaults.chartTitle_Description, 1, Defaults.chartTitleBackground));
+	}
 
 }

@@ -5,6 +5,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.TreeMap;
 
+import com.inepex.inechart.chartwidget.IneChart;
 import com.inepex.inechart.chartwidget.IneChartModul;
 import com.inepex.inechart.chartwidget.misc.HorizontalPosition;
 import com.inepex.inechart.chartwidget.misc.VerticalPosition;
@@ -18,7 +19,16 @@ import com.inepex.inegraphics.shared.GraphicalObjectContainer;
 import com.inepex.inegraphics.shared.gobjects.GraphicalObject;
 import com.inepex.inegraphics.shared.gobjects.Text;
 
+/**
+ * Base class for displaying texts in the chart.
+ * 
+ * @author Miklós Süveges / Inepex Ltd.
+ *
+ */
 public class LabelFactoryBase extends IneChartModul{
+	/**
+	 * a simple helper class for binding {@link HasLegend} entity and {@link GraphicalObject}s
+	 */
 	protected class LegendBinding{
 		HasLegend hasLegend;
 		GraphicalObjectContainer gosPerEntry;
@@ -31,7 +41,7 @@ public class LabelFactoryBase extends IneChartModul{
 	ArrayList<LegendBinding> legendBindings;
 	HasTitle chartTitle;
 	/**
-	 * legend excluded
+	 * legends excluded from this container
 	 */
 	TreeMap<TextContainer, GraphicalObjectContainer> textContainers;
 	
@@ -46,21 +56,34 @@ public class LabelFactoryBase extends IneChartModul{
 	}
 	
 	public void setChartTitle(HasTitle chartTitle) {
-		this.chartTitle = chartTitle;
-		
+		this.chartTitle = chartTitle;	
 	}
 
 	@Override
 	public void update() {
 		graphicalObjectContainer.removeAllGraphicalObject();
-		updateLegends();
-		updateChartTitle();
+		updateLegends(false);
+		updateChartTitle(false);
+		for(TextContainer tc : textContainers.keySet()){
+			graphicalObjectContainer.addAllGraphicalObject(textContainers.get(tc));
+		}
 	}
 	
-	protected void updateLegends(){
+	public void forcedUpdate(){
+		graphicalObjectContainer.removeAllGraphicalObject();
+		updateLegends(true);
+		updateChartTitle(true);
+		for(TextContainer tc : textContainers.keySet()){
+			graphicalObjectContainer.addAllGraphicalObject(textContainers.get(tc));
+		}
+	}
+	
+	protected void updateLegends(boolean forced){
 		for(LegendBinding lb : legendBindings){
 			if(lb.hasLegend.showLegend()){
-				createLegend(lb);				
+				if(forced || lb.gosPerEntry == null){
+					createLegend(lb);			
+				}
 				graphicalObjectContainer.addAllGraphicalObject(lb.gosPerEntry);
 			}
 			else{
@@ -74,54 +97,107 @@ public class LabelFactoryBase extends IneChartModul{
 		GraphicalObjectContainer goc = new GraphicalObjectContainer();
 		List<LegendEntry> entries = legendBinding.hasLegend.getLegendEntries();
 		Legend legend = legendBinding.hasLegend.getLegend();
+		
 		int textHeight = measureLegendTextHeight(legend);
 		int symbolHeight = getLegendSymbolHeight(legend);
 		if(symbolHeight == 0)
 			symbolHeight = textHeight;
 		int rowHeight = Math.max(textHeight, symbolHeight);
-		
+		//first create elements, then position them
 		int actualX = 0, actualY = 0;
-		
-		for(int i = 0; i < entries.size(); i++){
-			LegendEntry e = entries.get(i);
-			switch (legend.legendEntryLayout) {
-			case AUTO:   //TODO
-			case COLUMN: //TODO
-			case ROW:
+		switch (legend.legendEntryLayout) {
+		case AUTO:
+			int max = legend.maxHeight;
+			if(max > 0){
+				//columns first
+				int maxWidthInColumn = 0;
+				for(LegendEntry e : entries){
+					int w = createLegendEntry(legend, e, goc, actualX, actualY, rowHeight, symbolHeight, textHeight);
+					if(w > maxWidthInColumn){
+						maxWidthInColumn = w;
+					}
+					actualY += rowHeight;
+					if(actualY + rowHeight > max){
+						actualY = 0;
+						actualX += maxWidthInColumn;
+						maxWidthInColumn = 0;
+					}
+				}
+			}
+			else{
+				max = legend.maxWidth;
+				if(max < 0){
+					max = canvas.getWidth();
+				}
+				//rows first
+				GraphicalObjectContainer entryGoc = new GraphicalObjectContainer();
+				for(LegendEntry e : entries){
+					int w = createLegendEntry(legend, e, entryGoc, actualX, actualY, rowHeight, symbolHeight, textHeight);
+					if(actualX + w > max && actualX != 0){
+						entryGoc.moveBasePoints(-actualX, rowHeight);
+						actualX = w;
+						actualY += rowHeight;
+					}
+					else{
+						actualX += w;
+					}
+					goc.addAllGraphicalObject(entryGoc);
+					entryGoc.removeAllGraphicalObject();
+				}
+			}
+			break;
+		case COLUMN:
+			for(LegendEntry e : entries){
+				if(actualY > canvas.getHeight()){
+					break;
+				}
+				actualY += legend.paddingBetweenEntries;
+				createLegendEntry(legend, e, goc, actualX, actualY, rowHeight, symbolHeight, textHeight);
+				actualY += rowHeight;
+			}
+			break;
+		case ROW:
+			for(LegendEntry e : entries){
+				if(actualX > canvas.getWidth()){
+					break;
+				}
 				actualX += legend.paddingBetweenEntries;
 				actualX += createLegendEntry(legend, e, goc, actualX, actualY, rowHeight, symbolHeight, textHeight);
+			}
+			break;
+		}
+		
+		double[] bb = DrawingAreaAssist.getBoundingBox(goc);
+		int x = legend.fixedX, y = legend.fixedY;
+		if(x < 0){
+			switch (legend.horizontalPosition) {
+			case Auto:
+			case Right:
+				x = (int) (canvas.getWidth() - bb[2]);
 				break;
-			default:
+			case Left:
+				x = 0;
+				break;
+			case Middle:
+				x = (int) (canvas.getWidth() - bb[2]) / 2;
 				break;
 			}
 		}
-		double[] bb = DrawingAreaAssist.getBoundingBox(goc);
-		int x = 0, y=0;
-		switch (legend.horizontalPosition) {
-		case Auto:
-		case Right:
-			x = (int) (canvas.getWidth() - bb[2]);
-			break;
-		case Left:
-			x = 0;
-			break;
-		case Middle:
-			x = (int) (canvas.getWidth() - bb[2]) / 2;
-			break;
+		if(y < 0){
+			switch (legend.verticalPosition) {
+			case Auto:
+			case Top:
+				y = 0;			
+				break;
+			case Bottom:
+				y = (int) (canvas.getHeight() - bb[3]);
+				break;
+			case Middle:
+				y = (int) (canvas.getHeight() - bb[3]) / 2;
+				break;
+			}
 		}
-		switch (legend.verticalPosition) {
-		case Auto:
-		case Top:
-			y = 0;			
-			break;
-		case Bottom:
-			y = (int) (canvas.getHeight() - bb[3]);
-			break;
-		case Middle:
-			y = (int) (canvas.getHeight() - bb[3]) / 2;
-			break;
-		}
-		goc.moveBasePoints(x, y);
+		goc.moveBasePoints(x - bb[0], y - bb[1]);
 		legendBinding.gosPerEntry = goc;
 		legendBinding.boundingBox = new double[]{x,y,bb[2],bb[3]};
 	}
@@ -192,55 +268,71 @@ public class LabelFactoryBase extends IneChartModul{
 		return false;
 	}
 	
+	/**
+	 * Returns the padding needed for Legends (whose includeInPadding is set true)
+	 * and for the chart's title.
+	 * 
+	 * @param includeTitle should chart's title be included in padding?
+	 * @return [top, right, bottom, left] paddings
+	 */
 	public double[] getPadding(boolean includeTitle){
+		
 		double[] padding = new double[]{0,0,0,0};
 		for(LegendBinding lb : legendBindings){
 			if(lb.hasLegend.showLegend() && lb.hasLegend.getLegend().includeInPadding){
-				padding = mergePaddings(padding, getPadding(lb.boundingBox, lb.hasLegend.getLegend().horizontalPosition, lb.hasLegend.getLegend().verticalPosition));
+				padding = mergePaddings(padding, getPaddingFromBoundingBox(lb.boundingBox));
 			}
 		}
-		if(includeTitle){
-			HorizontalPosition hp = null;
-			 VerticalPosition vp = null;
+		if(includeTitle && chartTitle != null){
 			GraphicalObjectContainer goc = new GraphicalObjectContainer();
 			if(chartTitle.getName() != null){
 				goc.addAllGraphicalObject(textContainers.get(chartTitle.getName()));
-				hp = chartTitle.getName().horizontalPosition;
-				vp = chartTitle.getName().verticalPosition;
 			}
 			if(chartTitle.getDescription() != null){
 				goc.addAllGraphicalObject(textContainers.get(chartTitle.getDescription()));
-				if(hp == null){
-					hp = chartTitle.getDescription().horizontalPosition;
-					vp = chartTitle.getDescription().verticalPosition;
-				}
 			}
 			if(goc.getGraphicalObjects().size() > 0){
-				padding = mergePaddings(padding, getPadding(DrawingAreaAssist.getBoundingBox(goc),hp,vp));
+				padding = mergePaddings(padding, getPaddingFromBoundingBox(DrawingAreaAssist.getBoundingBox(goc)));
 			}
 		}
 		return padding;
 	}
 	
-	protected double[] getPadding(double[] boundingBox, HorizontalPosition hp, VerticalPosition vp){
-		double top=0, left=0, right=0, bottom=0;
-		switch (hp) {
-		case Auto:
-		case Right:
-			right = canvas.getWidth() - boundingBox[0];
-			break;
-		case Left:
-			left = boundingBox[0];
-			break;
+	protected double[] getPaddingFromBoundingBox(double[] boundingBox){
+		double top, left, right, bottom;
+		double space, maxSpace;
+		//rectangle above boundingBox
+		maxSpace = canvas.getWidth() * boundingBox[1];
+		top = 0;
+		left = 0;
+		right = 0;
+		bottom = canvas.getHeight() - boundingBox[1];
+		//right to bb
+		space = canvas.getHeight() * (boundingBox[0] + boundingBox[2]);
+		if(space > maxSpace){
+			maxSpace = space;
+			top = 0;
+			left = canvas.getWidth() - boundingBox[0] - boundingBox[2];
+			right = 0;
+			bottom = 0;
 		}
-		switch (vp) {
-		case Auto:
-		case Top:
-			top = boundingBox[1];			
-			break;
-		case Bottom:
-			bottom = canvas.getHeight() - boundingBox[1];
-			break;
+		// bottom
+		space = (canvas.getHeight() - boundingBox[1] - boundingBox[3]) * canvas.getWidth();
+		if(space > maxSpace){
+			maxSpace = space;
+			top =  boundingBox[1] + boundingBox[3];
+			left = 0;
+			right = 0;
+			bottom = 0;
+		}
+		//left
+		space = boundingBox[0] * canvas.getHeight();
+		if(space > maxSpace){
+			maxSpace = space;
+			top = 0;
+			left = 0;
+			right = canvas.getWidth() - boundingBox[0];
+			bottom = 0;
 		}
 		return new double[]{top,right,bottom,left};
 	}
@@ -259,11 +351,16 @@ public class LabelFactoryBase extends IneChartModul{
 		text.setFontFamily(label.getTextProperties().getFontFamily());
 		text.setFontSize(label.getTextProperties().getFontSize());
 		text.setFontStyle(label.getTextProperties().getFontStyle());
+		text.setColor(label.getTextProperties().getColor().getColor());
 		return text;
 	}
 
-	protected void updateChartTitle(){
-		
+	protected void updateChartTitle(boolean forced){
+		if(chartTitle == null ||
+			(chartTitle.getName() == null && chartTitle.getDescription() == null) ||
+			(!forced && chartTitle.getName() != null && textContainers.get(chartTitle.getName()) != null) ||
+			(!forced && chartTitle.getDescription() != null && textContainers.get(chartTitle.getDescription()) != null) )
+			return;
 		GraphicalObjectContainer goc = new GraphicalObjectContainer();
 		 HorizontalPosition hp = null;
 		 VerticalPosition vp = null;
@@ -289,7 +386,6 @@ public class LabelFactoryBase extends IneChartModul{
 		}
 		if(goc.getGraphicalObjects().size() > 0){
 			align(goc, hp, vp);
-			graphicalObjectContainer.addAllGraphicalObject(goc);
 		}
 		
 	}
@@ -319,11 +415,11 @@ public class LabelFactoryBase extends IneChartModul{
 		int x = 0, y = 0;
 		switch (hp) {
 		case Auto:
-		case Right:
-			x = (int) (canvas.getWidth() - bb[2]);
-			break;
 		case Left:
 			x = 0;
+			break;
+		case Right:
+			x = (int) (canvas.getWidth() - bb[2]);
 			break;
 		case Middle:
 			x = (int) (canvas.getWidth() - bb[2]) / 2;

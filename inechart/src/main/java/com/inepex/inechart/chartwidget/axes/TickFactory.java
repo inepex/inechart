@@ -5,6 +5,12 @@ import java.util.TreeMap;
 
 import com.inepex.inechart.chartwidget.axes.Axis.AxisDataType;
 
+/**
+ * Calculates ticks for axes.
+ * 
+ * @author Miklós Süveges / Inepex Ltd.
+ *
+ */
 public class TickFactory {
 
 	// constants
@@ -55,7 +61,7 @@ public class TickFactory {
 		 * Bug appeared (May 25th) incharttest/SpeedTest.java devMode:
 		 * -chart height 400 px, yAxis (vertical)
 		 * while 0.6 would have been the good value it was 0.600000000001
-		 * while debugging eclipse's 'watch expression' feature said that 0.3 * 2 = 0.60000000001
+		 * while debugging eclipse's 'watch expression' feature said that 0.3 * 2 = 0.60000000001 (manually typed)
 		 * quite peculiar...
 		 * values:
 		 * start = -1, delta = 0.2222... nDelta = 2.2222..., size = 0.2

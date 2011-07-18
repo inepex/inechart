@@ -437,4 +437,15 @@ public class Axis implements Comparable<Axis>, HasZIndex, HasTitle {
 	public StyledLabel getDescription() {
 		return description;
 	}
+	
+	@Override
+	public void setName(String name) {
+		setName(new StyledLabel(name));
+		
+	}
+
+	@Override
+	public void setDescription(String description) {
+		setDescription(new StyledLabel(description));
+	}
 }

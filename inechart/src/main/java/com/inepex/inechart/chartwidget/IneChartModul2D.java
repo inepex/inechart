@@ -3,22 +3,119 @@ package com.inepex.inechart.chartwidget;
 import java.util.ArrayList;
 import java.util.List;
 
+import com.google.gwt.event.dom.client.ClickEvent;
+import com.google.gwt.event.dom.client.ClickHandler;
+import com.google.gwt.event.dom.client.MouseDownEvent;
+import com.google.gwt.event.dom.client.MouseDownHandler;
+import com.google.gwt.event.dom.client.MouseEvent;
+import com.google.gwt.event.dom.client.MouseMoveEvent;
+import com.google.gwt.event.dom.client.MouseMoveHandler;
+import com.google.gwt.event.dom.client.MouseOutEvent;
+import com.google.gwt.event.dom.client.MouseOutHandler;
+import com.google.gwt.event.dom.client.MouseOverEvent;
+import com.google.gwt.event.dom.client.MouseOverHandler;
+import com.google.gwt.event.dom.client.MouseUpEvent;
+import com.google.gwt.event.dom.client.MouseUpHandler;
 import com.inepex.inechart.chartwidget.axes.Axes;
 import com.inepex.inechart.chartwidget.axes.Axis;
 import com.inepex.inechart.chartwidget.axes.Tick;
 import com.inepex.inechart.chartwidget.axes.TickFactory;
 import com.inepex.inechart.chartwidget.axes.Axis.AxisDirection;
+import com.inepex.inechart.chartwidget.event.ViewportChangeEvent;
+import com.inepex.inechart.chartwidget.event.ViewportChangeHandler;
 import com.inepex.inechart.chartwidget.label.HasLegend;
 import com.inepex.inechart.chartwidget.label.Legend;
-import com.inepex.inechart.chartwidget.label.LegendEntry;
 import com.inepex.inechart.chartwidget.properties.Color;
 import com.inepex.inechart.chartwidget.properties.LineProperties;
+import com.inepex.inegraphics.impl.client.DrawingAreaGWT;
 import com.inepex.inegraphics.impl.client.ishapes.Rectangle;
 import com.inepex.inegraphics.shared.Context;
 import com.inepex.inegraphics.shared.DrawingArea;
 
+/**
+ * A base class for moduls with axes, viewport and legend.
+ * Contains model-to-canvas calculation helper methods.
+ * Also supports auto padding calculation.
+ *
+ *  
+ * @author Miklós Süveges / Inepex Ltd.
+ *
+ */
 public abstract class IneChartModul2D extends IneChartModul implements	HasCoordinateSystem, HasLegend {
+	protected class InnerEventHandler implements ViewportChangeHandler, MouseMoveHandler,
+		MouseOutHandler, MouseDownHandler, MouseOverHandler, MouseUpHandler, ClickHandler{
+		
+		protected boolean canHandleViewportChangeEvent(ViewportChangeEvent event){
+			List<IneChartModul2D> addressedModuls = event.getAddressedModuls();
+			if(addressedModuls != null && 
+				( !addressedModuls.contains(IneChartModul2D.this) || event.isModulHandled(IneChartModul2D.this) )){
+				return false;
+			}
+			return true;
+		}
+		
+		protected void setViewportChangeEventHandled(ViewportChangeEvent event){
+			for(IneChartModul2D m : viewport.getUserModuls().keySet()){
+				event.setModulHandled(m);
+			}
+		}
 
+		@Override
+		public void onMove(ViewportChangeEvent event, double dx, double dy) {
+			if(canHandleViewportChangeEvent(event)){
+				viewport.move(dx, dy);
+				setViewportChangeEventHandled(event);
+			}				
+		}
+
+		@Override
+		public void onSet(ViewportChangeEvent event, double xMin, double yMin,
+				double xMax, double yMax) {
+			if(canHandleViewportChangeEvent(event)){
+				viewport.set(xMin, yMin, xMax, yMax);
+				setViewportChangeEventHandled(event);
+			}
+		}
+
+		@Override
+		public void onClick(ClickEvent event) {
+			if(getValuePair(event) != null)
+				IneChartModul2D.this.onClick(event);
+		}
+
+		@Override
+		public void onMouseUp(MouseUpEvent event) {
+			if(getValuePair(event) != null)
+				IneChartModul2D.this.onMouseUp(event);
+		}
+		
+		@Override
+		public void onMouseOver(MouseOverEvent event) {
+			if(getValuePair(event) != null)
+				IneChartModul2D.this.onMouseOver(event);
+		}
+
+		@Override
+		public void onMouseDown(MouseDownEvent event) {
+			if(getValuePair(event) != null)
+				IneChartModul2D.this.onMouseDown(event);
+		}
+
+		@Override
+		public void onMouseOut(MouseOutEvent event) {
+			if(getValuePair(event) != null)
+				IneChartModul2D.this.onMouseOut(event);
+		}
+
+		@Override
+		public void onMouseMove(MouseMoveEvent event) {
+			if(getValuePair(event) != null)
+				IneChartModul2D.this.onMouseMove(event);
+		}
+	
+	}
+
+	protected InnerEventHandler innerEventHandler;
 	protected Axis xAxis;
 	protected Axis yAxis;
 	protected ArrayList<Axis> extraAxes;
@@ -28,7 +125,7 @@ public abstract class IneChartModul2D extends IneChartModul implements	HasCoordi
 	protected boolean redrawNeeded;
 	protected boolean autoScaleViewport;
 	public static final LineProperties defaultGridLine = new LineProperties(1.8, new Color("#E8E8E8", 1),4,4);
-	protected boolean autocalcPadding = true;
+	protected boolean autoCalcPadding = true;
 	
 	protected static final int DEFAULT_PADDING_H = 8;
 	protected static final int DEFAULT_PADDING_V = 8;
@@ -72,6 +169,7 @@ public abstract class IneChartModul2D extends IneChartModul implements	HasCoordi
 		extraAxes = new ArrayList<Axis>();
 		border = defaultBorder;
 		legend = new Legend();
+		innerEventHandler = new InnerEventHandler();
 	}
 
 	public abstract void updateModulsAxes();
@@ -90,9 +188,9 @@ public abstract class IneChartModul2D extends IneChartModul implements	HasCoordi
 							new Context(border.getLineColor().getAlpha(),
 									border.getLineColor().getColor(),
 									border.getLineWidth(),
-									Color.DEFAULT_COLOR,
+									Defaults.colorString,
 									0,0,0,
-									Color.DEFAULT_COLOR),
+									Defaults.colorString),
 									true, false));
 		}
 		if(backgroundColor != null){
@@ -101,17 +199,17 @@ public abstract class IneChartModul2D extends IneChartModul implements	HasCoordi
 							0, 
 							backgroundZIndex,
 							new Context(backgroundColor.getAlpha(),
-									Color.DEFAULT_COLOR,
+									Defaults.colorString,
 									0,
 									backgroundColor.getColor(),
 									0,0,0,
-									Color.DEFAULT_COLOR),
+									Defaults.colorString),
 									false, true));
 		}
 	}
 	
 	public void calculatePadding(double[] minPadding){
-		if(!autocalcPadding)
+		if(!autoCalcPadding)
 			return;
 		double[] padding = mergePaddings(new double[]{DEFAULT_PADDING_V,DEFAULT_PADDING_H,DEFAULT_PADDING_V,DEFAULT_PADDING_H}, minPadding);
 		if(xAxis.isVisible())
@@ -226,11 +324,13 @@ public abstract class IneChartModul2D extends IneChartModul implements	HasCoordi
 	 * 
 	 * @param value
 	 *            to transform
-	 * @param horizontalAxis
-	 *            a horizontal {@link Axis}
 	 * @return -1 if the given {@link AxisDirection} is not horizontal
 	 */
-	public double getCanvasX(double value, Axis horizontalAxis) {
+	public double getCanvasX(double value) {
+		Axis horizontalAxis = xAxis;
+		if(!horizontalAxis.isHorizontal()){
+			horizontalAxis = yAxis;
+		}
 		int totalWidth = canvas.getWidth() - leftPadding - rightPadding;
 		double visibleLength, visibleMin;
 		visibleLength = horizontalAxis.getMax() - horizontalAxis.getMin();
@@ -254,11 +354,13 @@ public abstract class IneChartModul2D extends IneChartModul implements	HasCoordi
 	 * 
 	 * @param value
 	 *            to transform
-	 * @param verticalAxis
-	 *            a vertical {@link Axis}
 	 * @return -1 if the given {@link AxisDirection} is not vertical
 	 */
-	public double getCanvasY(double value, Axis verticalAxis) {
+	public double getCanvasY(double value) {
+		Axis verticalAxis = yAxis;
+		if(verticalAxis.isHorizontal()){
+			verticalAxis = yAxis;
+		}
 		int totalHeight = canvas.getHeight() - topPadding - bottomPadding;
 		double visibleLength, visibleMin;
 		visibleLength = verticalAxis.getMax() - verticalAxis.getMin();
@@ -274,7 +376,93 @@ public abstract class IneChartModul2D extends IneChartModul implements	HasCoordi
 			return -1;
 		return pos;
 	}
-
+	
+	/**
+	 * Returns a value for a x position over canvas 
+	 * @param canvasX
+	 * @return x or y (depends on horizontal axis)
+	 */
+	public double getValueForCanvasX(int canvasX){
+		Axis horizontalAxis = xAxis;
+		if(!horizontalAxis.isHorizontal()){
+			horizontalAxis = yAxis;
+		}
+		int totalWidth = canvas.getWidth() - leftPadding - rightPadding;
+		double visibleLength, visibleMin;
+		visibleLength = horizontalAxis.getMax() - horizontalAxis.getMin();
+		visibleMin = horizontalAxis.getMin();
+		double pos;
+		if (horizontalAxis.getAxisDirection() == AxisDirection.Horizontal_Ascending_To_Right) {
+			pos =  (canvasX - leftPadding) * visibleLength / totalWidth + visibleMin;
+		} 
+		else if (horizontalAxis.getAxisDirection() == AxisDirection.Horizontal_Ascending_To_Left) {
+			pos =  (totalWidth + leftPadding - canvasX) * visibleLength / totalWidth + visibleMin;
+		}
+		else
+			return -1;
+		return pos;
+	}
+	
+	/**
+	 * Returns a value for an y position over canvas 
+	 * @param canvasY
+	 * @return y or x (depends on vertical axis)
+	 */
+	public double getValueForCanvasY(int canvasY){
+		Axis verticalAxis = yAxis;
+		if(verticalAxis.isHorizontal()){
+			verticalAxis = yAxis;
+		}
+		int totalHeight = canvas.getHeight() - topPadding - bottomPadding;
+		double visibleLength, visibleMin;
+		visibleLength = verticalAxis.getMax() - verticalAxis.getMin();
+		visibleMin = verticalAxis.getMin();
+		double pos;
+		if (verticalAxis.getAxisDirection() == AxisDirection.Vertical_Ascending_To_Bottom) {
+			pos = (canvasY - topPadding) * visibleLength / totalHeight + visibleMin;
+		}
+		else if (verticalAxis.getAxisDirection() == AxisDirection.Vertical_Ascending_To_Top) {
+			pos = (totalHeight + topPadding - canvasY) * visibleLength / totalHeight + visibleMin;
+		}
+		else
+			return -1;
+		return pos;
+	}
+	
+	/**
+	 * Translates a point over the canvas to a point in a model
+	 * @param canvasX
+	 * @param canvasY
+	 * @return model's [x,y]
+	 */
+	public double[] getValuePair(int canvasX, int canvasY){
+		double[] ret = new double[2];
+		if (xAxis.isHorizontal())
+			ret[0] = getValueForCanvasX(canvasX);
+		else
+			ret[0] = getCanvasY(canvasY);
+		if (yAxis.isHorizontal())
+			ret[1] = getValueForCanvasX(canvasX);
+		else
+			ret[1] = getCanvasY(canvasY);
+		return ret;
+	}
+	
+	/**
+	 * 
+	 * @param mouseEvent any {@link MouseEvent}
+	 * @return model's [x,y], or null if it is not a client side chart or is not over this modul
+	 */
+	public double[] getValuePair(MouseEvent<?> mouseEvent){
+		if(canvas instanceof DrawingAreaGWT){
+			int canvasX = mouseEvent.getRelativeX(((DrawingAreaGWT) canvas).getWidget().getElement());
+			int canvasY = mouseEvent.getRelativeY(((DrawingAreaGWT) canvas).getWidget().getElement());
+			if(isInsideModul(canvasX, canvasY))
+				return getValuePair(canvasX, canvasY);
+		}
+		return null;
+	}
+	
 	/**
 	 * Translates a point(x,y) in model to a point on canvas
 	 * 
@@ -282,16 +470,16 @@ public abstract class IneChartModul2D extends IneChartModul implements	HasCoordi
 	 * @param y
 	 * @return
 	 */
-	public double[] getCanvasPosition(double x, double y) {
+ 	public double[] getCanvasPosition(double x, double y) {
 		double[] ret = new double[2];
 		if (xAxis.isHorizontal())
-			ret[0] = getCanvasX(x, xAxis);
+			ret[0] = getCanvasX(x);
 		else
-			ret[0] = getCanvasX(y, yAxis);
+			ret[0] = getCanvasX(y);
 		if (yAxis.isHorizontal())
-			ret[1] = getCanvasY(x, xAxis);
+			ret[1] = getCanvasY(x);
 		else
-			ret[1] = getCanvasY(y, yAxis);
+			ret[1] = getCanvasY(y);
 		return ret;
 	}
 
@@ -361,12 +549,12 @@ public abstract class IneChartModul2D extends IneChartModul implements	HasCoordi
 		return false;
 	}
 
-	public boolean isAutocalcPadding() {
-		return autocalcPadding;
+	public boolean isAutoCalcPadding() {
+		return autoCalcPadding;
 	}
 
-	public void setAutocalcPadding(boolean autocalcPadding) {
-		this.autocalcPadding = autocalcPadding;
+	public void setAutoCalcPadding(boolean autocalcPadding) {
+		this.autoCalcPadding = autocalcPadding;
 	}
 
 	protected boolean isInsideModul(double posOnCanvas, boolean isX){
@@ -379,13 +567,19 @@ public abstract class IneChartModul2D extends IneChartModul implements	HasCoordi
 		}
 		//x
 		else{
-			if(posOnCanvas > leftPadding && posOnCanvas < canvas.getWidth()-rightPadding){
+			if(posOnCanvas > leftPadding && posOnCanvas < canvas.getWidth() - rightPadding){
 				return true;
 			}
 			return false;
 		}
 	}
 
+	protected boolean isInsideModul(double posXOnCanvas, double posYOnCanvas){
+		if(isInsideModul(posXOnCanvas, true) && isInsideModul(posYOnCanvas, false))
+			return true;
+		return false;
+	}
+	
 	public void setLeftPadding(int leftPadding) {
 		this.leftPadding = leftPadding;
 	}
@@ -442,7 +636,6 @@ public abstract class IneChartModul2D extends IneChartModul implements	HasCoordi
 		return leftPadding;
 	}
 
-
 	@Override
 	public boolean showLegend() {
 		return showLegend;
@@ -463,5 +656,16 @@ public abstract class IneChartModul2D extends IneChartModul implements	HasCoordi
 		this.legend = legend;
 	}
 
+	protected abstract void onClick(ClickEvent event);
+
+	protected abstract void  onMouseUp(MouseUpEvent event);
+	
+	protected abstract void onMouseOver(MouseOverEvent event);
+
+	protected abstract void onMouseDown(MouseDownEvent event);
+
+	protected abstract void onMouseOut(MouseOutEvent event);
+	
+	protected abstract void onMouseMove(MouseMoveEvent event);
 	
 }

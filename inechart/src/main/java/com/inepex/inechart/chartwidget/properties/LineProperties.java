@@ -1,5 +1,7 @@
 package com.inepex.inechart.chartwidget.properties;
 
+import com.inepex.inechart.chartwidget.Defaults;
+
 public class LineProperties {
 	/**
 	 * Drawing style of the line
@@ -15,24 +17,14 @@ public class LineProperties {
 		DASHED
 	}
 
-	public static LineProperties getDefaultSolidLine() {
-		return new LineProperties(1, new Color("#000000"));
-	}
-
-	public static LineProperties getDefaultDashedLine() {
-		return new LineProperties(1, new Color("#000000"),
-				DEFAULT_DASH_STROKE_LENGTH, DEFAULT_DASH_DISTANCE);
-	}
-
-	public static final double DEFAULT_DASH_STROKE_LENGTH = 3.5;
-	public static final double DEFAULT_DASH_DISTANCE = 2.2;
+		
 	private double lineWidth;
 	private Color lineColor;
 	private LineStyle style;
 	private double dashStrokeLength, dashDistance;
 
 	public LineProperties(double lineWidth){
-		this(lineWidth, new Color("#000000"));
+		this(lineWidth, Defaults.color());
 	}
 	
 	public LineProperties(double lineWidth, Color lineColor) {
