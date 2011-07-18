@@ -34,8 +34,10 @@ public class Text extends GraphicalObject{
 		RIGHT
 	}
 	//font color is stored in context color
-	protected final static Context DEFAULT_FONT_CONTEXT = new Context(1, "#000000", 1, "#000000", 0, 0, 0,  "#000000");
-	protected final static String DEFAULT_FONT_FAMILY = "Calibri, Verdana, Arial, sans-serif";
+	protected final static Context getDefaultFontContext(){
+		return new Context(1, "#000000", 1, "#000000", 0, 0, 0,  "#000000");
+	}
+	protected final static String DEFAULT_FONT_FAMILY = "Calibri, Arial, sans-serif";
 	protected final static int DEFAULT_FONT_SIZE = 13;
 	protected final static String DEFAULT_FONT_STYLE = "normal";
 	protected final static String DEFAULT_FONT_WEIGHT = "normal";
@@ -65,7 +67,7 @@ public class Text extends GraphicalObject{
 	public Text(double basePointX, double basePointY, String text,
 			String fontFamily,int fontSize, String fontStyle, String fontWeight, 
 			BasePointXPosition basePointXPosition,	BasePointYPosition basePointYPosition) {
-		super(basePointX, basePointY, 0, DEFAULT_FONT_CONTEXT, false, false);
+		super(basePointX, basePointY, 0, getDefaultFontContext(), false, false);
 		this.text = text;
 		this.fontFamily = fontFamily;
 		this.fontSize = fontSize;
@@ -230,11 +232,9 @@ public class Text extends GraphicalObject{
 		this.basePointYPosition = basePointYPosition;
 	}
 	
-	
 	public String getColor(){
 		return context.getFillColor();
 	}
-	
 	
 	public void setColor(String color){
 		context.setFillColor(color);

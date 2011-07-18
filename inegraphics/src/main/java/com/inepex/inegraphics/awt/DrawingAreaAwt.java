@@ -46,18 +46,6 @@ public class DrawingAreaAwt extends DrawingArea {
 		g2.setRenderingHint(RenderingHints.KEY_RENDERING, RenderingHints.VALUE_RENDER_QUALITY);
 	}
 	
-	/**
-	 * ! since the image is not present, do not use {@link #saveToFile(String)} or {@link #saveToOutputStream(OutputStream)} methods !
-	 * @param graphics2D
-	 * @param width
-	 * @param height
-	 */
-	public DrawingAreaAwt(Graphics2D graphics2D,int width, int height){
-		super(width, height);
-		g2 = graphics2D;
-		g2.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
-		g2.setRenderingHint(RenderingHints.KEY_RENDERING, RenderingHints.VALUE_RENDER_QUALITY);
-	}
 
 	@Override
 	protected void clear() {
@@ -219,17 +207,26 @@ public class DrawingAreaAwt extends DrawingArea {
 	@Override
 	protected void drawText(Text text) {
 		applyContext(text.getContext(), true);
-		g2.setColor(Color.BLACK);
-//		updateTextDimensions(text);
+		g2.setColor(ColorUtil.getColor(text.getColor()));
 		measureText(text);
 		TextPositionerBase.calcTextPosition(text);
-		drawString(text.getText(), (int)text.getBasePointX(), (int)text.getBasePointY() + 10); 
+		drawString(text.getText(), (int)text.getBasePointX(), (int)text.getBasePointY()); 
 	}
 	
 	private void drawString(String text, int x, int y) {
-        for (String line : text.split("\n"))
-        {
-            g2.drawString(line, x, y);
+        for (String line : text.split("\n")){
+//        	Color c = g2.getColor();
+//        	g2.setColor(Color.red);
+//        	g2.fillOval(x, y, 3, 3);
+//        	
+//        	g2.setColor(Color.GREEN);
+//        	Rectangle2D r = g2.getFontMetrics().getStringBounds(text, g2);
+//        	r.setRect(x, y, r.getWidth(), r.getHeight());
+//        	g2.draw(r);
+//        	
+//        	
+//        	g2.setColor(c);
+            g2.drawString(line, x, y + g2.getFontMetrics().getAscent());
         	y += g2.getFontMetrics().getHeight();
         }
     }

@@ -3,6 +3,7 @@ package com.inepex.inegraphics.impl.client;
 
 import java.util.TreeMap;
 
+import com.google.gwt.dom.client.Style.BorderStyle;
 import com.google.gwt.dom.client.Style.Unit;
 import com.google.gwt.user.client.ui.AbsolutePanel;
 import com.google.gwt.user.client.ui.InlineLabel;
@@ -65,6 +66,9 @@ public class TextPositioner {
 		
 		TextPositionerBase.calcTextPosition(text);
 		InlineLabel lbl = createLabel(text);
+//		lbl.getElement().getStyle().setBorderWidth(1, Unit.PX);
+//		lbl.getElement().getStyle().setBorderColor("green");
+//		lbl.getElement().getStyle().setBorderStyle(BorderStyle.SOLID);
 		panel.add(lbl,(int) text.getBasePointX(), (int) text.getBasePointY());
 		texts.put(text, lbl);
 	}
