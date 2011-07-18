@@ -21,8 +21,8 @@ public class MultiLineChart extends FlowPanel{
 	
 	private void init(){
 		chart = new IneChart(670, 390);
-		chart.setName(new StyledLabel("Multi Line Chart"));
-		chart.setDescription(new StyledLabel("Generated data, default lookout"));
+		chart.setName("Multi Line Chart");
+		chart.setDescription("Generated data, default lookout");
 		lineChart = chart.createLineChart();
 		for(int i=0;i<5;i++){
 			Curve c = new Curve(DataGenerator.generateRandomData(0, 10, 100, 600, 40, 15));

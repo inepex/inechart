@@ -47,6 +47,7 @@ public class MultiLineChartTest extends JFrame{
 		addWindowListener(wndCloser);
 
 		setVisible(true);
+		chart.saveToFile("multiLineChart.png");
 	}
 	/**
 	 * @param args
@@ -94,8 +95,8 @@ public class MultiLineChartTest extends JFrame{
 	
 	private void init(){
 		chart = new IneAwtChart(630, 400);
-		chart.setName(new StyledLabel("Multi Line Chart"));
-		chart.setDescription(new StyledLabel("Generated data, default lookout"));
+		chart.setName("Multi Line Chart");
+		chart.setDescription("Generated data, default lookout");
 		LineChart lineChart = chart.createLineChart();
 		for(int i=0;i<5;i++){
 			Curve c = new Curve(generateRandomData(0, 10, 100, 600, 40, 15));
