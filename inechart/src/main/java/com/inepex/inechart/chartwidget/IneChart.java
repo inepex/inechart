@@ -54,12 +54,12 @@ public class IneChart extends Composite implements HasTitle{
 
 	public IneChart(int width, int height) {
 		//dimensions, layout
-		this.initWidget(mainPanel);
 		canvasHeight = height;
 		canvasWidth = width;
 		mainPanel = new AbsolutePanel();
 		mainPanel.setPixelSize(width, height);
-		this.drawingArea = new DrawingAreaGWT(canvasWidth, canvasHeight, false);
+		initWidget(mainPanel);
+		drawingArea = new DrawingAreaGWT(canvasWidth, canvasHeight, false);
 		if (DrawingAreaGWT.isHTML5Compatible())
 			drawingArea.setCreateShadows(false);
 		drawingArea.getCanvasWidget().setStyleName(ResourceHelper.getRes().style().chartWidget());
