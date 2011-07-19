@@ -193,9 +193,15 @@ public class IneChart extends Composite implements HasTitle{
 		legendFactory.update();
 		//scale moduls 
 		if (autoScaleModuls){
+			double[] padding = legendFactory.getPadding(includeTitleInPadding);
 			for (IneChartModul modul : moduls) {
-				if(modul instanceof IneChartModul2D){
-					((IneChartModul2D) modul).calculatePadding(legendFactory.getPadding(includeTitleInPadding));
+				if(modul instanceof IneChartModul2D && ((IneChartModul2D) modul).autoCalcPadding){
+					padding = IneChartModul2D.mergePaddings(padding,((IneChartModul2D) modul).getPaddingForAxes());
+				}
+			}
+			for (IneChartModul modul : moduls) {
+				if(modul instanceof IneChartModul2D && ((IneChartModul2D) modul).autoCalcPadding){
+					((IneChartModul2D) modul).setPadding(padding);
 				}
 			}
 			axes.forcedUpdate();

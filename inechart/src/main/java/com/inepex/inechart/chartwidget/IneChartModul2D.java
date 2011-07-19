@@ -204,10 +204,33 @@ public abstract class IneChartModul2D extends IneChartModul implements	HasCoordi
 		}
 	}
 	
-	public void calculatePadding(double[] minPadding){
-		if(!autoCalcPadding)
-			return;
-		double[] padding = mergePaddings(new double[]{DEFAULT_PADDING_V,DEFAULT_PADDING_H,DEFAULT_PADDING_V,DEFAULT_PADDING_H}, minPadding);
+//	public void calculatePadding(double[] minPadding){
+//		if(!autoCalcPadding)
+//			return;
+//		double[] padding = mergePaddings(new double[]{DEFAULT_PADDING_V,DEFAULT_PADDING_H,DEFAULT_PADDING_V,DEFAULT_PADDING_H}, minPadding);
+//		if(xAxis.isVisible())
+//			padding = mergePaddings(padding, axes.getPaddingForAxis(xAxis));
+//		if(yAxis.isVisible())
+//			padding = mergePaddings(padding, axes.getPaddingForAxis(yAxis));
+//		for(Axis axis : extraAxes){
+//			if(axis.isVisible())
+//				padding = mergePaddings(padding, axes.getPaddingForAxis(axis));
+//		}
+//		topPadding = (int) padding[0];
+//		rightPadding = (int) padding[1];
+//		bottomPadding = (int) padding[2];
+//		leftPadding = (int) padding[3];		
+//	}
+	
+	public void setPadding(double[] padding){
+		topPadding = (int) padding[0];
+		rightPadding = (int) padding[1];
+		bottomPadding = (int) padding[2];
+		leftPadding = (int) padding[3];	
+	}
+	
+	public double[] getPaddingForAxes(){
+		double[] padding = new double[]{DEFAULT_PADDING_V,DEFAULT_PADDING_H,DEFAULT_PADDING_V,DEFAULT_PADDING_H};
 		if(xAxis.isVisible())
 			padding = mergePaddings(padding, axes.getPaddingForAxis(xAxis));
 		if(yAxis.isVisible())
@@ -216,13 +239,10 @@ public abstract class IneChartModul2D extends IneChartModul implements	HasCoordi
 			if(axis.isVisible())
 				padding = mergePaddings(padding, axes.getPaddingForAxis(axis));
 		}
-		topPadding = (int) padding[0];
-		rightPadding = (int) padding[1];
-		bottomPadding = (int) padding[2];
-		leftPadding = (int) padding[3];		
+		return padding;
 	}
 	
-	private double[] mergePaddings(double[] first, double[] second){
+	public static double[] mergePaddings(double[] first, double[] second){
 		double[] ret = new double[4];
 		for(int i=0;i<4;i++){
 			ret[i] = Math.max(first[i], second [i]);
