@@ -80,7 +80,6 @@ public class BarChart extends IneChartModul2D implements HasShadow, HasZIndex {
 	protected int zIndex;
 	protected ColorSet colorSet;
 	
-	boolean autoCreateTicks;
 
 	/**
 	 * all bar data stored in this container all of the x values contained
@@ -917,15 +916,6 @@ public class BarChart extends IneChartModul2D implements HasShadow, HasZIndex {
 		this.colorSet = colorSet;
 	}
 	
-	/**
-	 * @param autoCreateTicks
-	 *            the autoCreateTicks to set
-	 */
-	public void setAutoCreateTicks(boolean autoCreateTicks) {
-		if (this.autoCreateTicks != autoCreateTicks)
-			redrawNeeded = true;
-		this.autoCreateTicks = autoCreateTicks;
-	}
 
 	@Override
 	public void updateModulsAxes() {
@@ -938,9 +928,6 @@ public class BarChart extends IneChartModul2D implements HasShadow, HasZIndex {
 
 		// update axes and viewport
 		alignViewportAndAxes();
-		if (autoCreateTicks)
-			createDefaultAxes();
-		
 	}
 
 	@Override

@@ -31,7 +31,6 @@ public class Defaults {
 	}
 	
 	//textproperty
-	
 	public static TextProperties getTextProperties(){
 		return new TextProperties("Verdana, Arial, sans-serif", 13, "normal", "normal", color());
 	}
@@ -44,6 +43,11 @@ public class Defaults {
 		return  new TextProperties("Calibri, Verdana, Arial, sans-serif", 12, "normal", "normal", color());
 	}
 	public static final ShapeProperties selectionLookout = new ShapeProperties(new LineProperties(1.2, new Color("#FFFF66", 0.84)), new Color("#FFFF66", 0.66));
-	
+	public static LineProperties gridLine(){
+		return new LineProperties(1.8, new Color("#E8E8E8", 1),4,4);
+	}
+	public static LineProperties border(){
+		return new LineProperties(1, new Color("#000", 1.0));
+	}
 
 }

@@ -15,4 +15,9 @@ public interface IneChartStyle extends CssResource {
 	String text();
 	String color();
 
+	String scrollBar();
+	String increase();
+	String decrease();
+	String slider();
+	String sliderMouseOver();
 }

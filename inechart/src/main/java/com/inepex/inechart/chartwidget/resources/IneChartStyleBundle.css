@@ -58,3 +58,24 @@
 	width: 28px;
 	float:left;
 }
+
+.scrollBar{
+	background-color: white;
+	border: 1px solid gray;
+}
+
+.scrollBar .slider{
+	background-color: black;
+}
+
+.scrollBar .sliderMouseOver{
+	background-color: gray;
+}
+
+.scrollBar .increase{
+	
+}
+
+.scrollBar .decrease{
+	
+}

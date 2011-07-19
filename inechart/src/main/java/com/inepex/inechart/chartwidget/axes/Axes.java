@@ -32,6 +32,7 @@ import com.inepex.inegraphics.shared.gobjects.Text.BasePointYPosition;
 public class Axes extends IneChartModul {
 
 	private ArrayList<Axis> axes;
+	private TickFactory tickFactory;
 
 	private TreeMap<Axis, GraphicalObjectContainer> gosPerAxis;
 	private TreeMap<Axis, ArrayList<Text>> labelsPerAxis;
@@ -54,6 +55,7 @@ public class Axes extends IneChartModul {
 		labelsPerAxis = new TreeMap<Axis, ArrayList<Text>>();
 		axisLinePosition = new TreeMap<Axis, Double>();
 		redrawNeeded = false;
+		tickFactory = new TickFactory();
 	}
 
 	public Axis createAxis(AxisDirection direction, IneChartModul2D modulToAlign) {
@@ -84,6 +86,10 @@ public class Axes extends IneChartModul {
 	public void update() {
 		for (Axis axis : axes) {
 			if (axis.changed) {
+				if (axis.autoCreateTicks){
+					tickFactory.autoCreateTicks(axis);
+					createDefaultTickAndLabelForAxis(axis);
+				}
 				removeAllGOAndLabelRelatedToAxis(axis);
 				createGOsAndLabelsForAxis(axis);
 				axis.changed = false;
@@ -533,6 +539,15 @@ public class Axes extends IneChartModul {
 		if(left < 0)
 			left = 0;
 		return new double[] {top, right, bottom, left};
+	}
+	
+	private void createDefaultTickAndLabelForAxis(Axis axis) {
+		for(Tick t : axis.getTicks()){
+			if(t.getPosition() != axis.getMin() && t.getPosition() != axis.getMax()){
+				t.setGridLine(Defaults.gridLine());
+			}
+			t.setTickText(t.getPosition() + "");
+		}
 	}
 	
 }

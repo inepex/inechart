@@ -18,8 +18,6 @@ import com.google.gwt.event.dom.client.MouseUpEvent;
 import com.google.gwt.event.dom.client.MouseUpHandler;
 import com.inepex.inechart.chartwidget.axes.Axes;
 import com.inepex.inechart.chartwidget.axes.Axis;
-import com.inepex.inechart.chartwidget.axes.Tick;
-import com.inepex.inechart.chartwidget.axes.TickFactory;
 import com.inepex.inechart.chartwidget.axes.Axis.AxisDirection;
 import com.inepex.inechart.chartwidget.event.ViewportChangeEvent;
 import com.inepex.inechart.chartwidget.event.ViewportChangeHandler;
@@ -124,22 +122,20 @@ public abstract class IneChartModul2D extends IneChartModul implements	HasCoordi
 	protected boolean useViewport;
 	protected boolean redrawNeeded;
 	protected boolean autoScaleViewport;
-	public static final LineProperties defaultGridLine = new LineProperties(1.8, new Color("#E8E8E8", 1),4,4);
 	protected boolean autoCalcPadding = true;
-	
+	//padding
 	protected static final int DEFAULT_PADDING_H = 8;
 	protected static final int DEFAULT_PADDING_V = 8;
 	protected int topPadding = DEFAULT_PADDING_V,
 			leftPadding = DEFAULT_PADDING_H,
 			bottomPadding = DEFAULT_PADDING_V,
 			rightPadding = DEFAULT_PADDING_H;
-	
+	//border and background
 	protected static final int backgroundZIndex = Integer.MIN_VALUE + 100;
 	protected static final int borderZIndex = backgroundZIndex + 1;
 	protected LineProperties border = null;
 	protected Color backgroundColor = null;
-	public static final LineProperties defaultBorder = new LineProperties(1, new Color("#000", 1.0));
-	
+	//legend
 	protected boolean showLegend = true;
 	protected Legend legend;
 	
@@ -167,7 +163,7 @@ public abstract class IneChartModul2D extends IneChartModul implements	HasCoordi
 		axes.addAxis(xAxis);
 		axes.addAxis(yAxis);
 		extraAxes = new ArrayList<Axis>();
-		border = defaultBorder;
+		border = Defaults.border();
 		legend = new Legend();
 		innerEventHandler = new InnerEventHandler();
 	}
@@ -284,8 +280,22 @@ public abstract class IneChartModul2D extends IneChartModul implements	HasCoordi
 
 	public void addExtraAxis(Axis axis) {
 		axis.setModulToAlign(this);
+		
 		axes.addAxis(axis);
 		extraAxes.add(axis);
+	}
+	
+	protected void alignExtraAxes(){
+		for(Axis axis:extraAxes){
+			Axis pairAxis = xAxis;
+			if(AxisDirection.isPerpendicular(pairAxis, axis)){
+				pairAxis = yAxis;
+			}
+			if(axis.getMax() == axis.getMin()){
+				axis.setMax(pairAxis.getMax());
+				axis.setMin(pairAxis.getMin());
+			}
+		}
 	}
 
 	public void removeExtraAxis(Axis axis) {
@@ -482,28 +492,6 @@ public abstract class IneChartModul2D extends IneChartModul implements	HasCoordi
 			ret[1] = getCanvasY(y);
 		return ret;
 	}
-
-	public void createDefaultAxes() {
-		TickFactory tf = new TickFactory();
-		if (xAxis.isChanged()){
-			tf.autoCreateTicks(xAxis);
-			for(Tick t : xAxis.getTicks()){
-				if(t.getPosition() != xAxis.getMin() && t.getPosition() != xAxis.getMax()){
-					t.setGridLine(defaultGridLine);
-				}
-				t.setTickText(t.getPosition() + "");
-			}
-		}
-		if (yAxis.isChanged()){
-			tf.autoCreateTicks(yAxis);
-			for(Tick t : yAxis.getTicks()){
-				if(t.getPosition() != yAxis.getMin() && t.getPosition() != yAxis.getMax()){
-					t.setGridLine(defaultGridLine);
-				}
-				t.setTickText(t.getPosition() + "");
-			}
-		}
-	}
 	
 	protected void alignViewportAndAxes(){
 		if (useViewport) {
@@ -523,6 +511,7 @@ public abstract class IneChartModul2D extends IneChartModul implements	HasCoordi
 				viewport.setY(yAxis.getMin(), yAxis.getMax());
 			}
 		}
+		alignExtraAxes();
 		viewport.userModuls.put(this, false);
 	}
 

@@ -121,8 +121,9 @@ public class Axis implements Comparable<Axis>, HasZIndex, HasTitle {
 	 * values
 	 */
 	protected double lowerEnd, upperEnd;
+	protected boolean filterFrequentTicks = false;
+	protected boolean autoCreateTicks = true;
 
-	protected  boolean filterFrequentTicks = false;
 
 	public Axis() {
 		this(null);
@@ -447,5 +448,15 @@ public class Axis implements Comparable<Axis>, HasZIndex, HasTitle {
 	@Override
 	public void setDescription(String description) {
 		setDescription(new StyledLabel(description));
+	}
+
+	
+	public boolean isAutoCreateTicks() {
+		return autoCreateTicks;
+	}
+
+	
+	public void setAutoCreateTicks(boolean autoCreateTicks) {
+		this.autoCreateTicks = autoCreateTicks;
 	}
 }

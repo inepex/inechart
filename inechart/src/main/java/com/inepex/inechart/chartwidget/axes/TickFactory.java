@@ -19,8 +19,6 @@ public class TickFactory {
 	static final int MINIMUM_TICK_DISTANCE_VERTICAL = 14;
 	static final int MINIMUM_TICK_DISTANCE_HORIZONTAL = 29;
 
-	int canvasHeight, canvasWidth;
-
 	public TickFactory() {
 	}
 
