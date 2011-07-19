@@ -103,7 +103,7 @@ public class IneChart extends Composite implements HasTitle{
 	}
 
 	public PieChart createPieChart() {
-		PieChart chart = new PieChart(drawingArea);
+		PieChart chart = new PieChart(drawingArea, getAxes());
 		moduls.add(chart);
 		legendFactory.addHasLegendEntries(chart);
 		return chart;

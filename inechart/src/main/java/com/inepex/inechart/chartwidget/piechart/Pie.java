@@ -74,7 +74,7 @@ public class Pie{
 			sliceMap.put(key, new Slice(new StyledLabel(key), null,c));
 		}
 		calculatePercentages();
-		setLegendEntries();
+//		setLegendEntries();
 	}
 
 	public void addData(String name, Double value, String color) {
@@ -90,7 +90,7 @@ public class Pie{
 			sliceMap.put(name, new Slice(new StyledLabel(name), null,new Color(color)));
 		}
 		calculatePercentages();
-		setLegendEntries();
+//		setLegendEntries();
 	}
 
 	public SortedMap<String, Double> getDataMap() {
@@ -134,5 +134,9 @@ public class Pie{
 			Slice s = sliceMap.get(key);
 			s.setName(new StyledLabel(s.getName().getText() + " " + dataMap.get(key) + " " + Math.round(percentages.get(key)) + "%"));
 		}
+	}
+
+	public void setColors(ColorSet colors) {
+		this.colors = colors;
 	}
 }

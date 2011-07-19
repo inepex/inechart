@@ -6,8 +6,8 @@ public class ColorSet {
 
 	static final Color[] flotColorSet = { new Color("#edc240"),
 			new Color("#afd8f8"), new Color("#cb4b4b"), new Color("#4da74d"),
-			new Color("#9440ed"), new Color("#9440ed"), new Color("#9440ed"),
-			new Color("#9440ed") };
+			new Color("#9440ed"), new Color("#1c91db"), new Color("#dfd212"),
+			new Color("#de8238") };
 	
 	static final Color[] ineColorSet = {
 		new Color("#1c91db"),
@@ -44,5 +44,9 @@ public class ColorSet {
 		if (actual >= colors.length)
 			actual = 0;
 		return colors[actual++];
+	}
+	
+	public static ColorSet flotColorSet(){
+		return new ColorSet(flotColorSet);
 	}
 }

@@ -2,27 +2,29 @@ package com.inepex.inechart.chartwidget.piechart;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.SortedMap;
-import java.util.TreeMap;
 
+import com.google.gwt.event.dom.client.ClickEvent;
+import com.google.gwt.event.dom.client.MouseDownEvent;
 import com.google.gwt.event.dom.client.MouseMoveEvent;
 import com.google.gwt.event.dom.client.MouseMoveHandler;
 import com.google.gwt.event.dom.client.MouseOutEvent;
 import com.google.gwt.event.dom.client.MouseOutHandler;
+import com.google.gwt.event.dom.client.MouseOverEvent;
+import com.google.gwt.event.dom.client.MouseUpEvent;
 import com.inepex.inechart.chartwidget.IneChartModul;
+import com.inepex.inechart.chartwidget.IneChartModul2D;
+import com.inepex.inechart.chartwidget.axes.Axes;
 import com.inepex.inechart.chartwidget.label.HasLegend;
 import com.inepex.inechart.chartwidget.label.Legend;
 import com.inepex.inechart.chartwidget.label.LegendEntry;
-import com.inepex.inechart.chartwidget.label.StyledLabel;
 import com.inepex.inechart.chartwidget.piechart.Pie.Slice;
 import com.inepex.inegraphics.impl.client.GraphicalObjectEventHandler;
 import com.inepex.inegraphics.shared.Context;
 import com.inepex.inegraphics.shared.DrawingArea;
 import com.inepex.inegraphics.shared.gobjects.Arc;
 import com.inepex.inegraphics.shared.gobjects.GraphicalObject;
-import com.inepex.inegraphics.shared.gobjects.Text;
 
-public class PieChart extends IneChartModul implements HasLegend,GraphicalObjectEventHandler, MouseMoveHandler, MouseOutHandler {
+public class PieChart extends IneChartModul2D implements HasLegend,GraphicalObjectEventHandler, MouseMoveHandler, MouseOutHandler {
 	
 	public static interface PieLabeler {
 		public String getLabel(String name, String value, String pctg);
@@ -34,8 +36,8 @@ public class PieChart extends IneChartModul implements HasLegend,GraphicalObject
 	boolean showLegend = true;
 	Legend legend = new Legend();
 
-	public PieChart(DrawingArea canvas) {
-		super(canvas);
+	public PieChart(DrawingArea canvas, Axes axes) {
+		super(canvas, axes);
 		pieLabeler = new PieLabeler() {
 			
 			@Override
@@ -85,12 +87,12 @@ public class PieChart extends IneChartModul implements HasLegend,GraphicalObject
 		// calculate angles
 		// create graphical objects
 		Double actualAngle = 0.0;
-		int basePointX = canvas.getWidth() / 2;
-		int basePointY = canvas.getHeight() / 2;
+		int basePointX = getWidth() / 2;
+		int basePointY = getHeight() / 2;
 		Long radius = Math
-				.round((canvas.getWidth() < canvas.getHeight()) ? canvas
-						.getWidth() / 2.0 * 0.9
-						: canvas.getHeight() / 2.0 * 0.9);
+				.round((getWidth() < getHeight()) ? 
+						getWidth() / 2.0 * 0.9
+						: getHeight() / 2.0 * 0.9);
 		double start = 0.0;
 		double finish = 0.0;
 		for (String key : pie.getKeys()) {
@@ -168,6 +170,36 @@ public class PieChart extends IneChartModul implements HasLegend,GraphicalObject
 	@Override
 	public void setLegend(Legend legend) {
 		this.legend = legend;
+	}
+
+	@Override
+	public void updateModulsAxes() {
+		// TODO Auto-generated method stub
+		
+	}
+
+	@Override
+	protected void onClick(ClickEvent event) {
+		// TODO Auto-generated method stub
+		
+	}
+
+	@Override
+	protected void onMouseUp(MouseUpEvent event) {
+		// TODO Auto-generated method stub
+		
+	}
+
+	@Override
+	protected void onMouseOver(MouseOverEvent event) {
+		// TODO Auto-generated method stub
+		
+	}
+
+	@Override
+	protected void onMouseDown(MouseDownEvent event) {
+		// TODO Auto-generated method stub
+		
 	}
 	
 	

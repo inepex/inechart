@@ -55,7 +55,7 @@ public class LineChart extends IneChartModul2D implements GraphicalObjectEventHa
 	}
 
 	//defaults
-	final ColorSet colors = new ColorSet();
+	ColorSet colors = new ColorSet();
 	public static final double defaultLineWidth = 2.1;
 	
 	public static final double defaultShadowOffsetX = 1.2;
@@ -66,6 +66,7 @@ public class LineChart extends IneChartModul2D implements GraphicalObjectEventHa
 	ArrayList<Curve> curves;
 	int highestZIndex = 1;
 	int overlapFilterDistance;
+	//TODO: tengelyenkent kulon-kulon
 	boolean autoCreateAxes;
 	PointSelectionMode pointSelectionMode;
 
@@ -829,4 +830,8 @@ public class LineChart extends IneChartModul2D implements GraphicalObjectEventHa
 		
 	}
 
+	public void setColors(ColorSet colors) {
+		this.colors = colors;
+	}
+	
 }
