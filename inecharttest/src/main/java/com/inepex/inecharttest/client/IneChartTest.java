@@ -8,6 +8,8 @@ import com.google.gwt.user.client.ui.HorizontalPanel;
 import com.google.gwt.user.client.ui.RootPanel;
 import com.google.gwt.user.client.ui.SimplePanel;
 import com.google.gwt.user.client.ui.Widget;
+import com.inepex.inechart.misc.ScrollBarPresenter;
+import com.inepex.inechart.misc.ScrollBarView;
 import com.inepex.inecharttest.client.showcase.AxisTest;
 import com.inepex.inecharttest.client.showcase.BarChartTest;
 import com.inepex.inecharttest.client.showcase.LineAndBarChartTest;
@@ -34,7 +36,9 @@ public class IneChartTest implements EntryPoint {
 //		addTest("barchartTest", new BarChartTest());
 //		addTest("speedTest", new SpeedTest());
 //		addTest("lineAndBar", new LineAndBarChartTest());
-		addTest("multiLineChart", new MultiLineChart());
+//		addTest("multiLineChart", new MultiLineChart());
+		
+		RootPanel.get().add(new ScrollBarTest());
 		
 	}
 	

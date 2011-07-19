@@ -1,5 +1,6 @@
 package com.inepex.inecharttest.shared;
 
+import com.inepex.inechart.chartwidget.Defaults;
 import com.inepex.inechart.chartwidget.IneChartModul2D;
 import com.inepex.inechart.chartwidget.axes.Tick;
 import com.inepex.inechart.chartwidget.barchart.BarChart;
@@ -33,9 +34,9 @@ public class TestLineChartCreator {
 		lc.getYAxis().addTick(new Tick(10.0, "1"));
 //		lc.getXAxis().addTick(new Tick(0.0, "0"));
 		lc.getXAxis().addTick(new Tick(1.0, "2010.jan"));
-		lc.getXAxis().addTick(new Tick(2.0, LineProperties.getDefaultSolidLine(), null, 5,  "2010.feb"));
+		lc.getXAxis().addTick(new Tick(2.0, Defaults.solidLine(), null, 5,  "2010.feb"));
 		lc.getXAxis().addTick(new Tick(3.0, null, null, 5,  "2010.márc"));
-		lc.getXAxis().addTick(new Tick(3.1, LineProperties.getDefaultSolidLine(), null, 5,  "").setUnfiltereble(true));
+		lc.getXAxis().addTick(new Tick(3.1, Defaults.solidLine(), null, 5,  "").setUnfiltereble(true));
 		lc.getXAxis().addTick(new Tick(4.0, null, null, 5,  "2010.ápr"));
 		lc.getXAxis().addTick(new Tick(5.0, null, null, 5,  "2010.május"));
 		lc.getXAxis().addTick(new Tick(6.0, null, null, 5,  "2010.június"));

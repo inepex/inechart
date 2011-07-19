@@ -50,14 +50,14 @@ public class Charts2D extends JFrame {
 		chart.setLineColor(new Color(0, 28, 28));
 //		getContentPane().add(chart);
 
-		chart = new JChart2D(JChart2D.ColumnChart, xData.length, xData, yData, "Column Chart");
+//		chart = new JChart2D(JChart2D.ColumnChart, xData.length, xData, yData, "Column Chart");
 		GradientPaint gp = new GradientPaint(0, 100, Color.white, 0, 300, Color.blue, true);
 		chart.setGradient(gp);
 		chart.setEffectIndex(JChart2D.Gradientffect);
 		chart.setDrawShadow(true);
 //		getContentPane().add(chart);
 
-		chart = new JChart2D(JChart2D.PieChart, xData.length, xData, yData, "Pie Chart");
+//		chart = new JChart2D(JChart2D.PieChart, xData.length, xData, yData, "Pie Chart");
 //		ImageIcon icon = new ImageIcon("largeJava2slogo.GIF");
 //		chart.setForegroundImage(icon.getImage());
 //		chart.setEffectIndex(JChart2D.ImageEffect);
