@@ -114,7 +114,6 @@ public class LineChart extends IneChartModul2D implements GraphicalObjectEventHa
 		pointSelectionMode = PointSelectionMode.Closest_To_Cursor;
 		overlapFilterDistance = 0;
 		autoScaleViewport = false;
-		autoCreateAxes = true;
 	}
 
 	public void addCurve(Curve curve) {
@@ -175,14 +174,6 @@ public class LineChart extends IneChartModul2D implements GraphicalObjectEventHa
 
 		// update axes and the viewport to match values
 		alignViewportAndAxes();
-		
-		/**
-		 * update model
-		 */
-		// axes auto calc
-		if (autoCreateAxes) {
-			createDefaultAxes();
-		}
 	}
 	
 	@Override
@@ -760,26 +751,11 @@ public class LineChart extends IneChartModul2D implements GraphicalObjectEventHa
 			c.modelChanged = true;
 	}
 
-	public boolean isAutoCreateAxes() {
-		return autoCreateAxes;
-	}
-
-	/**
-	 * @param autoCreateAxes
-	 *            the autoCreateTicks to set
-	 */
-	public void setAutoCreateAxes(boolean autoCreateAxes) {
-		if (this.autoCreateAxes != autoCreateAxes)
-			redrawNeeded = true;
-		this.autoCreateAxes = autoCreateAxes;
-	}
-
 	/**
 	 * @param otherLineChart
 	 */
 	public void cloneProperties(LineChart otherLineChart) {
 		autoScaleViewport = otherLineChart.autoScaleViewport;
-		autoCreateAxes = otherLineChart.autoCreateAxes;
 		pointSelectionMode = otherLineChart.pointSelectionMode;
 		useViewport = otherLineChart.useViewport;
 		overlapFilterDistance = otherLineChart.overlapFilterDistance;
