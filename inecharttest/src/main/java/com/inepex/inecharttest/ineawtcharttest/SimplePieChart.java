@@ -62,9 +62,8 @@ public class SimplePieChart extends JFrame{
 //		chart.setDescription(new StyledLabel("Generated data, default lookout"));
 		PieChart pieChart = chart.createPieChart();
 		Pie pie = new Pie();
-		pieChart.setPie(pie);
 		pie.setData(generateData());
-		
+		pieChart.setPie(pie);
 	}
 	
 	SortedMap<String, Double> generateData(){

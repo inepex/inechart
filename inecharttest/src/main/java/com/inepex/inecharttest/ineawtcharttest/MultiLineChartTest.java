@@ -13,6 +13,9 @@ import javax.swing.JFrame;
 import javax.swing.JPanel;
 
 import com.inepex.inechart.awtchart.IneAwtChart;
+import com.inepex.inechart.chartwidget.axes.Axis;
+import com.inepex.inechart.chartwidget.axes.Axis.AxisDirection;
+import com.inepex.inechart.chartwidget.axes.Axis.AxisPosition;
 import com.inepex.inechart.chartwidget.label.StyledLabel;
 import com.inepex.inechart.chartwidget.linechart.Curve;
 import com.inepex.inechart.chartwidget.linechart.LineChart;
@@ -105,9 +108,14 @@ public class MultiLineChartTest extends JFrame{
 			c.setUseDefaultPointShape(true);
 			lineChart.addCurve(c);
 		}
-		lineChart.setAutoCreateAxes(true);
+	
 		lineChart.setAutoScaleViewport(true);
-		lineChart.createDefaultAxes();	
+	
+		Axis extra = new Axis();
+		extra.setAxisDirection(AxisDirection.Vertical_Ascending_To_Bottom);
+		extra.setAxisPosition(AxisPosition.Maximum);
+		lineChart.addExtraAxis(extra);
+		
 	}
 
 	

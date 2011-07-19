@@ -17,7 +17,7 @@ public class TestLineChartCreator {
 	public static void setupTestLines(LineChart lc){
 		lc.setAutoScaleViewport(true);
 		lc.setLeftPadding(50);
-		lc.setAutoCreateAxes(false);
+//		lc.setAutoCreateAxes(false);
 //		lc.getYAxis().setMin(0.0);
 //		lc.getYAxis().setMax(5.0);
 //		lc.getViewport().setYMin(0.0);

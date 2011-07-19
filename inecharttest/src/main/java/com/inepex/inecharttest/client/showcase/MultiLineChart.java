@@ -31,9 +31,7 @@ public class MultiLineChart extends FlowPanel{
 			c.setUseDefaultPointShape(true);
 			lineChart.addCurve(c);
 		}
-		lineChart.setAutoCreateAxes(true);
-		lineChart.setAutoScaleViewport(true);
-		lineChart.createDefaultAxes();	
+		lineChart.setAutoScaleViewport(true);	
 	}
 
 	/**
