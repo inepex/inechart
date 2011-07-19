@@ -230,17 +230,12 @@ public class IneScrollPanelFPImpl extends Composite {
 		DOM.setStyleAttribute(horizontalScrollBarView.getElement(), "position", "absolute");
 		DOM.setStyleAttribute(horizontalScrollBarView.getElement(), "left", 0 + "px");
 		DOM.setStyleAttribute(horizontalScrollBarView.getElement(), "top", height - hBarHeight + "px");
-		
-//		horizontalScrollBarPresenter.setView(horizontalScrollBarView);
-//		verticalScrollBarPresenter.setView(verticalScrollBarView);
-		
+				
 		verticalScrollBarView.setVisible(alwaysShowScrollbars || verticalNeeded);
 		horizontalScrollBarView.setVisible(alwaysShowScrollbars || horizontalNeeded);
-//		verticalScrollBarPresenter.setEnabled(verticalNeeded);
-//		horizontalScrollBarPresenter.setEnabled(horizontalNeeded);
 		verticalScrollBarPresenter.setSlider(scrollTop, innerHeight);
 		horizontalScrollBarPresenter.setSlider(scrollLeft, innerWidth);
-		
+		setContentWidgetPosition();
 	}
 
 	public int getScrollTop(){

@@ -34,7 +34,6 @@ public class ScrollBarView extends Composite implements View {
 	protected boolean enabled = true;
 	
 	
-
 	protected ArrayList<HandlerRegistration> handlerRegistrations;
 	
 	public ScrollBarView(boolean isHorizontal){

@@ -55,7 +55,7 @@ public class Legend extends TextContainer{
 		paddingBetweenEntries = 5;
 		paddingBetweenTextAndSymbol = 3;
 		includeInPadding = true;
-		legendEntryLayout = LegendEntryLayout.ROW;
+		legendEntryLayout = LegendEntryLayout.AUTO;
 	}
 
 	public Shape getLegendSymbol() {

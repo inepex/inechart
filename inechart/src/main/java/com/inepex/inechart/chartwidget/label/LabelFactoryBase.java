@@ -7,6 +7,7 @@ import java.util.TreeMap;
 
 import com.inepex.inechart.chartwidget.IneChart;
 import com.inepex.inechart.chartwidget.IneChartModul;
+import com.inepex.inechart.chartwidget.label.Legend.LegendEntryLayout;
 import com.inepex.inechart.chartwidget.misc.HorizontalPosition;
 import com.inepex.inechart.chartwidget.misc.VerticalPosition;
 import com.inepex.inechart.chartwidget.properties.TextProperties;
@@ -39,7 +40,9 @@ public class LabelFactoryBase extends IneChartModul{
 	}
 	
 	ArrayList<LegendBinding> legendBindings;
+	
 	HasTitle chartTitle;
+	double[] chartTitleBoundingBox;
 	/**
 	 * legends excluded from this container
 	 */
@@ -62,8 +65,8 @@ public class LabelFactoryBase extends IneChartModul{
 	@Override
 	public void update() {
 		graphicalObjectContainer.removeAllGraphicalObject();
-		updateLegends(false);
 		updateChartTitle(false);
+		updateLegends(false);
 		for(TextContainer tc : textContainers.keySet()){
 			graphicalObjectContainer.addAllGraphicalObject(textContainers.get(tc));
 		}
@@ -97,14 +100,23 @@ public class LabelFactoryBase extends IneChartModul{
 		GraphicalObjectContainer goc = new GraphicalObjectContainer();
 		List<LegendEntry> entries = legendBinding.hasLegend.getLegendEntries();
 		Legend legend = legendBinding.hasLegend.getLegend();
-		
 		int textHeight = measureLegendTextHeight(legend);
 		int symbolHeight = getLegendSymbolHeight(legend);
 		if(symbolHeight == 0)
 			symbolHeight = textHeight;
-		int rowHeight = Math.max(textHeight, symbolHeight);
+		int rowHeight = Math.max(textHeight, symbolHeight) + legend.paddingBetweenEntries / 2;
 		//first create elements, then position them
 		int actualX = 0, actualY = 0;
+		StyledLabel title = null;
+		if(chartTitle != null){
+			title = chartTitle.getName();
+			if(title == null){
+				title = chartTitle.getDescription();
+			}
+		}
+		if(legend.legendEntryLayout == LegendEntryLayout.AUTO && title != null && title.verticalPosition == legend.verticalPosition && legend.maxWidth <= 0){
+			legend.maxWidth = (int) (canvas.getWidth() - chartTitleBoundingBox[2]);
+		}
 		switch (legend.legendEntryLayout) {
 		case AUTO:
 			int max = legend.maxHeight;
@@ -113,6 +125,7 @@ public class LabelFactoryBase extends IneChartModul{
 				int maxWidthInColumn = 0;
 				for(LegendEntry e : entries){
 					int w = createLegendEntry(legend, e, goc, actualX, actualY, rowHeight, symbolHeight, textHeight);
+					w += legend.paddingBetweenEntries;
 					if(w > maxWidthInColumn){
 						maxWidthInColumn = w;
 					}
@@ -133,6 +146,7 @@ public class LabelFactoryBase extends IneChartModul{
 				GraphicalObjectContainer entryGoc = new GraphicalObjectContainer();
 				for(LegendEntry e : entries){
 					int w = createLegendEntry(legend, e, entryGoc, actualX, actualY, rowHeight, symbolHeight, textHeight);
+					w += legend.paddingBetweenEntries;
 					if(actualX + w > max && actualX != 0){
 						entryGoc.moveBasePoints(-actualX, rowHeight);
 						actualX = w;
@@ -199,7 +213,42 @@ public class LabelFactoryBase extends IneChartModul{
 		}
 		goc.moveBasePoints(x - bb[0], y - bb[1]);
 		legendBinding.gosPerEntry = goc;
-		legendBinding.boundingBox = new double[]{x,y,bb[2],bb[3]};
+		bb = legendBinding.boundingBox = new double[]{x,y,bb[2],bb[3]};
+		//align to title
+		if(title == null || legend.fixedX != -1 && legend.fixedY != -1){
+			return;
+		}
+		
+		if(isOverlap(chartTitleBoundingBox, bb)){
+			//try to float legend to right
+			double dx = 0, dy = 0;
+			if(chartTitleBoundingBox[0] + chartTitleBoundingBox[2] + bb[2] <= canvas.getWidth()){
+				dx = chartTitleBoundingBox[0] + chartTitleBoundingBox[2] - bb[0];
+			}
+			//to left
+			else if(bb[2] < chartTitleBoundingBox[0]){
+				dx = chartTitleBoundingBox[0] - bb[0] - bb[2];
+			}
+			//to bottom
+			else if(chartTitleBoundingBox[1] + chartTitleBoundingBox[3] + bb[3] <= canvas.getHeight()){
+				dy = chartTitleBoundingBox[1] + chartTitleBoundingBox[3] - bb[1];
+			}
+			//to top
+			else if(bb[3] < chartTitleBoundingBox[1]){
+				dy = chartTitleBoundingBox[1] - bb[1] - bb[3];
+			}
+			goc.moveBasePoints(dx, dy);
+			legendBinding.boundingBox[0] += dx;
+			legendBinding.boundingBox[1] += dy;
+		}
+	}
+	
+	protected boolean isOverlap(double[] bb1, double[] bb2){
+		if(bb1[0] + bb1[2] > bb2[0] && bb1[0] < bb2[0] + bb2[2] &&
+			bb1[1] + bb1[3] > bb2[1] && bb1[1] < bb2[1] + bb2[3]){
+			return true;
+		}
+		return false;
 	}
 	
 	protected int createLegendEntry(Legend legend, LegendEntry e, GraphicalObjectContainer goc, int actualX, int actualY, int rowHeight, int symbolHeight, int textHeight){
@@ -276,25 +325,15 @@ public class LabelFactoryBase extends IneChartModul{
 	 * @return [top, right, bottom, left] paddings
 	 */
 	public double[] getPadding(boolean includeTitle){
-		
 		double[] padding = new double[]{0,0,0,0};
+		if(includeTitle && chartTitle != null){
+			padding = mergePaddings(padding, getPaddingFromBoundingBox(chartTitleBoundingBox));
+		}
 		for(LegendBinding lb : legendBindings){
 			if(lb.hasLegend.showLegend() && lb.hasLegend.getLegend().includeInPadding){
 				padding = mergePaddings(padding, getPaddingFromBoundingBox(lb.boundingBox));
 			}
-		}
-		if(includeTitle && chartTitle != null){
-			GraphicalObjectContainer goc = new GraphicalObjectContainer();
-			if(chartTitle.getName() != null){
-				goc.addAllGraphicalObject(textContainers.get(chartTitle.getName()));
-			}
-			if(chartTitle.getDescription() != null){
-				goc.addAllGraphicalObject(textContainers.get(chartTitle.getDescription()));
-			}
-			if(goc.getGraphicalObjects().size() > 0){
-				padding = mergePaddings(padding, getPaddingFromBoundingBox(DrawingAreaAssist.getBoundingBox(goc)));
-			}
-		}
+		}		
 		return padding;
 	}
 	
@@ -308,7 +347,7 @@ public class LabelFactoryBase extends IneChartModul{
 		right = 0;
 		bottom = canvas.getHeight() - boundingBox[1];
 		//right to bb
-		space = canvas.getHeight() * (boundingBox[0] + boundingBox[2]);
+		space = canvas.getHeight() * (canvas.getWidth() - boundingBox[0] - boundingBox[2]);
 		if(space > maxSpace){
 			maxSpace = space;
 			top = 0;
@@ -362,9 +401,9 @@ public class LabelFactoryBase extends IneChartModul{
 			(!forced && chartTitle.getDescription() != null && textContainers.get(chartTitle.getDescription()) != null) )
 			return;
 		GraphicalObjectContainer goc = new GraphicalObjectContainer();
-		 HorizontalPosition hp = null;
-		 VerticalPosition vp = null;
-		 int dy = 0;
+		HorizontalPosition hp = null;
+		VerticalPosition vp = null;
+		int dy = 0;
 		if(chartTitle.getName() != null){
 			textContainers.put(chartTitle.getName(), createLabel(chartTitle.getName()));
 			goc.addAllGraphicalObject(textContainers.get(chartTitle.getName()));
@@ -386,8 +425,8 @@ public class LabelFactoryBase extends IneChartModul{
 		}
 		if(goc.getGraphicalObjects().size() > 0){
 			align(goc, hp, vp);
+			chartTitleBoundingBox = DrawingAreaAssist.getBoundingBox(goc);
 		}
-		
 	}
 	
 	protected GraphicalObjectContainer createLabel(StyledLabel label){
@@ -438,5 +477,9 @@ public class LabelFactoryBase extends IneChartModul{
 			break;
 		}
 		gocToAlign.moveBasePoints(x - bb[0], y - bb[1]);
+	}
+
+	protected void floatOverlappingGOCs(GraphicalObjectContainer fix, GraphicalObjectContainer toFloat){
+		
 	}
 }

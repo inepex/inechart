@@ -160,23 +160,16 @@ public class ScrollBarPresenter implements MouseDownHandler,
 	}
 	
 	protected void updateScrollable(double dist){
-		double actualW = visibleMax - visibleMin;
-		//TODO
-		//increase
-		if(dist > 0){
-			visibleMax += dist;
-			if(visibleMax > scrollable.getScrollableDomainLength()){
-				visibleMax = scrollable.getScrollableDomainLength();
-			}
-			visibleMin = visibleMax - actualW;
+		if(dist > 0 && dist + visibleMax > scrollable.getScrollableDomainLength()){
+			dist = scrollable.getScrollableDomainLength() - visibleMax;
 		}
-		else{ //decrease
-			visibleMin += dist;
-			if(visibleMin < 0){
-				visibleMin = 0;
-			}
-			visibleMax = visibleMin + actualW;
+		else if(dist < 0 && visibleMin + dist < 0){
+			dist = 0 - visibleMin;
 		}
+		if(dist == 0)
+			return;
+		visibleMax += dist;
+		visibleMin += dist;
 		scrollable.scrollBarMoved(dist);
 	}
 	

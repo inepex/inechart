@@ -121,6 +121,7 @@ public class IneAwtChart implements HasTitle{
 		}
 
 		legendFactory.update();
+		
 		if (autoScaleModuls){
 			for (IneChartModul modul : moduls) {
 				if(modul instanceof IneChartModul2D){
