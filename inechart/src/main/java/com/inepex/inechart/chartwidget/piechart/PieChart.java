@@ -29,7 +29,7 @@ public class PieChart extends IneChartModul implements HasLegend,GraphicalObject
 	}
 
 	Pie pie;
-	SortedMap<String, Double> percentages = new TreeMap<String, Double>();
+	
 	PieLabeler pieLabeler;
 	boolean showLegend = true;
 	Legend legend = new Legend();
@@ -74,26 +74,14 @@ public class PieChart extends IneChartModul implements HasLegend,GraphicalObject
 
 	}
 
+	
+	
 	@Override
 	public void update() {
 		if (pie == null)
 			throw new RuntimeException(
 					"There is nothing to show. You should call setPie on PieChart!");
-		percentages.clear();
-
-		// calculate percentages
-
-		Double sum = 0.0;
-		for (Double value : pie.getDataMap().values()) {
-			sum += value;
-		}
-
-		for (String key : pie.getDataMap().keySet()) {
-			Double value = pie.getDataMap().get(key);
-			Double pctg = value / sum * 100.0;
-			percentages.put(key, pctg);
-		}
-
+		
 		// calculate angles
 		// create graphical objects
 		Double actualAngle = 0.0;
@@ -107,7 +95,7 @@ public class PieChart extends IneChartModul implements HasLegend,GraphicalObject
 		double finish = 0.0;
 		for (String key : pie.getKeys()) {
 			// add arcs
-			double pctg = percentages.get(key);
+			double pctg = pie.percentages.get(key);
 			if (pctg < 0.5)
 				continue;
 			Double angle = 360.0 * pctg / 100.0;
@@ -122,9 +110,9 @@ public class PieChart extends IneChartModul implements HasLegend,GraphicalObject
 			getGraphicalObjectContainer().addGraphicalObject(arc);
 			actualAngle += angle;
 			start = finish;
-			double f = ((f1 + f2) / 2 + 90.0) * Math.PI / 180.0;
-			double d = radius * 0.7;
-//			Double textX = basePointX + d * Math.sin(f);
+//			double f = ((f1 + f2) / 2 + 90.0) * Math.PI / 180.0;
+//			double d = radius * 0.7;
+////			Double textX = basePointX + d * Math.sin(f);
 //			Double textY = basePointY + d * Math.cos(f);
 //			String pieLabel = pieLabeler.getLabel(key, "" + pie.getDataMap().get(key), "" + Math.round(pctg));
 //			Double offsetY = pieLabel.split("\n").length * 10.0;
@@ -134,8 +122,7 @@ public class PieChart extends IneChartModul implements HasLegend,GraphicalObject
 //			label.setContext(getTextContext());
 //			getGraphicalObjectContainer().addGraphicalObject(label);
 			
-			Slice s = pie.sliceMap.get(key);
-			s.setName(new StyledLabel(s.getName().getText() + " " + pie.getDataMap().get(key) + " " + Math.round(pctg) + "%"));
+		
 		}
 	}
 

@@ -120,6 +120,7 @@ public class IneAwtChart implements HasTitle{
 			}
 		}
 
+		legendFactory.update();
 		if (autoScaleModuls){
 			for (IneChartModul modul : moduls) {
 				if(modul instanceof IneChartModul2D){
@@ -163,7 +164,7 @@ public class IneAwtChart implements HasTitle{
 				}
 			}
 		}
-		legendFactory.update();
+		
 		// draw graphics
 		if (doRedraw) {
 			drawingArea.removeAllGraphicalObject();

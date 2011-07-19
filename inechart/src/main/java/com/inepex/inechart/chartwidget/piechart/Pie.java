@@ -57,6 +57,7 @@ public class Pie{
 	SortedMap<String, Double> dataMap = new TreeMap<String, Double>();
 	SortedMap<String, String> colorMap = new TreeMap<String, String>();
 	SortedMap<String, Slice> sliceMap = new TreeMap<String, Pie.Slice>();
+	SortedMap<String, Double> percentages = new TreeMap<String, Double>();
 	ColorSet colors = new ColorSet();
 
 	/**
@@ -72,6 +73,8 @@ public class Pie{
 			colorMap.put(key, c.getColor());
 			sliceMap.put(key, new Slice(new StyledLabel(key), null,c));
 		}
+		calculatePercentages();
+		setLegendEntries();
 	}
 
 	public void addData(String name, Double value, String color) {
@@ -86,14 +89,12 @@ public class Pie{
 			colorMap.put(name, color);
 			sliceMap.put(name, new Slice(new StyledLabel(name), null,new Color(color)));
 		}
+		calculatePercentages();
+		setLegendEntries();
 	}
 
 	public SortedMap<String, Double> getDataMap() {
 		return dataMap;
-	}
-
-	public void setDataMap(SortedMap<String, Double> dataMap) {
-		this.dataMap = dataMap;
 	}
 
 	public SortedMap<String, String> getColorMap() {
@@ -112,8 +113,26 @@ public class Pie{
 		return sliceMap;
 	}
 
-	public void setSliceMap(SortedMap<String, Slice> sliceMap) {
-		this.sliceMap = sliceMap;
-	}
+	protected void calculatePercentages(){
+		percentages = new TreeMap<String, Double>();
+		// calculate percentages
+		Double sum = 0.0;
+		for (Double value : dataMap.values()) {
+			sum += value;
+		}
 
+		for (String key : dataMap.keySet()) {
+			Double value = dataMap.get(key);
+			Double pctg = value / sum * 100.0;
+			percentages.put(key, pctg);
+		}
+
+	}
+	
+	protected void setLegendEntries(){
+		for(String key : sliceMap.keySet()){
+			Slice s = sliceMap.get(key);
+			s.setName(new StyledLabel(s.getName().getText() + " " + dataMap.get(key) + " " + Math.round(percentages.get(key)) + "%"));
+		}
+	}
 }
