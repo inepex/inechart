@@ -63,7 +63,7 @@ public class LineChart extends IneChartModul2D implements GraphicalObjectEventHa
 	public static final Color defaultShadowColor =  new Color("#D8D8D8", 0.74);
 	
 	// model fields
-	ArrayList<Curve> curves;
+	ArrayList<Curve> curves = new ArrayList<Curve>();
 	int highestZIndex = 1;
 	int overlapFilterDistance;
 	//TODO: tengelyenkent kulon-kulon
