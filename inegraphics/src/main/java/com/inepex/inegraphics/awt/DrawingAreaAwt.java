@@ -6,7 +6,9 @@ import java.awt.Font;
 import java.awt.FontMetrics;
 import java.awt.Graphics2D;
 import java.awt.RenderingHints;
+import java.awt.geom.AffineTransform;
 import java.awt.geom.Arc2D;
+import java.awt.geom.Ellipse2D;
 import java.awt.geom.GeneralPath;
 import java.awt.geom.Rectangle2D;
 import java.awt.image.BufferedImage;
@@ -129,21 +131,36 @@ public class DrawingAreaAwt extends DrawingArea {
 
 	@Override
 	protected void drawCircle(Circle circle) {
+		Ellipse2D circle2D = new Ellipse2D.Double(
+				circle.getBasePointX() - circle.getRadius(),
+				circle.getBasePointY() - circle.getRadius(),
+				circle.getRadius() *2,
+				circle.getRadius() *2);
 		if (circle.hasFill()){
 			applyContext(circle.getContext(), false);
-			g2.fillOval(
-					(int)circle.getBasePointX() - (int)circle.getRadius(), 
-					(int)circle.getBasePointY() - (int)circle.getRadius(),
-					(int)circle.getRadius()  * 2,
-					(int)circle.getRadius() * 2);
+//			int x = (int) circle.getBasePointX();
+//			int y = (int) circle.getBasePointY();
+//			double sx = circle.getBasePointX() - x;
+//			double sy = circle.getBasePointY() - y;
+//			AffineTransform temp = g2.getTransform();
+//			AffineTransform hack = AffineTransform.getScaleInstance(sx, sy);
+//			g2.setTransform(hack);
+//			g2.fillOval(
+//					(int) Math.round(circle.getBasePointX() - circle.getRadius()), 
+//					(int)Math.round(circle.getBasePointY() - circle.getRadius()),
+//					(int)Math.round(circle.getRadius()  * 2),
+//					(int)Math.round(circle.getRadius() * 2));
+//			g2.setTransform(temp);
+			g2.fill(circle2D);
 		}
 		if (circle.hasStroke()){
 			applyContext(circle.getContext(), true);
-			g2.drawOval(
-					(int)circle.getBasePointX() - (int)circle.getRadius(), 
-					(int)circle.getBasePointY() - (int)circle.getRadius(),
-					(int)circle.getRadius()  * 2,
-					(int)circle.getRadius() * 2);
+//			g2.drawOval(
+//					(int)Math.round(circle.getBasePointX() - circle.getRadius()), 
+//					(int)Math.round(circle.getBasePointY() - circle.getRadius()),
+//					(int)Math.round(circle.getRadius()  * 2),
+//					(int)Math.round(circle.getRadius() * 2));
+			g2.draw(circle2D);
 		}
 	}
 
