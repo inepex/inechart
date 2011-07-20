@@ -123,7 +123,7 @@ public class Axis implements Comparable<Axis>, HasZIndex, HasTitle {
 	protected double lowerEnd, upperEnd;
 	protected boolean filterFrequentTicks = false;
 	protected boolean autoCreateTicks = true;
-
+	protected boolean autoCreateGrids = false;
 
 	public Axis() {
 		this(null);
@@ -458,5 +458,13 @@ public class Axis implements Comparable<Axis>, HasZIndex, HasTitle {
 	
 	public void setAutoCreateTicks(boolean autoCreateTicks) {
 		this.autoCreateTicks = autoCreateTicks;
+	}
+
+	public boolean isAutoCreateGrids() {
+		return autoCreateGrids;
+	}
+
+	public void setAutoCreateGrids(boolean autoCreateGrids) {
+		this.autoCreateGrids = autoCreateGrids;
 	}
 }

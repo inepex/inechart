@@ -552,7 +552,7 @@ public class Axes extends IneChartModul {
 	
 	private void createDefaultTickAndLabelForAxis(Axis axis) {
 		for(Tick t : axis.getTicks()){
-			if(t.getPosition() != axis.getMin() && t.getPosition() != axis.getMax()){
+			if(axis.autoCreateGrids && t.getPosition() != axis.getMin() && t.getPosition() != axis.getMax()){
 				t.setGridLine(Defaults.gridLine());
 			}
 			t.setTickText(t.getPosition() + "");
