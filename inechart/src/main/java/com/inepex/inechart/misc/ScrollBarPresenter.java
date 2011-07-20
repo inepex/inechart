@@ -47,12 +47,12 @@ public class ScrollBarPresenter implements MouseDownHandler,
 	protected final int DELAY = 250;
 	protected Scrollable scrollable;
 	protected View view;
+	
+	protected double visibleMin;
+	protected double visibleMax;
 
 	protected int sliderPosition;
 	protected int sliderWidth;
-
-	protected double visibleMin;
-	protected double visibleMax;
 	
 	protected boolean mouseDown = false;
 	protected int mouseDownCoordinate_Client;
@@ -223,12 +223,16 @@ public class ScrollBarPresenter implements MouseDownHandler,
 			}
 			if(actualCoordinate == lastMouseMoveCoordinate)
 				return;
-			if(sliderStop && 
-					(sliderStopAtMax && actualCoordinate_Slider > mouseDownCoordinate_Slider ||
-							!sliderStopAtMax && actualCoordinate_Slider < mouseDownCoordinate_Slider)){
-				return;
+			if(sliderStop){
+				if(sliderStopAtMax && actualCoordinate_Slider > mouseDownCoordinate_Slider ||
+					!sliderStopAtMax && actualCoordinate_Slider < mouseDownCoordinate_Slider){
+					return;
+				}
+				else{
+					sliderStop = false;
+					lastMouseMoveCoordinate = actualCoordinate;
+				}
 			}
-			sliderStop = false;
 			if(!move(actualCoordinate - lastMouseMoveCoordinate)){
 				sliderStop = true;
 				sliderStopAtMax = actualCoordinate > lastMouseMoveCoordinate;

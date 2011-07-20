@@ -56,8 +56,9 @@ public class Curve implements HasZIndex, HasShadow, Comparable<Curve>, HasTitle 
 	final Shape defaultPointShape = new Circle(3.5);
 	Shape normalPointShape;
 	Shape selectedPointShape;
-	boolean setCurveShadowForPoint = true;
+	boolean useCurveShadowForShape = true;
 	boolean useDefaultPointShape = true;
+	boolean useCurveLinePropertiesForShape = true;
 	// shadow
 	Color shadowColor;
 	double shadowOffsetX = 0, shadowOffsetY = 0;
@@ -634,6 +635,23 @@ public class Curve implements HasZIndex, HasShadow, Comparable<Curve>, HasTitle 
 	public void setUseDefaultPointShape(boolean useDefaultPointShape) {
 		this.useDefaultPointShape = useDefaultPointShape;
 	}
+	public boolean isUseCurveLinePropertiesForShape() {
+		return useCurveLinePropertiesForShape;
+	}
+
+	public void setUseCurveLinePropertiesForShape(
+			boolean useCurveLinePropertiesForShape) {
+		this.useCurveLinePropertiesForShape = useCurveLinePropertiesForShape;
+	}
+
+	public boolean isUseCurveShadowForShape() {
+		return useCurveShadowForShape;
+	}
+
+	public void setUseCurveShadowForShape(boolean useCurveShadowForShape) {
+		this.useCurveShadowForShape = useCurveShadowForShape;
+	}
+
 	@Override
 	public StyledLabel getName() {
 		return title;

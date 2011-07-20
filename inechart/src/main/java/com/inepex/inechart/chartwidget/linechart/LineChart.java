@@ -447,6 +447,14 @@ public class LineChart extends IneChartModul2D implements GraphicalObjectEventHa
 		GraphicalObjectContainer gocForPoint = new GraphicalObjectContainer();
 		if (point == null)
 			return gocForPoint;
+		if(point.parent.useCurveLinePropertiesForShape){
+			if(point.parent.normalPointShape != null){
+				point.parent.normalPointShape.getProperties().setLineProperties(point.parent.lineProperties);
+			}
+			if(point.parent.selectedPointShape != null){
+				point.parent.selectedPointShape.getProperties().setLineProperties(point.parent.lineProperties);
+			}
+		}
 		if(point.parent.useDefaultPointShape){
 			if(point.parent.hasShadow){
 				point.parent.defaultPointShape.setShadowColor(point.parent.shadowColor);
@@ -464,8 +472,8 @@ public class LineChart extends IneChartModul2D implements GraphicalObjectEventHa
 			// set the proper pos for gos
 			for (GraphicalObject go : point.parent.defaultPointShape.toGraphicalObjects()) {
 				if (point.parent.defaultPointShape instanceof Circle) {
-					go.setBasePointX(point.getPosX());
-					go.setBasePointY(point.getPosY());
+					go.setBasePointX(point.getPosX() + go.getBasePointX());
+					go.setBasePointY(point.getPosY() + go.getBasePointY());
 					go.setzIndex(point.parent.zIndex);
 				} else if (point.parent.defaultPointShape instanceof Rectangle) {
 					go.setBasePointX(point.getPosX()
@@ -480,7 +488,7 @@ public class LineChart extends IneChartModul2D implements GraphicalObjectEventHa
 			}
 		}
 		else {
-			if (point.parent.setCurveShadowForPoint) {
+			if (point.parent.useCurveShadowForShape && point.parent.hasShadow) {
 				if (point.parent.selectedPointShape != null) {
 					point.parent.selectedPointShape
 							.setShadowColor(point.parent.shadowColor);

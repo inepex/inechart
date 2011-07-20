@@ -33,7 +33,6 @@ public class ScrollBarView extends Composite implements View {
 	protected boolean sliderBeingDragged = false;
 	protected boolean enabled = true;
 	
-	
 	protected ArrayList<HandlerRegistration> handlerRegistrations;
 	
 	public ScrollBarView(boolean isHorizontal){

@@ -48,9 +48,10 @@ public class Circle extends Shape {
 					shadowColor == null ? Defaults.colorString : shadowColor
 							.getColor());
 			inner = new com.inepex.inegraphics.impl.client.ishapes.Circle(0, 0,
-					this.zIndex, innerContext, false, true,
-					outer == null ? this.radius : radius
-							- properties.getLineProperties().getLineWidth() + 1);
+					zIndex, innerContext, false, true,
+					outer == null ? radius : radius
+							- properties.getLineProperties().getLineWidth()/2d 
+							);
 		}
 
 		ArrayList<GraphicalObject> toRet = new ArrayList<GraphicalObject>();
