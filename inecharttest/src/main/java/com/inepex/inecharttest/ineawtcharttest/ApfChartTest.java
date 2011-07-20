@@ -84,10 +84,10 @@ public class ApfChartTest extends JFrame {
 		c.setName(curveNames[i]);
 		// set curve properties
 		c.setHasShadow(false);
-	
+//		c.set
 
 		ShapeProperties sp_bogyo = new ShapeProperties(
-				new LineProperties(5, new com.inepex.inechart.chartwidget.properties.Color("blue")),
+				c.getLineProperties(),
 				new com.inepex.inechart.chartwidget.properties.Color("white"));
 		// ez igy 5px vonalvastagságú kört rajzol, közepe üres
 		// az hogy fehér színnel legyen kitöltve a közepe megoldható: new
@@ -112,7 +112,8 @@ public class ApfChartTest extends JFrame {
 		}
 
 		// set linechart properties
-		lineChart.setAutoScaleViewport(true);
+		lineChart.setAutoScaleViewport(false);
+		lineChart.setUseViewport(false);
 		lineChart.setAutoCalcPadding(true);
 		lineChart.setColors(ColorSet.flotColorSet());
 
@@ -121,6 +122,8 @@ public class ApfChartTest extends JFrame {
 		lineChart.getXAxis().setAutoCreateTicks(false);
 		lineChart.getYAxis().setFilterFrequentTicks(true);
 		lineChart.getXAxis().setFilterFrequentTicks(true);
+		lineChart.getXAxis().setMin(0);
+		lineChart.getXAxis().setMax(11);
 		lineChart.getYAxis().setMin(0.0);
 		lineChart.getYAxis().setMax(16.0 * 1.2); // 16 is the hihghest value
 
