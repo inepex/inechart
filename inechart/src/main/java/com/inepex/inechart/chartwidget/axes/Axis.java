@@ -160,7 +160,7 @@ public class Axis implements Comparable<Axis>, HasZIndex, HasTitle {
 		switch (tick1.compareTo(tick2)) {
 		case 0:
 			return;
-		case 1:
+		case 1: //tick1 > tick2
 			gridFills.add(new Object[] { tick2, tick1, color });
 			break;
 		case -1:

@@ -269,24 +269,33 @@ public class Axes extends IneChartModul {
 	}
 	
 	void createFillBetweenTicks(Axis axis, GraphicalObjectContainer goc){
-		double x, x2, y, y2;
+		double x, y, width, height;
 		for (Object[] tickPair : axis.gridFills) {
-			if (axis.getAxisDirection() == AxisDirection.Horizontal_Ascending_To_Right) {
-				x = axis.getModulToAlign().getCanvasX(((Tick) tickPair[0]).position);
-				x2 = axis.getModulToAlign().getCanvasX(((Tick) tickPair[1]).position);;
+			if(((Tick) tickPair[0]).position >= axis.max || ((Tick) tickPair[1]).position <= axis.min)
+				continue;
+			double tick1,tick2;
+			if (axis.isHorizontal()) {
+				tick1 = axis.getModulToAlign().getCanvasX(((Tick) tickPair[0]).position);
+				tick2 = axis.getModulToAlign().getCanvasX(((Tick) tickPair[1]).position);
+				x = Math.max(axis.modulToAlign.getLeftPadding(), Math.min(tick1, tick2));
 				y = axis.getModulToAlign().getTopPadding();
-				y2 = canvas.getHeight() - axis.getModulToAlign().getBottomPadding();
-			} else {
-				x = axis.getModulToAlign().getLeftPadding();
-				x2 = canvas.getWidth() - axis.getModulToAlign().getRightPadding();
-				y = axis.getModulToAlign().getCanvasY(((Tick) tickPair[0]).position);
-				y2 = Math.max(0.0 + axis.getModulToAlign().getTopPadding(), axis.getModulToAlign().getCanvasY(((Tick) tickPair[1]).position));
+				height = axis.getModulToAlign().getHeight();
+				width = Math.min(Math.abs(tick1 - tick2), canvas.getWidth() - axis.modulToAlign.getRightPadding() - x);
 			}
+			else {
+				tick1 = axis.getModulToAlign().getCanvasY(((Tick) tickPair[0]).position);
+				tick2 = axis.getModulToAlign().getCanvasY(((Tick) tickPair[1]).position);
+				x = axis.modulToAlign.getLeftPadding();
+				y = Math.max(axis.modulToAlign.getTopPadding(), Math.min(tick1, tick2));
+				width = axis.modulToAlign.getWidth();
+				height = Math.min(Math.abs(tick1 - tick2), canvas.getHeight() - axis.modulToAlign.getBottomPadding() - y);
+			}
+			
 			Rectangle fill = new Rectangle(
 					x,
 					y,
-					x2 - x,
-					y2 - y,
+					width,
+					height,
 					0,
 					tickFillZIndex,
 					createFillContext((Color) tickPair[2]),
