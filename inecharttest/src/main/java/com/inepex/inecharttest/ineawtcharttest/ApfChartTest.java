@@ -17,6 +17,7 @@ import javax.swing.JFrame;
 
 import com.inepex.inechart.awtchart.IneAwtChart;
 import com.inepex.inechart.chartwidget.axes.Tick;
+import com.inepex.inechart.chartwidget.barchart.BarChart;
 import com.inepex.inechart.chartwidget.linechart.Curve;
 import com.inepex.inechart.chartwidget.linechart.LineChart;
 import com.inepex.inechart.chartwidget.misc.ColorSet;
@@ -63,20 +64,25 @@ public class ApfChartTest extends JFrame {
 
 	}
 
-	String[] curveNames = { "Airspace Infringement", "Near Controlled Flight Into Terrain", "Level Bust",
-			"Prolonged Loss of Communications", };
+	String[] curveNames = { 
+			"Airspace Infringement", 
+//			"Near Controlled Flight Into Terrain", 
+//			"Level Bust",
+//			"Prolonged Loss of Communications" 
+			};
 
-	Double[][] values = { { 12.0, 11.0, 8.0, 16.0, 10.0, 9.0, 16.0, 10.0, 14.0, 11.0, 8.0, 9.0 },
-			{ 3.0, 6.0, 1.0, 2.0, 4.0, 1.0, 5.0, 1.0, 3.0, 3.0, 1.0, 2.0 },
-			{ 0.0, 3.0, 1.0, 5.0, 4.0, 4.0, 3.0, 2.0, 7.0, 3.0, 2.0, 4.0 },
-			{ 4.0, 1.0, 3.0, 6.0, 1.0, 2.0, 5.0, 1.0, 3.0, 3.0, 1.0, 2.0 },
-			{ 5.0, 1.0, 3.0, 3.0, 1.0, 2.0, 3.0, 6.0, 1.0, 2.0, 4.0, 1.0 }
+	Double[][] values = { 
+//			{ 12.0, 11.0, 8.0, 16.0, 10.0, 9.0, 16.0, 10.0, 14.0, 11.0, 8.0, 9.0 },
+//			{ 3.0, 6.0, 1.0, 2.0, 4.0, 1.0, 5.0, 1.0, 3.0, 3.0, 1.0, 2.0 },
+//			{ 0.0, 3.0, 1.0, 5.0, 4.0, 4.0, 3.0, 2.0, 7.0, 3.0, 2.0, 4.0 },
+//			{ 4.0, 0.0, 3.0, 6.0, 1.0, 2.0, 5.0, 1.0, 3.0, 3.0, 1.0, 2.0 },
+			{ 1.2818774975743393E-6, 1.2140364313571E-6, 1.7912267015441461E-6}
 
 	};
 
 	private Curve getCurve(int i) {
 		TreeMap<Double, Double> data = new TreeMap<Double, Double>();
-		for (int j = 0; j < values[0].length; j++) {
+		for (int j = 0; j < values[i].length; j++) {
 			data.put(new Double(j), values[i][j]);
 		}
 
@@ -105,6 +111,14 @@ public class ApfChartTest extends JFrame {
 		chart = new IneAwtChart(1200, 600);
 		chart.setName("Potential/Near Collisions Air");
 		LineChart lineChart = chart.createLineChart();
+		
+		//create barchart
+		BarChart barChart = chart.createBarChart();
+		barChart.setViewport(lineChart.getViewport());
+		barChart.setAutoScaleViewport(false);
+		barChart.setColorSet(ColorSet.flotColorSet());
+		barChart.getYAxis().setAutoCreateTicks(false);
+		barChart.getXAxis().setAutoCreateTicks(false);
 
 		// add curves
 		for (int i = 0; i < curveNames.length; i++) {
@@ -144,7 +158,7 @@ public class ApfChartTest extends JFrame {
 
 		// add y markings
 		lineChart.getYAxis().fillBetween(
-				new Tick(0.0),
+				new Tick(-1.0),
 				new Tick(14.0),
 				new com.inepex.inechart.chartwidget.properties.Color("#C2EBC2"));
 		lineChart.getYAxis().fillBetween(
@@ -159,7 +173,7 @@ public class ApfChartTest extends JFrame {
 				new Tick(16.0),
 				new Tick(16.0 * 1.2),
 				new com.inepex.inechart.chartwidget.properties.Color("#FFA6A6"));
-
+		
 		// add x ticks
 		String monthlyDateFormat = "MMM yyyy";
 		SimpleDateFormat dateTimeFormat = new SimpleDateFormat(monthlyDateFormat);
