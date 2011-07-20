@@ -7,6 +7,7 @@ import com.inepex.inegraphics.shared.gobjects.GraphicalObject;
 
 public class GraphicalObjectContainer {
 	
+	
 	protected ArrayList<GraphicalObject> graphicalObjects;
 	
 	/**
@@ -64,20 +65,6 @@ public class GraphicalObjectContainer {
 		for(GraphicalObject go:graphicalObjects){
 			go.setBasePointX(go.getBasePointX()+dx);
 			go.setBasePointY(go.getBasePointY()+dy);
-		}
-	}
-	
-	public static void dropGraphicalObjectsOutsideRectangle(GraphicalObjectContainer goc, double x, double y, double width, double height){
-		ArrayList<GraphicalObject> toDrop = new ArrayList<GraphicalObject>();
-		for(GraphicalObject go : goc.graphicalObjects){
-			if(go.getBasePointX() < x ||
-				go.getBasePointY() < y ||
-				go.getBasePointX() > x + width ||
-				go.getBasePointY() > y + height)
-				toDrop.add(go);
-		}
-		for(GraphicalObject go : toDrop){
-			goc.removeGraphicalObject(go);
 		}
 	}
 }

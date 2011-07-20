@@ -136,7 +136,8 @@ public class DrawingAreaAwt extends DrawingArea {
 					(int)circle.getBasePointY() - (int)circle.getRadius(),
 					(int)circle.getRadius()  * 2,
 					(int)circle.getRadius() * 2);
-		if (circle.hasStroke())
+		}
+		if (circle.hasStroke()){
 			applyContext(circle.getContext(), true);
 			g2.drawOval(
 					(int)circle.getBasePointX() - (int)circle.getRadius(), 

@@ -1,5 +1,7 @@
 package com.inepex.inegraphics.shared;
 
+import java.util.ArrayList;
+
 import com.inepex.inegraphics.shared.gobjects.Circle;
 import com.inepex.inegraphics.shared.gobjects.GraphicalObject;
 import com.inepex.inegraphics.shared.gobjects.Line;
@@ -12,6 +14,20 @@ import com.inepex.inegraphics.shared.gobjects.Rectangle;
 import com.inepex.inegraphics.shared.gobjects.Text;
 
 public class DrawingAreaAssist {
+	
+	public static void dropGraphicalObjectsOutsideRectangle(GraphicalObjectContainer goc, double x, double y, double width, double height){
+		ArrayList<GraphicalObject> toDrop = new ArrayList<GraphicalObject>();
+		for(GraphicalObject go : goc.graphicalObjects){
+			if(go.getBasePointX() < x ||
+				go.getBasePointY() < y ||
+				go.getBasePointX() > x + width ||
+				go.getBasePointY() > y + height)
+				toDrop.add(go);
+		}
+		for(GraphicalObject go : toDrop){
+			goc.removeGraphicalObject(go);
+		}
+	}
 
 	public static double getYIntercept(double x, double x1, double y1, double x2, double y2){
 		return (y2 - y1) / (x2 - x1) * (x - x1) + y1;
@@ -554,6 +570,5 @@ public class DrawingAreaAssist {
 		}
 		return bb;
 	}
-	
 	
 }
