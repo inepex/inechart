@@ -182,10 +182,8 @@ public class LineChart extends IneChartModul2D implements GraphicalObjectEventHa
 			return;
 		for (Curve curve : curves) {
 			if (viewport.isChanged() || curve.modelChanged) {
-				curve.calculatePoints(viewport.getXMin(),
-						viewport.getXMax(), this);
-				curve.updateVisiblePoints(viewport.getXMin(),
-						viewport.getXMax(), overlapFilterDistance);
+				curve.calculatePoints(xAxis.getMin(), xAxis.getMax(), this);
+				curve.updateVisiblePoints(xAxis.getMin(), xAxis.getMax(), overlapFilterDistance);
 				removeAndAddAllGO(curve);
 				curve.modelChanged = false;
 			}
@@ -196,51 +194,11 @@ public class LineChart extends IneChartModul2D implements GraphicalObjectEventHa
 	}
 
 	void calculatePoint(Point point) {
-		if (xAxis.isHorizontal()) {
-			point.setPosX(getX(point.getDataX(), xAxis));
-			point.setPosY(getY(point.getDataY(), yAxis));
-		} else {
-			point.setPosX(getX(point.getDataY(), yAxis));
-			point.setPosY(getY(point.getDataX(), xAxis));
-		}
+		double[] pos = getCanvasPosition(point.getDataX(), point.getDataY());
+		point.setPosX(pos[0]);
+		point.setPosY(pos[1]);
 	}
 
-	double getX(double value, Axis horizontalAxis) {
-		double totalWidth = canvas.getWidth() - leftPadding - rightPadding;
-		double visibleLength, visibleMin;
-		Viewport viewport;
-		viewport = this.viewport;
-		visibleLength = viewport.getWidth();
-		visibleMin = viewport.getXMin();
-		double pos;
-		if (horizontalAxis.getAxisDirection() == AxisDirection.Horizontal_Ascending_To_Right) {
-			pos =  ((value - visibleMin) * totalWidth / visibleLength)	+ leftPadding;
-		}
-		else if (horizontalAxis.getAxisDirection() == AxisDirection.Horizontal_Ascending_To_Left) {
-			pos = (totalWidth -  ((value - visibleMin) * totalWidth / visibleLength)) + leftPadding;
-		}
-		else
-			return -1;
-		return pos;
-	}
-
-	double getY(double value, Axis verticalAxis) {
-		double totalHeight = canvas.getHeight() - topPadding - bottomPadding;
-		double visibleLength, visibleMin;
-		Viewport viewport;
-		viewport = this.viewport;
-		visibleLength = viewport.getHeight();
-		visibleMin = viewport.getYMin();
-		double pos;
-		if (verticalAxis.getAxisDirection() == AxisDirection.Vertical_Ascending_To_Bottom) {
-			pos = ((value - visibleMin) * totalHeight / visibleLength)
-					+ topPadding;
-		} else if (verticalAxis.getAxisDirection() == AxisDirection.Vertical_Ascending_To_Top) {
-			pos = (totalHeight - (value - visibleMin) * totalHeight / visibleLength) + topPadding;
-		} else
-			return -1;
-		return pos;
-	}
 
 	/**
 	 * (Re)creates the {@link GraphicalObject}s for this curve and puts them
@@ -278,7 +236,9 @@ public class LineChart extends IneChartModul2D implements GraphicalObjectEventHa
 	protected void createLineChartGOs(Curve curve) {
 		GraphicalObjectContainer gos = new GraphicalObjectContainer();
 		Path path;
-		path = curve.getVisiblePath();
+		path = curve.getVisiblePath(leftPadding, topPadding,
+				canvas.getWidth() - leftPadding - rightPadding,
+				canvas.getHeight() - topPadding - bottomPadding);
 		if (path == null) {
 			return;
 		}
@@ -776,7 +736,6 @@ public class LineChart extends IneChartModul2D implements GraphicalObjectEventHa
 		return super.redrawNeeded();
 	}
 
-	
 	@Override
 	public List<LegendEntry> getLegendEntries() {
 		ArrayList<LegendEntry> entries = new ArrayList<LegendEntry>();
