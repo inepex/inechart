@@ -326,7 +326,7 @@ public class LabelFactoryBase extends IneChartModul{
 	 */
 	public double[] getPadding(boolean includeTitle){
 		double[] padding = new double[]{0,0,0,0};
-		if(includeTitle && chartTitle != null){
+		if(includeTitle && chartTitle != null && (chartTitle.getName() !=null || chartTitle.getDescription() != null)){
 			padding = mergePaddings(padding, getPaddingFromBoundingBox(chartTitleBoundingBox));
 		}
 		for(LegendBinding lb : legendBindings){

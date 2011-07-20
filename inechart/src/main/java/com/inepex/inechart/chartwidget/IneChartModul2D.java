@@ -126,10 +126,14 @@ public abstract class IneChartModul2D extends IneChartModul implements	HasCoordi
 	//padding
 	protected static final int DEFAULT_PADDING_H = 8;
 	protected static final int DEFAULT_PADDING_V = 8;
-	protected int topPadding = DEFAULT_PADDING_V,
-			leftPadding = DEFAULT_PADDING_H,
-			bottomPadding = DEFAULT_PADDING_V,
-			rightPadding = DEFAULT_PADDING_H;
+	protected int minTopPadding = DEFAULT_PADDING_V;
+	protected int minLeftPadding = DEFAULT_PADDING_H;
+	protected int minBottomPadding = DEFAULT_PADDING_V;
+	protected int minRightPadding = DEFAULT_PADDING_H;
+	protected int topPadding = minTopPadding;
+	protected int leftPadding = minLeftPadding;
+	protected int bottomPadding = minBottomPadding;
+	protected int rightPadding = minRightPadding;
 	//border and background
 	protected static final int backgroundZIndex = Integer.MIN_VALUE + 100;
 	protected static final int borderZIndex = backgroundZIndex + 1;
@@ -203,30 +207,13 @@ public abstract class IneChartModul2D extends IneChartModul implements	HasCoordi
 									false, true));
 		}
 	}
-	
-//	public void calculatePadding(double[] minPadding){
-//		if(!autoCalcPadding)
-//			return;
-//		double[] padding = mergePaddings(new double[]{DEFAULT_PADDING_V,DEFAULT_PADDING_H,DEFAULT_PADDING_V,DEFAULT_PADDING_H}, minPadding);
-//		if(xAxis.isVisible())
-//			padding = mergePaddings(padding, axes.getPaddingForAxis(xAxis));
-//		if(yAxis.isVisible())
-//			padding = mergePaddings(padding, axes.getPaddingForAxis(yAxis));
-//		for(Axis axis : extraAxes){
-//			if(axis.isVisible())
-//				padding = mergePaddings(padding, axes.getPaddingForAxis(axis));
-//		}
-//		topPadding = (int) padding[0];
-//		rightPadding = (int) padding[1];
-//		bottomPadding = (int) padding[2];
-//		leftPadding = (int) padding[3];		
-//	}
+
 	
 	public void setPadding(double[] padding){
-		topPadding = (int) padding[0];
-		rightPadding = (int) padding[1];
-		bottomPadding = (int) padding[2];
-		leftPadding = (int) padding[3];	
+		topPadding = (int) Math.max(padding[0], minTopPadding);
+		rightPadding = (int) Math.max(padding[1], minRightPadding);
+		bottomPadding = (int) Math.max(padding[2], minBottomPadding);
+		leftPadding = (int) Math.max(padding[3], minLeftPadding);	
 	}
 	
 	public double[] getPaddingForAxes(){
@@ -644,6 +631,46 @@ public abstract class IneChartModul2D extends IneChartModul implements	HasCoordi
 	public int getLeftPadding() {
 		return leftPadding;
 	}
+	
+	public int getMinTopPadding() {
+		return minTopPadding;
+	}
+	
+
+	public void setMinTopPadding(int minTopPadding) {
+		this.minTopPadding = minTopPadding;
+	}
+	
+
+	public int getMinLeftPadding() {
+		return minLeftPadding;
+	}
+	
+
+	public void setMinLeftPadding(int minLeftPadding) {
+		this.minLeftPadding = minLeftPadding;
+	}
+	
+
+	public int getMinBottomPadding() {
+		return minBottomPadding;
+	}
+	
+
+	public void setMinBottomPadding(int minBottomPadding) {
+		this.minBottomPadding = minBottomPadding;
+	}
+	
+
+	public int getMinRightPadding() {
+		return minRightPadding;
+	}
+	
+
+	public void setMinRightPadding(int minRightPadding) {
+		this.minRightPadding = minRightPadding;
+	}
+	
 
 	@Override
 	public boolean showLegend() {
