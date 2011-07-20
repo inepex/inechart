@@ -562,6 +562,7 @@ public class Curve implements HasZIndex, HasShadow, Comparable<Curve>, HasTitle 
 	 */
 	public void setNormalPointShape(Shape normalPointShape) {
 		this.normalPointShape = normalPointShape;
+		this.useDefaultPointShape  = false;
 	}
 
 	/**
@@ -579,6 +580,7 @@ public class Curve implements HasZIndex, HasShadow, Comparable<Curve>, HasTitle 
 	 */
 	public void setSelectedPointShape(Shape selectedPointShape) {
 		this.selectedPointShape = selectedPointShape;
+		this.useDefaultPointShape  = false;
 	}
 
 	public double getxMax() {

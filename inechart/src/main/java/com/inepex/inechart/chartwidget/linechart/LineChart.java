@@ -392,10 +392,7 @@ public class LineChart extends IneChartModul2D implements GraphicalObjectEventHa
 				boolean mouseOverRelatedSelection = pointSelectionMode == PointSelectionMode.On_Point_Click
 						|| pointSelectionMode == PointSelectionMode.On_Point_Over;
 				for (Point point : visiblePoints) {
-					gosPerPoint.get(curve)
-							.put(point,
-									createGOsForPoint(point,
-											mouseOverRelatedSelection));
+					gosPerPoint.get(curve).put(point, createGOsForPoint(point, mouseOverRelatedSelection));
 				}
 			}
 		}
