@@ -66,17 +66,17 @@ public class ApfChartTest extends JFrame {
 
 	String[] curveNames = { 
 			"Airspace Infringement", 
-//			"Near Controlled Flight Into Terrain", 
-//			"Level Bust",
-//			"Prolonged Loss of Communications" 
+			"Near Controlled Flight Into Terrain", 
+			"Level Bust",
+			"Prolonged Loss of Communications" 
 			};
 
 	Double[][] values = { 
-//			{ 12.0, 11.0, 8.0, 16.0, 10.0, 9.0, 16.0, 10.0, 14.0, 11.0, 8.0, 9.0 },
-//			{ 3.0, 6.0, 1.0, 2.0, 4.0, 1.0, 5.0, 1.0, 3.0, 3.0, 1.0, 2.0 },
-//			{ 0.0, 3.0, 1.0, 5.0, 4.0, 4.0, 3.0, 2.0, 7.0, 3.0, 2.0, 4.0 },
-//			{ 4.0, 0.0, 3.0, 6.0, 1.0, 2.0, 5.0, 1.0, 3.0, 3.0, 1.0, 2.0 },
-			{ 1.2818774975743393E-6, 1.2140364313571E-6, 1.7912267015441461E-6}
+			{ 12.0, 11.0, 8.0, 16.0, 10.0, 9.0, 16.0, 10.0, 14.0, 11.0, 8.0, 9.0 },
+			{ 3.0, 6.0, 1.0, 2.0, 4.0, 1.0, 5.0, 1.0, 3.0, 3.0, 1.0, 2.0 },
+			{ 0.0, 3.0, 1.0, 5.0, 4.0, 4.0, 3.0, 2.0, 7.0, 3.0, 2.0, 4.0 },
+			{ 4.0, 0.0, 3.0, 6.0, 1.0, 2.0, 5.0, 1.0, 3.0, 3.0, 1.0, 2.0 },
+//			{ 1.2818774975743393E-6, 1.2140364313571E-6, 1.7912267015441461E-6}
 
 	};
 
@@ -130,6 +130,7 @@ public class ApfChartTest extends JFrame {
 		lineChart.setUseViewport(false);
 		lineChart.setAutoCalcPadding(true);
 		lineChart.setColors(ColorSet.flotColorSet());
+		lineChart.setMinRightPadding(42);
 
 		// set axis properties
 		lineChart.getYAxis().setAutoCreateTicks(false);
