@@ -16,11 +16,16 @@ import javax.swing.JComponent;
 import javax.swing.JFrame;
 
 import com.inepex.inechart.awtchart.IneAwtChart;
+import com.inepex.inechart.chartwidget.axes.Axis;
+import com.inepex.inechart.chartwidget.axes.Axis.AxisDirection;
+import com.inepex.inechart.chartwidget.axes.Axis.AxisPosition;
 import com.inepex.inechart.chartwidget.axes.Tick;
 import com.inepex.inechart.chartwidget.barchart.BarChart;
+import com.inepex.inechart.chartwidget.label.Legend.LegendEntryLayout;
 import com.inepex.inechart.chartwidget.linechart.Curve;
 import com.inepex.inechart.chartwidget.linechart.LineChart;
 import com.inepex.inechart.chartwidget.misc.ColorSet;
+import com.inepex.inechart.chartwidget.misc.HorizontalPosition;
 import com.inepex.inechart.chartwidget.properties.LineProperties;
 import com.inepex.inechart.chartwidget.properties.ShapeProperties;
 import com.inepex.inechart.chartwidget.shape.Circle;
@@ -76,7 +81,8 @@ public class ApfChartTest extends JFrame {
 			{ 3.0, 6.0, 1.0, 2.0, 4.0, 1.0, 5.0, 1.0, 3.0, 3.0, 1.0, 2.0 },
 			{ 0.0, 3.0, 1.0, 5.0, 4.0, 4.0, 3.0, 2.0, 7.0, 3.0, 2.0, 4.0 },
 			{ 4.0, 0.0, 3.0, 6.0, 1.0, 2.0, 5.0, 1.0, 3.0, 3.0, 1.0, 2.0 },
-//			{ 1.2818774975743393E-6, 1.2140364313571E-6, 1.7912267015441461E-6}
+			{ 1.2818774975743393E-6, 1.2140364313571E-6, 1.7912267015441461E-6}
+
 
 	};
 
@@ -110,6 +116,7 @@ public class ApfChartTest extends JFrame {
 	private void init() {
 		chart = new IneAwtChart(1200, 600);
 		chart.setName("Potential/Near Collisions Air");
+		chart.getName().getTextProperties().setFontSize(26);
 		LineChart lineChart = chart.createLineChart();
 		
 		//create barchart
@@ -119,10 +126,12 @@ public class ApfChartTest extends JFrame {
 		barChart.setColorSet(ColorSet.flotColorSet());
 		barChart.getYAxis().setAutoCreateTicks(false);
 		barChart.getXAxis().setAutoCreateTicks(false);
+		
 
 		// add curves
 		for (int i = 0; i < curveNames.length; i++) {
 			lineChart.addCurve(getCurve(i));
+			barChart.addDataSet(getCurve(i));
 		}
 
 		// set linechart properties
@@ -130,7 +139,24 @@ public class ApfChartTest extends JFrame {
 		lineChart.setUseViewport(false);
 		lineChart.setAutoCalcPadding(true);
 		lineChart.setColors(ColorSet.flotColorSet());
-		lineChart.setMinRightPadding(42);
+		lineChart.setMinRightPadding(30);
+		lineChart.setMinBottomPadding(30);
+		lineChart.setMinTopPadding(30);
+		lineChart.setMinLeftPadding(80);
+		
+		barChart.setMinRightPadding(30);
+		barChart.setMinBottomPadding(30);
+		barChart.setMinTopPadding(30);
+		barChart.setMinLeftPadding(80);
+		
+		//set legend properties
+		lineChart.getLegend().setLegendEntryLayout(LegendEntryLayout.AUTO);
+		lineChart.getLegend().setHorizontalPosition(HorizontalPosition.Right);
+		lineChart.getLegend().setFixedX(80);
+		lineChart.getLegend().setFixedY(80);
+		lineChart.getLegend().setMaxWidth(1200);
+		lineChart.getLegend().getTextProperties().setFontSize(18);
+		
 
 		// set axis properties
 		lineChart.getYAxis().setAutoCreateTicks(false);
@@ -138,9 +164,20 @@ public class ApfChartTest extends JFrame {
 		lineChart.getYAxis().setFilterFrequentTicks(true);
 		lineChart.getXAxis().setFilterFrequentTicks(true);
 		lineChart.getXAxis().setMin(0);
-		lineChart.getXAxis().setMax(11);
+		lineChart.getXAxis().setMax(10);
 		lineChart.getYAxis().setMin(0.0);
 		lineChart.getYAxis().setMax(16.0 * 1.2); // 16 is the hihghest value
+		
+		Axis y2Axis = new Axis();
+		y2Axis.setAxisDirection(AxisDirection.Vertical_Ascending_To_Top);
+		y2Axis.setAxisPosition(AxisPosition.Maximum);
+		
+		y2Axis.setVisible(true);
+		y2Axis.setMin(0.0);
+		y2Axis.setAutoCreateTicks(true);
+		y2Axis.setAutoCreateGrids(false);
+//		y2Axis.getLineProperties().setStyle(LineStyle.)t
+		lineChart.addExtraAxis(y2Axis);
 
 		// add y ticks
 		LineProperties tickLineProperties = new LineProperties(1, new com.inepex.inechart.chartwidget.properties.Color("#A3A3A3"));
