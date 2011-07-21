@@ -5,7 +5,7 @@
 	<groupId>com.inepex</groupId>
 	<artifactId>inechart</artifactId>
 	<packaging>jar</packaging>
-	<version>1.0.9</version>
+	<version>1.0.11</version>
 	<name>inechart</name>
 	<url>http://maven.apache.org</url>
 	<repositories>

@@ -932,8 +932,15 @@ public class BarChart extends IneChartModul2D implements HasShadow, HasZIndex {
 
 	@Override
 	public List<LegendEntry> getLegendEntries() {
-		// TODO Auto-generated method stub
-		return null;
+		ArrayList<LegendEntry> entries = new ArrayList<LegendEntry>();
+		for(String name : names){
+			//temporary solution 
+			Curve c = new Curve();
+			c.setName(name);
+			LegendEntry e = new LegendEntry(c, lookOut.get(name).getFillColor());
+			entries.add(e);
+		}
+		return entries;
 	}
 
 	@Override
@@ -970,6 +977,10 @@ public class BarChart extends IneChartModul2D implements HasShadow, HasZIndex {
 	protected void onMouseMove(MouseMoveEvent event) {
 		// TODO Auto-generated method stub
 		
+	}
+	
+	public void setLookout(String name, ShapeProperties lookout){
+		this.lookOut.put(name, lookout);
 	}
 
 }

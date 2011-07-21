@@ -73,6 +73,7 @@ public class IneAwtChart implements HasTitle{
 
 	public BarChart createBarChart() {
 		BarChart bc = new BarChart(drawingArea, getAxes());
+		legendFactory.addHasLegendEntries(bc);
 		moduls.add(bc);
 		return bc;
 	}
