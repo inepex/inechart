@@ -1,5 +1,7 @@
 package com.inepex.inechart.chartwidget;
 
+import com.google.gwt.core.client.Scheduler;
+import com.google.gwt.core.client.Scheduler.ScheduledCommand;
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;
 import com.google.gwt.event.dom.client.HasAllMouseHandlers;
@@ -21,6 +23,7 @@ import com.google.gwt.event.shared.EventHandler;
 import com.google.gwt.event.shared.GwtEvent;
 import com.google.gwt.event.shared.HandlerManager;
 import com.google.gwt.event.shared.HandlerRegistration;
+import com.google.gwt.user.client.Element;
 import com.inepex.inechart.chartwidget.event.IneChartEvent;
 import com.inepex.inechart.chartwidget.event.ViewportChangeEvent;
 import com.inepex.inechart.chartwidget.event.ViewportChangeHandler;
@@ -32,6 +35,7 @@ public class IneChartEventManager implements HasAllMouseHandlers, ViewportChange
 	protected IneChart parent;
 	
 	public IneChartEventManager(IneChart parent) {
+		this.parent = parent;
 		handlerManager = new HandlerManager(parent);
 	}
 
@@ -49,9 +53,23 @@ public class IneChartEventManager implements HasAllMouseHandlers, ViewportChange
 	
 	@Override
 	public void fireEvent(GwtEvent<?> event){
-		eventBus.fireEventFromSource(event, parent);
+		if(eventBus != null)
+			eventBus.fireEvent(event);
 	}
 
+	protected void fireInnerEvent(GwtEvent<?> event){
+		handlerManager.fireEvent(event);
+		if(parent.isRedrawNeeded()){
+			Scheduler.get().scheduleDeferred(new ScheduledCommand() {
+				
+				@Override
+				public void execute() {
+					parent.update();
+				}
+			});
+			
+		}
+	}
 	
 	public void addViewportChangeHandler(ViewportChangeHandler handler){
 		handlerManager.addHandler(ViewportChangeEvent.TYPE, handler);
@@ -99,7 +117,7 @@ public class IneChartEventManager implements HasAllMouseHandlers, ViewportChange
 		if(event.getSourceChart() != null && event.getSourceChart().equals(parent))
 			return;
 		if(event.getAddressedCharts() == null || event.getAddressedCharts().contains(parent)){
-			handlerManager.fireEvent(event);
+			fireInnerEvent(event);
 		}
 	}
 
@@ -110,47 +128,47 @@ public class IneChartEventManager implements HasAllMouseHandlers, ViewportChange
 		if(event.getSourceChart() != null && event.getSourceChart().equals(parent))
 			return;
 		if(event.getAddressedCharts() == null || event.getAddressedCharts().contains(parent)){
-			handlerManager.fireEvent(event);
+			fireInnerEvent(event);
 		}
 	}
 
 
 	@Override
 	public void onMouseUp(MouseUpEvent event) {
-		handlerManager.fireEvent(event);
+		fireInnerEvent(event);
 	}
 
 
 	@Override
 	public void onMouseOver(MouseOverEvent event) {
-		handlerManager.fireEvent(event);
+		fireInnerEvent(event);
 	}
 
 
 	@Override
 	public void onMouseMove(MouseMoveEvent event) {
-		handlerManager.fireEvent(event);
+		fireInnerEvent(event);
 	}
 
 
 	@Override
 	public void onMouseOut(MouseOutEvent event) {
-		handlerManager.fireEvent(event);
+		fireInnerEvent(event);
 	}
 
 
 	@Override
 	public void onMouseDown(MouseDownEvent event) {
-		handlerManager.fireEvent(event);
+		fireInnerEvent(event);
 	}
 	
 	@Override
 	public void onClick(ClickEvent event) {
-		handlerManager.fireEvent(event);
+		fireInnerEvent(event);
 	}
 
 	public void fireViewportChangedEvent(ViewportChangeEvent event){
-		handlerManager.fireEvent(event);
+		fireInnerEvent(event);
 		setSourceChart(event);
 		fireEvent(event);
 	}
@@ -159,7 +177,9 @@ public class IneChartEventManager implements HasAllMouseHandlers, ViewportChange
 		event.setSourceChart(parent);
 	}
 
-
+	public Element getCaptureElement(){
+		return parent.getElement();
+	}
 	
 	
 }

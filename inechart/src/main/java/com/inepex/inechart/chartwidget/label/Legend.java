@@ -1,6 +1,7 @@
 package com.inepex.inechart.chartwidget.label;
 
-import com.inepex.inechart.chartwidget.IneChartModul2D;
+import com.inepex.inechart.chartwidget.Defaults;
+import com.inepex.inechart.chartwidget.IneChartModule2D;
 import com.inepex.inechart.chartwidget.misc.HorizontalPosition;
 import com.inepex.inechart.chartwidget.misc.VerticalPosition;
 import com.inepex.inechart.chartwidget.properties.TextProperties;
@@ -26,25 +27,24 @@ public class Legend extends TextContainer{
 		COLUMN,
 		/**
 		 * Entries displayed in
-		 * 	- rows if {@link Legend#setMaxWidth(int)} is set, or
-		 *  - columns if {@link Legend#setMaxHeight(int)} is set.
+		
 		 */
 		AUTO
 	}
 	LegendEntryLayout legendEntryLayout;
-	private static final Shape DEFAULT_LEGEND_SYMBOL = new Rectangle(28, 7);
-	Shape legendSymbol;
+	
+	Rectangle legendSymbol;
 	int paddingBetweenTextAndSymbol;
 	int paddingBetweenEntries;
-	boolean includeInPadding;
+	TextProperties textProperties;
 	
-	int fixedX=-1, fixedY=-1, maxWidth=-1, maxHeight=-1;
+	int fixedX=-1, fixedY=-1;
 
 	public Legend(){
-		this(DEFAULT_LEGEND_SYMBOL, DEFAULT_TEXT_PROPERTIES);
+		this(Defaults.legendSymbol, Defaults.textContainerText);
 	}
 
-	public Legend(Shape legendSymbol, TextProperties textProperties) {
+	public Legend(Rectangle legendSymbol, TextProperties textProperties) {
 		super();
 		this.legendSymbol = legendSymbol;
 		this.textProperties = textProperties;
@@ -58,11 +58,11 @@ public class Legend extends TextContainer{
 		legendEntryLayout = LegendEntryLayout.AUTO;
 	}
 
-	public Shape getLegendSymbol() {
+	public Rectangle getLegendSymbol() {
 		return legendSymbol;
 	}
 
-	public void setLegendSymbol(Shape legendSymbol) {
+	public void setLegendSymbol(Rectangle legendSymbol) {
 		this.legendSymbol = legendSymbol;
 	}
 
@@ -90,53 +90,21 @@ public class Legend extends TextContainer{
 		this.legendEntryLayout = legendEntryLayout;
 	}
 
-	public boolean isIncludeInPadding() {
-		return includeInPadding;
-	}
-
 	/**
-	 * If true the {@link IneChartModul2D#setAutocalcPadding(boolean)}s
-	 * @param includeInPadding
+	 * Absolute position of the legend
+	 * {@link HorizontalPosition} and {@link VerticalPosition} will be ignored,
+	 * and includeInPadding is set false
+	 * if one of the arguments is -1 it disables absolute positioning 
+	 * @param fixedX
+	 * @param fixedY
 	 */
-	public void setIncludeInPadding(boolean includeInPadding) {
-		this.includeInPadding = includeInPadding;
-	}
-
-	/**
-	 * Sets the horizontal position of the legend,
-	 * {@link #setHorizontalPosition(HorizontalPosition)} is disabled.
-	 * @param fixedX -1 to use {@link #setHorizontalPosition(HorizontalPosition)} (default)
-	 */
-	public void setFixedX(int fixedX) {
+	public void setFixedPosition(int fixedX, int fixedY) {
+		if(fixedX < 0 || fixedY <0){
+			this.fixedX = -1;
+			this.fixedY = -1;
+		}
 		this.fixedX = fixedX;
+		this.fixedY = fixedY;
 	}	
 
-	/**
-	 * Sets the vertical position of the legend,
-	 * {@link #setVerticalPosition(VerticalPosition)} is disabled.
-	 * @param fixedY -1 to use {@link #setVerticalPosition(VerticalPosition)} (default)
-	 */
-	public void setFixedY(int fixedY) {
-		this.fixedY = fixedY;
-	}
-	
-	/**
-	 * Maximum width for {@link LegendEntryLayout#AUTO}
-	 * if {@link #setMaxHeight(int)} was set too, this method overrides it.
-	 * @param width -1 for auto (default)
-	 */
-	public void setMaxWidth(int width) {
-		this.maxWidth = width;
-		this.maxHeight = -1;
-	}
-
-	/**
-	 * Maximum height for {@link LegendEntryLayout#AUTO}
-	 * if {@link #setMaxWidth(int)} was set too, this method overrides it.
-	 * @param height -1 for auto (default)
-	 */
-	public void setMaxHeight(int height) {
-		this.maxHeight = height;
-		this.maxWidth = -1;
-	}
 }

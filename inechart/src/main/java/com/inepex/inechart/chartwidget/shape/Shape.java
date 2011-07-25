@@ -6,7 +6,6 @@ import com.inepex.inechart.chartwidget.misc.HasShadow;
 import com.inepex.inechart.chartwidget.misc.HasZIndex;
 import com.inepex.inechart.chartwidget.properties.Color;
 import com.inepex.inechart.chartwidget.properties.ShapeProperties;
-import com.inepex.inegraphics.impl.client.InteractiveGraphicalObject;
 import com.inepex.inegraphics.shared.gobjects.GraphicalObject;
 
 public abstract class Shape implements HasShadow, HasZIndex {
@@ -33,14 +32,6 @@ public abstract class Shape implements HasShadow, HasZIndex {
 	 */
 	abstract public ArrayList<GraphicalObject> toGraphicalObjects();
 
-	/**
-	 * This method created an {@link InteractiveGraphicalObject} from one of the
-	 * {@link GraphicalObject} returned by calling (or a previously called)
-	 * toGraphicalObjects() method
-	 * 
-	 * @return
-	 */
-	abstract public GraphicalObject toInterActiveGraphicalObject();
 
 	@Override
 	public void setZIndex(int zIndex) {

@@ -2,14 +2,12 @@ package com.inepex.inechart.chartwidget.axes;
 
 import java.util.ArrayList;
 
-import com.inepex.inechart.chartwidget.IneChartModul2D;
-import com.inepex.inechart.chartwidget.label.HasTitle;
-import com.inepex.inechart.chartwidget.label.StyledLabel;
+import com.inepex.inechart.chartwidget.IneChartModule2D;
 import com.inepex.inechart.chartwidget.misc.HasZIndex;
 import com.inepex.inechart.chartwidget.properties.Color;
 import com.inepex.inechart.chartwidget.properties.LineProperties;
 
-public class Axis implements Comparable<Axis>, HasZIndex, HasTitle {
+public class Axis implements Comparable<Axis>, HasZIndex{
 
 	// comparison helper fields
 	private static int highestComparableNo = 0;
@@ -87,14 +85,11 @@ public class Axis implements Comparable<Axis>, HasZIndex, HasTitle {
 		Number, Time
 	}
 
-	protected StyledLabel title;
-	protected StyledLabel description;
-
 	protected AxisDataType axisDataType;
 	/**
 	 * The axis will be aligned to this modul *
 	 */
-	protected IneChartModul2D modulToAlign;
+	protected IneChartModule2D modulToAlign;
 
 	protected int zIndex;
 	protected ArrayList<Tick> ticks;
@@ -395,18 +390,18 @@ public class Axis implements Comparable<Axis>, HasZIndex, HasTitle {
 	/**
 	 * @return the modulToAlign
 	 */
-	public IneChartModul2D getModulToAlign() {
+	public IneChartModule2D getModulToAlign() {
 		return modulToAlign;
 	}
 
 	/**
 	 * Do NOT use this method, it will be automatically set whenever you set a
-	 * {@link IneChartModul2D}'s axis
+	 * {@link IneChartModule2D}'s axis
 	 * 
 	 * @param modulToAlign
 	 *            the modulToAlign to set
 	 */
-	public void setModulToAlign(IneChartModul2D modulToAlign) {
+	public void setModulToAlign(IneChartModule2D modulToAlign) {
 		this.modulToAlign = modulToAlign;
 		changed = true;
 	}
@@ -419,42 +414,9 @@ public class Axis implements Comparable<Axis>, HasZIndex, HasTitle {
 		this.filterFrequentTicks = filterFrequentTicks;
 	}
 
-	@Override
-	public void setName(StyledLabel name) {
-		this.title = name;	
-	}
-
-	@Override
-	public StyledLabel getName() {
-		return title;
-	}
-
-	@Override
-	public void setDescription(StyledLabel description) {
-		this.description = description;
-	}
-
-	@Override
-	public StyledLabel getDescription() {
-		return description;
-	}
-	
-	@Override
-	public void setName(String name) {
-		setName(new StyledLabel(name));
-		
-	}
-
-	@Override
-	public void setDescription(String description) {
-		setDescription(new StyledLabel(description));
-	}
-
-	
 	public boolean isAutoCreateTicks() {
 		return autoCreateTicks;
 	}
-
 	
 	public void setAutoCreateTicks(boolean autoCreateTicks) {
 		this.autoCreateTicks = autoCreateTicks;

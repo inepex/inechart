@@ -11,8 +11,9 @@ import java.util.List;
  */
 public interface HasLegend {
 	List<LegendEntry> getLegendEntries();
-	boolean showLegend();
+	void setLegendEntries(List<LegendEntry> legendEntries);
+	boolean isShowLegend();
 	void setShowLegend(boolean showLegend);
 	Legend getLegend();
-	void setLegend(Legend legend);
+//	void setLegend(Legend legend);
 }

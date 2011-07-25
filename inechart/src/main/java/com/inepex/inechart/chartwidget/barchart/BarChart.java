@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Map;
 import java.util.TreeMap;
 
 import com.google.gwt.event.dom.client.ClickEvent;
@@ -12,13 +13,13 @@ import com.google.gwt.event.dom.client.MouseMoveEvent;
 import com.google.gwt.event.dom.client.MouseOutEvent;
 import com.google.gwt.event.dom.client.MouseOverEvent;
 import com.google.gwt.event.dom.client.MouseUpEvent;
-import com.inepex.inechart.chartwidget.IneChartModul2D;
-import com.inepex.inechart.chartwidget.Viewport;
+import com.inepex.inechart.chartwidget.DataSet;
+import com.inepex.inechart.chartwidget.Defaults;
+import com.inepex.inechart.chartwidget.IneChartModule2D;
 import com.inepex.inechart.chartwidget.axes.Axes;
 import com.inepex.inechart.chartwidget.axes.Axis.AxisDirection;
+import com.inepex.inechart.chartwidget.label.LabelFactoryBase;
 import com.inepex.inechart.chartwidget.label.LegendEntry;
-import com.inepex.inechart.chartwidget.linechart.Curve;
-import com.inepex.inechart.chartwidget.linechart.Point;
 import com.inepex.inechart.chartwidget.misc.ColorSet;
 import com.inepex.inechart.chartwidget.misc.HasShadow;
 import com.inepex.inechart.chartwidget.misc.HasZIndex;
@@ -30,7 +31,14 @@ import com.inepex.inegraphics.shared.DrawingArea;
 import com.inepex.inegraphics.shared.DrawingAreaAssist;
 import com.inepex.inegraphics.shared.GraphicalObjectContainer;
 
-public class BarChart extends IneChartModul2D implements HasShadow, HasZIndex {
+/**
+ * 
+ * Simple Bar Chart module.
+ * 
+ * @author Miklós Süveges, Tibor Somodi / Inepex Ltd.
+ *
+ */
+public class BarChart extends IneChartModule2D implements HasShadow, HasZIndex {
 	public enum BarChartType {
 		Stacked, Simple, Sorted;
 	}
@@ -72,6 +80,8 @@ public class BarChart extends IneChartModul2D implements HasShadow, HasZIndex {
 	 */
 	protected double baseY;
 	protected boolean divideSameValueSortedBars;
+	
+	//shadow
 	protected Color shadowColor;
 	protected double shadowOffsetX = 0, shadowOffsetY = 0;
 	/**
@@ -80,157 +90,96 @@ public class BarChart extends IneChartModul2D implements HasShadow, HasZIndex {
 	protected int zIndex;
 	protected ColorSet colorSet;
 	
-
 	/**
 	 * all bar data stored in this container all of the x values contained
 	 * within the given dataSets if a dataSet does not contain a mapping(y) for
 	 * the given x, a 0 y value will be mapped to it. The order of y values
 	 * contained by the ArrayList is their adding time (first added dataset ->
 	 * ArrayList.get(0) )
+	 * updated at update() call
 	 */
-	protected TreeMap<Double, ArrayList<Double>> dataSets;
-	/**
-	 * The dataSets referenced by their unique names.
-	 */
-	protected ArrayList<String> names;
-	protected static int autoNameNo = 0;
-	/**
-	 * Look per dataSet
-	 */
-	protected TreeMap<String, ShapeProperties> lookOut;
+	protected TreeMap<Double, ArrayList<Double>> normalizedData;
+	protected ArrayList<DataSet> dataSets;
+	
+	protected ArrayList<ShapeProperties> lookOut;
 
-	public BarChart(DrawingArea canvas, Axes axes) {
-		this(canvas, axes, new Viewport());
-		autoScaleViewport = true;
-	}
-
-	public BarChart(DrawingArea canvas, Axes axes, Viewport viewport) {
-		super(canvas, axes, viewport);
-		dataSets = new TreeMap<Double, ArrayList<Double>>();
-		names = new ArrayList<String>();
-		lookOut = new TreeMap<String, ShapeProperties>();
+	public BarChart(DrawingArea canvas, LabelFactoryBase labelFactory, Axes axes) {
+		super(canvas,labelFactory, axes);
+		dataSets = new ArrayList<DataSet>();
+		normalizedData = new TreeMap<Double, ArrayList<Double>>();
+		lookOut = new ArrayList<ShapeProperties>();
 
 		// defaults
 		this.barChartType = BarChartType.Simple;
 		this.barSequencePosition = BarSequencePosition.Over;
 		this.hasXValues = true;
-		colorSet = new ColorSet();
-		autoScaleViewport = false;
-		this.barSpacing = 2;
+		autoScaleViewport = true;
+		
 		this.baseY = 0;
-		this.maxBarWidth = 18;
-		this.minBarWidth = 3;
-		this.fixedBarWidth = -1;
+		this.barSpacing = Defaults.barSpacing;
+		this.maxBarWidth = Defaults.maxBarWidth;
+		this.minBarWidth = Defaults.minBarWidth;
+		this.fixedBarWidth = Defaults.fixedBarWidth;
 		this.divideSameValueSortedBars = true;
 	}
 
 	protected void updateLookOut() {
-		for (String name : names) {
-			if (!lookOut.containsKey(name)) {
-				Color c = colorSet.getNextColor();
-				LineProperties lp = new LineProperties(1, c);
-				ShapeProperties sp = new ShapeProperties(lp, new Color(c.getColor(), 0.6));
-				lookOut.put(name, sp);
+		for (int i=0; i < dataSets.size(); i++) {
+			if(lookOut.get(i) == null){
+				LineProperties lp = new LineProperties(Defaults.barBorderWidth, new Color(dataSets.get(i).getColor().getColor(),1));
+				ShapeProperties sp = new ShapeProperties(lp, new Color(lp.getLineColor().getColor(), Defaults.barFillOpacity));
+				lookOut.set(i,sp);
 			}
 		}
 	}
 
-	public TreeMap<Double, Double> getDataSet(String name) {
-		int index = names.indexOf(name);
-		if (index < 0)
-			return null;
-		TreeMap<Double, Double> dataSet = new TreeMap<Double, Double>();
-		for (Double x : dataSets.keySet()) {
-			dataSet.put(x, dataSets.get(x).get(index));
-		}
-		return dataSet;
+	public void addDataSet(DataSet dataSet){
+		addDataSet(dataSet, null);
+	}
+	
+	public void addDataSet(DataSet dataSet, ShapeProperties lookout){
+		if(dataSet == null)
+			return;
+		dataSet.update();
+		dataSets.add(dataSet);
+		lookOut.add(lookout);
+	}
+	
+	public void removeDataSet(DataSet dataSet){
+		int i = dataSets.indexOf(dataSet);
+		if(i == -1)
+			return;
+		dataSets.remove(i);
+		lookOut.remove(i);
 	}
 
-	/**
-	 * Adds a sequence of data, without x values
-	 * 
-	 * @param dataSet
-	 * @return
-	 */
-	public String addDataSet(ArrayList<Double> dataSet) {
-		return addDataSet(dataSet, createName(null));
-	}
-
-	/**
-	 * Adds a sequence of data, without x values
-	 * 
-	 * @param dataSet
-	 * @param name
-	 * @return
-	 */
-	public String addDataSet(ArrayList<Double> dataSet, String name) {
-		TreeMap<Double, Double> newDataSet = new TreeMap<Double, Double>();
-		for (int i = 0; i < dataSet.size(); i++) {
-			newDataSet.put((double) i, dataSet.get(i));
-		}
-		hasXValues = false;
-		redrawNeeded = true;
-		return addDataSet(newDataSet, name);
-	}
-
-	public String addDataSet(TreeMap<Double, Double> dataSet) {
-		return addDataSet(dataSet, createName(null));
-	}
-
-	public String addDataSet(Curve curve) {
-		return addDataSet(curve, curve.getName().getText());
-	}
-
-	public String addDataSet(TreeMap<Double, Double> dataSet, String name) {
-		if (dataSet == null || dataSet.size() < 1)
-			return null;
-		String finalName = createName(name);
-		names.add(finalName);
-		for (Double x : dataSet.keySet()) {
-			if (!dataSets.containsKey(x)) {
-				ArrayList<Double> yValues = new ArrayList<Double>();
-				// add 0 values if its a new x
-				for (int i = 0; i < names.size() - 1; i++) {
-					yValues.add(0d);
+	protected void normalizeData(){
+		normalizedData.clear();
+		for(DataSet dataSet : dataSets){
+			Map<Double, Double> map = dataSet.getDataMap();
+			for(double x : map.keySet()){
+				//no mapping for that x we fill up with 0 values
+				if(!normalizedData.containsKey(x)){
+					ArrayList<Double> yValues = new ArrayList<Double>();
+					for(int i=0; i < dataSets.indexOf(dataSet); i++){
+						yValues.add(0d);
+					}
+					normalizedData.put(x, yValues);
 				}
-				dataSets.put(x, yValues);
+				//add actual datasets y
+				normalizedData.get(x).add(map.get(x));
 			}
-			dataSets.get(x).add(dataSet.get(x));
-		}
-		for (Double x : dataSets.keySet()) {
-			if (dataSets.get(x).size() != names.size()) {
-				dataSets.get(x).add(0d);
+			//fill up normalized values with zeros, where this dataset does not contain x 
+			for(double otherX : normalizedData.keySet()){
+				if(!map.containsKey(otherX)){
+					normalizedData.get(otherX).add(0d);
+				}
 			}
 		}
-		redrawNeeded = true;
-		return finalName;
 	}
-
-	public String addDataSet(Curve curve, String name) {
-		TreeMap<Double, Double> dataSet = new TreeMap<Double, Double>();
-		for (Point point : curve.getPoints()) {
-			dataSet.put(point.getDataX(), point.getDataY());
-		}
-		redrawNeeded = true;
-		return addDataSet(dataSet, name);
-	}
-
-	protected String createName(String desiredName) {
-		String name = desiredName;
-		if (desiredName == null || desiredName.length() == 0) {
-			name = autoNameNo++ + "";
-		}
-		for (;; autoNameNo++) {
-			if (!names.contains(name)) {
-				break;
-			}
-			name = desiredName + autoNameNo;
-		}
-		return name;
-	}
-
+	
 	public void scaleViewportToFitAllBars(){
-		Iterator<Double> keyIt = dataSets.keySet().iterator();
+		Iterator<Double> keyIt = normalizedData.keySet().iterator();
 		ArrayList<Double> keys = new ArrayList<Double>();
 		double xMin = keyIt.next();
 		keys.add(xMin);
@@ -241,9 +190,9 @@ public class BarChart extends IneChartModul2D implements HasShadow, HasZIndex {
 		}
 		double yMin = Double.MAX_VALUE, yMax = -Double.MAX_VALUE;
 		double maxSumY = -Double.MAX_VALUE;
-		for (double x : dataSets.keySet()) {
+		for (double x : normalizedData.keySet()) {
 			double sumY = 0;
-			for (double y : dataSets.get(x)) {
+			for (double y : normalizedData.get(x)) {
 				if (y > yMax)
 					yMax = y;
 				if (y < yMin)
@@ -278,14 +227,10 @@ public class BarChart extends IneChartModul2D implements HasShadow, HasZIndex {
 			yMax = baseY;
 		if (barChartType == BarChartType.Stacked)
 			yMax = maxSumY;
-		if (xMax != viewport.getXMax())
-			viewport.setXMax(xMax);
-		if (yMax != viewport.getYMax())
-			viewport.setYMax(yMax);
-		if (xMin != viewport.getXMin())
-			viewport.setXMin(xMin);
-		if (yMin != viewport.getYMin())
-			viewport.setYMin(yMin);
+		xAxis.setMin(xMin);
+		xAxis.setMax(xMax);
+		yAxis.setMin(yMin);
+		yAxis.setMax(yMax);
 	}
 
 	@Override
@@ -293,82 +238,84 @@ public class BarChart extends IneChartModul2D implements HasShadow, HasZIndex {
 		if (dataSets.size() == 0)
 			return;
 		
+		normalizeData();
 		updateLookOut();
 
-		if (viewport.isChanged() || redrawNeeded) {
-			graphicalObjectContainer.removeAllGraphicalObject();
-			ArrayList<Double> xes = new ArrayList<Double>();
-			for (double x : dataSets.keySet()) {
-				xes.add(x);
+		graphicalObjectContainer.removeAllGraphicalObject();
+		ArrayList<Double> xes = new ArrayList<Double>();
+		for (double x : normalizedData.keySet()) {
+			xes.add(x);
+		}
+		if(xes.size() == 1){
+			switch (barChartType) {
+			case Simple:
+				graphicalObjectContainer.addAllGraphicalObject(
+						createNormalBarSequence(xAxis.getMin(), xAxis.getMax(), normalizedData.get(xes.get(0))));
+				break;
+			case Sorted:
+				graphicalObjectContainer.addAllGraphicalObject(
+						createSortedBarSequence(xAxis.getMin(), xAxis.getMax(), normalizedData.get(xes.get(0))));
+				break;
+			case Stacked:
+				graphicalObjectContainer.addAllGraphicalObject(
+						createStackedBarSequence(xAxis.getMin(), xAxis.getMax(), normalizedData.get(xes.get(0))));
+				break;
 			}
-			if(xes.size() == 1){
+		}
+		else{
+			int i=0;
+			for(double x:xes){
+				double to = 0,from = 0;
+				switch (barSequencePosition) {
+				case After:
+					from = x;
+					if(i == xes.size()-1){
+						to = x + (x - xes.get(i-1));
+					}
+					else{
+						to = xes.get(i+1);
+					}
+					break;
+				case Over:
+					if(i == xes.size()-1){
+						to = x + (x - xes.get(i-1))/2;
+					}
+					else{
+						to = x + (xes.get(i+1) - x)/2;
+					}
+					if(i == 0){
+						from = x - (xes.get(1) - x)/2;
+					}
+					else{
+						from = x - (x - xes.get(i-1))/2;
+					}
+					break;
+				case Before:
+					to = x;
+					if(i == 0){
+						from = x - (xes.get(1) - x);
+					}
+					else{
+						from = xes.get(i-1);
+					}
+					break;
+				}
 				switch (barChartType) {
 				case Simple:
-					graphicalObjectContainer.addAllGraphicalObject(createNormalBarSequence(viewport.getXMin(), viewport.getXMax(), this.dataSets.get(xes.get(0))));
-					break;
-				case Sorted:
-					graphicalObjectContainer.addAllGraphicalObject(createSortedBarSequence(viewport.getXMin(), viewport.getXMax(), this.dataSets.get(xes.get(0))));
+					graphicalObjectContainer.addAllGraphicalObject(createNormalBarSequence(from, to, normalizedData.get(x)));
 					break;
 				case Stacked:
-					graphicalObjectContainer.addAllGraphicalObject(createStackedBarSequence(viewport.getXMin(), viewport.getXMax(), this.dataSets.get(xes.get(0))));
+					graphicalObjectContainer.addAllGraphicalObject(createStackedBarSequence(from, to, normalizedData.get(x)));
+					break;
+				case Sorted:
+					graphicalObjectContainer.addAllGraphicalObject(createSortedBarSequence(from, to, normalizedData.get(x)));
 					break;
 				}
+				i++;
 			}
-			else{
-				int i=0;
-				for(double x:xes){
-					double to = 0,from = 0;
-					switch (barSequencePosition) {
-					case After:
-						from = x;
-						if(i == xes.size()-1){
-							to = x + (x - xes.get(i-1));
-						}
-						else{
-							to = xes.get(i+1);
-						}
-						break;
-					case Over:
-						if(i == xes.size()-1){
-							to = x + (x - xes.get(i-1))/2;
-						}
-						else{
-							to = x + (xes.get(i+1) - x)/2;
-						}
-						if(i == 0){
-							from = x - (xes.get(1) - x)/2;
-						}
-						else{
-							from = x - (x - xes.get(i-1))/2;
-						}
-						break;
-					case Before:
-						to = x;
-						if(i == 0){
-							from = x - (xes.get(1) - x);
-						}
-						else{
-							from = xes.get(i-1);
-						}
-						break;
-					}
-					switch (barChartType) {
-					case Simple:
-						graphicalObjectContainer.addAllGraphicalObject(createNormalBarSequence(from, to, dataSets.get(x)));
-						break;
-					case Stacked:
-						graphicalObjectContainer.addAllGraphicalObject(createStackedBarSequence(from, to, dataSets.get(x)));
-						break;
-					case Sorted:
-						graphicalObjectContainer.addAllGraphicalObject(createSortedBarSequence(from, to, dataSets.get(x)));
-						break;
-					}
-					i++;
-				}
-			}
+			
 			graphicalObjectContainer = DrawingAreaAssist.clipRectanglesWithRectangle(graphicalObjectContainer, leftPadding, topPadding, getWidth(), getHeight());
 		}
-		redrawNeeded = false;
 		super.update();
 	}
 
@@ -453,7 +400,7 @@ public class BarChart extends IneChartModul2D implements HasShadow, HasZIndex {
 						}
 						index++;
 					}
-					ShapeProperties sp = lookOut.get(names.get(index));
+					ShapeProperties sp = lookOut.get(index);
 					Rectangle r = new Rectangle(width/sameValueCount, height, leftTopX + j*(width/sameValueCount), leftTopY, sp);
 					goc.addAllGraphicalObject(r.toGraphicalObjects());
 				}
@@ -473,7 +420,7 @@ public class BarChart extends IneChartModul2D implements HasShadow, HasZIndex {
 						}
 						index++;
 					}
-					ShapeProperties sp = lookOut.get(names.get(index));
+					ShapeProperties sp = lookOut.get(index);
 					Rectangle r = new Rectangle(width, height/sameValueCount, leftTopX , leftTopY+ j*(height/sameValueCount), sp);
 					goc.addAllGraphicalObject(r.toGraphicalObjects());
 				}
@@ -511,7 +458,7 @@ public class BarChart extends IneChartModul2D implements HasShadow, HasZIndex {
 						}
 						index++;
 					}
-					ShapeProperties sp = lookOut.get(names.get(index));
+					ShapeProperties sp = lookOut.get(index);
 					Rectangle r = new Rectangle(width/sameValueCount, height, leftTopX + j*(width/sameValueCount), leftTopY, sp);
 					goc.addAllGraphicalObject(r.toGraphicalObjects());
 				}
@@ -531,7 +478,7 @@ public class BarChart extends IneChartModul2D implements HasShadow, HasZIndex {
 						}
 						index++;
 					}
-					ShapeProperties sp = lookOut.get(names.get(index));
+					ShapeProperties sp = lookOut.get(index);
 					Rectangle r = new Rectangle(width, height/sameValueCount, leftTopX , leftTopY+ j*(height/sameValueCount), sp);
 					goc.addAllGraphicalObject(r.toGraphicalObjects());
 				}
@@ -600,7 +547,7 @@ public class BarChart extends IneChartModul2D implements HasShadow, HasZIndex {
 			//we do not display negative values
 			if(y < 0)
 				continue;
-			ShapeProperties sp = lookOut.get(names.get(i));
+			ShapeProperties sp = lookOut.get(i);
 			if (xAxis.isHorizontal()) {
 				leftTopY = getCanvasY(y + lastY);
 				if( leftTopY < topPadding && yAxis.getAxisDirection() == AxisDirection.Vertical_Ascending_To_Top){
@@ -724,8 +671,7 @@ public class BarChart extends IneChartModul2D implements HasShadow, HasZIndex {
 				width = getXOnCanvas(y, baseY, false) - leftTopX;
 			}
 			Rectangle r = new Rectangle(width, height, leftTopX, leftTopY,
-					lookOut.get(names.get(reversedSeq ? ySequence.size()
-							- i : i)));
+					lookOut.get(reversedSeq ? ySequence.size() - i : i));
 			goc.addAllGraphicalObject(r.toGraphicalObjects());
 			i++;
 			if (xAxis.isHorizontal()) {
@@ -902,44 +848,30 @@ public class BarChart extends IneChartModul2D implements HasShadow, HasZIndex {
 		this.baseY = baseY;
 	}
 
-	/**
-	 * @return the colorSet
-	 */
-	public ColorSet getColorSet() {
-		return colorSet;
-	}
-
-	/**
-	 * @param colorSet the colorSet to set
-	 */
-	public void setColorSet(ColorSet colorSet) {
-		this.colorSet = colorSet;
-	}
-	
-
 	@Override
-	public void updateModulsAxes() {
+	public void updateModulesAxes() {
 		if (dataSets.size() == 0)
 			return;
 		if (autoScaleViewport) {
+			normalizeData();
 			scaleViewportToFitAllBars();
 			autoScaleViewport = false;
 		}
 
 		// update axes and viewport
-		alignViewportAndAxes();
+		super.updateModulesAxes();
 	}
 
 	@Override
 	public List<LegendEntry> getLegendEntries() {
 		ArrayList<LegendEntry> entries = new ArrayList<LegendEntry>();
-		for(String name : names){
-			//temporary solution 
-			Curve c = new Curve();
-			c.setName(name);
-			LegendEntry e = new LegendEntry(c, lookOut.get(name).getFillColor());
-			entries.add(e);
-		}
+//		for(String name : names){
+//			//temporary solution 
+//			Curve c = new Curve();
+//			c.setName(name);
+//			LegendEntry e = new LegendEntry(c, lookOut.get(name).getFillColor());
+//			entries.add(e);
+//		}
 		return entries;
 	}
 
@@ -979,8 +911,25 @@ public class BarChart extends IneChartModul2D implements HasShadow, HasZIndex {
 		
 	}
 	
-	public void setLookout(String name, ShapeProperties lookout){
-		this.lookOut.put(name, lookout);
+	public void setLookout(DataSet dataSet, ShapeProperties lookout){
+		int i = dataSets.indexOf(dataSet);
+		if(i == -1)
+			return;
+		this.lookOut.set(i, lookout);
+	}
+	
+	public ShapeProperties getLookout(DataSet dataSet){
+		int i = dataSets.indexOf(dataSet);
+		if(i == -1)
+			return null;
+		return lookOut.get(i);
+	}
+	
+	/**
+	 * @return the dataSets
+	 */
+	public ArrayList<DataSet> getDataSets() {
+		return dataSets;
 	}
 
 }

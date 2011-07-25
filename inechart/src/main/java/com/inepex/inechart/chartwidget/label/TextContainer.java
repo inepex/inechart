@@ -1,5 +1,7 @@
 package com.inepex.inechart.chartwidget.label;
 
+import com.inepex.inechart.chartwidget.Defaults;
+import com.inepex.inechart.chartwidget.IneChartModule2D;
 import com.inepex.inechart.chartwidget.misc.HorizontalPosition;
 import com.inepex.inechart.chartwidget.misc.VerticalPosition;
 import com.inepex.inechart.chartwidget.properties.Color;
@@ -12,29 +14,31 @@ import com.inepex.inechart.chartwidget.properties.TextProperties;
  * @author Miklós Süveges / Inepex Ltd.
  *
  */
-public abstract class TextContainer implements Comparable<TextContainer>{
+public class TextContainer implements Comparable<TextContainer>{
 	private static int highestComparatorID = Integer.MIN_VALUE;
 	private final int comparatorID;
-	static final TextProperties DEFAULT_TEXT_PROPERTIES = new TextProperties("Arial, sans-serif", 10);
-	static final ShapeProperties DEFAULT_BACKGROUND = new ShapeProperties( new Color("#ffffff", 0.8));
-	VerticalPosition verticalPosition;
-	HorizontalPosition horizontalPosition;
-	TextProperties textProperties;
-	int positionX=0, positionY=0;
-	int width = 0, height = 0;
-	ShapeProperties background;
-	int backgroundRoundedCornerRadius = 0;
 	
-	protected TextContainer(){
-		this(VerticalPosition.Auto, HorizontalPosition.Auto, DEFAULT_TEXT_PROPERTIES, DEFAULT_BACKGROUND);
+	protected VerticalPosition verticalPosition;
+	protected HorizontalPosition horizontalPosition;
+//	protected int positionX=0, positionY=0;
+//	protected int width = 0, height = 0;
+	protected ShapeProperties background;
+	
+	protected int topPadding = Defaults.textContainerPadding_V;
+	protected int leftPadding =  Defaults.textContainerPadding_H;
+	protected int bottomPadding =  Defaults.textContainerPadding_V;
+	protected int rightPadding =  Defaults.textContainerPadding_H;
+
+	boolean includeInPadding = true;
+	
+	public TextContainer(){
+		this(VerticalPosition.Auto, HorizontalPosition.Auto, Defaults.textContainerBackground);
 	}
 	
-	protected TextContainer(VerticalPosition verticalPosition,
-			HorizontalPosition horizontalPosition,
-			TextProperties textProperties, ShapeProperties background) {
+	public TextContainer(VerticalPosition verticalPosition,
+			HorizontalPosition horizontalPosition, ShapeProperties background) {
 		this.verticalPosition = verticalPosition;
 		this.horizontalPosition = horizontalPosition;
-		this.textProperties = textProperties;
 		this.background = background;
 		comparatorID = ++highestComparatorID;
 	}
@@ -50,31 +54,12 @@ public abstract class TextContainer implements Comparable<TextContainer>{
 	public void setHorizontalPosition(HorizontalPosition horizontalPosition) {
 		this.horizontalPosition = horizontalPosition;
 	}
-	public TextProperties getTextProperties() {
-		return textProperties;
-	}
-	public void setTextProperties(TextProperties textProperties) {
-		this.textProperties = textProperties;
-	}
+
 	public ShapeProperties getBackground() {
 		return background;
 	}
 	public void setBackground(ShapeProperties background) {
 		this.background = background;
-	}
-	/**
-	 * Valid only after it has been displayed
-	 * @return width in pixels
-	 */
-	public int getWidth() {
-		return width;
-	}
-	/**
-	 * Valid only after it has been displayed
-	 * @return height in pixels
-	 */
-	public int getHeight() {
-		return height;
 	}
 
 	@Override
@@ -82,13 +67,49 @@ public abstract class TextContainer implements Comparable<TextContainer>{
 		return this.comparatorID - o.comparatorID;
 	}
 
-	public int getBackgroundRoundedCornerRadius() {
-		return backgroundRoundedCornerRadius;
+	public void setPadding(int padding){
+		topPadding = bottomPadding = rightPadding = leftPadding = padding;
 	}
 
-	public void setBackgroundRoundedCornerRadius(int backgroundRoundedCornerRadius) {
-		this.backgroundRoundedCornerRadius = backgroundRoundedCornerRadius;
+	public int getTopPadding() {
+		return topPadding;
+	}
+
+	public void setTopPadding(int topPadding) {
+		this.topPadding = topPadding;
+	}
+
+	public int getLeftPadding() {
+		return leftPadding;
+	}
+
+	public void setLeftPadding(int leftPadding) {
+		this.leftPadding = leftPadding;
+	}
+
+	public int getBottomPadding() {
+		return bottomPadding;
+	}
+
+	public void setBottomPadding(int bottomPadding) {
+		this.bottomPadding = bottomPadding;
+	}
+
+	public int getRightPadding() {
+		return rightPadding;
+	}
+
+	public void setRightPadding(int rightPadding) {
+		this.rightPadding = rightPadding;
 	}
 	
+	public boolean isIncludeInPadding() {
+		return includeInPadding;
+	}
+
+	public void setIncludeInPadding(boolean includeInPadding) {
+		this.includeInPadding = includeInPadding;
+	}
+
 	
 }

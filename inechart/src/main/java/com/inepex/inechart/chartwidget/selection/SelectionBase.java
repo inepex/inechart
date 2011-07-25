@@ -1,8 +1,12 @@
 package com.inepex.inechart.chartwidget.selection;
 
+import java.util.ArrayList;
+import java.util.List;
+
 import com.google.gwt.event.dom.client.MouseEvent;
+import com.inepex.inechart.chartwidget.IneChart;
 import com.inepex.inechart.chartwidget.IneChartEventManager;
-import com.inepex.inechart.chartwidget.IneChartModul2D;
+import com.inepex.inechart.chartwidget.IneChartModule2D;
 import com.inepex.inechart.chartwidget.properties.ShapeProperties;
 import com.inepex.inegraphics.impl.client.DrawingAreaGWT;
 
@@ -10,13 +14,17 @@ public abstract class SelectionBase {
 
 	protected ShapeProperties selectionLookOut;
 	protected IneChartEventManager eventManager;
-	protected IneChartModul2D modulToSelectFrom;
+	protected IneChartModule2D modulToSelectFrom;
 	protected DrawingAreaGWT canvas;
+	protected List<IneChart> addressedCharts;
+	protected List<IneChartModule2D> addressedModuls;
 
 	protected SelectionBase(IneChartEventManager eventManager,
 			DrawingAreaGWT canvas) {
 		this.eventManager = eventManager;
 		this.canvas = canvas;
+		addressedCharts = new ArrayList<IneChart>();
+		addressedModuls = new ArrayList<IneChartModule2D>();
 	}
 	
 	protected int[] normalizeCoords(int[] coords){
@@ -69,15 +77,44 @@ public abstract class SelectionBase {
 	/**
 	 * @return the modulToSelectFrom
 	 */
-	public IneChartModul2D getModulToSelectFrom() {
+	public IneChartModule2D getModulToSelectFrom() {
 		return modulToSelectFrom;
 	}
 
 	/**
 	 * @param modulToSelectFrom the modulToSelectFrom to set
 	 */
-	public void setModulToSelectFrom(IneChartModul2D modulToSelectFrom) {
+	public void setModulToSelectFrom(IneChartModule2D modulToSelectFrom) {
 		this.modulToSelectFrom = modulToSelectFrom;
 	}
 
+	/**
+	 * @return the addressedCharts
+	 */
+	public List<IneChart> getAddressedCharts() {
+		return addressedCharts;
+	}
+
+	/**
+	 * @param addressedCharts the addressedCharts to set
+	 */
+	public void setAddressedCharts(List<IneChart> addressedCharts) {
+		this.addressedCharts = addressedCharts;
+	}
+
+	/**
+	 * @return the addressedModuls
+	 */
+	public List<IneChartModule2D> getAddressedModuls() {
+		return addressedModuls;
+	}
+
+	/**
+	 * @param addressedModuls the addressedModuls to set
+	 */
+	public void setAddressedModuls(List<IneChartModule2D> addressedModuls) {
+		this.addressedModuls = addressedModuls;
+	}
+
+	
 }

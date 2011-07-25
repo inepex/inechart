@@ -34,14 +34,15 @@ public class RectangularSelection extends SelectionBase{
 	protected class MouseHandler implements MouseDownHandler, MouseMoveHandler, MouseUpHandler{
 		@Override
 		public void onMouseUp(MouseUpEvent event) {
-		
-			DOM.releaseCapture(((DrawingAreaGWT)canvas).getWidget().getElement());
-			int[] actualCoords = normalizeCoords(getCoords(event));
-			areaSelected(mouseDownCoords, actualCoords);
-			mouseDownCoords = null;	
-			if(!displayRectangleAfterSelection){
-				canvas.removeAllGraphicalObject();
-				canvas.update();
+			if(mouseDownCoords != null){
+				DOM.releaseCapture(eventManager.getCaptureElement());
+				int[] actualCoords = normalizeCoords(getCoords(event));
+				areaSelected(mouseDownCoords, actualCoords);
+				mouseDownCoords = null;	
+				if(!displayRectangleAfterSelection){
+					canvas.removeAllGraphicalObject();
+					canvas.update();
+				}
 			}
 		}
 
@@ -88,7 +89,8 @@ public class RectangularSelection extends SelectionBase{
 				return;
 			}
 			canvas.removeAllGraphicalObject();
-			DOM.setCapture(((DrawingAreaGWT)canvas).getWidget().getElement());
+			
+			DOM.setCapture(eventManager.getCaptureElement());
 		}
 	}
 		
@@ -146,18 +148,36 @@ public class RectangularSelection extends SelectionBase{
 		case Horizontal:
 			xMin = Math.min(modelFrom[0], modelTo[0]);
 			xMax = Math.max(modelFrom[0], modelTo[0]);
-			yMin = modulToSelectFrom.getViewport().getYMin();
-			yMax = modulToSelectFrom.getViewport().getYMax();
+			yMin = modulToSelectFrom.getYAxis().getMin();
+			yMax = modulToSelectFrom.getYAxis().getMax();
 			break;			
 		case Vertical:
 			yMin = Math.min(modelFrom[1], modelTo[1]);
 			yMax = Math.max(modelFrom[1], modelTo[1]);
-			xMin = modulToSelectFrom.getViewport().getXMin();
-			xMax = modulToSelectFrom.getViewport().getXMax();
+			xMin = modulToSelectFrom.getXAxis().getMin();
+			xMax = modulToSelectFrom.getXAxis().getMax();
 			break;
 		}
 		ViewportChangeEvent event = new ViewportChangeEvent(null, xMin, yMin, xMax, yMax, null);
-		event.addAddressedModul(modulToSelectFrom);
+		event.setAddressedCharts(addressedCharts);
+		event.setAddressedModuls(addressedModuls);;
 		eventManager.fireViewportChangedEvent(event);
+	}
+
+
+	/**
+	 * @return the displayRectangleAfterSelection
+	 */
+	public boolean isDisplayRectangleAfterSelection() {
+		return displayRectangleAfterSelection;
+	}
+
+
+	/**
+	 * @param displayRectangleAfterSelection the displayRectangleAfterSelection to set
+	 */
+	public void setDisplayRectangleAfterSelection(
+			boolean displayRectangleAfterSelection) {
+		this.displayRectangleAfterSelection = displayRectangleAfterSelection;
 	}
 }

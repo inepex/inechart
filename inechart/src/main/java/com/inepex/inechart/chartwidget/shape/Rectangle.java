@@ -60,7 +60,7 @@ public class Rectangle extends Shape {
 							: shadowColor.getAlpha(),
 					shadowColor == null ? Defaults.colorString : shadowColor
 							.getColor());
-			outer = new com.inepex.inegraphics.impl.client.ishapes.Rectangle(
+			outer = new com.inepex.inegraphics.shared.gobjects.Rectangle(
 					baseX == null ? 0 : baseX, baseY == null ? 0 : baseY,
 					this.width, this.height, this.roundedCornerR, zIndex,
 					outerContext, true, false);
@@ -74,7 +74,7 @@ public class Rectangle extends Shape {
 					0, 0, shadowColor == null ? 0d : shadowColor.getAlpha(),
 					shadowColor == null ? Defaults.colorString : shadowColor
 							.getColor());
-			inner = new com.inepex.inegraphics.impl.client.ishapes.Rectangle(
+			inner = new com.inepex.inegraphics.shared.gobjects.Rectangle(
 					baseX == null ? 0 : baseX, baseY == null ? 0 : baseY,
 					this.width, this.height, this.roundedCornerR, zIndex,
 					innerContext, false, true);
@@ -87,15 +87,6 @@ public class Rectangle extends Shape {
 		return toRet;
 	}
 
-	@Override
-	public GraphicalObject toInterActiveGraphicalObject() {
-		if (outer == null && inner == null && toGraphicalObjects().size() == 0)
-			return null;
-		else if (outer != null)
-			return outer;
-		else
-			return inner;
-	}
 
 	/**
 	 * @return the width

@@ -5,19 +5,20 @@ import java.util.TreeMap;
 
 import com.inepex.inechart.chartwidget.Defaults;
 import com.inepex.inechart.chartwidget.IneChart;
-import com.inepex.inechart.chartwidget.IneChartModul;
-import com.inepex.inechart.chartwidget.IneChartModul2D;
+import com.inepex.inechart.chartwidget.IneChartModule;
+import com.inepex.inechart.chartwidget.IneChartModule2D;
 import com.inepex.inechart.chartwidget.axes.Axis.AxisDirection;
 import com.inepex.inechart.chartwidget.axes.Axis.AxisPosition;
+import com.inepex.inechart.chartwidget.label.LabelFactoryBase;
 import com.inepex.inechart.chartwidget.properties.Color;
 import com.inepex.inechart.chartwidget.properties.LineProperties;
-import com.inepex.inegraphics.impl.client.ishapes.Rectangle;
 import com.inepex.inegraphics.shared.Context;
 import com.inepex.inegraphics.shared.DrawingArea;
 import com.inepex.inegraphics.shared.DrawingAreaAssist;
 import com.inepex.inegraphics.shared.GraphicalObjectContainer;
 import com.inepex.inegraphics.shared.gobjects.GraphicalObject;
 import com.inepex.inegraphics.shared.gobjects.Line;
+import com.inepex.inegraphics.shared.gobjects.Rectangle;
 import com.inepex.inegraphics.shared.gobjects.Text;
 import com.inepex.inegraphics.shared.gobjects.Text.BasePointXPosition;
 import com.inepex.inegraphics.shared.gobjects.Text.BasePointYPosition;
@@ -29,8 +30,8 @@ import com.inepex.inegraphics.shared.gobjects.Text.BasePointYPosition;
  * @author Miklós Süveges, Tibor Somodi / Inepex Ltd.
  * 
  */
-public class Axes extends IneChartModul {
-
+public class Axes extends IneChartModule {
+	private LabelFactoryBase labelFactory;
 	private ArrayList<Axis> axes;
 	private TickFactory tickFactory;
 
@@ -40,25 +41,24 @@ public class Axes extends IneChartModul {
 	 * helps in padding calculation
 	 */
 	private TreeMap<Axis, Double> axisLinePosition;
-	private boolean redrawNeeded;
-		
+	private TreeMap<Axis, double[]> paddingAroundAxes;
 	private static final int tickFillZIndex = Integer.MIN_VALUE;
 	private static final int gridLineZIndex = tickFillZIndex + 1;	
 	private static final int axisLineZIndex = gridLineZIndex + 1;	
 	private static final int tickLineZIndex = axisLineZIndex + 1;
 	
 	
-	public Axes(DrawingArea canvas) {
+	public Axes(DrawingArea canvas,  LabelFactoryBase labelFactory) {
 		super(canvas);
 		axes = new ArrayList<Axis>();
 		gosPerAxis = new TreeMap<Axis, GraphicalObjectContainer>();
 		labelsPerAxis = new TreeMap<Axis, ArrayList<Text>>();
 		axisLinePosition = new TreeMap<Axis, Double>();
-		redrawNeeded = false;
+		paddingAroundAxes = new TreeMap<Axis, double[]>();
 		tickFactory = new TickFactory();
 	}
 
-	public Axis createAxis(AxisDirection direction, IneChartModul2D modulToAlign) {
+	public Axis createAxis(AxisDirection direction, IneChartModule2D modulToAlign) {
 		Axis a = new Axis(Defaults.solidLine());
 		a.isVisible = true;
 		a.modulToAlign = modulToAlign;
@@ -69,8 +69,6 @@ public class Axes extends IneChartModul {
 
 	public void addAxis(Axis axis) {
 		axes.add(axis);
-		if (axis.isVisible)
-			redrawNeeded = true;
 	}
 
 	public void removeAxis(Axis axis) {
@@ -78,33 +76,25 @@ public class Axes extends IneChartModul {
 		gosPerAxis.remove(axis);
 		labelsPerAxis.remove(axis);
 		axes.remove(axis);
-		if (axis.isVisible)
-			redrawNeeded = true;
 	}
 
 	@Override
 	public void update() {
 		for (Axis axis : axes) {
-			if (axis.changed) {
-				if (axis.autoCreateTicks){
-					tickFactory.autoCreateTicks(axis);
-					createDefaultTickAndLabelForAxis(axis);
-				}
-				removeAllGOAndLabelRelatedToAxis(axis);
-				createGOsAndLabelsForAxis(axis);
-				axis.changed = false;
+			if (axis.autoCreateTicks){
+				tickFactory.autoCreateTicks(axis);
+				createDefaultTickAndLabelForAxis(axis);
 			}
+			removeAllGOAndLabelRelatedToAxis(axis);
+			createGOsAndLabelsForAxis(axis);
 		}
-		redrawNeeded = false;
 	}
 
-	public void forcedUpdate(){
+	public void updateWithOutAutoTickCreation(){
 		for (Axis axis : axes) {
 			removeAllGOAndLabelRelatedToAxis(axis);
 			createGOsAndLabelsForAxis(axis);
-			axis.changed = false;
 		}
-		redrawNeeded = false;
 	}
 	
 	void createAxisLine(Axis axis, GraphicalObjectContainer goc, double startX, double startY, double endX, double endY){
@@ -115,7 +105,7 @@ public class Axes extends IneChartModul {
 		}
 	}
 	
-	void createTickLinesLabelsGrids(Axis axis, Axis perpAxis, GraphicalObjectContainer goc, double startX, double startY){
+	void createTickLinesLabelsGrids(Axis axis, Axis perpAxis, GraphicalObjectContainer goc, GraphicalObjectContainer gridGOs, double startX, double startY){
 		// ticks
 		ArrayList<Tick> filtered = axis.getVisibleTicks();
 		if (axis.isFilterFrequentTicks()){
@@ -136,7 +126,7 @@ public class Axes extends IneChartModul {
 				case To_Lower_Values:
 					tickStartY = startY;
 					if (perpAxis.axisDirection == AxisDirection.Vertical_Ascending_To_Bottom) {
-						tickEndY = tickStartY - tick.tickLength;
+						 tickEndY = tickStartY - tick.tickLength;
 					} else {
 						tickEndY = tickStartY + tick.tickLength;
 					}
@@ -150,7 +140,8 @@ public class Axes extends IneChartModul {
 					}
 					break;
 				}
-			} else {
+			} 
+			else {
 				gridEndY = gridStartY = tickStartY = tickEndY = axis.getModulToAlign().getCanvasY(tick.position);
 				gridStartX = axis.getModulToAlign().getLeftPadding();
 				gridEndX = canvas.getWidth() - axis.getModulToAlign().getRightPadding();
@@ -186,10 +177,10 @@ public class Axes extends IneChartModul {
 			if (tick.gridLine != null) {
 				Line gridLine = new Line(gridStartX, gridStartY, gridEndX, gridEndY, gridLineZIndex, createContext(tick.gridLine));
 				if(tick.gridLine.getDashDistance() > 0){
-					goc.addGraphicalObject(DrawingAreaAssist.createDashedLine(gridLine, tick.gridLine.getDashStrokeLength(), tick.gridLine.getDashDistance()));
+					gridGOs.addGraphicalObject(DrawingAreaAssist.createDashedLine(gridLine, tick.gridLine.getDashStrokeLength(), tick.gridLine.getDashDistance()));
 				}
 				else{
-					goc.addGraphicalObject(gridLine);
+					gridGOs.addGraphicalObject(gridLine);
 				}
 			}
 			createTickText(axis, perpAxis, goc, tick, tickStartX, tickStartY);
@@ -198,25 +189,25 @@ public class Axes extends IneChartModul {
 	
 	void createTickText(Axis axis, Axis perpAxis, GraphicalObjectContainer goc, Tick tick, double tickStartX, double tickStartY){
 		if (tick.tickText != null && tick.tickText.length() > 0) {
+			//calculate the text position relative to tick
 			BasePointXPosition h = null;
 			BasePointYPosition v = null;
 			switch (tick.tickTextHorizontalPosition) {
 			case Auto:
 				if (axis.isHorizontal()) {
 					h = BasePointXPosition.MIDDLE;
-				} else {
-					if (axis.getAxisPosition() == AxisPosition.Maximum
-							&& perpAxis.getAxisDirection() == AxisDirection.Horizontal_Ascending_To_Left
-							|| axis.getAxisPosition() == AxisPosition.Minimum
-							&& perpAxis.getAxisDirection() == AxisDirection.Horizontal_Ascending_To_Right) {
+				} 
+				else {
+					if (axis.getAxisPosition() == AxisPosition.Maximum && perpAxis.getAxisDirection() == AxisDirection.Horizontal_Ascending_To_Left ||
+							axis.getAxisPosition() == AxisPosition.Minimum && perpAxis.getAxisDirection() == AxisDirection.Horizontal_Ascending_To_Right) {
 						h = BasePointXPosition.RIGHT;
 						tickStartX -= 4;
-
-					} else {
+					}
+					else {
 						h = BasePointXPosition.LEFT;
 						tickStartX += tick.tickLength + 4;
 					}
-					tickStartY += 2;
+//					tickStartY += 2;
 				}
 				break;
 			case Left:
@@ -235,13 +226,12 @@ public class Axes extends IneChartModul {
 					v = BasePointYPosition.MIDDLE;
 				}
 				else {
-					if (axis.getAxisPosition() == AxisPosition.Maximum
-							&& perpAxis.getAxisDirection() == AxisDirection.Vertical_Ascending_To_Bottom
-							|| axis.getAxisPosition() == AxisPosition.Minimum
-							&& perpAxis.getAxisDirection() == AxisDirection.Vertical_Ascending_To_Top) {
+					if (axis.getAxisPosition() == AxisPosition.Maximum && perpAxis.getAxisDirection() == AxisDirection.Vertical_Ascending_To_Bottom ||
+							axis.getAxisPosition() == AxisPosition.Minimum && perpAxis.getAxisDirection() == AxisDirection.Vertical_Ascending_To_Top) {
 						v = BasePointYPosition.TOP;
-						tickStartY += tick.tickLength + 3;
-					} else {
+						tickStartY += tick.tickLength + 2;
+					} 
+					else {
 						v = BasePointYPosition.BOTTOM;
 						tickStartY += 1;
 					}
@@ -339,9 +329,9 @@ public class Axes extends IneChartModul {
 			break;
 		case Middle:
 			if (perpAxis.isHorizontal()) {
-				startX = endX = (canvas.getWidth() - axis.modulToAlign.getLeftPadding() - axis.modulToAlign.getRightPadding()) / 2 + axis.modulToAlign.getLeftPadding();
+				startX = endX = axis.modulToAlign.getWidth() / 2 + axis.modulToAlign.getLeftPadding();
 			} else {
-				startY = endY = (canvas.getHeight() - axis.modulToAlign.getTopPadding() - axis.modulToAlign.getBottomPadding()) / 2 + axis.modulToAlign.getTopPadding();
+				startY = endY = axis.modulToAlign.getHeight() / 2 + axis.modulToAlign.getTopPadding();
 			}
 			break;
 		case Fixed:
@@ -388,10 +378,44 @@ public class Axes extends IneChartModul {
 		
 		createAxisLine(axis, goc, startX, startY, endX, endY);
 		
-		createTickLinesLabelsGrids(axis, perpAxis, goc, startX, startY);
+		GraphicalObjectContainer gridGOs = new GraphicalObjectContainer();
+		createTickLinesLabelsGrids(axis, perpAxis, goc, gridGOs, startX, startY);
 		
-		createFillBetweenTicks(axis, goc);
+		createFillBetweenTicks(axis, gridGOs);
 		
+		//add axis line to get a valid bounding box
+		GraphicalObjectContainer gocToMeasure = new GraphicalObjectContainer();
+		gocToMeasure.addAllGraphicalObject(goc);
+		gocToMeasure.addGraphicalObject(new Line(startX, startY, endX, endY, 0, null));
+		
+		double[] paddingAroundAxis = new double[]{0,0,0,0};
+		double[] axisBB = DrawingAreaAssist.getBoundingBox(gocToMeasure);
+		if(axis.isHorizontal()){
+			paddingAroundAxis[0] = startY - axisBB[1];
+			paddingAroundAxis[2] = axisBB[1] + axisBB[3] - startY;
+			if (axis.getAxisDirection() == AxisDirection.Horizontal_Ascending_To_Left) {
+				paddingAroundAxis[1] = axisBB[0] + axisBB[2] - startX;
+				paddingAroundAxis[3] = endX - axisBB[0];
+			}
+			else if (axis.getAxisDirection() == AxisDirection.Horizontal_Ascending_To_Right) {
+				paddingAroundAxis[1] = axisBB[0] + axisBB[2] - endX;
+				paddingAroundAxis[3] = startX - axisBB[0];
+			}
+		}
+		else{
+			paddingAroundAxis[1] = axisBB[0] + axisBB[2] - startX;
+			paddingAroundAxis[3] = startX - axisBB[0];
+			if (axis.getAxisDirection() == AxisDirection.Vertical_Ascending_To_Bottom) {
+				paddingAroundAxis[0] = startY - axisBB[1];
+				paddingAroundAxis[2] = axisBB[1] + axisBB[3] - endY;
+			}
+			else if (axis.getAxisDirection() == AxisDirection.Vertical_Ascending_To_Top) {
+				paddingAroundAxis[0] = endY - axisBB[1];
+				paddingAroundAxis[2] = axisBB[1] + axisBB[3] - startY;
+			}
+		}
+		goc.addAllGraphicalObject(gridGOs);
+		paddingAroundAxes.put(axis, paddingAroundAxis);
 		gosPerAxis.put(axis, goc);
 		axisLinePosition.put(axis, axis.isHorizontal() ? startY : startX);
 		graphicalObjectContainer.addAllGraphicalObject(goc);
@@ -479,75 +503,123 @@ public class Axes extends IneChartModul {
 		labelsPerAxis.remove(axis);
 	}
 
-	@Override
-	public boolean redrawNeeded() {
-		if (!redrawNeeded) {
-			for (Axis axis : axes) {
-				if (axis.changed) {
-					redrawNeeded = true;
-					break;
-				}
-			}
-		}
-		return redrawNeeded;
-	}	
-
-	/**
-	 * Ensure that {@link GraphicalObject}s for axis have been created when called! 
-	 * @param axis
-	 * @return [top, right, bottom, left] padding for axis
-	 */
-	public double[] getPaddingForAxis(Axis axis){
+	public double[] getActualModulPaddingForAxis(Axis axis){
 		Axis perpAxis;
 		if (AxisDirection.isPerpendicular(axis, axis.getModulToAlign().getYAxis()))
 			perpAxis = axis.getModulToAlign().getYAxis();
 		else
 			perpAxis = axis.getModulToAlign().getXAxis();
 
-		double[] bb = DrawingAreaAssist.getBoundingBox(gosPerAxis.get(axis));
+		double[] paddingAroundAxis = paddingAroundAxes.get(axis);
+		if(paddingAroundAxis == null){
+			return new double[]{0,0,0,0};
+		}
 		double top = 0;
 		double right = 0;
 		double bottom = 0;
 		double left = 0;
-		double axisLinePos = axisLinePosition.get(axis);
+		boolean visible = true;
 		if(axis.isHorizontal()){
 			if(axis.axisPosition == AxisPosition.Fixed || axis.axisPosition == AxisPosition.Fixed_Dock_If_Not_Visible){
-				top = axisLinePos - bb[1];
-				bottom = bb[1] + bb[3] - axisLinePos;
+				double axisLinePos = axis.modulToAlign.getCanvasY(axis.fixedPosition);
+				if(axisLinePos < axis.modulToAlign.getTopPadding()){
+					if(axis.axisPosition == AxisPosition.Fixed_Dock_If_Not_Visible){
+						top = paddingAroundAxis[0];
+					}
+					visible = false;
+				}
+				else if(axisLinePos > axis.modulToAlign.getHeight() + axis.modulToAlign.getTopPadding()){
+					if(axis.axisPosition == AxisPosition.Fixed_Dock_If_Not_Visible){
+						bottom = paddingAroundAxis[2];
+					}
+					visible = false;
+				}
+				else{
+					top = Math.max(0, axis.modulToAlign.getTopPadding() - axisLinePos + paddingAroundAxis[0]);
+					bottom = Math.max(0, axisLinePos + paddingAroundAxis[2] - axis.modulToAlign.getHeight() - axis.modulToAlign.getTopPadding()); 
+				}
 			}
+			//bottom
 			else if( (axis.axisPosition == AxisPosition.Maximum && perpAxis.getAxisDirection() == AxisDirection.Vertical_Ascending_To_Bottom) ||
 					(axis.axisPosition == AxisPosition.Minimum && perpAxis.getAxisDirection() == AxisDirection.Vertical_Ascending_To_Top) ){
-				bottom =  bb[1] + bb[3] - axisLinePos;
+				bottom = paddingAroundAxis[2];
 			}
+			//top
 			else if( (axis.axisPosition == AxisPosition.Maximum && perpAxis.getAxisDirection() == AxisDirection.Vertical_Ascending_To_Top) ||
 					(axis.axisPosition == AxisPosition.Minimum && perpAxis.getAxisDirection() == AxisDirection.Vertical_Ascending_To_Bottom) ){
-				top = axisLinePos - bb[1];
+				top = paddingAroundAxis[0];
+			}
+			if(visible){
+				left = paddingAroundAxis[3];
+				right = paddingAroundAxis[1];
 			}
 		}
 		else{
 			if(axis.axisPosition == AxisPosition.Fixed || axis.axisPosition == AxisPosition.Fixed_Dock_If_Not_Visible){
-				left = axisLinePos - bb[0];
-				right = bb[0] + bb[2] - axisLinePos;
+				double axisLinePos = axis.modulToAlign.getCanvasX(axis.fixedPosition);
+				if(axisLinePos < axis.modulToAlign.getLeftPadding()){
+					if(axis.axisPosition == AxisPosition.Fixed_Dock_If_Not_Visible){
+						left = paddingAroundAxis[3];
+					}
+					visible = false;
+				}
+				else if(axisLinePos > axis.modulToAlign.getWidth() + axis.modulToAlign.getLeftPadding()){
+					if(axis.axisPosition == AxisPosition.Fixed_Dock_If_Not_Visible){
+						right = paddingAroundAxis[1];
+					}
+					visible = false;
+				}
+				else{
+					left = Math.max(0, axis.modulToAlign.getLeftPadding() - axisLinePos + paddingAroundAxis[3]);
+					right = Math.max(0, axisLinePos + paddingAroundAxis[1] - axis.modulToAlign.getWidth() - axis.modulToAlign.getLeftPadding()); 
+				}
 			}
+			//left
 			else if( (axis.axisPosition == AxisPosition.Maximum && perpAxis.getAxisDirection() == AxisDirection.Horizontal_Ascending_To_Left) ||
 					(axis.axisPosition == AxisPosition.Minimum && perpAxis.getAxisDirection() == AxisDirection.Horizontal_Ascending_To_Right) ){
-				left =  axisLinePos - bb[0];
+				left = paddingAroundAxis[3];
 			}
+			//right
 			else if( (axis.axisPosition == AxisPosition.Maximum && perpAxis.getAxisDirection() == AxisDirection.Horizontal_Ascending_To_Right) ||
 					(axis.axisPosition == AxisPosition.Minimum && perpAxis.getAxisDirection() == AxisDirection.Horizontal_Ascending_To_Left) ){
-				right = bb[0] + bb[2] - axisLinePos;
+				right = paddingAroundAxis[1];
 			}
-			
+			if(visible){
+				top = paddingAroundAxis[0];
+				bottom = paddingAroundAxis[2];
+			}
 		}
-		if(top < 0)
-			top = 0;
-		if(right < 0)
-			right = 0;
-		if(bottom < 0)
-			bottom = 0;
-		if(left < 0)
-			left = 0;
+//		if(top < 0)
+//			top = 0;
+//		if(right < 0)
+//			right = 0;
+//		if(bottom < 0)
+//			bottom = 0;
+//		if(left < 0)
+//			left = 0;
 		return new double[] {top, right, bottom, left};
+	}
+	
+	public double[] getPaddingNeededForAxis(Axis axis){
+		Axis perpAxis;
+		if (AxisDirection.isPerpendicular(axis, axis.getModulToAlign().getYAxis()))
+			perpAxis = axis.getModulToAlign().getYAxis();
+		else
+			perpAxis = axis.getModulToAlign().getXAxis();
+		double top = 0;
+		double right = 0;
+		double bottom = 0;
+		double left = 0;
+		
+		
+		//TODO
+		
+		
+		
+		
+		
+		
+		return null;
 	}
 	
 	private void createDefaultTickAndLabelForAxis(Axis axis) {

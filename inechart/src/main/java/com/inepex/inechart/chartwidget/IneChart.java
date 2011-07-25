@@ -1,48 +1,43 @@
 package com.inepex.inechart.chartwidget;
 
 import java.util.ArrayList;
+import java.util.List;
 
-import com.google.gwt.core.client.Scheduler;
-import com.google.gwt.core.client.Scheduler.RepeatingCommand;
 import com.google.gwt.event.dom.client.MouseDownEvent;
 import com.google.gwt.event.dom.client.MouseMoveEvent;
 import com.google.gwt.event.dom.client.MouseUpEvent;
 import com.google.gwt.event.shared.EventBus;
-import com.google.gwt.user.client.Timer;
+import com.google.gwt.event.shared.SimpleEventBus;
 import com.google.gwt.user.client.ui.AbsolutePanel;
 import com.google.gwt.user.client.ui.Composite;
 import com.inepex.inechart.chartwidget.axes.Axes;
 import com.inepex.inechart.chartwidget.barchart.BarChart;
-import com.inepex.inechart.chartwidget.label.GWTLabelFactory;
-import com.inepex.inechart.chartwidget.label.HasTitle;
-import com.inepex.inechart.chartwidget.label.StyledLabel;
+import com.inepex.inechart.chartwidget.label.ChartTitle;
+import com.inepex.inechart.chartwidget.label.GWTLabelFactory2;
 import com.inepex.inechart.chartwidget.label.LabelFactoryBase;
+import com.inepex.inechart.chartwidget.linechart.Curve;
 import com.inepex.inechart.chartwidget.linechart.LineChart;
 import com.inepex.inechart.chartwidget.piechart.PieChart;
-import com.inepex.inechart.chartwidget.resources.ResourceHelper;
 import com.inepex.inechart.chartwidget.selection.RectangularSelection;
+import com.inepex.inechart.chartwidget.selection.RectangularSelection.RectangularSelectionMode;
 import com.inepex.inegraphics.impl.client.DrawingAreaGWT;
-import com.inepex.inegraphics.shared.DrawingAreaAssist;
-import com.inepex.inegraphics.shared.gobjects.GraphicalObject;
 
-public class IneChart extends Composite implements HasTitle{
+public class IneChart extends Composite{
 	private static final int DEFAULT_WIDTH = 470;
 	private static final int DEFAULT_HEIGHT = 380;
 	private AbsolutePanel mainPanel;
-	private ArrayList<IneChartModul> moduls;
-	/**
-	 * singleton per {@link IneChart} instance
-	 */
+	private DrawingAreaGWT drawingArea;
+	private ArrayList<IneChartModule> moduls;
+	
 	private Axes axes;
 	private RectangularSelection selection = null;
-	private ArrayList<Viewport> modulViewports;
-	private DrawingAreaGWT drawingArea;
-	private IneChartModul focus;
-	private LabelFactoryBase legendFactory;
-	private StyledLabel title, description;
-	private boolean autoScaleModuls = true;
-	private boolean includeTitleInPadding = true;
+	private LabelFactoryBase labelFactory;
 	private IneChartEventManager eventManager;
+	
+	private IneChartModule focus;
+	
+	private boolean autoScaleModuls = true;
+	
 
 	// properties
 	private int canvasWidth;
@@ -60,16 +55,12 @@ public class IneChart extends Composite implements HasTitle{
 		mainPanel.setPixelSize(width, height);
 		initWidget(mainPanel);
 		drawingArea = new DrawingAreaGWT(canvasWidth, canvasHeight, false);
-		if (DrawingAreaGWT.isHTML5Compatible())
-			drawingArea.setCreateShadows(false);
-		drawingArea.getCanvasWidget().setStyleName(ResourceHelper.getRes().style().chartWidget());
-		//moduls
-		moduls = new ArrayList<IneChartModul>();
-		axes = new Axes(drawingArea);
-		modulViewports = new ArrayList<Viewport>();
-		mainPanel.add(drawingArea.getWidget(), 0, 0);
-		legendFactory = new LabelFactoryBase(drawingArea);
-		legendFactory.setChartTitle(this);
+		mainPanel.add(drawingArea.getWidget(),0,0);
+		
+		moduls = new ArrayList<IneChartModule>();
+		labelFactory = new GWTLabelFactory2(drawingArea,mainPanel);
+		axes = new Axes(drawingArea,labelFactory);
+		
 		//event
 		eventManager = new IneChartEventManager(this);
 		addDomHandler(eventManager, MouseDownEvent.getType());
@@ -82,37 +73,98 @@ public class IneChart extends Composite implements HasTitle{
 		//TODO
 	}
 
+	public boolean isRedrawNeeded(){
+		for(IneChartModule m : moduls){
+			if(m.isRedrawNeeded()){
+				return true;
+			}
+		}
+		return false;
+	}
+	
+	public void update() {
+		releaseFocusIfPossible();
+		// grant focus if possible and requested
+		if (focus == null) {
+			for (IneChartModule modul : moduls) {
+				if (modul.isVisible && modul.requestFocus) {
+					focusModul(modul);
+					break;
+				}
+			}
+		}
+
+		if (autoScaleModuls){
+			for (IneChartModule modul : moduls) {
+				if(modul instanceof IneChartModule2D){
+					((IneChartModule2D) modul).updateModulesAxes();
+				}
+			}
+		}
+		
+		labelFactory.update();
+		
+		axes.update();
+		
+		//scale moduls 
+		if (autoScaleModuls){
+			double[] padding = new double[]{0,0,0,0};
+			for (IneChartModule modul : moduls) {
+				if(modul instanceof IneChartModule2D && ((IneChartModule2D) modul).autoCalcPadding){
+					padding = LabelFactoryBase.mergePaddings(padding, ((IneChartModule2D) modul).getPaddingForAxes());
+				}
+			}
+			padding = LabelFactoryBase.addPaddings(labelFactory.getPaddingNeeded(), padding);
+			for (IneChartModule modul : moduls) {
+				if(modul instanceof IneChartModule2D && ((IneChartModule2D) modul).autoCalcPadding){
+					((IneChartModule2D) modul).setPadding(padding);
+				}
+			}
+			axes.updateWithOutAutoTickCreation();
+		}
+		//FIXME think about removing focus...
+		// update moduls if present, update only focused
+		if (focus != null) {
+			focus.update();
+		} 
+		else {
+			for (IneChartModule modul : moduls) {
+				modul.update();
+			}
+		}
+
+		drawingArea.removeAllGraphicalObject();
+		for (IneChartModule modul : moduls) {
+			if (modul.isVisible){
+				drawingArea.addAllGraphicalObject(modul.graphicalObjectContainer);
+			}
+		}
+		drawingArea.addAllGraphicalObject(axes.graphicalObjectContainer);
+		drawingArea.addAllGraphicalObject(labelFactory.graphicalObjectContainer);
+		drawingArea.update();
+
+	}
+
 	/*
 	 * Moduls
 	 */
 
 	public LineChart createLineChart() {
-		LineChart chart = new LineChart(drawingArea, getAxes());
+		LineChart chart = new LineChart(drawingArea, labelFactory, getAxes());
 		moduls.add(chart);
-		legendFactory.addHasLegendEntries(chart);
-		eventManager.addViewportChangeHandler(chart.innerEventHandler);
-		return chart;
-	}
-
-	public LineChart createLineChart(Viewport viewport) {
-		LineChart chart = new LineChart(drawingArea, getAxes(), viewport);
-		moduls.add(chart);
-		legendFactory.addHasLegendEntries(chart);
 		eventManager.addViewportChangeHandler(chart.innerEventHandler);
 		return chart;
 	}
 
 	public PieChart createPieChart() {
-		PieChart chart = new PieChart(drawingArea, getAxes());
+		PieChart chart = new PieChart(drawingArea, labelFactory, getAxes());
 		moduls.add(chart);
-		legendFactory.addHasLegendEntries(chart);
 		return chart;
 	}
 
 	public BarChart createBarChart() {
-		BarChart bc = new BarChart(drawingArea, getAxes());
+		BarChart bc = new BarChart(drawingArea, labelFactory, getAxes());
 		moduls.add(bc);
-		legendFactory.addHasLegendEntries(bc);
 		eventManager.addViewportChangeHandler(bc.innerEventHandler);
 		return bc;
 	}
@@ -121,15 +173,19 @@ public class IneChart extends Composite implements HasTitle{
 		return axes;
 	}
 	
-	public RectangularSelection getSelection(){
+	LabelFactoryBase getLabelFactory(){
+		return labelFactory;
+	}
+	
+	public RectangularSelection getRectangularSelection(){
 		if(selection == null){
 			DrawingAreaGWT selectionLayer = new DrawingAreaGWT(canvasWidth, canvasHeight, false);
 			this.selection = new RectangularSelection(selectionLayer,eventManager);
-			mainPanel.add(selectionLayer.getWidget(), 0, 0);
-			IneChartModul2D modulToSelectFrom = null;
-			for(IneChartModul m : moduls){
-				if(m instanceof IneChartModul2D){
-					modulToSelectFrom = (IneChartModul2D) m;
+			mainPanel.add(selectionLayer.getWidget(),0,0);
+			IneChartModule2D modulToSelectFrom = null;
+			for(IneChartModule m : moduls){
+				if(m instanceof IneChartModule2D){
+					modulToSelectFrom = (IneChartModule2D) m;
 					break;
 				}
 			}
@@ -138,10 +194,8 @@ public class IneChart extends Composite implements HasTitle{
 		return selection;
 	}
 
-	/* public methods */
-
-	private void focusModul(IneChartModul modul) {
-		for (IneChartModul m : moduls) {
+	private void focusModul(IneChartModule modul) {
+		for (IneChartModule m : moduls) {
 			if (m != modul)
 				m.canHandleEvents = false;
 			else
@@ -152,9 +206,9 @@ public class IneChart extends Composite implements HasTitle{
 
 	private void releaseFocusIfPossible() {
 		if (focus != null) {
-			for (IneChartModul m : moduls) {
+			for (IneChartModule m : moduls) {
 				if (focus == m && m.requestFocus == false) {
-					for (IneChartModul m1 : moduls) {
+					for (IneChartModule m1 : moduls) {
 						m1.canHandleEvents = true;
 					}
 					focus = null;
@@ -164,137 +218,126 @@ public class IneChart extends Composite implements HasTitle{
 		}
 	}
 	
- 	public void update() {
-		releaseFocusIfPossible();
-		// grant focus if possible and requested
-		if (focus == null) {
-			for (IneChartModul modul : moduls) {
-				if (modul.isVisible && modul.requestFocus) {
-					focusModul(modul);
-					break;
-				}
+	/* public methods */
+	public List<LineChart> getLineCharts(){
+		ArrayList<LineChart> lineCharts = new ArrayList<LineChart>();
+		for(IneChartModule m : moduls){
+			if(m instanceof LineChart){
+				lineCharts.add((LineChart) m);
 			}
 		}
-
-		if (autoScaleModuls){
-			for (IneChartModul modul : moduls) {
-				if(modul instanceof IneChartModul2D){
-					((IneChartModul2D) modul).updateModulsAxes();
-				}
-			}
-		}
-		
-		boolean doRedraw = false;
-		// axes should be updated even if a modul has been focused
-		if (axes.redrawNeeded()) {
-			axes.update();
-			doRedraw = true;
-		}
-		legendFactory.update();
-		//scale moduls 
-		if (autoScaleModuls){
-			double[] padding = legendFactory.getPadding(includeTitleInPadding);
-			for (IneChartModul modul : moduls) {
-				if(modul instanceof IneChartModul2D && ((IneChartModul2D) modul).autoCalcPadding){
-					padding = IneChartModul2D.mergePaddings(padding,((IneChartModul2D) modul).getPaddingForAxes());
-				}
-			}
-			for (IneChartModul modul : moduls) {
-				if(modul instanceof IneChartModul2D && ((IneChartModul2D) modul).autoCalcPadding){
-					((IneChartModul2D) modul).setPadding(padding);
-				}
-			}
-			axes.forcedUpdate();
-		}
-		//FIXME think about removing focus...
-		// update moduls if present, update only focused
-		if (focus != null) {
-			if (focus.redrawNeeded()) {
-				focus.update();
-				doRedraw = true;
-			}
-		} 
-		else {
-			for (IneChartModul modul : moduls) {
-				if (modul.redrawNeeded()) {
-					modul.update();
-					if (modul instanceof HasCoordinateSystem && !modulViewports.contains(((HasCoordinateSystem) modul).getViewport()))
-						modulViewports.add(((HasCoordinateSystem) modul).getViewport());
-					doRedraw = true;
-				}
-			}
-		}
-		// draw graphics
-		if (doRedraw) {
-			drawingArea.removeAllGraphicalObject();
-			for (IneChartModul modul : moduls) {
-				if (modul.isVisible){
-					drawingArea.addAllGraphicalObject(modul.graphicalObjectContainer);
-				}
-			}
-			drawingArea.addAllGraphicalObject(axes.graphicalObjectContainer);
-			drawingArea.addAllGraphicalObject(legendFactory.graphicalObjectContainer);
-			drawingArea.update();
-		}
-		//reset viewports 
-		for (Viewport vp : modulViewports) {
-			boolean canResetVP = true;
-			for (IneChartModul m : vp.userModuls.keySet()) {
-				if (vp.userModuls.get(m)) {
-					canResetVP = false;
-					break;
-				}
-			}
-			if (canResetVP)
-				vp.resetChanged();
-		}
-		
+		return lineCharts;
 	}
-
-	public boolean redrawNeeded() {
-		for (IneChartModul modul : moduls) {
-			if (modul.redrawNeeded())
-				return true;
+	
+	public List<BarChart> getBarCharts(){
+		ArrayList<BarChart> barCharts = new ArrayList<BarChart>();
+		for(IneChartModule m : moduls){
+			if(m instanceof BarChart){
+				barCharts.add((BarChart) m);
+			}
 		}
-		return axes.redrawNeeded();
+		return barCharts;
 	}
-
+	
+	public List<PieChart> getPieCharts(){
+		ArrayList<PieChart> pieCharts = new ArrayList<PieChart>();
+		for(IneChartModule m : moduls){
+			if(m instanceof PieChart){
+				pieCharts.add((PieChart) m);
+			}
+		}
+		return pieCharts;
+	}
+ 	
+	public List<IneChartModule2D> getIneChartModul2Ds(){
+		ArrayList<IneChartModule2D> module2Ds = new ArrayList<IneChartModule2D>();
+		for(IneChartModule m : moduls){
+			if(m instanceof IneChartModule2D){
+				module2Ds.add((IneChartModule2D) m);
+			}
+		}
+		return module2Ds;
+	}
+	
 	public DrawingAreaGWT getDrawingArea() {
 		return this.drawingArea;
 	}
 
-	@Override
-	public void setDescription(StyledLabel description) {
-		this.description = description;
+	public void setChartTitle(String title){
+		setChartTitle(new ChartTitle(title));
 	}
-
-	@Override
-	public StyledLabel getDescription() {
-		return description;
+	
+	public void setChartTitle(String title,String description){
+		setChartTitle(new ChartTitle(title,description));
 	}
-
-	@Override
-	public void setName(StyledLabel name) {
-		this.title = name;	
+	
+	public void setChartTitle(ChartTitle title){
+		labelFactory.setChartTitle(title);
 	}
-
-	@Override
-	public StyledLabel getName() {
-		return title;
-	}
-
-	@Override
-	public void setName(String name) {
-		setName(new StyledLabel(name, Defaults.chartTitle_Name, 1, Defaults.chartTitleBackground));
-		
-	}
-
-	@Override
-	public void setDescription(String description) {
-		setDescription(new StyledLabel(description, Defaults.chartTitle_Description, 1, Defaults.chartTitleBackground));
+	
+	public ChartTitle getChartTitle(){
+		return labelFactory.getChartTitle();
 	}
 	
 	public void setEventBus(EventBus eventBus){
 		eventManager.setEventBus(eventBus);
 	}
+
+	public IneChart createViewportSelectorChart(int width, int height){
+		IneChart viewportSelectorChart = new IneChart(width, height);
+		RectangularSelection rs = viewportSelectorChart.getRectangularSelection();
+		
+		for(IneChartModule module : moduls){
+			if(module instanceof LineChart){
+				LineChart vpLineChart = viewportSelectorChart.createLineChart();
+				for(Curve c : ((LineChart)module).getCurves()){
+					vpLineChart.addCurve(c);
+				}
+				vpLineChart.setShowLegend(false);
+				rs.setModulToSelectFrom(vpLineChart);
+				rs.getAddressedModuls().add((IneChartModule2D) module);
+				break;
+			}
+			else if(module instanceof BarChart){
+				BarChart vpBarChart = viewportSelectorChart.createBarChart();
+				for(DataSet d : ((BarChart) module).getDataSets()){
+					vpBarChart.addDataSet(d,((BarChart) module).getLookout(d));
+				}
+				vpBarChart.setShowLegend(false);
+				rs.setModulToSelectFrom(vpBarChart);
+				rs.getAddressedModuls().add((IneChartModule2D) module);
+				break;
+			}
+		}
+		rs.setSelectionLookOut(Defaults.selectionLookout);
+		rs.setSelectionMode(RectangularSelectionMode.Both);
+		rs.getAddressedCharts().add(this);
+		rs.setDisplayRectangleAfterSelection(true);
+		if(eventManager.getEventBus() == null){
+			eventManager.setEventBus(new SimpleEventBus());
+		}
+		viewportSelectorChart.setEventBus(eventManager.getEventBus());
+		
+		return viewportSelectorChart;
+	}
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+
 }

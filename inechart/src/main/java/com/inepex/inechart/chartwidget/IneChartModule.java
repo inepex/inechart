@@ -1,22 +1,29 @@
 package com.inepex.inechart.chartwidget;
 
+import com.inepex.inechart.chartwidget.label.LabelFactoryBase;
 import com.inepex.inegraphics.shared.DrawingArea;
 import com.inepex.inegraphics.shared.GraphicalObjectContainer;
 
 /**
  * 
- * An {@link IneChartModul} updates its model and (re)draw its graphics on {@link #update()} call.
+ * An {@link IneChartModule} updates its model and (re)draw its graphics on {@link #update()} call.
  * The graphics should be stored in graphicalObjectContainer.
  * 
  * @author Miklós Süveges / Inepex Ltd.
  * 
  */
-public abstract class IneChartModul implements Comparable<IneChartModul> {
+public abstract class IneChartModule implements Comparable<IneChartModule> {
 	private static int highestModulComparatorID = Integer.MIN_VALUE;
 	private final int modulComparatorID;
 	protected GraphicalObjectContainer graphicalObjectContainer;
 	protected DrawingArea canvas;
-		
+
+	/**
+	 * Tells whether the module has been changed since its last update call.
+	 * Typically set true after a module successfully handled a change event.
+	 */
+	protected boolean redrawNeeded;
+	
 
 	/**
 	 * The modul should not recieve (handle) events when false
@@ -43,7 +50,7 @@ public abstract class IneChartModul implements Comparable<IneChartModul> {
 		return graphicalObjectContainer;
 	}
 
-	protected IneChartModul(DrawingArea canvas) {
+	protected IneChartModule(DrawingArea canvas) {
 		modulComparatorID = ++highestModulComparatorID;
 		graphicalObjectContainer = new GraphicalObjectContainer();
 		this.canvas = canvas;
@@ -58,13 +65,9 @@ public abstract class IneChartModul implements Comparable<IneChartModul> {
 	 * so the container {@link IneChart} can display the up-to-date graphics.
 	 * Do not forget to call super.update()!
 	 */
-	public abstract void update();
-	
-	/**
-	 * Tells the chart if the modul needs an {@link #update()} call
-	 * @return
-	 */
-	public abstract boolean redrawNeeded();
+	public void update(){
+		redrawNeeded = false;
+	}
 	
 	
 	/**
@@ -83,7 +86,7 @@ public abstract class IneChartModul implements Comparable<IneChartModul> {
 	}
 
 	@Override
-	public int compareTo(IneChartModul o) {
+	public int compareTo(IneChartModule o) {
 		return modulComparatorID - o.modulComparatorID;
 	}
 
@@ -115,4 +118,10 @@ public abstract class IneChartModul implements Comparable<IneChartModul> {
 		this.isVisible = isVisible;
 	}
 
+	/**
+	 * @return the redrawNeeded
+	 */
+	public boolean isRedrawNeeded() {
+		return redrawNeeded;
+	}
 }

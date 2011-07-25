@@ -35,7 +35,7 @@ public class Circle extends Shape {
 							: shadowColor.getAlpha(),
 					shadowColor == null ? Defaults.colorString : shadowColor
 							.getColor());
-			outer = new com.inepex.inegraphics.impl.client.ishapes.Circle(0, 0,
+			outer = new com.inepex.inegraphics.shared.gobjects.Circle(0, 0,
 					this.zIndex, outerContext, true, false, this.radius);
 		}
 		if (properties.getFillColor() != null) {
@@ -47,7 +47,7 @@ public class Circle extends Shape {
 					0, 0, shadowColor == null ? 0d : shadowColor.getAlpha(),
 					shadowColor == null ? Defaults.colorString : shadowColor
 							.getColor());
-			inner = new com.inepex.inegraphics.impl.client.ishapes.Circle(0, 0,
+			inner = new com.inepex.inegraphics.shared.gobjects.Circle(0, 0,
 					zIndex, innerContext, false, true,
 					outer == null ? radius : radius
 							- properties.getLineProperties().getLineWidth()/2d 
@@ -62,15 +62,6 @@ public class Circle extends Shape {
 		return toRet;
 	}
 
-	@Override
-	public GraphicalObject toInterActiveGraphicalObject() {
-		if (outer == null && inner == null && toGraphicalObjects().size() == 0)
-			return null;
-		else if (outer != null)
-			return outer;
-		else
-			return inner;
-	}
 
 	/**
 	 * @return the radius
