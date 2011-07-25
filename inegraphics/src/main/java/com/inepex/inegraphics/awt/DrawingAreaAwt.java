@@ -233,17 +233,6 @@ public class DrawingAreaAwt extends DrawingArea {
 	
 	private void drawString(String text, int x, int y) {
         for (String line : text.split("\n")){
-//        	Color c = g2.getColor();
-//        	g2.setColor(Color.red);
-//        	g2.fillOval(x, y, 3, 3);
-//        	
-//        	g2.setColor(Color.GREEN);
-//        	Rectangle2D r = g2.getFontMetrics().getStringBounds(text, g2);
-//        	r.setRect(x, y, r.getWidth(), r.getHeight());
-//        	g2.draw(r);
-//        	
-//        	
-//        	g2.setColor(c);
             g2.drawString(line, x, y + g2.getFontMetrics().getAscent());
         	y += g2.getFontMetrics().getHeight();
         }
@@ -267,14 +256,17 @@ public class DrawingAreaAwt extends DrawingArea {
 	}
 	
 	private void applyFontContext(Text text){
-		String fontFamily = text.getFontFamily();
+		g2.setFont(getFont(text.getFontFamily(), text.getFontStyle(), text.getFontSize()));		
+	}
+	
+	public static Font getFont(String fontFamily, String fontStyle, int fontSize){
 		StringTokenizer st = new StringTokenizer(fontFamily," ",false);
 		String t="";
 		while (st.hasMoreElements()) 
 			t += st.nextElement();
 		String[] fontFamilies = t.split(",");
 		int style;
-		String tStyle = text.getFontStyle().toLowerCase();
+		String tStyle = fontStyle.toLowerCase();
 		if(tStyle == "bold" || tStyle == "bolder"){
 			style = Font.BOLD;
 		}
@@ -284,9 +276,7 @@ public class DrawingAreaAwt extends DrawingArea {
 		else{
 			style = Font.PLAIN;
 		}
-		Font font = new Font(fontFamilies[0], style, text.getFontSize());
-		
-		g2.setFont(font);		
+		return new Font(fontFamilies[0], style,fontSize);
 	}
 
 }

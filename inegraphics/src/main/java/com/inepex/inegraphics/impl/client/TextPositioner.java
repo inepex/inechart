@@ -6,6 +6,7 @@ import java.util.TreeMap;
 import com.google.gwt.dom.client.Style.BorderStyle;
 import com.google.gwt.dom.client.Style.Unit;
 import com.google.gwt.user.client.ui.AbsolutePanel;
+import com.google.gwt.user.client.ui.InlineHTML;
 import com.google.gwt.user.client.ui.InlineLabel;
 import com.google.gwt.user.client.ui.RootPanel;
 import com.inepex.inegraphics.shared.gobjects.Text;
@@ -14,15 +15,15 @@ import com.inepex.inegraphics.shared.gobjects.Text.BasePointYPosition;
 
 public class TextPositioner {
 	protected AbsolutePanel panel;
-	protected TreeMap<Text, InlineLabel> texts;
+	protected TreeMap<Text, InlineHTML> texts;
 //	protected static TreeMap<String, Integer[]> fontDimensionsPerFamily = new TreeMap<String, Integer[]>();
-	protected static final int DEFAULT_PADDING_X = 0;
-	protected static final int DEFAULT_PADDING_Y = 3;
+//	protected static final int DEFAULT_PADDING_X = 0;
+//	protected static final int DEFAULT_PADDING_Y = 3;
 	protected static final Text defaultTextToMeasure = new Text(0, 0, "1234567890", "", 16, "normal", "normal", BasePointXPosition.LEFT, BasePointYPosition.TOP);
 	
 	public TextPositioner(AbsolutePanel panel) {
 		this.panel = panel;
-		this.texts = new TreeMap<Text, InlineLabel>();
+		this.texts = new TreeMap<Text, InlineHTML>();
 	}
 	
 	/**
@@ -46,12 +47,12 @@ public class TextPositioner {
 	}
 	
 	public void measureText(Text text){
-		InlineLabel lbl = createLabel(text);
+		InlineHTML lbl = createLabel(text);
 		lbl.getElement().getStyle().setPadding(0, Unit.PX);
 		lbl.getElement().getStyle().setMargin(0, Unit.PX);
 		RootPanel.get().add(lbl);
 		text.setWidth(lbl.getOffsetWidth());
-		text.setHeight(lbl.getOffsetHeight() + DEFAULT_PADDING_Y);
+		text.setHeight(lbl.getOffsetHeight());
 		RootPanel.get().remove(lbl);
 		text.setChanged(false);
 	}
@@ -65,10 +66,7 @@ public class TextPositioner {
 		}
 		
 		TextPositionerBase.calcTextPosition(text);
-		InlineLabel lbl = createLabel(text);
-//		lbl.getElement().getStyle().setBorderWidth(1, Unit.PX);
-//		lbl.getElement().getStyle().setBorderColor("green");
-//		lbl.getElement().getStyle().setBorderStyle(BorderStyle.SOLID);
+		InlineHTML lbl = createLabel(text);
 		panel.add(lbl,(int) text.getBasePointX(), (int) text.getBasePointY());
 		texts.put(text, lbl);
 	}
@@ -96,8 +94,9 @@ public class TextPositioner {
 		}
 	}
 	
-	private static InlineLabel createLabel(Text label){
-		InlineLabel lbl = new InlineLabel(label.getText());
+	private static InlineHTML createLabel(Text label){
+		InlineHTML lbl = new InlineHTML(label.getText());
+		lbl.setWordWrap(false);
 		lbl.getElement().getStyle().setFontSize(label.getFontSize(), Unit.PX);
 		lbl.getElement().getStyle().setProperty("fontFamily", label.getFontFamily());
 		lbl.getElement().getStyle().setProperty("color", label.getColor());

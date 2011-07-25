@@ -13,6 +13,12 @@ import com.inepex.inegraphics.shared.gobjects.QuadraticCurveTo;
 import com.inepex.inegraphics.shared.gobjects.Rectangle;
 import com.inepex.inegraphics.shared.gobjects.Text;
 
+/**
+ * Contains static helper methods for {@link GraphicalObject} calculations.
+ * 
+ * @author Miklós Süveges / Inepex Ltd.
+ *
+ */
 public class DrawingAreaAssist {
 	
 	public static void dropGraphicalObjectsOutsideRectangle(GraphicalObjectContainer goc, double x, double y, double width, double height){
@@ -92,21 +98,39 @@ public class DrawingAreaAssist {
 		return clippedPath;
 	} 
 	
-	public static Path clipPathWithRectangle(Path pathToBeClipped, double x, double y, double width, double height){
+	public static Path replaceAllPathElementsWithLineTo(Path path){
+		Path lineToPath = new Path(path);
+		lineToPath.getPathElements().clear();
+		for(PathElement e : path.getPathElements()){
+			lineToPath.getPathElements().add(new LineTo(e.getEndPointX(),e.getEndPointY()));
+		}
+		return lineToPath;
+	}
+	
+	/**
+	 * NOTE: this method is only good for stroking a path.
+	 * If you want to fill the path later use {@link #clipFillPathWithRectangle(Path, double, double, double, double)}!
+	 * Clips a path with rectangle.
+	 * @param pathToBeClipped
+	 * @param x
+	 * @param y
+	 * @param width
+	 * @param height
+	 * @return null if the path has no common line points with a rectangle.
+	 */
+	public static Path clipStrokePathWithRectangle(Path pathToBeClipped, double x, double y, double width, double height){
 		Path clippedPath = null;
 		if(pathToBeClipped == null)
 			return null;
 		double lastX, lastY, actX, actY;
-		int elementNo = -1;
+
 		//first find a basepoint
 		boolean basepointSet = false;
 		if(isPointInRectangle(pathToBeClipped.getBasePointX(), pathToBeClipped.getBasePointY(), x, y, width, height)){
 			clippedPath = new Path(pathToBeClipped.getBasePointX(), pathToBeClipped.getBasePointY(), pathToBeClipped.getzIndex(), pathToBeClipped.getContext(), pathToBeClipped.hasStroke(), pathToBeClipped.hasFill());
 			basepointSet = true;
 		}
-		else{
-			elementNo++;
-		}
+
 		lastX = pathToBeClipped.getBasePointX();
 		lastY = pathToBeClipped.getBasePointY();
 		for(PathElement e : pathToBeClipped.getPathElements()){
@@ -134,7 +158,7 @@ public class DrawingAreaAssist {
 				}
 			}
 			//actual element has no point in rect, but the path is set,
-			//we 'follow' the step's change with moveTo -> the path's fill will be correct only in this case
+			//we 'follow' the step's x, y change with moveTo 
 			if(clippedPath != null && (clipped == null || clipped[2] != actX || clipped[3] != actY)){
 				double yTo =  (actY > y + height ? y + height : (actY < y ? y : actY));
 				double xTo =  (actX > x + width ? x + width : (actX < x ? x : actX));
@@ -159,6 +183,44 @@ public class DrawingAreaAssist {
 		}
 		return clippedPath;
 	}
+	
+	/**
+	 * NOTE: this method is only good for filling a path.
+	 * If you want to stroke the path later use {@link #clipStrokePathWithRectangle(Path, double, double, double, double)}
+	 * Clips a path with rectangle.
+	 * @param pathToBeClipped all elements interpreted as LineTo
+	 * @param x
+	 * @param y
+	 * @param width
+	 * @param height
+	 * @return null if the path has no common points with a rectangle.
+	 */
+	public static Path clipFillPathWithRectangle(Path pathToBeClipped, double x, double y, double width, double height){
+		Path clippedPath = new Path(pathToBeClipped);
+		if(pathToBeClipped == null)
+			return null;
+		
+		//determine basepoint
+		double bpX = pathToBeClipped.getBasePointX(), bpY = pathToBeClipped.getBasePointY();
+		if(pathToBeClipped.getBasePointX() < x){
+			bpX = x;
+		}
+		else if(pathToBeClipped.getBasePointX() > x + width){
+			bpX = x + width;
+		}
+		if(pathToBeClipped.getBasePointY() < y){
+			bpY = y;
+		}
+		else if(pathToBeClipped.getBasePointY() > y + height){
+			bpY = y + height;
+		}
+		clippedPath.setBasePointX(bpX);
+		clippedPath.setBasePointY(bpY);
+		clippedPath = replaceAllPathElementsWithLineTo(clippedPath);
+		
+		return clipStrokePathWithRectangle(clippedPath, x, y, width, height);
+	}
+	
 	
 	public static GraphicalObjectContainer clipRectanglesWithRectangle(GraphicalObjectContainer container, double x, double y, double width, double height){
 		GraphicalObjectContainer filtered = new GraphicalObjectContainer();
@@ -501,6 +563,7 @@ public class DrawingAreaAssist {
 	
 	/**
 	 * Returns a bounding box for a GO, works with instances of:
+	 * 	{@link Line}
 	 *  {@link Rectangle},
 	 *  {@link Circle}, 
 	 *  {@link Path} (quadraticCurveTo, and moveTo interpreted as LineTo)
@@ -509,6 +572,12 @@ public class DrawingAreaAssist {
 	 */
 	public static double[] getBoundingBox(GraphicalObject go){
 		double[] bb = new double[4];
+		if(go instanceof Line){
+			bb[0] = Math.min(go.getBasePointX(), ((Line) go).getEndPointX());
+			bb[1] = Math.min(go.getBasePointY(), ((Line) go).getEndPointY());
+			bb[2] = Math.abs(go.getBasePointX() - ((Line) go).getEndPointX());
+			bb[3] = Math.abs(go.getBasePointY() - ((Line) go).getEndPointY());
+		}
 		if(go instanceof Path){
 			double minX = go.getBasePointX();
 			double minY = go.getBasePointY();

@@ -48,7 +48,7 @@ import com.inepex.inegraphics.shared.gobjects.Text;
  * @author Miklós Süveges / Inepex Ltd.
  *
  */
-public class DrawingAreaGWT extends DrawingArea implements ClickHandler, MouseDownHandler, MouseMoveHandler, MouseOutHandler, MouseOverHandler, MouseUpHandler, MouseWheelHandler{
+public class DrawingAreaGWT extends DrawingArea {
 	
 	public static boolean isHTML5Compatible(){
 		return Canvas.isSupported();		
@@ -58,13 +58,6 @@ public class DrawingAreaGWT extends DrawingArea implements ClickHandler, MouseDo
 	protected Canvas canvasGWT;
 	protected AbsolutePanel panel;
 	protected TextPositioner textPositioner;
-	protected boolean mouseOverCanvas = false;
-	protected int mouseX, mouseY;
-	protected ArrayList<GraphicalObject> interactiveGOs;
-	protected ArrayList<GraphicalObject> mouseOverGOs;
-	protected HandlerManager hm;
-	protected boolean singleMouseSelection = false;
-
 	
 	/**
 	 * Creates a {@link DrawingArea} with the given dimensions
@@ -87,7 +80,6 @@ public class DrawingAreaGWT extends DrawingArea implements ClickHandler, MouseDo
 		}
 		
 		panel.add(canvas, 0, 0);
-		initEvents();
 		clear();
 	}
 	
@@ -102,7 +94,6 @@ public class DrawingAreaGWT extends DrawingArea implements ClickHandler, MouseDo
 		panel.setPixelSize(width, height);
 		panel.add(canvas, 0, 0);
 		textPositioner = new TextPositioner(panel);
-		initEvents();
 		clear();
 	}
 
@@ -112,7 +103,6 @@ public class DrawingAreaGWT extends DrawingArea implements ClickHandler, MouseDo
 		this.panel = new AbsolutePanel();
 		panel.setPixelSize(width, height);
 		panel.add(canvas, 0, 0);
-		initEvents();
 		clear();
 	}
 	
@@ -278,145 +268,7 @@ public class DrawingAreaGWT extends DrawingArea implements ClickHandler, MouseDo
 		
 	}
 
-	/*Mouse event handling*/
-	protected void initEvents(){
-		hm = new HandlerManager(this);
-		interactiveGOs = new ArrayList<GraphicalObject>();
-		this.mouseOverGOs = new ArrayList<GraphicalObject>();
-		canvas.addDomHandler(this, MouseDownEvent.getType());
-		canvas.addDomHandler(this, MouseUpEvent.getType());
-		canvas.addDomHandler(this, MouseMoveEvent.getType());
-		canvas.addDomHandler(this, MouseOutEvent.getType());
-		canvas.addDomHandler(this, MouseOverEvent.getType());
-		canvas.addDomHandler(this, MouseWheelEvent.getType());
-		canvas.addDomHandler(this, ClickEvent.getType());
-	}
 	
-	/**
-	 * Adds a {@link GraphicalObject} which must implement {@link InteractiveGraphicalObject},
-	 *  so when an event occurs on this element the registered and related handlers will be notified.
-	 *  This method itself will NOT display the {@link InteractiveGraphicalObject}. 
-	 * @param igo
-	 */
-	public void addInteractiveGO(GraphicalObject igo){
-		if(igo instanceof InteractiveGraphicalObject){
-			interactiveGOs.add(igo);
-		}
-	}
-	
-	/**
-	 * Removes the given {@link GraphicalObject} from the related list
-	 * @param igo
-	 */
-	public void removeInteractiveGO(GraphicalObject igo){
-		this.interactiveGOs.remove(igo);
-		
-	}
-	
-	/**
-	 * @return the singleMouseOverGO
-	 */
-	public boolean isSingleMouseSelection() {
-		return singleMouseSelection;
-	}
-	
-	/**
-	 * @param if set true only one {@link GraphicalObject} will be 'selected' (the topmost)
-	 */
-	public void setSingleMouseSelection(boolean singleMouseSelection) {
-		this.singleMouseSelection = singleMouseSelection;
-	}
-	
-	@Override
-	public void onMouseWheel(MouseWheelEvent event) {
-		event.preventDefault();
-	}	
-
-	@Override
-	public void onMouseUp(MouseUpEvent event) {
-	
-	}
-
-	@Override
-	public void onMouseOver(MouseOverEvent event) {
-		event.preventDefault();
-		mouseOverCanvas = true;
-	}
-
-	@Override
-	public void onMouseOut(MouseOutEvent event) {
-		mouseOverCanvas = false;
-		hm.fireEvent(event);
-	}
-
-	@Override
-	public void onMouseMove(MouseMoveEvent event) {
-		mouseX = event.getRelativeX(canvas.getElement());
-		mouseY = event.getRelativeY(canvas.getElement());
-		
-		if(mouseOverCanvas){
-			updateMouseOverIGOsAndFireMouseOverEvents();
-		}
-		hm.fireEvent(event);
-	}
-
-	@Override
-	public void onMouseDown(MouseDownEvent event) {
-		event.preventDefault();
-	}
-
-	@Override
-	public void onClick(ClickEvent event) {
-		event.preventDefault();
-		if(mouseOverGOs.size() > 0)
-			hm.fireEvent(new GraphicalObjectEvent(mouseOverGOs));
-	}
-	
-	/**
-	 * Checks the the positions of the {@link GraphicalObject}s and updates the related container
-	 * @return the newly mouseovered {@link GraphicalObject}s
-	 */
-	protected void updateMouseOverIGOsAndFireMouseOverEvents(){
-		ArrayList<GraphicalObject> mouseOver = new ArrayList<GraphicalObject>();
-		ArrayList<GraphicalObject> justMouseOvered = new ArrayList<GraphicalObject>();
-		ArrayList<GraphicalObject> justMouseOut = new ArrayList<GraphicalObject>();
-		if(singleMouseSelection){
-			Collections.sort((ArrayList<GraphicalObject>)interactiveGOs, GraphicalObject.getZXComparator());
-			Collections.reverse(interactiveGOs);
-		}
-		for(GraphicalObject igo : interactiveGOs){
-			if(((InteractiveGraphicalObject) igo).isMouseOver(mouseX, mouseY)){
-				mouseOver.add(igo);
-				if(!mouseOverGOs.contains(igo))
-					justMouseOvered.add(igo);
-				if(singleMouseSelection)
-					break;
-			}
-		}
-		for(GraphicalObject go : mouseOverGOs){
-			if(!mouseOver.contains(go)){
-				justMouseOut.add(go);
-			}
-		}
-		if(justMouseOut.size() > 0 || justMouseOvered.size() > 0)
-			hm.fireEvent(new GraphicalObjectEvent(justMouseOvered, justMouseOut));
-		this.mouseOverGOs = mouseOver;
-		
-	}
-	
-	public HandlerRegistration addGraphicalObjectEventHandler(GraphicalObjectEventHandler handler){
-		
-		return hm.addHandler(GraphicalObjectEvent.TYPE, handler);
-	}
-
-	public HandlerRegistration addMouseMoveHandler(MouseMoveHandler handler){
-		return hm.addHandler(MouseMoveEvent.getType(), handler);
-	}
-	
-	public HandlerRegistration addMouseOutHandler(MouseOutHandler handler){
-		return hm.addHandler(MouseOutEvent.getType(), handler);
-	}
-
 	@Override
 	protected void drawArc(Arc arc) {
 		// TODO Auto-generated method stub

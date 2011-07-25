@@ -30,7 +30,7 @@ public class ColorUtil {
 		else if (colorString.equals("black")) return Color.black;
 		else if (colorString.equals("red")) return Color.red;
 		else if (colorString.equals("blue")) return Color.blue;
-		else if (colorString.equals("grey")) return Color.gray;
+		else if (colorString.equals("gray")) return Color.gray;
 		else throw new RuntimeException("Unhandled color: " + colorString);
 	}
 	
