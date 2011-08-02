@@ -27,6 +27,7 @@ import com.inepex.inechart.chartwidget.properties.Color;
 import com.inepex.inechart.chartwidget.properties.LineProperties;
 import com.inepex.inechart.chartwidget.properties.ShapeProperties;
 import com.inepex.inechart.chartwidget.shape.Rectangle;
+import com.inepex.inechart.chartwidget.shape.Shape;
 import com.inepex.inegraphics.shared.DrawingArea;
 import com.inepex.inegraphics.shared.DrawingAreaAssist;
 import com.inepex.inegraphics.shared.GraphicalObjectContainer;
@@ -345,15 +346,15 @@ public class BarChart extends IneChartModule2D implements HasShadow, HasZIndex {
 			width = (double) barWidth;
 			break;
 		case Horizontal_Ascending_To_Right:
-			leftTopX = getCanvasX(fromX) - distanceFromSequenceStart - barSpacing;
+			leftTopX = getCanvasX(fromX) + distanceFromSequenceStart + barSpacing;
 			width = (double) barWidth;
 			break;
 		case Vertical_Ascending_To_Bottom:
-			leftTopY = getCanvasY(fromX)+ distanceFromSequenceStart + barSpacing;
+			leftTopY = getCanvasY(fromX) + distanceFromSequenceStart + barSpacing;
 			height = (double) barWidth;
 			break;
 		case Vertical_Ascending_To_Top:
-			leftTopY = getCanvasY(toX) - distanceFromSequenceStart - barSpacing;
+			leftTopY = getCanvasY(toX) + distanceFromSequenceStart + barSpacing;
 			height = (double) barWidth;
 			break;
 		}
@@ -402,6 +403,7 @@ public class BarChart extends IneChartModule2D implements HasShadow, HasZIndex {
 					}
 					ShapeProperties sp = lookOut.get(index);
 					Rectangle r = new Rectangle(width/sameValueCount, height, leftTopX + j*(width/sameValueCount), leftTopY, sp);
+					setShadowForShape(r);
 					goc.addAllGraphicalObject(r.toGraphicalObjects());
 				}
 				last = leftTopY;
@@ -422,6 +424,7 @@ public class BarChart extends IneChartModule2D implements HasShadow, HasZIndex {
 					}
 					ShapeProperties sp = lookOut.get(index);
 					Rectangle r = new Rectangle(width, height/sameValueCount, leftTopX , leftTopY+ j*(height/sameValueCount), sp);
+					setShadowForShape(r);
 					goc.addAllGraphicalObject(r.toGraphicalObjects());
 				}
 				last = leftTopX;
@@ -460,6 +463,7 @@ public class BarChart extends IneChartModule2D implements HasShadow, HasZIndex {
 					}
 					ShapeProperties sp = lookOut.get(index);
 					Rectangle r = new Rectangle(width/sameValueCount, height, leftTopX + j*(width/sameValueCount), leftTopY, sp);
+					setShadowForShape(r);
 					goc.addAllGraphicalObject(r.toGraphicalObjects());
 				}
 				last = leftTopY + height;
@@ -480,6 +484,7 @@ public class BarChart extends IneChartModule2D implements HasShadow, HasZIndex {
 					}
 					ShapeProperties sp = lookOut.get(index);
 					Rectangle r = new Rectangle(width, height/sameValueCount, leftTopX , leftTopY+ j*(height/sameValueCount), sp);
+					setShadowForShape(r);
 					goc.addAllGraphicalObject(r.toGraphicalObjects());
 				}
 				last = leftTopX + width;
@@ -577,7 +582,9 @@ public class BarChart extends IneChartModule2D implements HasShadow, HasZIndex {
 				else
 					last -= barSpacing;
 			}
-			goc.addAllGraphicalObject(new Rectangle(width, height, leftTopX, leftTopY, sp).toGraphicalObjects());
+			Rectangle r = new Rectangle(width, height, leftTopX, leftTopY, sp);
+			setShadowForShape(r);
+			goc.addAllGraphicalObject(r.toGraphicalObjects());
 			lastY += y;
 		}
 		return goc;
@@ -672,6 +679,7 @@ public class BarChart extends IneChartModule2D implements HasShadow, HasZIndex {
 			}
 			Rectangle r = new Rectangle(width, height, leftTopX, leftTopY,
 					lookOut.get(reversedSeq ? ySequence.size() - i : i));
+			setShadowForShape(r);
 			goc.addAllGraphicalObject(r.toGraphicalObjects());
 			i++;
 			if (xAxis.isHorizontal()) {
@@ -682,6 +690,12 @@ public class BarChart extends IneChartModule2D implements HasShadow, HasZIndex {
 			}
 		}
 		return goc;
+	}
+	
+	protected void setShadowForShape(Shape shape){
+		shape.setShadowColor(shadowColor);
+		shape.setShadowOffsetX(shadowOffsetX);
+		shape.setShadowOffsetY(shadowOffsetY);
 	}
 
 	protected double getYOnCanvas(double a, double b, boolean lowerOnCanvas) {

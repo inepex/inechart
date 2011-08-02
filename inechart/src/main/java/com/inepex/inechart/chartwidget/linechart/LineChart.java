@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.TreeMap;
 
+import com.google.gwt.core.client.GWT;
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.MouseDownEvent;
 import com.google.gwt.event.dom.client.MouseMoveEvent;
@@ -58,8 +59,7 @@ public class LineChart extends IneChartModule2D {
 	// model fields
 	ArrayList<Curve> curves = new ArrayList<Curve>();
 	int highestZIndex = 1;
-	//	int overlapFilterDistance;
-	//	boolean autoCreateAxes;
+
 	PointSelectionMode pointSelectionMode;
 
 	/**
@@ -79,17 +79,22 @@ public class LineChart extends IneChartModule2D {
 	 * all {@link GraphicalObject}s related to point chart per curve
 	 */
 	TreeMap<Curve, GraphicalObjectContainer> pointChartGOsPerCurve;
-
-
+	
 	public LineChart(DrawingArea canvas, LabelFactoryBase labelFactory, Axes axes) {
+		this(canvas, labelFactory, axes, null);
+		useOverlay = false;
+	}
+	
+	public LineChart(DrawingArea canvas, LabelFactoryBase labelFactory, Axes axes, DrawingArea overLay) {
 		super(canvas,labelFactory, axes);
+		this.overlay = overLay;
 		calculatedPointsPerCurve = new TreeMap<Curve, ArrayList<double[]>>();
 		selectedPointsPerCurve = new TreeMap<Curve, ArrayList<double[]>>();
 		visiblePathPerCurve = new TreeMap<Curve, Path>();
 		fillPathPerCurve = new TreeMap<Curve, Path>();
 		lineChartGOsPerCurve = new TreeMap<Curve, GraphicalObjectContainer>();
 		pointChartGOsPerCurve = new TreeMap<Curve, GraphicalObjectContainer>();
-		useOverlay = false;
+		useOverlay = true;
 		// defaults
 		pointSelectionMode = PointSelectionMode.Closest_To_Cursor;
 		autoScaleViewport = true;

@@ -30,20 +30,22 @@ public class ScrollBarView extends Composite implements View {
 	protected AbsolutePanel panel;
 	protected Widget slider;
 	protected int width, height, padding;
+	boolean hasBorder;
 	protected boolean sliderBeingDragged = false;
 	protected boolean enabled = true;
 	
 	protected ArrayList<HandlerRegistration> handlerRegistrations;
 	
 	public ScrollBarView(boolean isHorizontal){
-		this(isHorizontal, isHorizontal ? 0 : DEFAULT_SIZE, isHorizontal ? DEFAULT_SIZE : 0, DEFAULT_PADDING);
+		this(isHorizontal, isHorizontal ? 0 : DEFAULT_SIZE, isHorizontal ? DEFAULT_SIZE : 0, DEFAULT_PADDING, true);
 	}
 	
-	public ScrollBarView(boolean isHorizontal, int width, int height, int padding) {
+	public ScrollBarView(boolean isHorizontal, int width, int height, int padding, boolean hasBorder) {
 		this.isHorizontal = isHorizontal;
 		this.height = height;
 		this.width = width;
 		this.padding = padding;
+		this.hasBorder = hasBorder;
 		initLayout();
 		registerHandlers();
 	}
@@ -52,6 +54,9 @@ public class ScrollBarView extends Composite implements View {
 		panel = new AbsolutePanel();
 		initWidget(panel);
 		panel.setStyleName(ResourceHelper.getRes().style().scrollBar());
+		if(hasBorder){
+			panel.addStyleName(ResourceHelper.getRes().style().border());
+		}
 		slider = new Label();
 		slider.setStyleName(ResourceHelper.getRes().style().slider());
 		panel.add(slider);

@@ -46,7 +46,6 @@ import com.inepex.inegraphics.awt.DrawingAreaAwt;
 import com.inepex.inegraphics.shared.DrawingArea;
 
 public class AwtLabelFactory extends LabelFactoryBase {
-
 	
 	double[] paddingNeeded;
 	JPanel mainPanel;
@@ -54,7 +53,6 @@ public class AwtLabelFactory extends LabelFactoryBase {
 	JPanel botPanel;
 	ArrayList<JComponent> topPaddingComponents;
 	ArrayList<JComponent> botPaddingComponents;
-	
 
 	public AwtLabelFactory(DrawingArea canvas, JPanel labelPanel) {
 		super(canvas);
@@ -98,6 +96,9 @@ public class AwtLabelFactory extends LabelFactoryBase {
 				createLegend(legendOwner);
 			}
 		}
+		JLabel l = new JLabel("JLABEL");
+		l.setBorder(BorderFactory.createLineBorder(Color.GREEN, 1));
+		topPanel.add(l);
 	}
 	
 	protected void positionTextContainerWidget(TextContainer textContainer, JComponent component){

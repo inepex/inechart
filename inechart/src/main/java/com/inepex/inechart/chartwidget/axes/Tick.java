@@ -26,7 +26,7 @@ public class Tick implements Comparable<Tick> {
 	 */
 	LineProperties gridLine;
 	/**
-	 * the lookout of the tick, or null if invisible
+	 * the lookout of the tick, or null if none
 	 */
 	LineProperties tickLine;
 	/**
@@ -37,12 +37,22 @@ public class Tick implements Comparable<Tick> {
 	 * the tick's label
 	 */
 	String tickText;
+	/**
+	 * the 'style' of the tick's text
+	 */
 	TextProperties textProperties;
-	
+	/**
+	 * the number -> string
+	 */
+	String formatString;
 	/**
 	 * if set to true filterFrequentTicks won't filter out this tick
 	 */
 	boolean unfiltereble = false;
+	
+	public Tick(){
+		this(0);
+	}
 
 	/**
 	 * Constructs a tick with default look, without label
@@ -207,4 +217,19 @@ public class Tick implements Comparable<Tick> {
 		this.textProperties = textProperties;
 	}
 
+	/**
+	 * @return the formatString
+	 */
+	public String getFormatString() {
+		return formatString;
+	}
+
+	/**
+	 * @param formatString the formatString to set
+	 */
+	public void setFormatString(String formatString) {
+		this.formatString = formatString;
+	}
+
+	
 }

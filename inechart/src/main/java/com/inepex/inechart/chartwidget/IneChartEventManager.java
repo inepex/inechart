@@ -60,13 +60,14 @@ public class IneChartEventManager implements HasAllMouseHandlers, ViewportChange
 	protected void fireInnerEvent(GwtEvent<?> event){
 		handlerManager.fireEvent(event);
 		if(parent.isRedrawNeeded()){
-			Scheduler.get().scheduleDeferred(new ScheduledCommand() {
-				
-				@Override
-				public void execute() {
+//			Scheduler.get().scheduleDeferred(new ScheduledCommand() {
+//				
+//				@Override
+//				public void execute() {
+			if(!parent.isUpdatingInProgress())
 					parent.update();
-				}
-			});
+//				}
+//			});
 			
 		}
 	}

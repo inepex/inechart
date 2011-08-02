@@ -69,9 +69,10 @@ public class Rectangle extends Shape {
 			Context innerContext = new Context(properties.getFillColor()
 					.getAlpha(), Defaults.colorString, 0,
 					properties.getFillColor().getColor(),
-					// shadowOffsetX,
-					// shadowOffsetY,
-					0, 0, shadowColor == null ? 0d : shadowColor.getAlpha(),
+					 shadowOffsetX,
+					 shadowOffsetY,
+//					0, 0,
+					shadowColor == null ? 0d : shadowColor.getAlpha(),
 					shadowColor == null ? Defaults.colorString : shadowColor
 							.getColor());
 			inner = new com.inepex.inegraphics.shared.gobjects.Rectangle(

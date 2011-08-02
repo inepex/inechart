@@ -94,12 +94,12 @@ public class Axis implements Comparable<Axis>, HasZIndex{
 	protected int zIndex;
 	protected ArrayList<Tick> ticks;
 	protected ArrayList<Object[]> gridFills;
-	protected boolean changed = true;
-	protected LineProperties lineProperties;
+
 	/**
 	 * min and max values defines the visible part of this axis
 	 */
 	protected double min, max;
+	
 	protected AxisDirection axisDirection;
 	protected AxisPosition axisPosition;
 	/**
@@ -119,7 +119,15 @@ public class Axis implements Comparable<Axis>, HasZIndex{
 	protected boolean filterFrequentTicks = false;
 	protected boolean autoCreateTicks = true;
 	protected boolean autoCreateGrids = false;
-
+	/**
+	 * lookout of the axis' line
+	 */
+	protected LineProperties lineProperties;
+	/**
+	 * default tick
+	 */
+	protected Tick defaultTick;
+	
 	public Axis() {
 		this(null);
 	}
@@ -141,12 +149,12 @@ public class Axis implements Comparable<Axis>, HasZIndex{
 
 	public void addTick(Tick tick) {
 		ticks.add(tick);
-		changed = true;
+		
 	}
 
 	public void clearTicks() {
 		ticks.clear();
-		changed = true;
+		
 	}
 
 	public void fillBetween(Tick tick1, Tick tick2, Color color) {
@@ -162,7 +170,7 @@ public class Axis implements Comparable<Axis>, HasZIndex{
 			gridFills.add(new Object[] { tick1, tick2, color });
 			break;
 		}
-		changed = true;
+		
 	}
 
 	public void fillBetween(double value1, double value2, Color color){
@@ -193,7 +201,7 @@ public class Axis implements Comparable<Axis>, HasZIndex{
 		}
 		if (toRemove != null)
 			gridFills.remove(toRemove);
-		changed = true;
+		
 	}
 
 	public void removeFill(double value1, double value2){
@@ -213,7 +221,7 @@ public class Axis implements Comparable<Axis>, HasZIndex{
 	 */
 	public void setLineProperties(LineProperties lineProperties) {
 		this.lineProperties = lineProperties;
-		changed = true;
+		
 	}
 
 	public ArrayList<Tick> getVisibleTicks() {
@@ -241,7 +249,7 @@ public class Axis implements Comparable<Axis>, HasZIndex{
 	 */
 	public void setMax(double max) {
 		this.max = max;
-		changed = true;
+		
 	}
 
 	/**
@@ -257,7 +265,7 @@ public class Axis implements Comparable<Axis>, HasZIndex{
 	 */
 	public void setMin(double min) {
 		this.min = min;
-		changed = true;
+		
 	}
 
 	@Override
@@ -268,7 +276,7 @@ public class Axis implements Comparable<Axis>, HasZIndex{
 	@Override
 	public void setZIndex(int zIndex) {
 		this.zIndex = zIndex;
-		changed = true;
+		
 	}
 
 	@Override
@@ -289,7 +297,7 @@ public class Axis implements Comparable<Axis>, HasZIndex{
 	 */
 	public void setTicks(ArrayList<Tick> ticks) {
 		this.ticks = ticks;
-		changed = true;
+		
 	}
 
 	/**
@@ -306,7 +314,7 @@ public class Axis implements Comparable<Axis>, HasZIndex{
 	 */
 	public void setAxisDirection(AxisDirection axisDirection) {
 		this.axisDirection = axisDirection;
-		changed = true;
+		
 	}
 
 	/**
@@ -322,7 +330,7 @@ public class Axis implements Comparable<Axis>, HasZIndex{
 	 */
 	public void setAxisPosition(AxisPosition axisPosition) {
 		this.axisPosition = axisPosition;
-		changed = true;
+		
 	}
 
 	/**
@@ -338,7 +346,7 @@ public class Axis implements Comparable<Axis>, HasZIndex{
 	 */
 	public void setLowerEnd(double lowerEnd) {
 		this.lowerEnd = lowerEnd;
-		changed = true;
+		
 	}
 
 	/**
@@ -354,14 +362,7 @@ public class Axis implements Comparable<Axis>, HasZIndex{
 	 */
 	public void setUpperEnd(double upperEnd) {
 		this.upperEnd = upperEnd;
-		changed = true;
-	}
-
-	/**
-	 * @return the changed
-	 */
-	public boolean isChanged() {
-		return changed;
+		
 	}
 
 	/**
@@ -377,7 +378,7 @@ public class Axis implements Comparable<Axis>, HasZIndex{
 	 */
 	public void setVisible(boolean isVisible) {
 		this.isVisible = isVisible;
-		changed = true;
+		
 	}
 
 	public boolean isHorizontal() {
@@ -403,7 +404,7 @@ public class Axis implements Comparable<Axis>, HasZIndex{
 	 */
 	public void setModulToAlign(IneChartModule2D modulToAlign) {
 		this.modulToAlign = modulToAlign;
-		changed = true;
+		
 	}
 	
 	public boolean isFilterFrequentTicks() {

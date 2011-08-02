@@ -21,7 +21,7 @@ public class TickFactory {
 		autoCreateTicks(axis,
 				(int) Math.round(axis.isHorizontal() ? 
 						0.4 * Math.sqrt(axis.modulToAlign.getWidth()) :
-						0.6 * Math.sqrt(axis.modulToAlign.getHeight())));
+						0.5 * Math.sqrt(axis.modulToAlign.getHeight())));
 	}
 
 	public void autoCreateTicks(Axis axis, int tickNo) {

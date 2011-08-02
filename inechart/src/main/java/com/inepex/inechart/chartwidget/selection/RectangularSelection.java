@@ -1,7 +1,11 @@
 package com.inepex.inechart.chartwidget.selection;
 
+
+import com.google.gwt.event.dom.client.ClickEvent;
+import com.google.gwt.event.dom.client.ClickHandler;
 import com.google.gwt.event.dom.client.MouseDownEvent;
 import com.google.gwt.event.dom.client.MouseDownHandler;
+import com.google.gwt.event.dom.client.MouseEvent;
 import com.google.gwt.event.dom.client.MouseMoveEvent;
 import com.google.gwt.event.dom.client.MouseMoveHandler;
 import com.google.gwt.event.dom.client.MouseUpEvent;
@@ -31,18 +35,18 @@ public class RectangularSelection extends SelectionBase{
 		Horizontal
 	}
 	
-	protected class MouseHandler implements MouseDownHandler, MouseMoveHandler, MouseUpHandler{
+	protected class MouseHandler implements MouseDownHandler, MouseMoveHandler, MouseUpHandler, ClickHandler{
 		@Override
 		public void onMouseUp(MouseUpEvent event) {
-			if(mouseDownCoords != null){
-				DOM.releaseCapture(eventManager.getCaptureElement());
-				int[] actualCoords = normalizeCoords(getCoords(event));
-				areaSelected(mouseDownCoords, actualCoords);
-				mouseDownCoords = null;	
-				if(!displayRectangleAfterSelection){
-					canvas.removeAllGraphicalObject();
-					canvas.update();
-				}
+			if(mouseDownCoords == null)
+				return;
+			DOM.releaseCapture(eventManager.getCaptureElement());
+			areaSelected();
+			mouseDownCoords = null;	
+			dragging = false;
+			if(!displayRectangleAfterSelection){
+				canvas.removeAllGraphicalObject();
+				canvas.update();
 			}
 		}
 
@@ -50,32 +54,51 @@ public class RectangularSelection extends SelectionBase{
 		public void onMouseMove(MouseMoveEvent event) {
 			if(mouseDownCoords != null){
 				int[] actualCoords = normalizeCoords(getCoords(event));
-				double x = 0,y = 0,width = 0,height = 0;
-				switch (selectionMode) {
-				case Both:
-					width = Math.abs(actualCoords[0] - mouseDownCoords[0]);
-					height = Math.abs(actualCoords[1] - mouseDownCoords[1]);
-					x = Math.min(actualCoords[0], mouseDownCoords[0]);
-					y = Math.min(actualCoords[1], mouseDownCoords[1]);
-					break;
-				case Horizontal:
-					width = Math.abs(actualCoords[0] - mouseDownCoords[0]);
-					x = Math.min(actualCoords[0], mouseDownCoords[0]);
-					y = modulToSelectFrom.getTopPadding();
-					height = modulToSelectFrom.getHeight();
-					break;
-				case Vertical:
-					height = Math.abs(actualCoords[1] - mouseDownCoords[1]);
-					y = Math.min(actualCoords[1], mouseDownCoords[1]);
-					x = modulToSelectFrom.getLeftPadding();
-					width = modulToSelectFrom.getWidth();
-					break;
+				int x = 0,y = 0,width = 0,height = 0;
+				if(dragging){
+					width = w;
+					height = h;
+					int xDiff = actualCoords[0] - mouseDownCoords[0];
+					int yDiff = actualCoords[1] - mouseDownCoords[1];
+					x = RectangularSelection.this.x + xDiff;
+					y = RectangularSelection.this.y + yDiff;
+					if(x < modulToSelectFrom.getLeftPadding())
+						x = modulToSelectFrom.getLeftPadding();
+					if(y < modulToSelectFrom.getTopPadding())
+						y = modulToSelectFrom.getTopPadding();
+					if(x + width > modulToSelectFrom.getWidth() + modulToSelectFrom.getLeftPadding())
+						x = modulToSelectFrom.getWidth() + modulToSelectFrom.getLeftPadding() - width;
+					if(y + height > modulToSelectFrom.getHeight() + modulToSelectFrom.getTopPadding())
+						y = modulToSelectFrom.getHeight() + modulToSelectFrom.getTopPadding() - height;				
+					mouseDownCoords = actualCoords;
+					areaSelected();
 				}
-				Rectangle r = new Rectangle(width, height, x, y, selectionLookOut);
-				//do update
-				canvas.removeAllGraphicalObject();
-				canvas.addAllGraphicalObject(r.toGraphicalObjects());
-				canvas.update();
+				else{
+					switch (selectionMode) {
+					case Both:
+						width = Math.abs(actualCoords[0] - mouseDownCoords[0]);
+						height = Math.abs(actualCoords[1] - mouseDownCoords[1]);
+						x = Math.min(actualCoords[0], mouseDownCoords[0]);
+						y = Math.min(actualCoords[1], mouseDownCoords[1]);
+						break;
+					case Horizontal:
+						width = Math.abs(actualCoords[0] - mouseDownCoords[0]);
+						x = Math.min(actualCoords[0], mouseDownCoords[0]);
+						y = modulToSelectFrom.getTopPadding();
+						height = modulToSelectFrom.getHeight();
+						break;
+					case Vertical:
+						height = Math.abs(actualCoords[1] - mouseDownCoords[1]);
+						y = Math.min(actualCoords[1], mouseDownCoords[1]);
+						x = modulToSelectFrom.getLeftPadding();
+						width = modulToSelectFrom.getWidth();
+						break;
+					}
+				}
+				updateSelection(x, y, width, height) ;		
+			}
+			else{
+				updateCursor(event);
 			}
 		}
 
@@ -88,9 +111,14 @@ public class RectangularSelection extends SelectionBase{
 				mouseDownCoords = null;
 				return;
 			}
-			canvas.removeAllGraphicalObject();
-			
+			dragging = isDraggableSelection && isOverSelection(event);
 			DOM.setCapture(eventManager.getCaptureElement());
+		}
+
+		@Override
+		public void onClick(ClickEvent event) {
+//			canvas.removeAllGraphicalObject();
+//			canvas.update();
 		}
 	}
 		
@@ -98,6 +126,12 @@ public class RectangularSelection extends SelectionBase{
 	protected MouseHandler handler;
 	protected int[] mouseDownCoords;
 	protected boolean displayRectangleAfterSelection;
+	protected boolean isDraggableSelection;
+	protected boolean rectangleSelected;
+	protected boolean invertSelection;
+	protected int minSelectionSize;
+	protected int x,y,w,h;
+	protected boolean dragging;
 	
 	/**
 	 * Creates a selection modul.
@@ -107,7 +141,8 @@ public class RectangularSelection extends SelectionBase{
 	public RectangularSelection(DrawingAreaGWT canvas, IneChartEventManager eventManager) {
 		super(eventManager, canvas);
 		selectionMode = RectangularSelectionMode.Both;
-		selectionLookOut = Defaults.selectionLookout;
+		selectionLookOut = Defaults.selectionLookout();
+		minSelectionSize = Defaults.minSelectionSize;
 		modulToSelectFrom = null;
 		mouseDownCoords = null;
 		handler = new MouseHandler();
@@ -115,8 +150,10 @@ public class RectangularSelection extends SelectionBase{
 		eventManager.addMouseUpHandler(handler);
 		eventManager.addMouseMoveHandler(handler);
 		displayRectangleAfterSelection = false;
+		rectangleSelected = false;
+		dragging = false;
+		isDraggableSelection = true;
 	}
-	
 	
 	/**
 	 * @return the selectionMode
@@ -132,38 +169,28 @@ public class RectangularSelection extends SelectionBase{
 		this.selectionMode = selectionMode;
 	}
 
-	protected void areaSelected(int[] from, int[] to){
+	protected void areaSelected(){
 		if(modulToSelectFrom == null)
 			return;
-		double[] modelFrom = modulToSelectFrom.getValuePair(from[0], from[1]);
-		double[] modelTo = modulToSelectFrom.getValuePair(to[0], to[1]);
-		double xMin = 0, xMax = 0, yMin = 0, yMax = 0;
+		double xMin = modulToSelectFrom.getValueForCanvasX(x);
+		double xMax = modulToSelectFrom.getValueForCanvasX(x + w);
+		double yMin = modulToSelectFrom.getValueForCanvasY(y);
+		double yMax = modulToSelectFrom.getValueForCanvasY(y + h);
 		switch (selectionMode) {
-		case Both:
-			xMin = Math.min(modelFrom[0], modelTo[0]);
-			xMax = Math.max(modelFrom[0], modelTo[0]);
-			yMin = Math.min(modelFrom[1], modelTo[1]);
-			yMax = Math.max(modelFrom[1], modelTo[1]);
-			break;
 		case Horizontal:
-			xMin = Math.min(modelFrom[0], modelTo[0]);
-			xMax = Math.max(modelFrom[0], modelTo[0]);
 			yMin = modulToSelectFrom.getYAxis().getMin();
 			yMax = modulToSelectFrom.getYAxis().getMax();
 			break;			
 		case Vertical:
-			yMin = Math.min(modelFrom[1], modelTo[1]);
-			yMax = Math.max(modelFrom[1], modelTo[1]);
 			xMin = modulToSelectFrom.getXAxis().getMin();
 			xMax = modulToSelectFrom.getXAxis().getMax();
 			break;
 		}
 		ViewportChangeEvent event = new ViewportChangeEvent(null, xMin, yMin, xMax, yMax, null);
 		event.setAddressedCharts(addressedCharts);
-		event.setAddressedModuls(addressedModuls);;
+		event.setAddressedModuls(addressedModuls);
 		eventManager.fireViewportChangedEvent(event);
 	}
-
 
 	/**
 	 * @return the displayRectangleAfterSelection
@@ -172,12 +199,67 @@ public class RectangularSelection extends SelectionBase{
 		return displayRectangleAfterSelection;
 	}
 
-
 	/**
 	 * @param displayRectangleAfterSelection the displayRectangleAfterSelection to set
 	 */
 	public void setDisplayRectangleAfterSelection(
 			boolean displayRectangleAfterSelection) {
 		this.displayRectangleAfterSelection = displayRectangleAfterSelection;
+	}
+
+	protected void updateSelection(int x, int y, int width, int height){
+		if(w < minSelectionSize || h < minSelectionSize){
+			rectangleSelected = false;
+			canvas.removeAllGraphicalObject();
+			canvas.update();
+		}
+		if(invertSelection){
+			//its easier to draw on canvas directly, and since its uses a separate canvas, we can clear it.
+			canvas.getCanvasWidget().clearRect(0, 0, canvas.getWidth(), canvas.getHeight());
+			canvas.getCanvasWidget().setGlobalAlpha(selectionLookOut.getFillColor().getAlpha());
+			canvas.getCanvasWidget().setFillStyle(selectionLookOut.getFillColor().getColor());
+			canvas.getCanvasWidget().fillRect(modulToSelectFrom.getLeftPadding(), modulToSelectFrom.getTopPadding(), modulToSelectFrom.getWidth(), modulToSelectFrom.getHeight());
+			canvas.getCanvasWidget().clearRect(x, y, width, height);
+			canvas.getCanvasWidget().setGlobalAlpha(selectionLookOut.getLineProperties().getLineColor().getAlpha());
+			canvas.getCanvasWidget().setStrokeStyle(selectionLookOut.getLineProperties().getLineColor().getColor());
+			canvas.getCanvasWidget().setLineWidth(selectionLookOut.getLineProperties().getLineWidth());
+			canvas.getCanvasWidget().strokeRect(x, y, width, height);
+		}
+		else{
+			canvas.removeAllGraphicalObject();
+			Rectangle r = new Rectangle(width, height, x, y, selectionLookOut);
+			canvas.addAllGraphicalObject(r.toGraphicalObjects());
+			canvas.update();
+		}
+		this.x = x;
+		this.y = y;
+		this.w = width;
+		this.h = height;
+		rectangleSelected = true;
+	}
+
+	protected void updateCursor(MouseEvent<?> event){
+		int[] coords = getCoords(event);
+		if(isPointOverModul(coords)){
+			if(isDraggableSelection && rectangleSelected && isOverSelection(event)){
+				DOM.setStyleAttribute(canvas.getCanvasWidget().getElement(), "cursor", "move");
+			}
+			else{
+				DOM.setStyleAttribute(canvas.getCanvasWidget().getElement(), "cursor", "crosshair");
+			}
+		}	
+	}
+	
+	protected boolean isOverSelection(MouseEvent<?> event){
+		if(rectangleSelected == false)
+			return false;
+		int[] coords = getCoords(event);
+		if(coords[0] >= x &&
+			coords[0] <= x + w &&
+			coords[1] >= y && 
+			coords[1] <= y + h)
+			return true;
+		else
+			return false;
 	}
 }

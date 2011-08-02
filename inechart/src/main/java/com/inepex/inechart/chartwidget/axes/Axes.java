@@ -600,27 +600,6 @@ public class Axes extends IneChartModule {
 		return new double[] {top, right, bottom, left};
 	}
 	
-	public double[] getPaddingNeededForAxis(Axis axis){
-		Axis perpAxis;
-		if (AxisDirection.isPerpendicular(axis, axis.getModulToAlign().getYAxis()))
-			perpAxis = axis.getModulToAlign().getYAxis();
-		else
-			perpAxis = axis.getModulToAlign().getXAxis();
-		double top = 0;
-		double right = 0;
-		double bottom = 0;
-		double left = 0;
-		
-		
-		//TODO
-		
-		
-		
-		
-		
-		
-		return null;
-	}
 	
 	private void createDefaultTickAndLabelForAxis(Axis axis) {
 		for(Tick t : axis.getTicks()){

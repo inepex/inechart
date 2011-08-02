@@ -115,8 +115,8 @@ public class IneScrollPanelFPImpl extends Composite {
 	protected int contentWidth;
 	protected int hBarHeight;
 	protected int vBarWidth;
-	protected int scrollTop;
-	protected int scrollLeft;
+	protected double scrollTop;
+	protected double scrollLeft;
 	
 	public IneScrollPanelFPImpl(){
 		this(null, false);
@@ -225,12 +225,12 @@ public class IneScrollPanelFPImpl extends Composite {
 
 	public int getScrollTop(){
 //		return parseCSSPositionString(contentWidget.getElement().getStyle().getTop());
-		return scrollTop;
+		return (int) scrollTop;
 	}
 
 	public int getScrollLeft(){
 //		return parseCSSPositionString(contentWidget.getElement().getStyle().getLeft());
-		return scrollLeft;
+		return (int) scrollLeft;
 	}
 
 	protected int parseCSSPositionString(String position){

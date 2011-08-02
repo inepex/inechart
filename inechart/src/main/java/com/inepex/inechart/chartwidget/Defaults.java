@@ -39,7 +39,10 @@ public class Defaults {
 	}
 	
 	//selection
-	public static final ShapeProperties selectionLookout = new ShapeProperties(new LineProperties(1.2, new Color("#FFFF66", 0.84)), new Color("#FFFF66", 0.66));
+	public static final ShapeProperties selectionLookout(){
+		return new ShapeProperties(new LineProperties(1.2, new Color("#FFFF66", 0.84)), new Color("#FFFF66", 0.66));
+	}
+	public static final int minSelectionSize = 4;
 	//chart title
 	public static final TextProperties chartTitle_Name = new TextProperties("Arial, sans-serif", 18, "normal", "bold");
 	public static final TextProperties chartTitle_Description = new TextProperties("Arial, sans-serif", 12, "normal", "normal", new Color("#8d8d8d"));	
@@ -76,8 +79,8 @@ public class Defaults {
 	public static final int barSpacing = 2;
 	public static final int maxBarWidth = 18;
 	public static final int minBarWidth = 3;
-	public static final double barBorderWidth = 1.4;
-	public static final double barFillOpacity = 0.75;
+	public static final double barBorderWidth = 0;
+	public static final double barFillOpacity = 0.85;
 	//piechart
 	public static ShapeProperties pie(){
 		return new ShapeProperties(new LineProperties(2, color()), new Color(colorString, 0.8));
