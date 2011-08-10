@@ -1,26 +1,8 @@
 package com.inepex.inegraphics.impl.client;
 
 import java.util.ArrayList;
-import java.util.Collections;
-
 import com.google.gwt.canvas.client.Canvas;
 import com.google.gwt.canvas.dom.client.Context2d;
-import com.google.gwt.event.dom.client.ClickEvent;
-import com.google.gwt.event.dom.client.ClickHandler;
-import com.google.gwt.event.dom.client.MouseDownEvent;
-import com.google.gwt.event.dom.client.MouseDownHandler;
-import com.google.gwt.event.dom.client.MouseMoveEvent;
-import com.google.gwt.event.dom.client.MouseMoveHandler;
-import com.google.gwt.event.dom.client.MouseOutEvent;
-import com.google.gwt.event.dom.client.MouseOutHandler;
-import com.google.gwt.event.dom.client.MouseOverEvent;
-import com.google.gwt.event.dom.client.MouseOverHandler;
-import com.google.gwt.event.dom.client.MouseUpEvent;
-import com.google.gwt.event.dom.client.MouseUpHandler;
-import com.google.gwt.event.dom.client.MouseWheelEvent;
-import com.google.gwt.event.dom.client.MouseWheelHandler;
-import com.google.gwt.event.shared.HandlerManager;
-import com.google.gwt.event.shared.HandlerRegistration;
 import com.google.gwt.user.client.ui.AbsolutePanel;
 import com.google.gwt.user.client.ui.Widget;
 import com.inepex.inegraphics.impl.client.canvas.CanvasWidget;
@@ -28,7 +10,6 @@ import com.inepex.inegraphics.shared.Context;
 import com.inepex.inegraphics.shared.DrawingArea;
 import com.inepex.inegraphics.shared.gobjects.Arc;
 import com.inepex.inegraphics.shared.gobjects.Circle;
-import com.inepex.inegraphics.shared.gobjects.GraphicalObject;
 import com.inepex.inegraphics.shared.gobjects.Line;
 import com.inepex.inegraphics.shared.gobjects.LineTo;
 import com.inepex.inegraphics.shared.gobjects.MoveTo;
@@ -175,8 +156,10 @@ public class DrawingAreaGWT extends DrawingArea {
 		if(path.hasStroke())
 			canvas.stroke();
 		//if its a closed path then we can fill it
-		if(path.hasFill() && pathElements.get(pathElements.size()-1).getEndPointX() == path.getBasePointX() &&
-				pathElements.get(pathElements.size()-1).getEndPointY() == path.getBasePointY()){
+		if(path.hasFill()
+				&& pathElements.get(pathElements.size()-1).getEndPointX() == path.getBasePointX() &&
+				pathElements.get(pathElements.size()-1).getEndPointY() == path.getBasePointY()
+				){
 			canvas.fill();
 		}
 	}
