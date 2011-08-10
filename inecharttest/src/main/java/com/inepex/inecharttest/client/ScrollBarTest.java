@@ -1,15 +1,10 @@
 package com.inepex.inecharttest.client;
 
-import com.google.gwt.dom.client.Style.Float;
 import com.google.gwt.dom.client.Style.Unit;
+import com.google.gwt.user.client.ui.AbsolutePanel;
 import com.google.gwt.user.client.ui.FlowPanel;
 import com.google.gwt.user.client.ui.HTML;
-import com.google.gwt.user.client.ui.RootPanel;
-import com.google.gwt.user.client.ui.Widget;
-import com.inepex.inechart.misc.IneScrollPanel;
-import com.inepex.inechart.misc.ScrollBarPresenter;
-import com.inepex.inechart.misc.ScrollBarView;
-import com.inepex.inechart.misc.Scrollable;
+import com.inepex.inechart.misc.IneScrollPanelFPImpl;
 
 public class ScrollBarTest extends FlowPanel {
 
@@ -32,11 +27,15 @@ public class ScrollBarTest extends FlowPanel {
 			" Nulla facilisi. Praesent tellus lorem, cursus vitae posuere eget, cursus vel nulla. Aenean pharetra metus quis lorem feugiat eget porta magna pharetra. " +
 			"Pellentesque arcu velit, venenatis quis porttitor nec, sodales sed orci. Suspendisse potenti. Quisque enim elit, imperdiet at laoreet at, luctus nec nibh." +
 			"Vivamus orci metus, feugiat at venenatis vel, volutpat vitae nunc. Nulla facilisi. Morbi non dui et nisi faucibus vehicula ac feugiat libero. Phasellus eleifend risus id" );
+	AbsolutePanel loremPanel;
 	
-	IneScrollPanel sp;
+	IneScrollPanelFPImpl sp;
 	public ScrollBarTest() {
-		sp = new IneScrollPanel();
-		sp.setWidget(lorem);
+		sp = new IneScrollPanelFPImpl();
+		loremPanel = new AbsolutePanel();
+		loremPanel.setPixelSize(500, 900);
+		loremPanel.add(lorem);
+		sp.setContentWidget(loremPanel);
 		this.add(sp);
 		sp.setSize("300px", "300px");
 		sp.getElement().getStyle().setMargin(50, Unit.PX);

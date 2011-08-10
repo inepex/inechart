@@ -1,26 +1,20 @@
-package com.inepex.inecharttest.ineawtcharttest;
+package com.inepex.inecharttest.client.showcase;
 
-import java.awt.Color;
-import java.awt.Graphics;
-import java.awt.GridLayout;
-import java.awt.event.WindowAdapter;
-import java.awt.event.WindowEvent;
-import java.awt.event.WindowListener;
-import java.sql.Date;
-import java.text.SimpleDateFormat;
+import java.util.Date;
 import java.util.Map;
-import java.util.Map.Entry;
 import java.util.TreeMap;
+import java.util.Map.Entry;
 
-import javax.swing.JComponent;
-import javax.swing.JFrame;
-
-import com.inepex.inechart.awtchart.IneAwtChart;
+import com.google.gwt.i18n.client.DateTimeFormat;
+import com.google.gwt.user.client.ui.FlowPanel;
+import com.inepex.inechart.chartwidget.DataSet;
+import com.inepex.inechart.chartwidget.IneChart;
 import com.inepex.inechart.chartwidget.axes.Axis;
+import com.inepex.inechart.chartwidget.axes.Tick;
 import com.inepex.inechart.chartwidget.axes.Axis.AxisDirection;
 import com.inepex.inechart.chartwidget.axes.Axis.AxisPosition;
-import com.inepex.inechart.chartwidget.axes.Tick;
 import com.inepex.inechart.chartwidget.barchart.BarChart;
+import com.inepex.inechart.chartwidget.barchart.BarChart.BarSequencePosition;
 import com.inepex.inechart.chartwidget.label.Legend.LegendEntryLayout;
 import com.inepex.inechart.chartwidget.linechart.Curve;
 import com.inepex.inechart.chartwidget.linechart.LineChart;
@@ -30,44 +24,7 @@ import com.inepex.inechart.chartwidget.properties.LineProperties;
 import com.inepex.inechart.chartwidget.properties.ShapeProperties;
 import com.inepex.inechart.chartwidget.shape.Circle;
 
-public class ApfChartTest extends JFrame {
-
-	/**
-	 * 
-	 */
-	private static final long serialVersionUID = 4542081093511966555L;
-
-	private IneAwtChart chart;
-
-	public ApfChartTest() {
-		super("Apf-like chart test");
-		setSize(1300, 700);
-		getContentPane().setLayout(new GridLayout(1, 1, 10, 0));
-
-		getContentPane().setBackground(Color.lightGray);
-
-		init();
-		getContentPane().add(new ChartPanel());
-
-		chart.update();
-		WindowListener wndCloser = new WindowAdapter() {
-			public void windowClosing(WindowEvent e) {
-				System.exit(0);
-			}
-		};
-		addWindowListener(wndCloser);
-
-		setVisible(true);
-		chart.saveToFile("multiLineChart.png");
-	}
-
-	/**
-	 * @param args
-	 */
-	public static void main(String[] args) {
-		new ApfChartTest();
-
-	}
+public class ApfLikeChartTest extends FlowPanel {
 
 	String[] curveNames = { 
 			"Airspace Infringement", 
@@ -81,82 +38,52 @@ public class ApfChartTest extends JFrame {
 			{ 3.0, 6.0, 1.0, 2.0, 4.0, 1.0, 5.0, 1.0, 3.0, 3.0, 1.0, 2.0 },
 			{ 0.0, 3.0, 1.0, 5.0, 4.0, 4.0, 3.0, 2.0, 7.0, 3.0, 2.0, 4.0 },
 			{ 4.0, 0.0, 3.0, 6.0, 1.0, 2.0, 5.0, 1.0, 3.0, 3.0, 1.0, 2.0 },
-			{ 1.2818774975743393E-6, 1.2140364313571E-6, 1.7912267015441461E-6}
+			{ 10d, 10d, 3d, 4d,5d}
 
 
 	};
-
-	private Curve getCurve(int i) {
-		TreeMap<Double, Double> data = new TreeMap<Double, Double>();
-		for (int j = 0; j < values[i].length; j++) {
-			data.put(new Double(j), values[i][j]);
-		}
-
-		Curve c = new Curve(data);
-		c.setName(curveNames[i]);
-		// set curve properties
-		c.setHasShadow(false);
-//		c.set
-
-		ShapeProperties sp_bogyo = new ShapeProperties(
-				c.getLineProperties(),
-				new com.inepex.inechart.chartwidget.properties.Color("white"));
-		// ez igy 5px vonalvastagságú kört rajzol, közepe üres
-		// az hogy fehér színnel legyen kitöltve a közepe megoldható: new
-		// ShapeProperties(new LineProperties(5, new Color("blue")), new
-		// Color("white");
-		Circle bogyo = new Circle(5, sp_bogyo); // inechartos Circle class nem
-													// graphicsos
-		c.setNormalPointShape(bogyo); // c egy Curve objektum
-		c.setUseDefaultPointShape(false);
-		return c;
-
+	
+	
+	private IneChart chart;
+	
+	public ApfLikeChartTest() {
+		init();
+		this.add(chart);
+		chart.update();
+		getElement().getStyle().setBackgroundColor("lightyellow");
 	}
-
+	
+	
+	
+	
 	private void init() {
-		chart = new IneAwtChart(1200, 600);
-		chart.setName("Potential/Near Collisions Air");
-		chart.getName().getTextProperties().setFontSize(26);
+		chart = new IneChart(1200, 800);
+		chart.setChartTitle("Potential/Near Collisions Air");
+//		chart.getChartTitle().setHorizontalPosition(HorizontalPosition.Middle);
 		LineChart lineChart = chart.createLineChart();
 		
 		//create barchart
 		BarChart barChart = chart.createBarChart();
-		barChart.setViewport(lineChart.getViewport());
-		barChart.setAutoScaleViewport(false);
-		barChart.setColorSet(ColorSet.flotColorSet());
 		barChart.getYAxis().setAutoCreateTicks(false);
 		barChart.getXAxis().setAutoCreateTicks(false);
-		
+		barChart.setBarSequencePosition(BarSequencePosition.Over);
+		barChart.setXAxis(lineChart.getXAxis());
+	
 
 		// add curves
 		for (int i = 0; i < curveNames.length; i++) {
-			lineChart.addCurve(getCurve(i));
+			lineChart.addCurve(new Curve(getCurve(i)));
 			barChart.addDataSet(getCurve(i));
 		}
 
 		// set linechart properties
 		lineChart.setAutoScaleViewport(false);
-		lineChart.setUseViewport(false);
 		lineChart.setAutoCalcPadding(true);
-		lineChart.setColors(ColorSet.flotColorSet());
-		lineChart.setMinRightPadding(30);
-		lineChart.setMinBottomPadding(30);
-		lineChart.setMinTopPadding(30);
-		lineChart.setMinLeftPadding(80);
-		
-		barChart.setMinRightPadding(30);
-		barChart.setMinBottomPadding(30);
-		barChart.setMinTopPadding(30);
-		barChart.setMinLeftPadding(80);
 		
 		//set legend properties
-		lineChart.getLegend().setLegendEntryLayout(LegendEntryLayout.AUTO);
-		lineChart.getLegend().setHorizontalPosition(HorizontalPosition.Right);
-		lineChart.getLegend().setFixedX(80);
-		lineChart.getLegend().setFixedY(80);
-		lineChart.getLegend().setMaxWidth(1200);
-		lineChart.getLegend().getTextProperties().setFontSize(18);
-		
+//		lineChart.getLegend().setLegendEntryLayout(LegendEntryLayout.AUTO);
+//		lineChart.getLegend().setHorizontalPosition(HorizontalPosition.Right);
+//		barChart.setShowLegend(false);
 
 		// set axis properties
 		lineChart.getYAxis().setAutoCreateTicks(false);
@@ -214,24 +141,23 @@ public class ApfChartTest extends JFrame {
 		
 		// add x ticks
 		String monthlyDateFormat = "MMM yyyy";
-		SimpleDateFormat dateTimeFormat = new SimpleDateFormat(monthlyDateFormat);
+		DateTimeFormat dateTimeFormat = DateTimeFormat.getFormat(monthlyDateFormat);
 
 		for (int i = 0; i < 12; i++) {
 			String tickLabel = dateTimeFormat.format(new Date(2010 - 1900, i, 1));
 			lineChart.getXAxis().addTick(new Tick(i, tickLineProperties, null, 0, tickLabel));
 		}
+	}
+	
+	private DataSet getCurve(int i) {
+		DataSet dataSet = new DataSet();
+		for (int j = 0; j < values[i].length; j++) {
+			dataSet.addDataPair(j, values[i][j]);
+		}
+		dataSet.setName(curveNames[i]);
+		
+		return dataSet;
 
 	}
 
-	private class ChartPanel extends JComponent {
-		public ChartPanel() {
-			setSize(700, 500);
-		}
-
-		@Override
-		protected void paintComponent(Graphics g) {
-			g.drawImage(chart.getImage(), 0, 0, this);
-		}
-
-	}
 }

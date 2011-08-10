@@ -1,29 +1,14 @@
 package com.inepex.inecharttest.client.showcase;
 
 import java.util.ArrayList;
-import java.util.Date;
-import java.util.Map;
 import java.util.TreeMap;
 
-import com.google.gwt.thirdparty.guava.common.primitives.UnsignedBytes;
 import com.google.gwt.user.client.Random;
+import com.inepex.inechart.chartwidget.DataSet;
 
 public class DataGenerator {
 
-	public static TreeMap<Double, Double> generateRandomData(int sampleCount){
-		return generateRandomData(0, 2, -10, 10, 5, sampleCount);
-	}
 	
-	/**
-	 * Generates random double data pairs (x,y).
-	 * @param xFrom exclusive x
-	 * @param maxDiffX positive double, maximum difference between two neighbour x
-	 * @param yFrom inclusive bottom cap for y values (yFrom < yTo)
-	 * @param yTo inclusive top cap for y values (yFrom < yTo)
-	 * @param maxDiffY maximum difference between two neighbour y
-	 * @param count the samplecount
-	 * @return
-	 */
 	public static TreeMap<Double, Double> generateRandomData(double xFrom, double maxDiffX, double yFrom, double yTo, double maxDiffY, int count){
 		TreeMap<Double, Double> map = new TreeMap<Double, Double>();
 		double lastX = xFrom;
@@ -59,14 +44,22 @@ public class DataGenerator {
 		return map ;
 	}
 	
-	public static ArrayList<Double> generateMarkDataForChart(long start, long end){
-		double min = start;
-		ArrayList<Double> vs = new ArrayList<Double>();
-		while(min < end){
-			vs.add(min);
-			min += Random.nextDouble() * 1000 * 60 * 60 * 4;
+	public static DataSet generateRandomData(int sampleCount){
+		DataSet dataSet = new DataSet(true, false);
+		for(int sample = 0; sample < sampleCount; sample++){
+			dataSet.addDataPair(sample, Random.nextDouble());
 		}
-		return vs;
+		return dataSet;
+	}
+	
+	public static DataSet generateSinePeriod(int sampleCount){
+		DataSet dataSet = new DataSet(true, false);
+		double x = 0;
+		for(int sample = 0; sample < sampleCount; sample++){
+			dataSet.addDataPair(x, Math.sin(x));
+			x += Math.PI*2 / (sampleCount-1);
+		}
+		return dataSet;
 	}
 
 	public static TreeMap<Double, Double> generateSine(int periodCount, int samplesInPeriod){

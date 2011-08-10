@@ -1,22 +1,10 @@
 package com.inepex.inecharttest.ineawtcharttest;
 
-import java.awt.Color;
-import java.awt.Graphics;
-import java.awt.GridLayout;
-import java.awt.event.WindowAdapter;
-import java.awt.event.WindowEvent;
-import java.awt.event.WindowListener;
 import java.util.TreeMap;
 
-import javax.swing.JComponent;
 import javax.swing.JFrame;
-import javax.swing.JPanel;
-
 import com.inepex.inechart.awtchart.IneAwtChart;
-import com.inepex.inechart.chartwidget.axes.Axis;
-import com.inepex.inechart.chartwidget.axes.Axis.AxisDirection;
-import com.inepex.inechart.chartwidget.axes.Axis.AxisPosition;
-import com.inepex.inechart.chartwidget.label.StyledLabel;
+import com.inepex.inechart.chartwidget.DataSet;
 import com.inepex.inechart.chartwidget.linechart.Curve;
 import com.inepex.inechart.chartwidget.linechart.LineChart;
 
@@ -24,40 +12,62 @@ import com.inepex.inechart.chartwidget.linechart.LineChart;
 
 public class MultiLineChartTest extends JFrame{
 
-	/**
-	 * 
-	 */
-	private static final long serialVersionUID = 4542081093511966555L;
-
 	private IneAwtChart chart;
-	
-	public MultiLineChartTest() {
-		super("Multi Line Chart Test");
-		setSize(700, 500);
-		getContentPane().setLayout(new GridLayout(1, 1, 10, 0));
-		
-		getContentPane().setBackground(Color.white);
-		
-		init();
-		getContentPane().add(new ChartPanel());
-		
-		chart.update();
-		WindowListener wndCloser = new WindowAdapter() {
-			public void windowClosing(WindowEvent e) {
-				System.exit(0);
-			}
-		};
-		addWindowListener(wndCloser);
+	private LineChart lineChart;
+	private Curve curve0;
+	private Curve curve1;
+	private Curve curve2;
+	private Curve curve3;
+	private Curve curve4;
 
-		setVisible(true);
-		chart.saveToFile("multiLineChart.png");
+	public MultiLineChartTest() {
+		init();
+		getContentPane().add(chart);
 	}
+
+	private void init(){
+		chart = new IneAwtChart(670, 490);
+		chart.setChartTitle("Multi Line Chart","Generated data, default lookout");
+		//		chart.getChartTitle().setVerticalPosition(VerticalPosition.Bottom);
+		//		chart.getChartTitle().setHorizontalPosition(HorizontalPosition.Middle);
+		lineChart = chart.createLineChart();
+		lineChart.getYAxis().setAutoCreateGrids(true);
+		curve0 = new Curve(new DataSet(generateRandomData(0, 10, 100, 600, 40, 15)));
+		curve0.setHasShadow(true);
+		curve0.setHasPoints(true);
+		lineChart.addCurve(curve0);
+		curve1 = new Curve(new DataSet(generateRandomData(0, 10, 100, 600, 40, 15)));
+		curve1.setHasShadow(true);
+		curve1.setHasPoints(true);
+		lineChart.addCurve(curve1);
+		curve2 = new Curve(new DataSet(generateRandomData(0, 10, 100, 600, 40, 15)));
+		curve2.setHasShadow(true);
+		curve2.setHasPoints(true);
+		lineChart.addCurve(curve2);
+		curve3 = new Curve(new DataSet(generateRandomData(0, 10, 100, 600, 40, 15)));
+		curve3.setHasShadow(true);
+		curve3.setHasPoints(true);
+		lineChart.addCurve(curve3);
+		curve4 = new Curve(new DataSet(generateRandomData(0, 10, 100, 600, 40, 15)));
+		curve4.setHasShadow(true);
+		curve4.setHasPoints(true);
+		lineChart.addCurve(curve4);		
+
+		
+	}
+
+
+
+
+	
+	
+	
 	/**
 	 * @param args
 	 */
 	public static void main(String[] args) {
 		new MultiLineChartTest() ;
-
+//		System.exit(-1);
 	}
 	
 	
@@ -96,37 +106,35 @@ public class MultiLineChartTest extends JFrame{
 		return map;
 	}
 	
-	private void init(){
-		chart = new IneAwtChart(630, 400);
-		chart.setName("Multi Line Chart");
-		chart.setDescription("Generated data, default lookout");
-		LineChart lineChart = chart.createLineChart();
-		for(int i=0;i<5;i++){
-			Curve c = new Curve(generateRandomData(0, 10, 100, 600, 40, 15));
-			c.setAutoFill(true);
-			c.setHasShadow(false);
-			c.setUseDefaultPointShape(true);
-			lineChart.addCurve(c);
-		}
-	
-		lineChart.setAutoScaleViewport(true);
-	
-		Axis extra = new Axis();
-		extra.setAxisDirection(AxisDirection.Vertical_Ascending_To_Bottom);
-		extra.setAxisPosition(AxisPosition.Maximum);
-		lineChart.addExtraAxis(extra);
-		
-	}
+//	private void init(){
+//		chart = new IneAwtChart(700, 500);
+//		chart.setName("Multi Line Chart");
+//		chart.setDescription("Generated data, default lookout");
+//		LineChart lineChart = chart.createLineChart();
+//		for(int i=0;i<5;i++){
+//			Curve c = new Curve(generateRandomData(0, 10, 100, 600, 40, 15));
+//			c.setName("long name curve NO: "+i);
+//			c.setAutoFill(true);
+//			c.setHasShadow(false);
+//			lineChart.addCurve(c);
+//		}
+//		lineChart.setAutoScaleViewport(true);
+//		Axis extra = new Axis();
+//		extra.setAxisDirection(AxisDirection.Vertical_Ascending_To_Bottom);
+//		extra.setAxisPosition(AxisPosition.Maximum);
+//		lineChart.addExtraAxis(extra);
+//		
+//	}
 
 	
-	private class ChartPanel extends JComponent{
-		public ChartPanel() {
-			setSize(700, 500);
-		}
-		@Override
-		protected void paintComponent(Graphics g) {
-			g.drawImage(chart.getImage(), 0, 0, this);
-		}
-		
-	}
+//	private class ChartPanel extends JComponent{
+//		public ChartPanel() {
+//			setSize(700, 500);
+//		}
+//		@Override
+//		protected void paintComponent(Graphics g) {
+//			g.drawImage(chart.getImage(), 0, 0, this);
+//			
+//		}
+//	}
 }

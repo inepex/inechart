@@ -1,6 +1,7 @@
 package com.inepex.inecharttest.client;
 
 import com.google.gwt.core.client.EntryPoint;
+import com.google.gwt.dom.client.Style.Unit;
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;
 import com.google.gwt.user.client.ui.Button;
@@ -8,14 +9,11 @@ import com.google.gwt.user.client.ui.HorizontalPanel;
 import com.google.gwt.user.client.ui.RootPanel;
 import com.google.gwt.user.client.ui.SimplePanel;
 import com.google.gwt.user.client.ui.Widget;
-import com.inepex.inechart.misc.ScrollBarPresenter;
-import com.inepex.inechart.misc.ScrollBarView;
-import com.inepex.inecharttest.client.showcase.AxisTest;
+import com.inepex.inecharttest.client.showcase.ApfLikeChartTest;
 import com.inepex.inecharttest.client.showcase.BarChartTest;
-import com.inepex.inecharttest.client.showcase.LineAndBarChartTest;
-import com.inepex.inecharttest.client.showcase.LineChartTest;
 import com.inepex.inecharttest.client.showcase.MultiLineChart;
 import com.inepex.inecharttest.client.showcase.SpeedTest;
+import com.inepex.inecharttest.client.showcase.ViewportSelectorChartTest;
 
 
 /**
@@ -31,15 +29,16 @@ public class IneChartTest implements EntryPoint {
 		RootPanel.get("loading").setVisible(false);
 		RootPanel.get().add(menu);
 		RootPanel.get().add(panel);
+		panel.getElement().getStyle().setMarginLeft(50, Unit.PX);
 		
 //		addTest("linechartTest", new LineChartTest());
-//		addTest("barchartTest", new BarChartTest());
-//		addTest("speedTest", new SpeedTest());
-//		addTest("lineAndBar", new LineAndBarChartTest());
-//		addTest("multiLineChart", new MultiLineChart());
-		
-		RootPanel.get().add(new ScrollBarTest());
-		
+		addTest("barchartTest", new BarChartTest());
+		addTest("speedTest", new SpeedTest());
+////		addTest("lineAndBar", new LineAndBarChartTest());
+		addTest("multiLineChart", new MultiLineChart());
+		addTest("viewportTest", new ViewportSelectorChartTest());
+		addTest("apfLikeChartTest",new ApfLikeChartTest());
+
 	}
 	
 	private void addTest(String name, final Widget test){

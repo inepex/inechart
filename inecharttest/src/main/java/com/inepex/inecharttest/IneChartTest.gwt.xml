@@ -5,6 +5,8 @@
  <inherits name='com.inepex.inechart.IneChart'/>
  <inherits name='com.inepex.inegraphics.IneGraphics'/>
  
+	<inherits name="com.allen_sauer.gwt.log.gwt-log-DEBUG" />
+ 
   <entry-point class='com.inepex.inecharttest.client.IneChartTest'/>
 
   <source path='client'/>

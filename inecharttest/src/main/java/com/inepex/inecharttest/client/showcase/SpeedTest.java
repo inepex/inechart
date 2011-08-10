@@ -25,7 +25,6 @@ public class SpeedTest extends FlowPanel {
 	TextBox chartHeightTB;
 	TextBox pointCountTB;
 	Button go;
-	Curve curve;
 	Curve sineCurve;
 	FlexTable results;
 	
@@ -96,9 +95,10 @@ public class SpeedTest extends FlowPanel {
 		results.getColumnFormatter().setWidth(3, "120 px");
 		results.setBorderWidth(1);
 		results.setCellSpacing(1);
+		results.setCellPadding(0);
 		results.setStyleName("AlignMid");
 		this.add(results);
-		sineCurve = new Curve(DataGenerator.generateSine(4, 60));
+		
 //		sineCurve.setLineProperties(new LineProperties(2, new Color("#fc0")));
 		
 	}
@@ -107,15 +107,20 @@ public class SpeedTest extends FlowPanel {
 		if(chart != null){
 			this.remove(chart);
 		}
-		long start = System.currentTimeMillis();
 		chart = new IneChart(Integer.parseInt(chartWidthTB.getText()), Integer.parseInt(chartHeightTB.getText()));
-		chart.getDrawingArea().getCanvasWidget().translate(0.5, 0.5);
 		this.add(chart);
-		curve = new Curve(DataGenerator.generateRandomData(0, 0.5, -1, 1, 0.2, 50));
+		
+		sineCurve = new Curve(DataGenerator.generateSinePeriod(Integer.parseInt(pointCountTB.getText())));
 		LineChart lc= chart.createLineChart();
-		lc.addCurve(curve);
 		lc.addCurve(sineCurve);
-		long start1 = System.currentTimeMillis();
+		lc.getXAxis().setAutoCreateTicks(true);
+		lc.getXAxis().setAutoCreateGrids(true);
+		lc.getYAxis().setAutoCreateTicks(true);
+		lc.getYAxis().setAutoCreateGrids(true);
+		sineCurve.setHasPoints(true);
+		sineCurve.addFill(0d, new Color(sineCurve.getDataSet().getColor().getColor(),0.5));
+		chart.setChartTitle("Sine curve", "One period with "+Integer.parseInt(pointCountTB.getText())+" data samples");
+		long start = System.currentTimeMillis();
 		chart.update();
 		long end = System.currentTimeMillis();
 		
@@ -123,7 +128,7 @@ public class SpeedTest extends FlowPanel {
 		results.setWidget(row, 0, new Label(chartWidthTB.getText()));
 		results.setWidget(row, 1, new Label(chartHeightTB.getText()));
 		results.setWidget(row, 2, new Label(pointCountTB.getText()));
-		results.setWidget(row, 3, new Label(end - start1 + " ms "));
+		results.setWidget(row, 3, new Label(end - start + " ms "));
 	}
 
 }
