@@ -1,20 +1,18 @@
 package com.inepex.inechart.chartwidget.piechart;
 
-import java.util.ArrayList;
-import java.util.List;
+import java.util.TreeMap;
 
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.MouseDownEvent;
+import com.google.gwt.event.dom.client.MouseEvent;
 import com.google.gwt.event.dom.client.MouseMoveEvent;
-import com.google.gwt.event.dom.client.MouseOutEvent;
-import com.google.gwt.event.dom.client.MouseOverEvent;
 import com.google.gwt.event.dom.client.MouseUpEvent;
 import com.inepex.inechart.chartwidget.Defaults;
 import com.inepex.inechart.chartwidget.IneChartModule2D;
 import com.inepex.inechart.chartwidget.axes.Axes;
 import com.inepex.inechart.chartwidget.label.LabelFactoryBase;
 import com.inepex.inechart.chartwidget.label.Legend;
-import com.inepex.inechart.chartwidget.label.LegendEntry;
+import com.inepex.inechart.chartwidget.properties.Color;
 import com.inepex.inegraphics.shared.Context;
 import com.inepex.inegraphics.shared.DrawingArea;
 import com.inepex.inegraphics.shared.gobjects.Arc;
@@ -26,7 +24,7 @@ public class PieChart extends IneChartModule2D{
 	Legend legend = new Legend();
 
 	public PieChart(DrawingArea canvas, LabelFactoryBase labelFactory, Axes axes) {
-		super(canvas, labelFactory, axes);
+		super(canvas, labelFactory, axes, null);
 	}
 
 	public void setPie(Pie pie) {
@@ -89,35 +87,21 @@ public class PieChart extends IneChartModule2D{
 				
 	}
 
-	private Context getTextContext() {
-		return new Context(0.5, "black", 1, "white", 0.0, 0.0, 0.0, "black");
-	}
 
 	@Override
-	public List<LegendEntry> getLegendEntries() {
-		ArrayList<LegendEntry> entries = new ArrayList<LegendEntry>();
-//		for(String key : pie.sliceMap.keySet()){
-//			Slice s = pie.sliceMap.get(key);
-//			entries.add(new LegendEntry(s, s.c));
-//		}
-		return entries;
+	public TreeMap<String, Color> getLegendEntries() {
+		if(legendEntries == null){
+			TreeMap<String, Color> entries = new TreeMap<String, Color>();
+			for(Slice c : pie.slices){
+				entries.put(c.getName(), c.lookOut.getFillColor());
+			}
+			
+			return entries;
+		}
+		else{
+			return legendEntries;
+		}
 	}
-
-	@Override
-	public boolean isShowLegend() {
-		return showLegend;
-	}
-
-	@Override
-	public void setShowLegend(boolean showLegend) {
-		this.showLegend = showLegend;
-	}
-
-	@Override
-	public Legend getLegend() {
-		return legend;
-	}
-
 	@Override
 	public void updateModulesAxes() {
 		// TODO Auto-generated method stub
@@ -137,7 +121,7 @@ public class PieChart extends IneChartModule2D{
 	}
 
 	@Override
-	protected void onMouseOver(MouseOverEvent event) {
+	protected void onMouseOver(MouseEvent<?> event) {
 		// TODO Auto-generated method stub
 		
 	}
@@ -149,7 +133,7 @@ public class PieChart extends IneChartModule2D{
 	}
 
 	@Override
-	protected void onMouseOut(MouseOutEvent event) {
+	protected void onMouseOut(MouseEvent<?> event) {
 		// TODO Auto-generated method stub
 		
 	}

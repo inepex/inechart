@@ -1,12 +1,10 @@
 package com.inepex.inechart.chartwidget.label;
 
 import com.inepex.inechart.chartwidget.Defaults;
-import com.inepex.inechart.chartwidget.IneChartModule2D;
 import com.inepex.inechart.chartwidget.misc.HorizontalPosition;
 import com.inepex.inechart.chartwidget.misc.VerticalPosition;
 import com.inepex.inechart.chartwidget.properties.TextProperties;
 import com.inepex.inechart.chartwidget.shape.Rectangle;
-import com.inepex.inechart.chartwidget.shape.Shape;
 
 /**
  * This class holds information about how to display a legend,
@@ -54,7 +52,6 @@ public class Legend extends TextContainer{
 		//defaults
 		paddingBetweenEntries = 5;
 		paddingBetweenTextAndSymbol = 3;
-		includeInPadding = true;
 		legendEntryLayout = LegendEntryLayout.AUTO;
 	}
 
@@ -105,6 +102,20 @@ public class Legend extends TextContainer{
 		}
 		this.fixedX = fixedX;
 		this.fixedY = fixedY;
+	}
+
+	/**
+	 * @return the textProperties
+	 */
+	public TextProperties getTextProperties() {
+		return textProperties;
+	}
+
+	/**
+	 * @param textProperties the textProperties to set
+	 */
+	public void setTextProperties(TextProperties textProperties) {
+		this.textProperties = textProperties;
 	}	
 
 }

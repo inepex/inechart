@@ -1,15 +1,13 @@
 package com.inepex.inechart.chartwidget.label;
 
 import com.inepex.inechart.chartwidget.Defaults;
-import com.inepex.inechart.chartwidget.IneChartModule2D;
 import com.inepex.inechart.chartwidget.misc.HorizontalPosition;
 import com.inepex.inechart.chartwidget.misc.VerticalPosition;
-import com.inepex.inechart.chartwidget.properties.Color;
 import com.inepex.inechart.chartwidget.properties.ShapeProperties;
-import com.inepex.inechart.chartwidget.properties.TextProperties;
 
 /**
- * Base class for displaying text
+ * Base class for displaying textboxes, it does not contain Textual objects,
+ * only lookout and alignment properties.
  * 
  * @author Miklós Süveges / Inepex Ltd.
  *
@@ -18,10 +16,10 @@ public class TextContainer implements Comparable<TextContainer>{
 	private static int highestComparatorID = Integer.MIN_VALUE;
 	private final int comparatorID;
 	
+	protected int left = -1;
+	protected int top = -1;
 	protected VerticalPosition verticalPosition;
 	protected HorizontalPosition horizontalPosition;
-//	protected int positionX=0, positionY=0;
-//	protected int width = 0, height = 0;
 	protected ShapeProperties background;
 	
 	protected int topPadding = Defaults.textContainerPadding_V;
@@ -29,7 +27,6 @@ public class TextContainer implements Comparable<TextContainer>{
 	protected int bottomPadding =  Defaults.textContainerPadding_V;
 	protected int rightPadding =  Defaults.textContainerPadding_H;
 
-	boolean includeInPadding = true;
 	
 	public TextContainer(){
 		this(VerticalPosition.Auto, HorizontalPosition.Auto, Defaults.textContainerBackground);
@@ -103,13 +100,41 @@ public class TextContainer implements Comparable<TextContainer>{
 		this.rightPadding = rightPadding;
 	}
 	
-	public boolean isIncludeInPadding() {
-		return includeInPadding;
+
+	/**
+	 * @return the left
+	 */
+	public int getLeft() {
+		return left;
 	}
 
-	public void setIncludeInPadding(boolean includeInPadding) {
-		this.includeInPadding = includeInPadding;
+	/**
+	 * @param left the left to set
+	 */
+	public void setLeft(int left) {
+		this.left = left;
 	}
 
+	/**
+	 * @return the top
+	 */
+	public int getTop() {
+		return top;
+	}
+
+	/**
+	 * @param top the top to set
+	 */
+	public void setTop(int top) {
+		this.top = top;
+	}
+
+	public void copyLookoutProperties(TextContainer other){
+		this.background = other.background;
+		this.bottomPadding = other.bottomPadding;
+		this.leftPadding = other.leftPadding;
+		this.rightPadding = other.rightPadding;
+		this.topPadding = other.topPadding;
+	}
 	
 }

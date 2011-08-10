@@ -3,15 +3,13 @@ package com.inepex.inechart.chartwidget.barchart;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Iterator;
-import java.util.List;
 import java.util.Map;
 import java.util.TreeMap;
 
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.MouseDownEvent;
+import com.google.gwt.event.dom.client.MouseEvent;
 import com.google.gwt.event.dom.client.MouseMoveEvent;
-import com.google.gwt.event.dom.client.MouseOutEvent;
-import com.google.gwt.event.dom.client.MouseOverEvent;
 import com.google.gwt.event.dom.client.MouseUpEvent;
 import com.inepex.inechart.chartwidget.DataSet;
 import com.inepex.inechart.chartwidget.Defaults;
@@ -19,7 +17,6 @@ import com.inepex.inechart.chartwidget.IneChartModule2D;
 import com.inepex.inechart.chartwidget.axes.Axes;
 import com.inepex.inechart.chartwidget.axes.Axis.AxisDirection;
 import com.inepex.inechart.chartwidget.label.LabelFactoryBase;
-import com.inepex.inechart.chartwidget.label.LegendEntry;
 import com.inepex.inechart.chartwidget.misc.ColorSet;
 import com.inepex.inechart.chartwidget.misc.HasShadow;
 import com.inepex.inechart.chartwidget.misc.HasZIndex;
@@ -105,7 +102,7 @@ public class BarChart extends IneChartModule2D implements HasShadow, HasZIndex {
 	protected ArrayList<ShapeProperties> lookOut;
 
 	public BarChart(DrawingArea canvas, LabelFactoryBase labelFactory, Axes axes) {
-		super(canvas,labelFactory, axes);
+		super(canvas,labelFactory, axes, null);
 		dataSets = new ArrayList<DataSet>();
 		normalizedData = new TreeMap<Double, ArrayList<Double>>();
 		lookOut = new ArrayList<ShapeProperties>();
@@ -877,18 +874,19 @@ public class BarChart extends IneChartModule2D implements HasShadow, HasZIndex {
 	}
 
 	@Override
-	public List<LegendEntry> getLegendEntries() {
-		ArrayList<LegendEntry> entries = new ArrayList<LegendEntry>();
-//		for(String name : names){
-//			//temporary solution 
-//			Curve c = new Curve();
-//			c.setName(name);
-//			LegendEntry e = new LegendEntry(c, lookOut.get(name).getFillColor());
-//			entries.add(e);
-//		}
-		return entries;
+	public TreeMap<String, Color> getLegendEntries() {
+		if(legendEntries == null){
+			TreeMap<String, Color> entries = new TreeMap<String, Color>();
+			for(DataSet c : dataSets){
+				entries.put(c.getName(), c.getColor());
+			}
+			
+			return entries;
+		}
+		else{
+			return legendEntries;
+		}
 	}
-
 	@Override
 	protected void onClick(ClickEvent event) {
 		// TODO Auto-generated method stub
@@ -902,7 +900,7 @@ public class BarChart extends IneChartModule2D implements HasShadow, HasZIndex {
 	}
 
 	@Override
-	protected void onMouseOver(MouseOverEvent event) {
+	protected void onMouseOver(MouseEvent<?> event) {
 		// TODO Auto-generated method stub
 		
 	}
@@ -914,7 +912,7 @@ public class BarChart extends IneChartModule2D implements HasShadow, HasZIndex {
 	}
 
 	@Override
-	protected void onMouseOut(MouseOutEvent event) {
+	protected void onMouseOut(MouseEvent<?> event) {
 		// TODO Auto-generated method stub
 		
 	}

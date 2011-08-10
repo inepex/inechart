@@ -16,6 +16,10 @@ public class ViewportChangeEvent extends IneChartEvent<ViewportChangeHandler> {
 	protected double xMax;
 	protected double yMax;
 	protected List<IneChartModule2D> addressedModuls;
+	
+	public ViewportChangeEvent(){
+		this(null, 0, 0, null);
+	}
 
 	public ViewportChangeEvent(IneChart sourceChart, double xMin,
 			double yMin, double xMax, double yMax,

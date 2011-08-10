@@ -4,19 +4,19 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.TreeMap;
 
-import com.google.gwt.core.client.GWT;
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.MouseDownEvent;
+import com.google.gwt.event.dom.client.MouseEvent;
 import com.google.gwt.event.dom.client.MouseMoveEvent;
-import com.google.gwt.event.dom.client.MouseOutEvent;
-import com.google.gwt.event.dom.client.MouseOverEvent;
 import com.google.gwt.event.dom.client.MouseUpEvent;
+import com.google.gwt.user.client.Event;
 import com.inepex.inechart.chartwidget.Defaults;
+import com.inepex.inechart.chartwidget.IneChartEventManager;
 import com.inepex.inechart.chartwidget.IneChartModule2D;
 import com.inepex.inechart.chartwidget.axes.Axes;
+import com.inepex.inechart.chartwidget.event.PointSelectionEvent;
+import com.inepex.inechart.chartwidget.event.PointSelectionHandler;
 import com.inepex.inechart.chartwidget.label.LabelFactoryBase;
-import com.inepex.inechart.chartwidget.label.LegendEntry;
-import com.inepex.inechart.chartwidget.label.Text;
 import com.inepex.inechart.chartwidget.properties.Color;
 import com.inepex.inechart.chartwidget.properties.LineProperties;
 import com.inepex.inechart.chartwidget.properties.LineProperties.LineStyle;
@@ -31,21 +31,31 @@ import com.inepex.inegraphics.shared.gobjects.GraphicalObject;
 import com.inepex.inegraphics.shared.gobjects.Path;
 import com.inepex.inegraphics.shared.gobjects.PathElement;
 
-public class LineChart extends IneChartModule2D {
+public class LineChart extends IneChartModule2D implements PointSelectionHandler{
 
+	/**
+	 * 
+	 * An enum which defines the select/deselect mode of Points in {@link LineChart}
+	 * 
+	 */
 	public enum PointSelectionMode {
 		/**
-		 * The closest point to the cursor will be selected
+		 * The closest point to the cursor
+		 *  (if mouse is over modul a point will be selected always)
 		 */
 		Closest_To_Cursor,
 		/**
-		 * The clicked point will be selected
+		 * The clicked point
 		 */
-		On_Point_Click,
+		On_Click,
 		/**
-		 * The mouse overed point will be selected
+		 * The mouse overed point
 		 */
-		On_Point_Over
+		On_Over,
+		/**
+		 * The right clicked point
+		 */
+		On_Right_Click
 	}
 
 	/**
@@ -55,13 +65,14 @@ public class LineChart extends IneChartModule2D {
 	 */
 	DrawingArea overlay;
 	boolean useOverlay;
-	TreeMap<Curve, GraphicalObjectContainer> overlayGosPerCurve; 
+	TreeMap<Curve, GraphicalObjectContainer> overlayGosPerCurve;
+	int pointMouseOverRadius;
+
+	PointSelectionMode selectPoint;
+	
 	// model fields
 	ArrayList<Curve> curves = new ArrayList<Curve>();
 	int highestZIndex = 1;
-
-	PointSelectionMode pointSelectionMode;
-
 	/**
 	 * stores the calculated points inside viewport
 	 */
@@ -79,14 +90,14 @@ public class LineChart extends IneChartModule2D {
 	 * all {@link GraphicalObject}s related to point chart per curve
 	 */
 	TreeMap<Curve, GraphicalObjectContainer> pointChartGOsPerCurve;
-	
+
 	public LineChart(DrawingArea canvas, LabelFactoryBase labelFactory, Axes axes) {
-		this(canvas, labelFactory, axes, null);
+		this(canvas, labelFactory, axes, null, null);
 		useOverlay = false;
 	}
-	
-	public LineChart(DrawingArea canvas, LabelFactoryBase labelFactory, Axes axes, DrawingArea overLay) {
-		super(canvas,labelFactory, axes);
+
+	public LineChart(DrawingArea canvas, LabelFactoryBase labelFactory, Axes axes, DrawingArea overLay, IneChartEventManager eventManager) {
+		super(canvas, labelFactory, axes, eventManager);
 		this.overlay = overLay;
 		calculatedPointsPerCurve = new TreeMap<Curve, ArrayList<double[]>>();
 		selectedPointsPerCurve = new TreeMap<Curve, ArrayList<double[]>>();
@@ -94,10 +105,12 @@ public class LineChart extends IneChartModule2D {
 		fillPathPerCurve = new TreeMap<Curve, Path>();
 		lineChartGOsPerCurve = new TreeMap<Curve, GraphicalObjectContainer>();
 		pointChartGOsPerCurve = new TreeMap<Curve, GraphicalObjectContainer>();
+		overlayGosPerCurve = new TreeMap<Curve, GraphicalObjectContainer>();
 		useOverlay = true;
 		// defaults
-		pointSelectionMode = PointSelectionMode.Closest_To_Cursor;
+		selectPoint = Defaults.selectPoint;
 		autoScaleViewport = true;
+		pointMouseOverRadius = Defaults.pointMouseOverRadius;
 	}
 
 	public void addCurve(Curve curve) {
@@ -174,7 +187,7 @@ public class LineChart extends IneChartModule2D {
 				createLineChartGOs(curve);
 			}
 			if(curve.hasPoint){
-				createPointChartGOs(curve);
+				createPointChartGOs(curve, false);
 			}
 		}
 		for(Curve curve:curves){
@@ -190,7 +203,7 @@ public class LineChart extends IneChartModule2D {
 		}
 		super.update();
 	}	
-	
+
 	protected void updateOverLay(){
 		overlay.removeAllGraphicalObject();
 		for(Curve curve:overlayGosPerCurve.keySet()){
@@ -200,7 +213,7 @@ public class LineChart extends IneChartModule2D {
 		}
 		overlay.update();
 	}
-	
+
 	protected boolean shouldCalculateFillPathForCurve(Curve curve){
 		if( curve.autoFill || (curve.toCanvasYFills != null && curve.toCanvasYFills.size() > 0) ||
 				(curve.toCurveFills != null && curve.toCurveFills.size() > 0) || 
@@ -217,7 +230,7 @@ public class LineChart extends IneChartModule2D {
 		}
 		return false;
 	}
-	
+
 	protected void calculatePointsForCurve(Curve curve){
 		curve.dataSet.update();
 		List<double[]> dataPairs = curve.dataSet.getDataPairs();
@@ -276,7 +289,7 @@ public class LineChart extends IneChartModule2D {
 		}
 		fillPathPerCurve.put(curve, path);
 	}
-	
+
 	protected void createVisiblePathForCurve(Curve curve){
 		curve.dataSet.update();
 		List<double[]> dataPairs = curve.dataSet.getDataPairs();
@@ -331,8 +344,8 @@ public class LineChart extends IneChartModule2D {
 		GraphicalObjectContainer gos = new GraphicalObjectContainer();
 		lineChartGOsPerCurve.put(curve, gos);
 		Path strokePath = visiblePathPerCurve.get(curve);
-		
-	
+
+
 		if (curve.hasLine && strokePath != null) {
 			Path line = new Path(strokePath);
 			line.setContext(createLineContext(curve));
@@ -356,7 +369,7 @@ public class LineChart extends IneChartModule2D {
 			fill.lineTo(fill.getBasePointX(), minY, false);
 			fill.lineToBasePoint();
 			fill.setFill(true);
-//			fill = DrawingAreaAssist.replaceAllPathElementsWithLineTo(fill);
+			//			fill = DrawingAreaAssist.replaceAllPathElementsWithLineTo(fill);
 			Color c;
 			if (curve.getLineProperties() != null){
 				c = curve.getLineProperties().getLineColor();
@@ -425,14 +438,19 @@ public class LineChart extends IneChartModule2D {
 	 * {@link #pointChartGOsPerCurve} container
 	 * 
 	 * @param curve
+	 * @param onlyOverlay TODO
 	 */
-	protected void createPointChartGOs(Curve curve) {
+	protected void createPointChartGOs(Curve curve, boolean onlyOverlay) {
 		ArrayList<double[]> calculatedPoints = calculatedPointsPerCurve.get(curve);
 		ArrayList<double[]> selectedPoints = selectedPointsPerCurve.get(curve);
 		GraphicalObjectContainer goc = new GraphicalObjectContainer();
-		pointChartGOsPerCurve.put(curve, goc);
-		if(calculatedPoints == null || calculatedPoints.size() == 0)
-			return;
+		GraphicalObjectContainer overlayGoc = new GraphicalObjectContainer();
+		overlayGosPerCurve.put(curve, overlayGoc);
+		if(!onlyOverlay){
+			pointChartGOsPerCurve.put(curve, goc);
+			if(calculatedPoints == null || calculatedPoints.size() == 0)
+				return;
+		}
 		Shape normal = curve.normalPoint;
 		Shape selected = curve.selectedPoint;
 		if(normal == null && selected == null){
@@ -455,11 +473,11 @@ public class LineChart extends IneChartModule2D {
 					normal.setShadowOffsetX(curve.shadowOffsetX);
 					normal.setShadowOffsetY(curve.shadowOffsetY);
 				}
-				if(selected != null){
-					selected.setShadowColor(curve.shadowColor);
-					selected.setShadowOffsetX(curve.shadowOffsetX);
-					selected.setShadowOffsetY(curve.shadowOffsetY);
-				}
+//				if(selected != null){
+//					selected.setShadowColor(curve.shadowColor);
+//					selected.setShadowOffsetX(curve.shadowOffsetX);
+//					selected.setShadowOffsetY(curve.shadowOffsetY);
+//				}
 			}
 			else{
 				if(normal != null){
@@ -477,41 +495,50 @@ public class LineChart extends IneChartModule2D {
 				normal.getProperties().setLineProperties(curve.lineProperties != null ? curve.lineProperties : new LineProperties(Defaults.lineWidth, curve.dataSet.getColor()));
 			}
 		}
-		for(double[] point : calculatedPoints){
-			//selected
-			if(selectedPoints.contains(point)){
-				if(selected != null){
-					if(useOverlay){
-						//we put normal point on backing canvas
-						if(normal != null){
-							goc.addAllGraphicalObject(createPoint(point, normal));
+		if(onlyOverlay){
+			for(double[] point : selectedPoints){
+				overlayGoc.addAllGraphicalObject(createPoint(point, selected));
+			}
+		}
+		else{
+			for(double[] point : calculatedPoints){
+				//selected
+				if(selectedPoints.contains(point)){
+					if(selected != null){
+						if(useOverlay){
+							//we put normal point on backing canvas
+							if(normal != null){
+								goc.addAllGraphicalObject(createPoint(point, normal));
+							}
+							overlayGoc.addAllGraphicalObject(createPoint(point, selected));
 						}
-						overlayGosPerCurve.get(curve).addAllGraphicalObject(createPoint(point, selected));
-					}
-					else{
-						goc.addAllGraphicalObject(createPoint(point, selected));
+						else{
+							goc.addAllGraphicalObject(createPoint(point, selected));
+						}
 					}
 				}
-			}
-			//normal
-			else if(normal != null){
-				goc.addAllGraphicalObject(createPoint(point, normal));
+				//normal
+				else if(normal != null){
+					goc.addAllGraphicalObject(createPoint(point, normal));
+				}
 			}
 		}
 	}
 
 	protected GraphicalObjectContainer createPoint(double[] point, Shape shape){
 		GraphicalObjectContainer goc = new GraphicalObjectContainer();
-		for(GraphicalObject go : shape.toGraphicalObjects()){
-			if (shape instanceof Circle) {
-				go.setBasePointX(point[0]);
-				go.setBasePointY(point[1]);
+		if(shape != null){
+			for(GraphicalObject go : shape.toGraphicalObjects()){
+				if (shape instanceof Circle) {
+					go.setBasePointX(point[0]);
+					go.setBasePointY(point[1]);
+				}
+				else if (shape instanceof Rectangle) {
+					go.setBasePointX(point[0] - ((Rectangle) shape).getWidth() / 2);
+					go.setBasePointY(point[1] - ((Rectangle) shape).getHeight() / 2);
+				}
+				goc.addGraphicalObject(go);
 			}
-			else if (shape instanceof Rectangle) {
-				go.setBasePointX(point[0] - ((Rectangle) shape).getWidth() / 2);
-				go.setBasePointY(point[1] - ((Rectangle) shape).getHeight() / 2);
-			}
-			goc.addGraphicalObject(go);
 		}
 		return goc;
 	}
@@ -545,63 +572,30 @@ public class LineChart extends IneChartModule2D {
 	static Context createLineContext(Curve curve) {
 		return new Context(
 				curve.lineProperties != null ? curve.lineProperties.getLineColor().getAlpha() :	Defaults.alpha,
-						curve.lineProperties != null ? curve.lineProperties.getLineColor().getColor() : curve.dataSet.getColor().getColor(),
-								curve.lineProperties != null ? curve.lineProperties.getLineWidth() : Defaults.lineWidth,
-										Defaults.colorString,
-										curve.hasShadow ? curve.shadowOffsetX : 0,
-												curve.hasShadow ? curve.shadowOffsetY : 0,
-														curve.shadowColor == null ? Defaults.alpha : curve.shadowColor.getAlpha(),
-																curve.shadowColor == null ? Defaults.colorString : curve.shadowColor.getColor());
+				curve.lineProperties != null ? curve.lineProperties.getLineColor().getColor() : curve.dataSet.getColor().getColor(),
+				curve.lineProperties != null ? curve.lineProperties.getLineWidth() : Defaults.lineWidth,
+				Defaults.colorString,
+				curve.hasShadow ? curve.shadowOffsetX : 0,
+				curve.hasShadow ? curve.shadowOffsetY : 0,
+				curve.shadowColor == null ? Defaults.alpha : curve.shadowColor.getAlpha(),
+				curve.shadowColor == null ? Defaults.colorString : curve.shadowColor.getColor());
 	}
 
 	@Override
-	public List<LegendEntry> getLegendEntries() {
+	public TreeMap<String, Color> getLegendEntries() {
 		if(legendEntries == null){
-			ArrayList<LegendEntry> entries = new ArrayList<LegendEntry>();
+			TreeMap<String, Color> entries = new TreeMap<String, Color>();
 			for(Curve c : curves){
-				entries.add(new LegendEntry(new Text(c.dataSet.getName()), c.dataSet.getColor()));
+				entries.put(c.getDataSet().getName(), c.getDataSet().getColor());
 			}
+
 			return entries;
 		}
-		else return legendEntries;
-	}
-
-	@Override
-	protected void onClick(ClickEvent event) {
-		// TODO Auto-generated method stub
-
-	}
-
-	@Override
-	protected void onMouseUp(MouseUpEvent event) {
-		// TODO Auto-generated method stub
-
-	}
-
-	@Override
-	protected void onMouseOver(MouseOverEvent event) {
-		// TODO Auto-generated method stub
-
-	}
-
-	@Override
-	protected void onMouseDown(MouseDownEvent event) {
-		// TODO Auto-generated method stub
-
+		else{
+			return legendEntries;
+		}
 	}
 	
-	@Override
-	protected void onMouseOut(MouseOutEvent event) {
-		// TODO Auto-generated method stub
-		
-	}
-	
-	@Override
-	protected void onMouseMove(MouseMoveEvent event) {
-		// TODO Auto-generated method stub
-		
-	}
-
 	/**
 	 * @return the curves
 	 */
@@ -609,4 +603,189 @@ public class LineChart extends IneChartModule2D {
 		return curves;
 	}
 
+	/**
+	 * @return the pointMouseOverRadius
+	 */
+	public int getPointMouseOverRadius() {
+		return pointMouseOverRadius;
+	}
+
+	/**
+	 * @param pointMouseOverRadius -1 if you want to use the default
+	 */
+	public void setPointMouseOverRadius(int pointMouseOverRadius) {
+		this.pointMouseOverRadius = pointMouseOverRadius;
+	}
+
+	/**
+	 * @return the selectPoint
+	 */
+	public PointSelectionMode getSelectPoint() {
+		return selectPoint;
+	}
+
+	/**
+	 * @param selectPoint the selectPoint to set
+	 */
+	public void setSelectPoint(PointSelectionMode selectPoint) {
+		this.selectPoint = selectPoint;
+	}
+
+	@Override
+	protected void onClick(ClickEvent event) {
+		if(event.getNativeButton() == Event.BUTTON_RIGHT){
+			if(selectPoint == PointSelectionMode.On_Right_Click){
+				selectPointEvent(getMouseOverPoints(event));
+			}
+		}
+		else{
+			if(selectPoint == PointSelectionMode.On_Click){
+				selectPointEvent(getMouseOverPoints(event));
+			}
+		}
+	}
+
+	@Override
+	protected void onMouseUp(MouseUpEvent event) {
+		
+	}
+
+	@Override
+	protected void onMouseOver(MouseEvent<?> event) {
+		if(selectPoint == PointSelectionMode.On_Over || selectPoint == PointSelectionMode.Closest_To_Cursor){
+			selectPointEvent(getClosestToMousePoints(event));
+		}
+	}
+
+	@Override
+	protected void onMouseDown(MouseDownEvent event) {
+		
+	}
+
+	@Override
+	protected void onMouseOut(MouseEvent<?> event) {
+		if(selectPoint == PointSelectionMode.On_Over || selectPoint == PointSelectionMode.Closest_To_Cursor){
+			selectPointEvent(new TreeMap<Curve, double[]>()); //deselect points
+		}
+	}
+
+	@Override
+	protected void onMouseMove(MouseMoveEvent event) {
+		if(selectPoint == PointSelectionMode.On_Over){
+			selectPointEvent(getMouseOverPoints(event));
+		}
+		else if(selectPoint == PointSelectionMode.Closest_To_Cursor){
+			selectPointEvent(getClosestToMousePoints(event));
+		}
+	}
+	
+	/**
+	 * Returns a curve-point mapping for each mouseovered point
+	 * @param e
+	 * @return
+	 */
+	protected TreeMap<Curve, double[]> getMouseOverPoints(MouseEvent<?> e){
+		TreeMap<Curve, double[]> mouseOver = new TreeMap<Curve, double[]>();
+		int[] eventLocation = getCoords(e);
+		for(Curve c : curves){
+			double[] overed = null;
+			for(double[] pair : calculatedPointsPerCurve.get(c)){
+				if(pair[0] >= eventLocation[0]  - pointMouseOverRadius &&
+						pair[0] <= eventLocation[0]  + pointMouseOverRadius &&
+						pair[1] >= eventLocation[1] - pointMouseOverRadius &&
+						pair[1] <= eventLocation[1] + pointMouseOverRadius ){
+					overed = pair;
+					break;
+				}
+			}
+			if(overed != null){
+				mouseOver.put(c, overed);
+			}
+		}
+		return mouseOver;
+	}
+	
+	/**
+	 * Returns a curve - closest point to cursor mapping
+	 * @param e
+	 * @return
+	 */
+	protected TreeMap<Curve, double[]> getClosestToMousePoints(MouseEvent<?> e){
+		TreeMap<Curve, double[]> mouseOver = new TreeMap<Curve, double[]>();
+		int[] eventLocation = getCoords(e);
+		for(Curve c : curves){
+			double[] overed = null;
+			double closestDiff = Double.MAX_VALUE;
+			for(double[] pair : calculatedPointsPerCurve.get(c)){
+				if(Math.abs(pair[0] - eventLocation[0]) < closestDiff){
+					closestDiff = Math.abs(pair[0] - eventLocation[0]);
+					overed = pair;
+				}
+			}
+			if(overed != null){
+				mouseOver.put(c, overed);
+			}
+		}
+		return mouseOver;
+	}
+	
+	protected void selectPointEvent(TreeMap<Curve, double[]> selectedPoints){
+		if(!useOverlay)
+			return;
+		TreeMap<Curve, double[]> justSelected = new TreeMap<Curve, double[]>();
+		TreeMap<Curve, double[]> justDeselected = new TreeMap<Curve, double[]>();
+		
+		for(Curve c : selectedPoints.keySet()){
+			double[] actual = selectedPoints.get(c);
+			if(selectedPointsPerCurve.containsKey(c)){
+				ArrayList<double[]> prevSelected = selectedPointsPerCurve.get(c);
+				//currently selected point isn't selected
+				if(!prevSelected.contains(actual)){
+					//single point selection in this modes
+					if(prevSelected.size() > 0 && 
+							(selectPoint == PointSelectionMode.Closest_To_Cursor ||
+							selectPoint == PointSelectionMode.On_Over)){
+						justDeselected.put(c, prevSelected.get(0));
+						prevSelected.clear();
+					}
+					prevSelected.add(actual);
+					justSelected.put(c, actual);
+				}
+				//currently selected were previously selected
+				else{
+					if(selectPoint == PointSelectionMode.On_Click ||
+							selectPoint == PointSelectionMode.On_Right_Click){
+						justDeselected.put(c, actual);
+						prevSelected.remove(actual);
+					}
+				}
+			}
+			else{
+				selectedPointsPerCurve.put(c, new ArrayList<double[]>());
+				selectedPointsPerCurve.get(c).add(actual);
+				justSelected.put(c, actual);
+			}
+		}
+		
+		//update overlay
+		for(Curve c : selectedPointsPerCurve.keySet()){
+			createPointChartGOs(c, true);
+		}
+		updateOverLay();
+		
+		//fire events
+		//TODO
+	}
+
+	@Override
+	public void onSelect(PointSelectionEvent event) {
+		// TODO Auto-generated method stub
+		
+	}
+
+	@Override
+	public void onDeselect(PointSelectionEvent event) {
+		// TODO Auto-generated method stub
+		
+	}
 }

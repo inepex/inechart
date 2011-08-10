@@ -4,19 +4,70 @@ import java.util.ArrayList;
 import java.util.TreeMap;
 
 import com.inepex.inechart.chartwidget.axes.Axis.AxisDataType;
+import com.inepex.inechart.chartwidget.axes.Axis.AxisDirection;
 
 /**
- * Calculates ticks for axes.
+ * Calculates and creates ticks for axes.
  * 
- * @author Miklós Süveges / Inepex Ltd.
+ * @author Miklós Süveges, Tibor Somodi / Inepex Ltd.
  *
  */
-public class TickFactory {
+public abstract class TickFactory {
 
+	public abstract String formatTickText(Tick tick, AxisDataType dataType); 
 
-	public TickFactory() {
+	public ArrayList<Tick> filterFequentTicks(Axis axis, ArrayList<Tick> visibleTicks) {
+		if (visibleTicks.size() <= 1) return visibleTicks;
+		double avgTextLength = 0.0;
+		double sum = 0.0;
+		for (Tick tick : visibleTicks){
+			sum += tick.getText().getText().length();
+		}
+		avgTextLength = sum / new Double(visibleTicks.size());
+		double avgTextWidth = avgTextLength * 10;
+		
+		sum = 0.0;
+		double avgDistanceBetweenTicks = 0.0;
+		for (int i = 0; i<visibleTicks.size()-1; i++){
+			if (axis.getAxisDirection() == AxisDirection.Horizontal_Ascending_To_Right) {
+				double x = visibleTicks.get(i).getPosition();
+				double nextX =  visibleTicks.get(i + 1).getPosition();
+				sum += (axis.getModulToAlign().getCanvasX(nextX) 
+						- axis.getModulToAlign().getCanvasX(x));
+			} else if (axis.getAxisDirection() == AxisDirection.Vertical_Ascending_To_Top) {
+				double y = visibleTicks.get(i).getPosition();
+				double nextY =  visibleTicks.get(i + 1).getPosition();
+				sum += (axis.getModulToAlign().getCanvasY(y) 
+						- axis.getModulToAlign().getCanvasY(nextY));
+			}	
+		}
+		avgDistanceBetweenTicks = sum / new Double(visibleTicks.size());
+		
+		if (axis.getAxisDirection() == AxisDirection.Vertical_Ascending_To_Top) {
+			avgTextWidth = 10;
+		}
+		
+		ArrayList<Tick> filteredTicks = new ArrayList<Tick>();
+		if (avgDistanceBetweenTicks < avgTextWidth) {
+			Long ratio = Math.round(avgTextWidth / avgDistanceBetweenTicks);
+			int counter = ratio.intValue();
+			for (int i = 0; i<visibleTicks.size(); i++){
+				if (visibleTicks.get(i).isUnfiltereble() || counter == ratio.intValue()) {
+					filteredTicks.add(visibleTicks.get(i));
+					counter = 0;
+				}
+				counter++;	
+			}
+		} else {
+			filteredTicks.addAll(visibleTicks);
+		}
+		return filteredTicks;
 	}
-
+	
+	/**
+	 * Creates ticks for the given axis
+	 * @param axis
+	 */
 	public void autoCreateTicks(Axis axis) {
 		autoCreateTicks(axis,
 				(int) Math.round(axis.isHorizontal() ? 
@@ -24,6 +75,11 @@ public class TickFactory {
 						0.5 * Math.sqrt(axis.modulToAlign.getHeight())));
 	}
 
+	/**
+	 * creates ticks for the given axis with a desired tick count
+	 * @param axis
+	 * @param tickNo
+	 */
 	public void autoCreateTicks(Axis axis, int tickNo) {
 		if (axis.axisDataType == AxisDataType.Number)
 			setNumberAxis(axis, tickNo);
@@ -64,7 +120,6 @@ public class TickFactory {
 		ArrayList<Tick> ticks = new ArrayList<Tick>();
 		while (i * size + start <= axis.max) {
 			ticks.add(new Tick(i * size + start));
-//			axis.addTick(new Tick(i * size + start));
 			i++;
 		}
 		for(Tick t : clearDoubleBugs(ticks,decimal)){
@@ -72,6 +127,11 @@ public class TickFactory {
 		}
 		
 	}
+	
+	
+	
+	
+	
 	
 	
 	

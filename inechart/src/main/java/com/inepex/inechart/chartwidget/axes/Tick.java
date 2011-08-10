@@ -1,22 +1,23 @@
 package com.inepex.inechart.chartwidget.axes;
 
+import java.text.SimpleDateFormat;
+
+import com.google.gwt.i18n.client.DateTimeFormat;
+import com.google.gwt.i18n.client.NumberFormat;
 import com.inepex.inechart.chartwidget.Defaults;
-import com.inepex.inechart.chartwidget.misc.HorizontalPosition;
-import com.inepex.inechart.chartwidget.misc.VerticalPosition;
+import com.inepex.inechart.chartwidget.axes.Axis.AxisDataType;
+import com.inepex.inechart.chartwidget.label.Text;
+import com.inepex.inechart.chartwidget.label.TextContainer;
 import com.inepex.inechart.chartwidget.properties.LineProperties;
-import com.inepex.inechart.chartwidget.properties.TextProperties;
 
 public class Tick implements Comparable<Tick> {
-	public static final int DEFAULT_TICK_LENGTH = 7;
 
 	public static enum TickPosition {
 		Cross, To_Upper_Values, To_Lower_Values;
 	}
 
 	TickPosition tickPosition;
-	HorizontalPosition tickTextHorizontalPosition;
-	VerticalPosition tickTextVerticalPosition;
-
+	
 	/**
 	 * the position of this tick on the parent axis
 	 */
@@ -36,11 +37,11 @@ public class Tick implements Comparable<Tick> {
 	/**
 	 * the tick's label
 	 */
-	String tickText;
+	Text text;
 	/**
-	 * the 'style' of the tick's text
+	 * the box around text
 	 */
-	TextProperties textProperties;
+	TextContainer textContainer;
 	/**
 	 * the number -> string
 	 */
@@ -60,7 +61,7 @@ public class Tick implements Comparable<Tick> {
 	 * @param position
 	 */
 	public Tick(double position) {
-		this(position, null, Defaults.solidLine(), DEFAULT_TICK_LENGTH, "");
+		this(position, null, Defaults.solidLine(), Defaults.tickLength, "");
 	}
 
 	/**
@@ -70,7 +71,7 @@ public class Tick implements Comparable<Tick> {
 	 * @param tickText
 	 */
 	public Tick(double position, String tickText) {
-		this(position, null, Defaults.solidLine(), DEFAULT_TICK_LENGTH, tickText);
+		this(position, null, Defaults.solidLine(), Defaults.tickLength, tickText);
 	}
 
 	/**
@@ -92,26 +93,22 @@ public class Tick implements Comparable<Tick> {
 		this.gridLine = gridLine;
 		this.tickLine = tickLine;
 		this.tickLength = tickLength;
-		this.tickText = tickText;
 		this.tickPosition = TickPosition.Cross;
-		tickTextHorizontalPosition =  HorizontalPosition.Auto;
-		tickTextVerticalPosition = VerticalPosition.Auto;
-		this.textProperties = Defaults.tickTextProperties();
+		this.textContainer = Defaults.tickTextContainer();
+		this.text = new Text(tickText, Defaults.tickTextProperties());
 	}
 	
 	public Tick(double position, LineProperties gridLine,
-			LineProperties tickLine, int tickLength, String tickText,
-			TextProperties textProperties) {
+			LineProperties tickLine, int tickLength, Text tickText,
+			TextContainer textContainer) {
 		super();
 		this.position = position;
 		this.gridLine = gridLine;
 		this.tickLine = tickLine;
 		this.tickLength = tickLength;
-		this.tickText = tickText;
-		this.textProperties = textProperties;
 		this.tickPosition = TickPosition.Cross;
-		tickTextHorizontalPosition =  HorizontalPosition.Auto;
-		tickTextVerticalPosition = VerticalPosition.Auto;
+		this.textContainer = textContainer;
+		this.text = tickText;
 	}
 
 	/**
@@ -174,21 +171,6 @@ public class Tick implements Comparable<Tick> {
 		this.tickLength = tickLength;
 	}
 
-	/**
-	 * @return the tickText
-	 */
-	public String getTickText() {
-		return tickText;
-	}
-
-	/**
-	 * @param tickText
-	 *            the tickText to set
-	 */
-	public void setTickText(String tickText) {
-		this.tickText = tickText;
-	}
-
 	public boolean isUnfiltereble() {
 		return unfiltereble;
 	}
@@ -209,14 +191,6 @@ public class Tick implements Comparable<Tick> {
 			return 0;
 	}
 
-	public TextProperties getTextProperties() {
-		return textProperties;
-	}
-
-	public void setTextProperties(TextProperties textProperties) {
-		this.textProperties = textProperties;
-	}
-
 	/**
 	 * @return the formatString
 	 */
@@ -225,10 +199,58 @@ public class Tick implements Comparable<Tick> {
 	}
 
 	/**
+	 * The ticks number or date value (depends on the {@link AxisDataType} of containing axis)
+	 * will be formatted by 
+	 *  - GWT's {@link DateTimeFormat} or {@link NumberFormat} on client
+	 *  - jre's {@link SimpleDateFormat} or {@link java.text.NumberFormat} on 'server' side.
+	 *  If you are using this chart on both implementations be careful to define a format that
+	 *  matches both formatters 'language'. (Most formats are common.) 
 	 * @param formatString the formatString to set
 	 */
 	public void setFormatString(String formatString) {
 		this.formatString = formatString;
+	}
+
+	/**
+	 * @return the text
+	 */
+	public Text getText() {
+		return text;
+	}
+
+	/**
+	 * @param text the text to set
+	 */
+	public void setText(Text text) {
+		this.text = text;
+	}
+
+	/**
+	 * @return the textContainer
+	 */
+	public TextContainer getTextContainer() {
+		return textContainer;
+	}
+
+	/**
+	 * @param textContainer the textContainer to set
+	 */
+	public void setTextContainer(TextContainer textContainer) {
+		this.textContainer = textContainer;
+	}
+
+	/**
+	 * @return the tickPosition
+	 */
+	public TickPosition getTickPosition() {
+		return tickPosition;
+	}
+
+	/**
+	 * @param tickPosition the tickPosition to set
+	 */
+	public void setTickPosition(TickPosition tickPosition) {
+		this.tickPosition = tickPosition;
 	}
 
 	

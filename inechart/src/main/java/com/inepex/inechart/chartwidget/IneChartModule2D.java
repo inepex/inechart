@@ -1,7 +1,7 @@
 package com.inepex.inechart.chartwidget;
 
 import java.util.ArrayList;
-import java.util.List;
+import java.util.TreeMap;
 
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;
@@ -21,10 +21,8 @@ import com.inepex.inechart.chartwidget.axes.Axis;
 import com.inepex.inechart.chartwidget.axes.Axis.AxisDirection;
 import com.inepex.inechart.chartwidget.event.ViewportChangeEvent;
 import com.inepex.inechart.chartwidget.event.ViewportChangeHandler;
-import com.inepex.inechart.chartwidget.label.HasLegend;
+import com.inepex.inechart.chartwidget.label.HasLegendEntries;
 import com.inepex.inechart.chartwidget.label.LabelFactoryBase;
-import com.inepex.inechart.chartwidget.label.Legend;
-import com.inepex.inechart.chartwidget.label.LegendEntry;
 import com.inepex.inechart.chartwidget.properties.Color;
 import com.inepex.inechart.chartwidget.properties.LineProperties;
 import com.inepex.inegraphics.impl.client.DrawingAreaGWT;
@@ -41,10 +39,12 @@ import com.inepex.inegraphics.shared.gobjects.Rectangle;
  * @author Miklós Süveges / Inepex Ltd.
  *
  */
-public abstract class IneChartModule2D extends IneChartModule implements HasCoordinateSystem, HasLegend {
+public abstract class IneChartModule2D extends IneChartModule implements HasCoordinateSystem, HasLegendEntries {
 	
 	protected class InnerEventHandler implements ViewportChangeHandler, MouseMoveHandler,
 		MouseOutHandler, MouseDownHandler, MouseOverHandler, MouseUpHandler, ClickHandler{
+		
+		boolean isMouseOverModul = false;
 		
 		public boolean isAddressed(ViewportChangeEvent event){
 			if(event.getAddressedModuls() == null || event.getAddressedModuls().contains(IneChartModule2D.this)){
@@ -102,8 +102,8 @@ public abstract class IneChartModule2D extends IneChartModule implements HasCoor
 		
 		@Override
 		public void onMouseOver(MouseOverEvent event) {
-			if(getValuePair(event) != null)
-				IneChartModule2D.this.onMouseOver(event);
+//			if(getValuePair(event) != null)
+//				IneChartModule2D.this.onMouseOver(event);
 		}
 
 		@Override
@@ -114,14 +114,23 @@ public abstract class IneChartModule2D extends IneChartModule implements HasCoor
 
 		@Override
 		public void onMouseOut(MouseOutEvent event) {
-			if(getValuePair(event) != null)
-				IneChartModule2D.this.onMouseOut(event);
+//			if(getValuePair(event) != null)
+//				IneChartModule2D.this.onMouseOut(event);
 		}
 
 		@Override
 		public void onMouseMove(MouseMoveEvent event) {
-			if(getValuePair(event) != null)
+			if(getValuePair(event) != null){
+				if(!isMouseOverModul){
+					isMouseOverModul = true;
+					IneChartModule2D.this.onMouseOver(event);
+				}
 				IneChartModule2D.this.onMouseMove(event);
+			}
+			else{
+				isMouseOverModul = false;
+				IneChartModule2D.this.onMouseOut(event);
+			}
 		}
 	
 	}
@@ -133,6 +142,7 @@ public abstract class IneChartModule2D extends IneChartModule implements HasCoor
 	protected ArrayList<Axis> extraAxes;
 	protected Axes axes;
 	protected LabelFactoryBase labelFactory;
+	protected IneChartEventManager eventManager;
 
 	protected boolean autoScaleViewport;
 	protected boolean autoCalcPadding = true;
@@ -151,16 +161,16 @@ public abstract class IneChartModule2D extends IneChartModule implements HasCoor
 	protected LineProperties border = null;
 	protected Color backgroundColor = null;
 	//legend
-	protected boolean showLegend = true;
-	protected Legend legend;
-	protected List<LegendEntry> legendEntries;
+	protected boolean displayLegendEntries = true;
+	protected TreeMap<String, Color> legendEntries;
 	
-	protected IneChartModule2D(DrawingArea canvas, LabelFactoryBase labelFactoryBase, Axes axes) {
+	protected IneChartModule2D(DrawingArea canvas, LabelFactoryBase labelFactoryBase, Axes axes, IneChartEventManager eventManager) {
 		super(canvas);
 		this.labelFactory = labelFactoryBase;
 		labelFactory.addLegendOwner(this);
 		this.axes = axes;
 		autoScaleViewport = true;
+		this.eventManager = eventManager;
 		// default axes
 		xAxis = new Axis();
 		xAxis.setAxisDirection(AxisDirection.Horizontal_Ascending_To_Right);
@@ -172,8 +182,15 @@ public abstract class IneChartModule2D extends IneChartModule implements HasCoor
 		axes.addAxis(yAxis);
 		extraAxes = new ArrayList<Axis>();
 		border = Defaults.border();
-		legend = new Legend();
 		innerEventHandler = new InnerEventHandler();
+		if(eventManager != null){
+			eventManager.addMouseDownHandler(innerEventHandler);
+			eventManager.addMouseMoveHandler(innerEventHandler);
+	//		eventManager.addMouseOutHandler(innerEventHandler);
+	//		eventManager.addMouseOverHandler(innerEventHandler);
+			eventManager.addMouseUpHandler(innerEventHandler);
+			eventManager.addClickHandler(innerEventHandler);
+		}		
 	}
 
 	public void updateModulesAxes(){
@@ -330,6 +347,46 @@ public abstract class IneChartModule2D extends IneChartModule implements HasCoor
 			return -1;
 		return pos;
 	}
+	
+	public double getValueDistanceX(double distanceOnCanvas){
+		Axis horizontalAxis = xAxis;
+		if(!horizontalAxis.isHorizontal()){
+			horizontalAxis = yAxis;
+		}
+		int totalWidth = canvas.getWidth() - leftPadding - rightPadding;
+		double visibleLength = horizontalAxis.getMax() - horizontalAxis.getMin();
+		return distanceOnCanvas * visibleLength / totalWidth;
+	}
+	
+	public double getValueDistanceY(double distanceOnCanvas){
+		Axis verticalAxis = yAxis;
+		if(verticalAxis.isHorizontal()){
+			verticalAxis = xAxis;
+		}
+		int totalWidth = canvas.getWidth() - leftPadding - rightPadding;
+		double visibleLength = verticalAxis.getMax() - verticalAxis.getMin();
+		return distanceOnCanvas * visibleLength / totalWidth;
+	}
+	
+	public double getCanvasDistanceX(double distanceInValue){
+		Axis horizontalAxis = xAxis;
+		if(!horizontalAxis.isHorizontal()){
+			horizontalAxis = yAxis;
+		}
+		int totalWidth = canvas.getWidth() - leftPadding - rightPadding;
+		double visibleLength = horizontalAxis.getMax() - horizontalAxis.getMin();
+		return distanceInValue * totalWidth / visibleLength;
+	}
+	
+	public double getCanvasDistanceY(double distanceInValue){
+		Axis verticalAxis = yAxis;
+		if(verticalAxis.isHorizontal()){
+			verticalAxis = xAxis;
+		}
+		int totalWidth = canvas.getWidth() - leftPadding - rightPadding;
+		double visibleLength = verticalAxis.getMax() - verticalAxis.getMin();
+		return distanceInValue * totalWidth / visibleLength;
+	}
 
 	/**
 	 * Model to canvas calculation
@@ -462,28 +519,11 @@ public abstract class IneChartModule2D extends IneChartModule implements HasCoor
 		return ret;
 	}
 
-	public boolean isAutoCalcPadding() {
-		return autoCalcPadding;
+	public int[] getCoords(MouseEvent<?> e){
+		return new int[]{e.getRelativeX(((DrawingAreaGWT) canvas).getWidget().getElement()),
+				e.getRelativeY(((DrawingAreaGWT) canvas).getWidget().getElement())}	;
 	}
-
-	public void setAutoCalcPadding(boolean autocalcPadding) {
-		this.autoCalcPadding = autocalcPadding;
-	}
-
-	/**
-	 * @return the autoScaleViewport
-	 */
-	public boolean isAutoScaleViewport() {
-		return autoScaleViewport;
-	}
-
-	/**
-	 * @param autoScaleViewport the autoScaleViewport to set
-	 */
-	public void setAutoScaleViewport(boolean autoScaleViewport) {
-		this.autoScaleViewport = autoScaleViewport;
-	}
-
+ 	
 	protected boolean isInsideModul(double posOnCanvas, boolean isX){
 		//y
 		if(!isX){
@@ -505,6 +545,29 @@ public abstract class IneChartModule2D extends IneChartModule implements HasCoor
 		if(isInsideModul(posXOnCanvas, true) && isInsideModul(posYOnCanvas, false))
 			return true;
 		return false;
+	}
+	
+
+	public boolean isAutoCalcPadding() {
+		return autoCalcPadding;
+	}
+
+	public void setAutoCalcPadding(boolean autocalcPadding) {
+		this.autoCalcPadding = autocalcPadding;
+	}
+
+	/**
+	 * @return the autoScaleViewport
+	 */
+	public boolean isAutoScaleViewport() {
+		return autoScaleViewport;
+	}
+
+	/**
+	 * @param autoScaleViewport the autoScaleViewport to set
+	 */
+	public void setAutoScaleViewport(boolean autoScaleViewport) {
+		this.autoScaleViewport = autoScaleViewport;
 	}
 	
 	public void setLeftPadding(int leftPadding) {
@@ -595,36 +658,30 @@ public abstract class IneChartModule2D extends IneChartModule implements HasCoor
 		this.minRightPadding = minRightPadding;
 	}
 
-	@Override
-	public boolean isShowLegend() {
-		return showLegend;
-	}
-
-	@Override
-	public void setShowLegend(boolean showLegend) {
-		this.showLegend = showLegend;
-	}
-
-	@Override
-	public Legend getLegend() {
-		return legend;
-	}
-
-	@Override
-	public void setLegendEntries(List<LegendEntry> legendEntries) {
-		this.legendEntries = legendEntries;
-	}
-	
 	protected abstract void onClick(ClickEvent event);
 
 	protected abstract void  onMouseUp(MouseUpEvent event);
 	
-	protected abstract void onMouseOver(MouseOverEvent event);
+	protected abstract void onMouseOver(MouseEvent<?> event);
 
 	protected abstract void onMouseDown(MouseDownEvent event);
 
-	protected abstract void onMouseOut(MouseOutEvent event);
+	protected abstract void onMouseOut(MouseEvent<?> event);
 	
 	protected abstract void onMouseMove(MouseMoveEvent event);
-	
+
+	@Override
+	public void setDisplayEntries(boolean displayEntries) {
+		this.displayLegendEntries = displayEntries;
+	}
+
+	@Override
+	public boolean isDisplayEntries() {
+		return displayLegendEntries;
+	}
+
+	@Override
+	public void setLegendEntries(TreeMap<String, Color> legendEntries) {
+		this.legendEntries = legendEntries;
+	}
 }

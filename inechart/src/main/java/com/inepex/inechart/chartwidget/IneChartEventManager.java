@@ -1,10 +1,9 @@
 package com.inepex.inechart.chartwidget;
 
-import com.google.gwt.core.client.Scheduler;
-import com.google.gwt.core.client.Scheduler.ScheduledCommand;
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;
 import com.google.gwt.event.dom.client.HasAllMouseHandlers;
+import com.google.gwt.event.dom.client.HasClickHandlers;
 import com.google.gwt.event.dom.client.MouseDownEvent;
 import com.google.gwt.event.dom.client.MouseDownHandler;
 import com.google.gwt.event.dom.client.MouseMoveEvent;
@@ -18,8 +17,6 @@ import com.google.gwt.event.dom.client.MouseUpHandler;
 import com.google.gwt.event.dom.client.MouseWheelEvent;
 import com.google.gwt.event.dom.client.MouseWheelHandler;
 import com.google.gwt.event.shared.EventBus;
-import com.google.gwt.event.shared.GwtEvent.Type;
-import com.google.gwt.event.shared.EventHandler;
 import com.google.gwt.event.shared.GwtEvent;
 import com.google.gwt.event.shared.HandlerManager;
 import com.google.gwt.event.shared.HandlerRegistration;
@@ -29,7 +26,7 @@ import com.inepex.inechart.chartwidget.event.ViewportChangeEvent;
 import com.inepex.inechart.chartwidget.event.ViewportChangeHandler;
 
 public class IneChartEventManager implements HasAllMouseHandlers, ViewportChangeHandler,
-	MouseDownHandler, MouseOutHandler, MouseMoveHandler, MouseOverHandler, MouseUpHandler, ClickHandler {
+	MouseDownHandler, MouseOutHandler, MouseMoveHandler, MouseOverHandler, MouseUpHandler, ClickHandler, HasClickHandlers {
 	protected EventBus eventBus = null;
 	protected HandlerManager handlerManager;
 	protected IneChart parent;
@@ -112,6 +109,10 @@ public class IneChartEventManager implements HasAllMouseHandlers, ViewportChange
 		return handlerManager.addHandler(MouseWheelEvent.getType(), handler);
 	}
 
+	@Override
+	public HandlerRegistration addClickHandler(ClickHandler handler) {
+		return handlerManager.addHandler(ClickEvent.getType(), handler);
+	}
 
 	@Override
 	public void onMove(ViewportChangeEvent event, double dx, double dy) {

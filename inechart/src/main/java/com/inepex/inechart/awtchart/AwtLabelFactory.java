@@ -1,16 +1,13 @@
 package com.inepex.inechart.awtchart;
 
 import java.awt.BorderLayout;
-import java.awt.Color;
 import java.awt.Component;
 import java.awt.Dimension;
 import java.awt.FlowLayout;
 import java.awt.Graphics;
 import java.awt.Image;
-import java.awt.Rectangle;
 import java.awt.image.BufferedImage;
 import java.util.ArrayList;
-import java.util.List;
 import java.util.TreeMap;
 
 import javax.swing.BorderFactory;
@@ -20,45 +17,27 @@ import javax.swing.JComponent;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
 
-import com.google.gwt.dom.client.Style.BorderStyle;
-import com.google.gwt.dom.client.Style.Unit;
-import com.google.gwt.dom.client.Style.VerticalAlign;
-import com.google.gwt.user.client.DOM;
-import com.google.gwt.user.client.ui.AbsolutePanel;
-import com.google.gwt.user.client.ui.FlowPanel;
-import com.google.gwt.user.client.ui.HTML;
-import com.google.gwt.user.client.ui.HasVerticalAlignment;
-import com.google.gwt.user.client.ui.HorizontalPanel;
-import com.google.gwt.user.client.ui.InlineHTML;
-import com.google.gwt.user.client.ui.Label;
-import com.google.gwt.user.client.ui.RootPanel;
-import com.google.gwt.user.client.ui.VerticalPanel;
-import com.google.gwt.user.client.ui.Widget;
-import com.inepex.inechart.chartwidget.label.HasLegend;
+import com.inepex.inechart.chartwidget.label.HasLegendEntries;
 import com.inepex.inechart.chartwidget.label.LabelFactoryBase;
-import com.inepex.inechart.chartwidget.label.Legend;
-import com.inepex.inechart.chartwidget.label.LegendEntry;
+import com.inepex.inechart.chartwidget.label.StyledLabel;
 import com.inepex.inechart.chartwidget.label.Text;
 import com.inepex.inechart.chartwidget.label.TextContainer;
-import com.inepex.inechart.chartwidget.misc.VerticalPosition;
+import com.inepex.inechart.chartwidget.misc.HorizontalPosition;
 import com.inepex.inegraphics.awt.ColorUtil;
 import com.inepex.inegraphics.awt.DrawingAreaAwt;
 import com.inepex.inegraphics.shared.DrawingArea;
 
 public class AwtLabelFactory extends LabelFactoryBase {
 	
-	double[] paddingNeeded;
 	JPanel mainPanel;
 	JPanel topPanel;
 	JPanel botPanel;
-	ArrayList<JComponent> topPaddingComponents;
-	ArrayList<JComponent> botPaddingComponents;
-
+	JPanel leftPanel;
+	JPanel rightPanel;
+	
 	public AwtLabelFactory(DrawingArea canvas, JPanel labelPanel) {
 		super(canvas);
 		mainPanel = labelPanel;
-		topPaddingComponents = new ArrayList<JComponent>();
-		botPaddingComponents = new ArrayList<JComponent>();
 		initLayout();
 	}
 	
@@ -72,49 +51,52 @@ public class AwtLabelFactory extends LabelFactoryBase {
 		mainPanel.setLayout(layout);
 		topPanel = new JPanel();
 		botPanel = new JPanel();
+		rightPanel = new JPanel();
+		leftPanel = new JPanel();
 		BoxLayout layout2 = new BoxLayout(topPanel, BoxLayout.Y_AXIS);
 		topPanel.setLayout(layout2);
 		BoxLayout layout3 = new BoxLayout(botPanel, BoxLayout.Y_AXIS);
 		botPanel.setLayout(layout3);
+		BoxLayout layout4 = new BoxLayout(leftPanel, BoxLayout.X_AXIS);
+		topPanel.setLayout(layout4);
+		BoxLayout layout5 = new BoxLayout(rightPanel, BoxLayout.X_AXIS);
+		botPanel.setLayout(layout5);
 		topPanel.setOpaque(false);
 		botPanel.setOpaque(false);
+		leftPanel.setOpaque(false);
+		rightPanel.setOpaque(false);
 		mainPanel.add(topPanel, BorderLayout.NORTH);
 		mainPanel.add(botPanel, BorderLayout.SOUTH);
-//		topPanel.setBorder(BorderFactory.createLineBorder(Color.black));
-//		botPanel.setBorder(BorderFactory.createLineBorder(Color.black));
+		mainPanel.add(rightPanel, BorderLayout.EAST);
+		mainPanel.add(leftPanel, BorderLayout.WEST);
 	}
 	
-	@Override
-	public void update() {
-		topPaddingComponents.clear();
-		botPaddingComponents.clear();
-		topPanel.removeAll();
-		botPanel.removeAll();
-		createChartTitle();
-		for(HasLegend legendOwner : legendOwners){
-			if(legendOwner.isShowLegend()){
-				createLegend(legendOwner);
-			}
-		}
-		JLabel l = new JLabel("JLABEL");
-		l.setBorder(BorderFactory.createLineBorder(Color.GREEN, 1));
-		topPanel.add(l);
-	}
 	
 	protected void positionTextContainerWidget(TextContainer textContainer, JComponent component){
 		JPanel wrapper = createTextContainerJPanel(textContainer);
 		FlowLayout layout = new FlowLayout(FlowLayout.LEFT,(textContainer.getLeftPadding() + textContainer.getRightPadding())/2, (textContainer.getBottomPadding() + textContainer.getTopPadding())/2);
 		wrapper.setLayout(layout);
 		wrapper.add(component);
+		if(isFixedPosition(textContainer)){
+			mainPanel.add(wrapper);
+			wrapper.setLocation(textContainer.getTop(), textContainer.getLeft());
+		}
 		switch (textContainer.getVerticalPosition()) {
 		case Auto:
-		case Middle:
 		case Top:
 			topPanel.add(wrapper);
 			break;
 		case Bottom:
 			botPanel.add(wrapper);			
 			break;
+		case Middle:
+			if(textContainer.getHorizontalPosition() == HorizontalPosition.Left){
+				leftPanel.add(wrapper);
+			}
+			else{
+				rightPanel.add(wrapper);
+			}
+			return;
 		}
 		switch (textContainer.getHorizontalPosition()) {
 		case Auto:
@@ -142,29 +124,30 @@ public class AwtLabelFactory extends LabelFactoryBase {
 		if(chartTitle.getDescription() != null){
 			panel.add(createJLabelFromText(chartTitle.getDescription()));
 		}
-		if(chartTitle.isIncludeInPadding()){
-			if(chartTitle.getVerticalPosition() == VerticalPosition.Bottom){
-				botPaddingComponents.add(panel);
-			}
-			else{
-				topPaddingComponents.add(panel);
-			}
-		}
+		
 		panel.setOpaque(false);
 		positionTextContainerWidget(chartTitle, panel);
 	}
 	
-	protected void createLegend(HasLegend legendOwner){
-		if(!legendOwner.isShowLegend() || legendOwner.getLegend() == null){
+	protected void createLegend(){
+		if(legend == null){
 			return;
 		}
 		JPanel panel = new JPanel();		
-		List<LegendEntry> entries = legendOwner.getLegendEntries();
-		for(LegendEntry e : entries){
-			panel.add(createLegendEntry(e, legendOwner.getLegend()));
+		for(HasLegendEntries legendEntryOwner : legendOwners){
+			if(legendEntryOwner.isDisplayEntries()){
+				TreeMap<String, com.inepex.inechart.chartwidget.properties.Color> legendEntries = legendEntryOwner.getLegendEntries();
+				if(legendEntries == null || legendEntries.size() == 0){
+					continue;
+				}
+				for(String name : legendEntries.keySet()){
+					panel.add(createLegendEntry(name, legendEntries.get(name)));
+				}
+			}
 		}
-		switch(legendOwner.getLegend().getLegendEntryLayout()){
+		switch(legend.getLegendEntryLayout()){
 		case AUTO:
+			panel.setLayout(new FlowLayout());
 			break;
 		case ROW:
 			BoxLayout layout = new BoxLayout(panel, BoxLayout.X_AXIS);
@@ -175,25 +158,20 @@ public class AwtLabelFactory extends LabelFactoryBase {
 			panel.setLayout(layout1);
 			break;
 		}
-		if(legendOwner.getLegend().isIncludeInPadding()){
-			if(legendOwner.getLegend().getVerticalPosition() == VerticalPosition.Bottom){
-				botPaddingComponents.add(panel);
-			}
-			else{
-				topPaddingComponents.add(panel);
-			}
-		}
 		panel.setOpaque(false);
 		positionTextContainerWidget(chartTitle, panel);
 	}
 	
-	protected JLabel createLegendEntry(LegendEntry e, Legend legend){
+	protected JLabel createLegendEntry(String name, com.inepex.inechart.chartwidget.properties.Color color){
 		Image img = new BufferedImage((int)legend.getLegendSymbol().getWidth(), (int) legend.getLegendSymbol().getHeight(), BufferedImage.TYPE_INT_ARGB);
 		Graphics g = img.getGraphics();
-		g.setColor(ColorUtil.getColor(e.getColor().getColor()));
+		g.setColor(ColorUtil.getColor(color.getColor()));
 		g.fillRect(0, 0, (int)legend.getLegendSymbol().getWidth(), (int) legend.getLegendSymbol().getHeight());
 		ImageIcon i = new ImageIcon(img);
-		JLabel entry = createJLabelFromText(e.getText());
+		JLabel entry = new JLabel(name);
+		entry.setFont(DrawingAreaAwt.getFont(legend.getTextProperties().getFontFamily(), legend.getTextProperties().getFontStyle(), legend.getTextProperties().getFontSize()));
+		entry.setForeground(ColorUtil.getColor(legend.getTextProperties().getColor().getColor()));
+		entry.setOpaque(false);
 		entry.setIcon(i);
 		entry.setIconTextGap(legend.getPaddingBetweenTextAndSymbol());
 		return entry;
@@ -217,18 +195,45 @@ public class AwtLabelFactory extends LabelFactoryBase {
 	
 	@Override
 	public double[] getPaddingNeeded() {
-		int top = 0;
-//		for(JComponent c : topPaddingComponents){
-//			if(c.getHeight() > top)
-//				top = c.getHeight();
-//		}
-		top = topPanel.getHeight();
-		int bot = 0;
-		for(JComponent c : botPaddingComponents){
-			if(c.getHeight() > bot)
-				bot = c.getHeight();
-		}
+		return new double[]{
+				topPanel.getHeight(),
+				rightPanel.getWidth(),
+				botPanel.getHeight(),
+				leftPanel.getWidth()
+			};
+	}
 
-		return new double[]{top,0,bot,0};
-	}	
+	@Override
+	protected void clear() {
+		topPanel.removeAll();
+		botPanel.removeAll();
+		rightPanel.removeAll();
+		leftPanel.removeAll();
+		ArrayList<Component> toRemove = new ArrayList<Component>();
+		for(int i=0; i<mainPanel.getComponentCount();i ++){
+			Component c = mainPanel.getComponent(i);
+			if(c != topPanel && c != botPanel && c != rightPanel && c != leftPanel){
+				toRemove.add(c);
+			}
+		}
+		for(Component c : toRemove){
+			mainPanel.remove(c);
+		}
+	}
+
+
+	@Override
+	protected void createStyledLabel(StyledLabel label) {
+		// TODO Auto-generated method stub
+		
+	}
+
+	@Override
+	public void updateStyledLabel(StyledLabel label) {
+		// TODO Auto-generated method stub
+		
+	}
+
+	@Override
+	protected void measurePadding() {}	
 }

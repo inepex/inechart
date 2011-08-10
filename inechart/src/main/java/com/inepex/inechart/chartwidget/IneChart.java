@@ -4,7 +4,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import com.allen_sauer.gwt.log.client.Log;
-import com.google.gwt.core.client.GWT;
+import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.MouseDownEvent;
 import com.google.gwt.event.dom.client.MouseMoveEvent;
 import com.google.gwt.event.dom.client.MouseUpEvent;
@@ -13,10 +13,12 @@ import com.google.gwt.event.shared.SimpleEventBus;
 import com.google.gwt.user.client.ui.AbsolutePanel;
 import com.google.gwt.user.client.ui.Composite;
 import com.inepex.inechart.chartwidget.axes.Axes;
+import com.inepex.inechart.chartwidget.axes.TickFactoryGWT;
 import com.inepex.inechart.chartwidget.barchart.BarChart;
 import com.inepex.inechart.chartwidget.label.ChartTitle;
-import com.inepex.inechart.chartwidget.label.GWTLabelFactory2;
+import com.inepex.inechart.chartwidget.label.GWTLabelFactory;
 import com.inepex.inechart.chartwidget.label.LabelFactoryBase;
+import com.inepex.inechart.chartwidget.label.Legend;
 import com.inepex.inechart.chartwidget.linechart.Curve;
 import com.inepex.inechart.chartwidget.linechart.LineChart;
 import com.inepex.inechart.chartwidget.piechart.PieChart;
@@ -75,15 +77,16 @@ public class IneChart extends Composite{
 		mainPanel.add(drawingArea.getWidget(),0,0);
 		
 		moduls = new ArrayList<IneChartModule>();
-		labelFactory = new GWTLabelFactory2(drawingArea,mainPanel);
+		labelFactory = new GWTLabelFactory(drawingArea,mainPanel);
 		axes = new Axes(drawingArea,labelFactory);
+		axes.setTickFactory(new TickFactoryGWT());
 		
 		//event
 		eventManager = new IneChartEventManager(this);
 		addDomHandler(eventManager, MouseDownEvent.getType());
 		addDomHandler(eventManager, MouseUpEvent.getType());
 		addDomHandler(eventManager, MouseMoveEvent.getType());
-		
+		addDomHandler(eventManager, ClickEvent.getType());
 	}
 	
 	public void setSize(int width, int height){
@@ -120,7 +123,6 @@ public class IneChart extends Composite{
 				}
 			}
 		}
-//		Log.setCurrentLogLevel(Log.LOG_LEVEL_DEBUG);
 		long start2 = System.currentTimeMillis();
 		labelFactory.update();
 		Log.debug(System.currentTimeMillis() - start2 + " ms - labelFactory update");
@@ -179,7 +181,9 @@ public class IneChart extends Composite{
 	 */
 
 	public LineChart createLineChart() {
-		LineChart chart = new LineChart(drawingArea, labelFactory, getAxes());
+		DrawingAreaGWT overlay = new DrawingAreaGWT(canvasWidth, canvasHeight, false);
+		mainPanel.add(overlay.getWidget(),0,0);
+		LineChart chart = new LineChart(drawingArea, labelFactory, getAxes(), overlay, eventManager);
 		moduls.add(chart);
 		eventManager.addViewportChangeHandler(chart.innerEventHandler);
 		return chart;
@@ -308,6 +312,14 @@ public class IneChart extends Composite{
 		return labelFactory.getChartTitle();
 	}
 	
+	public void setLegend(Legend legend){
+		labelFactory.setLegend(legend);
+	}
+	
+	public Legend getLegend(){
+		return labelFactory.getLegend();
+	}
+	
 	public void setEventBus(EventBus eventBus){
 		eventManager.setEventBus(eventBus);
 	}
@@ -322,7 +334,7 @@ public class IneChart extends Composite{
 				for(Curve c : ((LineChart)module).getCurves()){
 					vpLineChart.addCurve(c);
 				}
-				vpLineChart.setShowLegend(false);
+				vpLineChart.setDisplayEntries(false);
 				rs.setModulToSelectFrom(vpLineChart);
 				rs.getAddressedModuls().add((IneChartModule2D) module);
 				break;
@@ -332,13 +344,12 @@ public class IneChart extends Composite{
 				for(DataSet d : ((BarChart) module).getDataSets()){
 					vpBarChart.addDataSet(d,((BarChart) module).getLookout(d));
 				}
-				vpBarChart.setShowLegend(false);
+				vpBarChart.setDisplayEntries(false);
 				rs.setModulToSelectFrom(vpBarChart);
 				rs.getAddressedModuls().add((IneChartModule2D) module);
 				break;
 			}
 		}
-//		rs.setSelectionLookOut(Defaults.selectionLookout());
 		rs.setSelectionMode(RectangularSelectionMode.Horizontal);
 		rs.getAddressedCharts().add(this);
 		rs.setDisplayRectangleAfterSelection(true);

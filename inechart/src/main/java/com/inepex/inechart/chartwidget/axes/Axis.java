@@ -2,7 +2,9 @@ package com.inepex.inechart.chartwidget.axes;
 
 import java.util.ArrayList;
 
+import com.inepex.inechart.chartwidget.Defaults;
 import com.inepex.inechart.chartwidget.IneChartModule2D;
+import com.inepex.inechart.chartwidget.label.StyledLabel;
 import com.inepex.inechart.chartwidget.misc.HasZIndex;
 import com.inepex.inechart.chartwidget.properties.Color;
 import com.inepex.inechart.chartwidget.properties.LineProperties;
@@ -128,6 +130,8 @@ public class Axis implements Comparable<Axis>, HasZIndex{
 	 */
 	protected Tick defaultTick;
 	
+	protected StyledLabel axisLabel;
+	
 	public Axis() {
 		this(null);
 	}
@@ -145,6 +149,7 @@ public class Axis implements Comparable<Axis>, HasZIndex{
 		lowerEnd = -Double.MAX_VALUE;
 		upperEnd = Double.MAX_VALUE;
 		isVisible = true;
+		axisLabel = Defaults.axisLabel();
 	}
 
 	public void addTick(Tick tick) {
@@ -429,5 +434,66 @@ public class Axis implements Comparable<Axis>, HasZIndex{
 
 	public void setAutoCreateGrids(boolean autoCreateGrids) {
 		this.autoCreateGrids = autoCreateGrids;
+	}
+
+	
+	/**
+	 * @return the defaultTick
+	 */
+	public Tick getDefaultTick() {
+		return defaultTick;
+	}
+
+	/**
+	 * If set all of the ticks in this axis will have the same
+	 *  - textFormat
+	 *  - tickLine
+	 *  - gridLine
+	 *  as this tick.
+	 * @param defaultTick
+	 */
+	public void setDefaultTick(Tick defaultTick) {
+		this.defaultTick = defaultTick;
+	}
+
+	/**
+	 * @return the axisDataType
+	 */
+	public AxisDataType getAxisDataType() {
+		return axisDataType;
+	}
+
+	/**
+	 * Specify that this axis has a {@link AxisDataType#Number} or {@link AxisDataType#Time} domain.
+	 * @param axisDataType the axisDataType to set
+	 */
+	public void setAxisDataType(AxisDataType axisDataType) {
+		this.axisDataType = axisDataType;
+	}
+
+	/**
+	 * @return the fixedPosition
+	 */
+	public double getFixedPosition() {
+		return fixedPosition;
+	}
+
+	/**
+	 * @param fixedPosition the fixedPosition to set
+	 */
+	public void setFixedPosition(double fixedPosition) {
+		this.fixedPosition = fixedPosition;
+	}
+	
+	public StyledLabel getAxisLabel() {
+		return axisLabel;
+	}
+	
+	public void setAxisLabel(StyledLabel axisLabel) {
+		this.axisLabel = axisLabel;
+	}
+	
+	public void setAxisLabel(String axisLabel) {
+		this.axisLabel.getText().setText(axisLabel);
 	}
 }

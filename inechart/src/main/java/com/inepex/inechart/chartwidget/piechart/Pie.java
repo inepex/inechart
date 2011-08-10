@@ -48,11 +48,5 @@ public class Pie{
 		}
 
 	}
-	
-	protected void setLegendEntries(){
-//		for(String key : sliceMap.keySet()){
-//			Slice s = sliceMap.get(key);
-//			s.setName(new StyledLabel(s.getName().getText() + " " + dataMap.get(key) + " " + Math.round(percentages.get(key)) + "%"));
-//		}
-	}
+
 }

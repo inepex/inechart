@@ -1,6 +1,5 @@
 package com.inepex.inechart.chartwidget;
 
-import com.inepex.inechart.chartwidget.label.LabelFactoryBase;
 import com.inepex.inegraphics.shared.DrawingArea;
 import com.inepex.inegraphics.shared.GraphicalObjectContainer;
 

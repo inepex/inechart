@@ -1,5 +1,11 @@
 package com.inepex.inechart.chartwidget;
 
+import com.inepex.inechart.chartwidget.label.StyledLabel;
+import com.inepex.inechart.chartwidget.label.Text;
+import com.inepex.inechart.chartwidget.label.TextContainer;
+import com.inepex.inechart.chartwidget.linechart.LineChart.PointSelectionMode;
+import com.inepex.inechart.chartwidget.misc.HorizontalPosition;
+import com.inepex.inechart.chartwidget.misc.VerticalPosition;
 import com.inepex.inechart.chartwidget.properties.Color;
 import com.inepex.inechart.chartwidget.properties.LineProperties;
 import com.inepex.inechart.chartwidget.properties.ShapeProperties;
@@ -47,8 +53,18 @@ public class Defaults {
 	public static final TextProperties chartTitle_Name = new TextProperties("Arial, sans-serif", 18, "normal", "bold");
 	public static final TextProperties chartTitle_Description = new TextProperties("Arial, sans-serif", 12, "normal", "normal", new Color("#8d8d8d"));	
 	public static final ShapeProperties chartTitleBackground = new ShapeProperties(new Color("white", 0));
+	//axis
+	public static final int tickLength = 7;
 	public static TextProperties tickTextProperties(){
 		return  new TextProperties("Calibri, Verdana, Arial, sans-serif", 12, "normal", "normal", color());
+	}
+	public static TextContainer tickTextContainer(){
+		TextContainer tc = new TextContainer(VerticalPosition.Auto, HorizontalPosition.Auto, new ShapeProperties(new LineProperties(0, new Color("black")), new Color("white", 0.7)));
+		tc.setPadding(2);
+		return tc;
+	}
+	public static StyledLabel axisLabel(){
+		return new StyledLabel(VerticalPosition.Auto, HorizontalPosition.Auto, new ShapeProperties(new LineProperties(0, new Color("black")), new Color("white", 0.7)), new Text(""));
 	}
 	//modul2d
 	public static LineProperties gridLine(){
@@ -68,6 +84,9 @@ public class Defaults {
 	}
 	public static final double fillOpacity = 0.4;
 	public static final double lineWidth = 2.1;
+	public static final PointSelectionMode selectPoint = PointSelectionMode.On_Click;
+	public static final int pointMouseOverRadius = 10;
+	
 	//shadow
 	public static final double shadowOffsetX = 1.2;
 	public static final double shadowOffsetY = 2.4;

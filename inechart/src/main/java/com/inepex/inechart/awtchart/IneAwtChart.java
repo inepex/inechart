@@ -66,6 +66,7 @@ public class IneAwtChart  extends JLayeredPane {
 		
 		moduls = new ArrayList<IneChartModule>();
 		axes = new Axes(drawingArea,labelFactory);
+		axes.setTickFactory(new AwtTickFactory());
 		
 		initLayout();
 		
@@ -182,7 +183,11 @@ public class IneAwtChart  extends JLayeredPane {
 				}
 			}
 			axes.updateWithOutAutoTickCreation();
+			
+			validate();
 		}
+		
+		
 		//FIXME think about removing focus...
 		// update moduls if present, update only focused
 		if (focus != null) {

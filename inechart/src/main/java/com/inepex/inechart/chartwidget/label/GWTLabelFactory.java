@@ -1,30 +1,23 @@
 package com.inepex.inechart.chartwidget.label;
 
-
-import java.util.List;
 import java.util.TreeMap;
 
 import com.google.gwt.dom.client.Style.BorderStyle;
-import com.google.gwt.dom.client.Style.Float;
 import com.google.gwt.dom.client.Style.Unit;
-import com.google.gwt.dom.client.Style.VerticalAlign;
 import com.google.gwt.user.client.DOM;
 import com.google.gwt.user.client.ui.AbsolutePanel;
-import com.google.gwt.user.client.ui.Composite;
 import com.google.gwt.user.client.ui.FlowPanel;
-import com.google.gwt.user.client.ui.Grid;
 import com.google.gwt.user.client.ui.HTML;
-import com.google.gwt.user.client.ui.HTMLPanel;
-import com.google.gwt.user.client.ui.HasHorizontalAlignment;
 import com.google.gwt.user.client.ui.HasVerticalAlignment;
 import com.google.gwt.user.client.ui.HorizontalPanel;
 import com.google.gwt.user.client.ui.InlineHTML;
 import com.google.gwt.user.client.ui.Label;
-import com.google.gwt.user.client.ui.LayoutPanel;
-import com.google.gwt.user.client.ui.Panel;
 import com.google.gwt.user.client.ui.RootPanel;
 import com.google.gwt.user.client.ui.VerticalPanel;
 import com.google.gwt.user.client.ui.Widget;
+import com.inepex.inechart.chartwidget.misc.HorizontalPosition;
+import com.inepex.inechart.chartwidget.properties.Color;
+import com.inepex.inechart.chartwidget.properties.TextProperties;
 import com.inepex.inegraphics.shared.DrawingArea;
 
 /**
@@ -35,145 +28,126 @@ import com.inepex.inegraphics.shared.DrawingArea;
  */
 public class GWTLabelFactory extends LabelFactoryBase{
 	AbsolutePanel chartMainPanel;
-	VerticalPanel mainPanel;
-	Grid topTable;
-	Grid midTable;
-	Grid botTable;
+	FlowPanel mainPanel;
 	TreeMap<TextContainer, Widget> textContainerWidgetMap;
-	double[] paddingNeeded;
+	TreeMap<TextContainer, Widget> detachedWidgetMap;
 	int basezIndex;
+	FlowPanel topPanel;
+	FlowPanel botPanel;
+	FlowPanel leftPanel;
+	FlowPanel rightPanel;
+	FlowPanel rightWrapper;
+	FlowPanel leftWrapper;
+	
 
 	public GWTLabelFactory(DrawingArea canvas, AbsolutePanel chartMainPanel) {
 		super(canvas);
 		this.chartMainPanel = chartMainPanel;
 		textContainerWidgetMap = new TreeMap<TextContainer, Widget>();
+		detachedWidgetMap = new TreeMap<TextContainer, Widget>();
 		initLayout();
 	}
-	
+
 	private void initLayout(){
-		mainPanel = new VerticalPanel();
+		mainPanel = new FlowPanel();
 		chartMainPanel.add(mainPanel, 0, 0);
 		mainPanel.setPixelSize(canvas.getWidth(), canvas.getHeight());
-//		basezIndex = DOM.getIntStyleAttribute(chartMainPanel.getElement(), "zIndex");
-		basezIndex = 100;
-		DOM.setIntStyleAttribute(mainPanel.getElement(), "zIndex", basezIndex-1);
-		topTable = new Grid(1, 3);
-		midTable = new Grid(1, 3);
-		botTable = new Grid(1, 3);
-		initGrid(topTable);
-		initGrid(midTable);
-		initGrid(botTable);
-		midTable.setHeight("100%");
-		mainPanel.setCellHeight(midTable, "100%");
-	}
+		DOM.setStyleAttribute(mainPanel.getElement(), "position", "realtive");
+		topPanel = new FlowPanel();
+		botPanel = new FlowPanel();
+		
+		leftPanel = new FlowPanel();
+		rightPanel = new FlowPanel();
+		leftWrapper = new FlowPanel();
+		rightWrapper = new FlowPanel();
+		leftWrapper.add(leftPanel);
+		rightWrapper.add(rightPanel);
+		
+		DOM.setStyleAttribute(mainPanel.getElement(), "position", "realtive");
+		DOM.setStyleAttribute(topPanel.getElement(), "position", "absolute");
+		DOM.setStyleAttribute(topPanel.getElement(), "top", "0px");
+		DOM.setStyleAttribute(botPanel.getElement(), "position", "absolute");
+		DOM.setStyleAttribute(botPanel.getElement(), "bottom", "0px");
+		DOM.setStyleAttribute(topPanel.getElement(), "width", "100%");
+		DOM.setStyleAttribute(botPanel.getElement(), "width", "100%");
 	
-	private void initGrid(Grid grid){
-		grid.setWidth("100%");
-//		grid.getElement().getStyle().setPadding(2, Unit.PX);
-		grid.setCellSpacing(0);
-		grid.setCellPadding(1);
-		grid.getCellFormatter().setWidth(0, 1, "100%");
-		grid.setBorderWidth(0);
-		grid.getCellFormatter().setHorizontalAlignment(0, 0, HasHorizontalAlignment.ALIGN_LEFT);
-		grid.getCellFormatter().setHorizontalAlignment(0, 1, HasHorizontalAlignment.ALIGN_CENTER);
-		grid.getCellFormatter().setHorizontalAlignment(0, 2, HasHorizontalAlignment.ALIGN_CENTER);
-		for(int i=0;i<3;i++){
-			grid.setWidget(0, i, new FlowPanel());
-		}
-		mainPanel.add(grid);
+		DOM.setStyleAttribute(leftWrapper.getElement(), "position", "absolute");
+		DOM.setStyleAttribute(leftPanel.getElement(), "display", "table-cell");
+		DOM.setStyleAttribute(leftPanel.getElement(), "verticalAlign", "middle");
+		DOM.setStyleAttribute(rightWrapper.getElement(), "position", "absolute");
+		DOM.setStyleAttribute(rightPanel.getElement(), "display", "table-cell");
+		DOM.setStyleAttribute(rightPanel.getElement(), "verticalAlign", "middle");
+		DOM.setStyleAttribute(leftWrapper.getElement(), "left", "0px");
+		DOM.setStyleAttribute(rightWrapper.getElement(), "right", "0px");
+		
+		//the position and the height must be set later of sidepanelss
+		mainPanel.add(topPanel);
+		mainPanel.add(botPanel);
+		mainPanel.add(rightWrapper);
+		mainPanel.add(leftWrapper);
 	}
 
-	@Override
-	public void update() {
-		for(Widget w : textContainerWidgetMap.values()){
-			w.removeFromParent();
-		}
-		textContainerWidgetMap.clear();
-		//first add textContainers which has true value of includeInPadding
-		if(chartTitle != null && chartTitle.includeInPadding){
-			createChartTitle();
-		}
-		for(HasLegend legendOwner:legendOwners){
-			if(legendOwner.isShowLegend() && legendOwner.getLegend().includeInPadding){
-				createLegend(legendOwner);
-			}
-		}
-		measurePadding();
-		
-		if(chartTitle != null && !chartTitle.includeInPadding){
-			createChartTitle();
-		}
-		for(HasLegend legendOwner:legendOwners){
-			if(legendOwner.isShowLegend() && !legendOwner.getLegend().includeInPadding){
-				createLegend(legendOwner);
-			}
-		}
-	}
-	
-	public void update(boolean forced){
-		if(forced){
-			
-		}
-		if(chartTitle != null && !textContainerWidgetMap.containsKey(chartTitle)){
-			createChartTitle();
-		}
-		for(HasLegend legendOwner:legendOwners){
-			if(legendOwner.isShowLegend() && !textContainerWidgetMap.containsKey(legendOwner.getLegend())){
-				createLegend(legendOwner);
-			}
-			if(!legendOwner.isShowLegend() && textContainerWidgetMap.containsKey(legendOwner.getLegend())){
-				textContainerWidgetMap.get(legendOwner.getLegend()).removeFromParent();
-				textContainerWidgetMap.remove(legendOwner.getLegend());
-			}
-		}
-	}
-	
 	protected void positionTextContainerWidget(TextContainer textContainer, Widget widget){
-		Grid grid = null;
-		switch (textContainer.verticalPosition) {
-		case Auto:
-		case Top:
-			grid = topTable;
-			break;
-		case Bottom:
-			grid = botTable;
-			break;
-		case Middle:
-			grid = midTable;
-			break;
-		}
-		switch (textContainer.horizontalPosition) {
-		case Auto:
-		case Left:
-			insertElementInGrid(grid, 0, widget);
-			break;
-		case Middle:
-			insertElementInGrid(grid, 1, widget);
-			break;
-		case Right:
-			insertElementInGrid(grid, 2, widget);
-			break;
-		}
-	}
-	
-	protected void insertElementInGrid(Grid grid, int column, Widget widgetToInsert){
-		DOM.setIntStyleAttribute(widgetToInsert.getElement(), "zIndex", basezIndex+1);
-		Widget w = grid.getWidget(0, column);
-		if(w != null){
-			((Panel)w).add(widgetToInsert);
+		if(textContainer.getTop() >= 0 || textContainer.getLeft() >= 0){
+			DOM.setStyleAttribute(widget.getElement(), "position", "absolute");
+			DOM.setStyleAttribute(widget.getElement(), "left", textContainer.getLeft()+"px");
+			DOM.setStyleAttribute(widget.getElement(), "top", textContainer.getTop()+"px");
+			mainPanel.add(widget);
 		}
 		else{
-			FlowPanel fp = new FlowPanel();
-			fp.add(widgetToInsert);
-			grid.setWidget(0, column, fp);
-		}	
+			switch (textContainer.verticalPosition) {
+			case Auto:
+			case Top:
+				topPanel.add(widget);
+				break;
+			case Bottom:
+				botPanel.add(widget);			
+				break;
+			case Middle:
+				if(textContainer.horizontalPosition == HorizontalPosition.Left){
+					leftPanel.add(widget);
+				}
+				else{
+					rightPanel.add(widget);
+				}
+				return;
+			}
+			switch (textContainer.horizontalPosition) {
+			case Auto:
+			case Left:
+				DOM.setStyleAttribute(widget.getElement(), "cssFloat", "left");
+				break;
+			case Middle:
+				DOM.setStyleAttribute(widget.getElement(), "clear", "both");
+				DOM.setStyleAttribute(widget.getElement(), "marginLeft", "auto");
+				DOM.setStyleAttribute(widget.getElement(), "marginRight", "auto");
+				break;
+			case Right:
+				DOM.setStyleAttribute(widget.getElement(), "cssFloat", "right");
+				break;
+			}
+		}
 	}
 	
+	@Override
 	protected void createChartTitle(){
 		if(chartTitle == null){
 			return;
 		}
-		VerticalPanel vp = new VerticalPanel();
+		VerticalPanel vp = null;
+		if(detachedWidgetMap.containsKey(chartTitle)){
+			Widget w = detachedWidgetMap.get(chartTitle);
+			if(w != null){
+				vp = (VerticalPanel) w;
+				vp.clear();
+			}
+			else{
+				detachedWidgetMap.put(chartTitle, vp);
+			}
+		}
+		if(vp == null){
+			vp = new VerticalPanel();
+		}
 		setTextContainerStyleForWidget(chartTitle, vp);
 		if(chartTitle.title != null){
 			vp.add(createHTMLFromText(chartTitle.title));
@@ -181,61 +155,87 @@ public class GWTLabelFactory extends LabelFactoryBase{
 		if(chartTitle.description != null){
 			vp.add(createHTMLFromText(chartTitle.description));
 		}
-		textContainerWidgetMap.put(chartTitle, vp);
-		positionTextContainerWidget(chartTitle, vp);
+		if(!detachedWidgetMap.containsKey(chartTitle)){
+			textContainerWidgetMap.put(chartTitle, vp);
+			positionTextContainerWidget(chartTitle, vp);
+		}
 	}
 	
-	protected void createLegend(HasLegend legendOwner){
-		if(!legendOwner.isShowLegend() || legendOwner.getLegend() == null){
+	@Override
+	protected void createLegend(){
+		if(legend == null){
 			return;
 		}
-		FlowPanel fp = new FlowPanel();
-		fp.setWidth("100%");
-		
-		List<LegendEntry> entries = legendOwner.getLegendEntries();
-		switch(legendOwner.getLegend().legendEntryLayout){
-		case AUTO:
-		case ROW:
-			HorizontalPanel hp = new HorizontalPanel();
-			for(LegendEntry e : entries){
-				hp.add(createLegendEntry(e, legendOwner.getLegend()));
+		FlowPanel fp = null;
+		if(detachedWidgetMap.containsKey(legend)){
+			Widget w = detachedWidgetMap.get(legend);
+			if(w != null){
+				fp = (FlowPanel) w;
+				fp.clear();
 			}
-			fp.add(hp);
-			break;
-		case COLUMN:
-			VerticalPanel vp = new VerticalPanel();
-			for(LegendEntry e : entries){
-				vp.add(createLegendEntry(e, legendOwner.getLegend()));
+			else{
+				detachedWidgetMap.put(legend, fp);
 			}
-			fp.add(vp);
-			break;
 		}
-		setTextContainerStyleForWidget(legendOwner.getLegend(), fp);
-		textContainerWidgetMap.put(legendOwner.getLegend(), fp);
-		positionTextContainerWidget(legendOwner.getLegend(), fp);
+		if(fp == null){
+			fp = new FlowPanel();
+		}	
+		for(HasLegendEntries legendEntryOwner : legendOwners){
+			if(legendEntryOwner.isDisplayEntries()){
+				TreeMap<String, Color> legendEntries = legendEntryOwner.getLegendEntries();
+				if(legendEntries == null || legendEntries.size() == 0){
+					continue;
+				}
+				switch(legend.legendEntryLayout){
+				case AUTO:
+					for(String e : legendEntries.keySet()){
+						Widget entryW = createLegendEntry(e, legendEntries.get(e), legend);
+						DOM.setStyleAttribute(entryW.getElement(), "cssFloat", "left");
+						fp.add(entryW);
+					}
+					break;
+				case ROW:
+					HorizontalPanel hp = new HorizontalPanel();
+					for(String e : legendEntries.keySet()){
+						hp.add(createLegendEntry(e, legendEntries.get(e), legend));
+					}
+					fp.add(hp);
+					break;
+				case COLUMN:
+					VerticalPanel vp = new VerticalPanel();
+					for(String e : legendEntries.keySet()){
+						vp.add(createLegendEntry(e, legendEntries.get(e), legend));
+					}
+					fp.add(vp);
+					break;
+				}
+			}
+		}
+		setTextContainerStyleForWidget(legend, fp);
+		if(!detachedWidgetMap.containsKey(legend)){
+			textContainerWidgetMap.put(legend, fp);
+			positionTextContainerWidget(legend, fp);
+		}
 	}
 	
-	protected HorizontalPanel createLegendEntry(LegendEntry e, Legend legend){
+	protected HorizontalPanel createLegendEntry(String name, Color color, Legend legend){
 		HorizontalPanel hp = new HorizontalPanel();
-		Label color = new Label();
-		color.setPixelSize((int)legend.legendSymbol.getWidth(), (int)legend.legendSymbol.getHeight());
-		color.getElement().getStyle().setBackgroundColor(e.color.getColor());
-		color.getElement().getStyle().setMarginRight(legend.paddingBetweenTextAndSymbol, Unit.PX);
-		hp.add(color);
-		HTML text = createHTMLFromText(e.text);
+		Label colorL = new Label();
+		colorL.setPixelSize((int)legend.legendSymbol.getWidth(), (int)legend.legendSymbol.getHeight());
+		colorL.getElement().getStyle().setBackgroundColor(color.getColor());
+		colorL.getElement().getStyle().setMarginRight(legend.paddingBetweenTextAndSymbol, Unit.PX);
+		hp.add(colorL);
+		HTML text = new HTML(name);
 		hp.add(text);
-		hp.setCellVerticalAlignment(color, HasVerticalAlignment.ALIGN_MIDDLE);
-		hp.setCellVerticalAlignment(text, HasVerticalAlignment.ALIGN_BOTTOM);
-//		hp.getElement().getStyle().setMargin(legend.paddingBetweenEntries, Unit.PX);
+		applyTextProperties(legend.textProperties, text);
+		hp.setCellVerticalAlignment(colorL, HasVerticalAlignment.ALIGN_MIDDLE);
+		hp.setCellVerticalAlignment(text, HasVerticalAlignment.ALIGN_MIDDLE);
 		DOM.setStyleAttribute(hp.getElement(), "margin", legend.paddingBetweenEntries/2+"px");
 		return hp;
 	}
 	
 	protected void setTextContainerStyleForWidget(TextContainer textContainer, Widget widget){
 		widget.getElement().getStyle().setProperty("filter", "'progid:DXImageTransform.Microsoft.Alpha(Opacity="+textContainer.getBackground().getFillColor().getAlpha()+")'");
-//		widget.getElement().getStyle().setProperty("filter", "alpha(opacity="+textContainer.getBackground().getFillColor().getAlpha()+")");
-//		widget.getElement().getStyle().setProperty("msFilter", "progid:DXImageTransform.Microsoft.Alpha(Opacity="+textContainer.getBackground().getFillColor().getAlpha()*100+")");
-//		widget.getElement().setPropertyString("-ms-filter", "progid:DXImageTransform.Microsoft.Alpha(Opacity="+textContainer.getBackground().getFillColor().getAlpha()*100+")");
 		widget.getElement().getStyle().setProperty("opacity", ""+textContainer.getBackground().getFillColor().getAlpha());
 		
 		widget.getElement().getStyle().setBackgroundColor(textContainer.getBackground().getFillColor().getColor());
@@ -250,40 +250,106 @@ public class GWTLabelFactory extends LabelFactoryBase{
 	
 	protected InlineHTML createHTMLFromText(Text text){
 		InlineHTML html = new InlineHTML(text.text);
-		html.getElement().getStyle().setFontSize(text.getTextProperties().getFontSize(), Unit.PX);
-		html.getElement().getStyle().setProperty("fontFamily", text.getTextProperties().getFontFamily());
-		html.getElement().getStyle().setProperty("color", text.getTextProperties().getColor().getColor());
-		html.getElement().getStyle().setProperty("fontStyle", text.getTextProperties().getFontStyle());
-		html.getElement().getStyle().setProperty("fontWeight", text.getTextProperties().getFontWeight());
+		applyTextProperties(text.textProperties, html);
 		html.setWordWrap(false);
 		return html;
 	}
 	
-	@Override
-	public double[] getPaddingNeeded() {
-		return paddingNeeded;
+	protected void applyTextProperties(TextProperties tp, Widget widget){
+		widget.getElement().getStyle().setFontSize(tp.getFontSize(), Unit.PX);
+		widget.getElement().getStyle().setProperty("fontFamily", tp.getFontFamily());
+		widget.getElement().getStyle().setProperty("color", tp.getColor().getColor());
+		widget.getElement().getStyle().setProperty("fontStyle", tp.getFontStyle());
+		widget.getElement().getStyle().setProperty("fontWeight", tp.getFontWeight());
 	}
 	
 	protected void measurePadding(){
 		boolean attached = mainPanel.isAttached();
 		if(!attached){
-			RootPanel.get().add(mainPanel);
+			AbsolutePanel ap = new AbsolutePanel();
+			ap.setPixelSize(canvas.getWidth(), canvas.getHeight());
+			RootPanel.get().add(ap);
+			ap.add(mainPanel);
 		}
-		int top = midTable.getElement().getAbsoluteTop() - mainPanel.getAbsoluteTop();
-		int left = midTable.getElement().getAbsoluteLeft() - mainPanel.getAbsoluteLeft();
-		int width = midTable.getElement().getClientWidth();
-		int height = midTable.getElement().getClientHeight();
-		
+		int top = topPanel.getElement().getOffsetHeight();
+		int bottom = botPanel.getElement().getOffsetHeight();
+		DOM.setStyleAttribute(leftWrapper.getElement(), "top", top+"px");
+		DOM.setStyleAttribute(rightWrapper.getElement(), "top", top+"px");
+		DOM.setStyleAttribute(leftPanel.getElement(), "height", canvas.getHeight() - top - bottom + "px");
+		DOM.setStyleAttribute(rightPanel.getElement(), "height", canvas.getHeight() - top - bottom + "px");
+		int left = leftPanel.getElement().getOffsetWidth();
+		int right = rightPanel.getElement().getOffsetWidth();
 		if(!attached){
-			RootPanel.get().remove(mainPanel);
+			RootPanel.get().remove(mainPanel.getParent());
 			chartMainPanel.add(mainPanel, 0, 0);
 		}
-		this.paddingNeeded =  new double[]{
-				top,
-				canvas.getWidth()-left-width,
-				canvas.getHeight()-top-height,
-				left};
+		this.paddingNeeded =  new double[]{top,right,bottom,left};
 	}
 
+	@Override
+	protected void clear() {
+		for(Widget w : textContainerWidgetMap.values()){
+			w.removeFromParent();
+		}
+		textContainerWidgetMap.clear();
+	}
+
+	@Override
+	protected void createStyledLabel(StyledLabel label) {
+		if(chartTitle == null){
+			return;
+		}
+		Widget labelW = createHTMLFromText(label.getText());
+		setTextContainerStyleForWidget(label, labelW);
+		
+		textContainerWidgetMap.put(label, labelW);
+		positionTextContainerWidget(label, labelW);
+	}
+
+	@Override
+	public void updateStyledLabel(StyledLabel label) {
+		if(isFixedPosition(label) && textContainerWidgetMap.containsKey(label)){
+			Widget w = textContainerWidgetMap.get(label);
+			DOM.setStyleAttribute(w.getElement(), "position", "absolute");
+			DOM.setStyleAttribute(w.getElement(), "top", label.top + "px");
+			DOM.setStyleAttribute(w.getElement(), "left", label.left + "px");
+		}
+	}
+
+	public Widget getLegendWidget(){
+		Widget w = null;
+		if(textContainerWidgetMap.containsKey(legend)){
+			w = textContainerWidgetMap.get(legend);
+			w.removeFromParent();
+			detachedWidgetMap.put(legend, w);
+			textContainerWidgetMap.remove(legend);
+		}
+		else if(detachedWidgetMap.containsKey(legend)){
+			w = detachedWidgetMap.get(legend);
+		}
+		else{
+			w = new FlowPanel();
+			detachedWidgetMap.put(legend, w);
+		}
+		return w;
+	}
+	
+	public Widget getChartTitleWidget(){
+		Widget w = null;
+		if(textContainerWidgetMap.containsKey(chartTitle)){
+			w = textContainerWidgetMap.get(chartTitle);
+			w.removeFromParent();
+			detachedWidgetMap.put(chartTitle, w);
+			textContainerWidgetMap.remove(chartTitle);
+		}
+		else if(detachedWidgetMap.containsKey(chartTitle)){
+			w = detachedWidgetMap.get(chartTitle);
+		}
+		else{
+			w = new VerticalPanel(); 
+			detachedWidgetMap.put(chartTitle, w);
+		}
+		return w;
+	}
 	
 }

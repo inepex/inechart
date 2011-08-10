@@ -19,7 +19,6 @@ public class ChartTitle extends TextContainer{
 		super();
 		this.title = title;
 		this.description = description;
-		includeInPadding = true;
 	}
 	/**
 	 * @return the title
