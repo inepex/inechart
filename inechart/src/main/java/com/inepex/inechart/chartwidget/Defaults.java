@@ -105,7 +105,7 @@ public class Defaults {
 		return new ShapeProperties(new LineProperties(2, color()), new Color(colorString, 0.8));
 	}
 	//textcontainer
-	public static final TextProperties textContainerText = new TextProperties("Arial, sans-serif", 10);
+	public static final TextProperties textContainerText = new TextProperties("Arial, sans-serif", 11);
 	public static final ShapeProperties textContainerBackground = new ShapeProperties(new LineProperties(0, new Color("gray")), new Color("#ffffff", 0.8));
 	public static final int textContainerPadding_H = 4;
 	public static final int textContainerPadding_V = 2;

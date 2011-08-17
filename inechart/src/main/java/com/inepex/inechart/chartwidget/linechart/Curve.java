@@ -96,6 +96,11 @@ public class Curve implements HasZIndex, HasShadow, Comparable<Curve>{
 	 */
 	public void setdDataSet(DataSet dataSet) {
 		this.dataSet = dataSet;
+		discontinuities.clear();
+		selectedPoints.clear();
+//		toCanvasYFills.clear();
+//		toCurveFills.clear();
+//		toYFills.clear();
 	}
 
 	/**

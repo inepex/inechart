@@ -418,7 +418,7 @@ public abstract class IneChartModule2D extends IneChartModule implements HasCoor
 	 * @param canvasX
 	 * @return x or y (depends on horizontal axis)
 	 */
-	public double getValueForCanvasX(int canvasX){
+	public double getValueForCanvasX(double canvasX){
 		Axis horizontalAxis = xAxis;
 		if(!horizontalAxis.isHorizontal()){
 			horizontalAxis = yAxis;
@@ -444,7 +444,7 @@ public abstract class IneChartModule2D extends IneChartModule implements HasCoor
 	 * @param canvasY
 	 * @return y or x (depends on vertical axis)
 	 */
-	public double getValueForCanvasY(int canvasY){
+	public double getValueForCanvasY(double canvasY){
 		Axis verticalAxis = yAxis;
 		if(verticalAxis.isHorizontal()){
 			verticalAxis = yAxis;
@@ -471,7 +471,7 @@ public abstract class IneChartModule2D extends IneChartModule implements HasCoor
 	 * @param canvasY
 	 * @return model's [x,y]
 	 */
-	public double[] getValuePair(int canvasX, int canvasY){
+	public double[] getValuePair(double canvasX, double canvasY){
 		double[] ret = new double[2];
 		if (xAxis.isHorizontal())
 			ret[0] = getValueForCanvasX(canvasX);

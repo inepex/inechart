@@ -15,6 +15,11 @@ public class PointSelectionEvent extends IneChartEvent<PointSelectionHandler> {
 	}
 	
 	public PointSelectionEvent(boolean selected,
+			double[] point){
+		this(selected, point, null);
+	}
+	
+	public PointSelectionEvent(boolean selected,
 			double[] point, Curve curve) {
 		super(null);
 		this.selected = selected;

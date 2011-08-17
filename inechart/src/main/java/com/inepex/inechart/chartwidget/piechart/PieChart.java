@@ -21,7 +21,6 @@ public class PieChart extends IneChartModule2D{
 	
 	Pie pie;
 	boolean showLegend = true;
-	Legend legend = new Legend();
 
 	public PieChart(DrawingArea canvas, LabelFactoryBase labelFactory, Axes axes) {
 		super(canvas, labelFactory, axes, null);

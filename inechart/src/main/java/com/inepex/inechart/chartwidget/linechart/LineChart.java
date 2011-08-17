@@ -766,6 +766,19 @@ public class LineChart extends IneChartModule2D implements PointSelectionHandler
 				justSelected.put(c, actual);
 			}
 		}
+		//update model (curves selectedpoints)
+		for(Curve c : justSelected.keySet()){
+			double[] data = getValuePair(justSelected.get(c)[0], justSelected.get(c)[1]);
+			if(!c.selectedPoints.contains(data)){
+				c.selectedPoints.add(data);
+			}
+		}
+		for(Curve c : justDeselected.keySet()){
+			double[] data = getValuePair(justDeselected.get(c)[0], justDeselected.get(c)[1]);
+			if(c.selectedPoints.contains(data)){
+				c.selectedPoints.remove(data);
+			}
+		}
 		
 		//update overlay
 		for(Curve c : selectedPointsPerCurve.keySet()){
@@ -774,18 +787,60 @@ public class LineChart extends IneChartModule2D implements PointSelectionHandler
 		updateOverLay();
 		
 		//fire events
-		//TODO
+		for(Curve c : justSelected.keySet()){
+			PointSelectionEvent e = new PointSelectionEvent(true, getValuePair(justSelected.get(c)[0], justSelected.get(c)[1]), c);
+			eventManager.fireEvent(e);
+		}
+		for(Curve c : justDeselected.keySet()){
+			PointSelectionEvent e = new PointSelectionEvent(false, getValuePair(justDeselected.get(c)[0], justDeselected.get(c)[1]), c);
+			eventManager.fireEvent(e);
+		}
 	}
 
 	@Override
 	public void onSelect(PointSelectionEvent event) {
-		// TODO Auto-generated method stub
-		
+		Curve curve = event.getCurve();
+		if(curve == null){
+			for(Curve c : curves){
+				if(c.dataSet.getDataPairs().contains(event.getPoint())){
+					curve = c;
+					break;
+				}
+			}
+		}
+		if(curve == null) {
+			return;
+		}
+		if(!curve.selectedPoints.contains(event.getPoint())){
+			curve.selectedPoints.add(event.getPoint());
+		}
+		if(event.getPoint()[0] < xAxis.getMax() && event.getPoint()[0] > xAxis.getMin() && 
+				event.getPoint()[1] < yAxis.getMax() && event.getPoint()[1] > yAxis.getMin()){
+			selectedPointsPerCurve.get(curve).add(getCanvasPosition(event.getPoint()[0], event.getPoint()[1]));
+		}
 	}
 
 	@Override
 	public void onDeselect(PointSelectionEvent event) {
-		// TODO Auto-generated method stub
-		
+		Curve curve = event.getCurve();
+		if(curve == null){
+			for(Curve c : curves){
+				if(c.dataSet.getDataPairs().contains(event.getPoint())){
+					curve = c;
+					break;
+				}
+			}
+		}
+		if(curve == null) {
+			return;
+		}
+		if(curve.selectedPoints.contains(event.getPoint())){
+			curve.selectedPoints.remove(event.getPoint());
+		}
+		if(event.getPoint()[0] < xAxis.getMax() && event.getPoint()[0] > xAxis.getMin() && 
+				event.getPoint()[1] < yAxis.getMax() && event.getPoint()[1] > yAxis.getMin()){
+			selectedPointsPerCurve.get(curve).remove(getCanvasPosition(event.getPoint()[0], event.getPoint()[1]));
+		}
 	}
 }
+

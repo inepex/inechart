@@ -3,7 +3,6 @@ package com.inepex.inechart.chartwidget;
 import java.util.ArrayList;
 import java.util.List;
 
-import com.allen_sauer.gwt.log.client.Log;
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.MouseDownEvent;
 import com.google.gwt.event.dom.client.MouseMoveEvent;
@@ -51,12 +50,7 @@ public class IneChart extends Composite{
 		return isUpdatingInProgress;
 	}
 
-	/**
-	 * @param isUpdatingInProgress the isUpdatingInProgress to set
-	 */
-	public void setUpdatingInProgress(boolean isUpdatingInProgress) {
-		this.isUpdatingInProgress = isUpdatingInProgress;
-	}
+
 
 	// properties
 	private int canvasWidth;
@@ -104,7 +98,7 @@ public class IneChart extends Composite{
 	
 	public void update() {
 		isUpdatingInProgress = true;
-		long start = System.currentTimeMillis();
+//		long start = System.currentTimeMillis();
 		releaseFocusIfPossible();
 		// grant focus if possible and requested
 		if (focus == null) {
@@ -123,14 +117,14 @@ public class IneChart extends Composite{
 				}
 			}
 		}
-		long start2 = System.currentTimeMillis();
+//		long start2 = System.currentTimeMillis();
 		labelFactory.update();
-		Log.debug(System.currentTimeMillis() - start2 + " ms - labelFactory update");
-		start2 = System.currentTimeMillis();
+//		Log.debug(System.currentTimeMillis() - start2 + " ms - labelFactory update");
+//		start2 = System.currentTimeMillis();
 		
 		axes.update();
-		Log.info(System.currentTimeMillis() - start2 + " ms - axes update");
-		start2 = System.currentTimeMillis();
+//		Log.info(System.currentTimeMillis() - start2 + " ms - axes update");
+//		start2 = System.currentTimeMillis();
 		//scale moduls 
 		if (autoScaleModuls){
 			double[] padding = new double[]{0,0,0,0};
@@ -146,8 +140,8 @@ public class IneChart extends Composite{
 				}
 			}
 			axes.updateWithOutAutoTickCreation();
-			Log.info(System.currentTimeMillis() - start2 + " ms - axes second update");
-			start2 = System.currentTimeMillis();
+//			Log.info(System.currentTimeMillis() - start2 + " ms - axes second update");
+//			start2 = System.currentTimeMillis();
 		}
 		//FIXME think about removing focus...
 		// update moduls if present, update only focused
@@ -168,11 +162,11 @@ public class IneChart extends Composite{
 		}
 		drawingArea.addAllGraphicalObject(axes.graphicalObjectContainer);
 		drawingArea.addAllGraphicalObject(labelFactory.graphicalObjectContainer);
-		Log.info(System.currentTimeMillis() - start + " ms - modules update");
-		start = System.currentTimeMillis();
+//		Log.info(System.currentTimeMillis() - start + " ms - modules update");
+//		start = System.currentTimeMillis();
 		drawingArea.update();
-		Log.info(System.currentTimeMillis() - start + " ms - drawingArea update");
-		Log.info("===============================================================");
+//		Log.info(System.currentTimeMillis() - start + " ms - drawingArea update");
+//		Log.info("===============================================================");
 		isUpdatingInProgress = false;
 	}
 

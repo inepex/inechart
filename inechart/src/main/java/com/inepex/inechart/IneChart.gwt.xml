@@ -2,8 +2,8 @@
 <module rename-to='IneChart'>
 	<inherits name="com.google.gwt.user.User" />
 	<inherits name="com.inepex.inegraphics.IneGraphics" />
-
-	<inherits name="com.allen_sauer.gwt.log.gwt-log-DEBUG" />
+	
+<!-- 	<inherits name="com.allen_sauer.gwt.log.gwt-log-DEBUG" /> -->
 
 
 	<source path='chartwidget' />
