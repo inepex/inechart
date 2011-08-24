@@ -184,7 +184,7 @@ public class DrawingAreaGWT extends DrawingArea {
 			canvas.moveTo(x, y + roundedCornerRadius);
 			canvas.quadraticCurveTo(x, y, x + roundedCornerRadius, y);
 			canvas.lineTo(x + width - roundedCornerRadius, y);
-			canvas.quadraticCurveTo(x + width, y, x + width, y - roundedCornerRadius);
+			canvas.quadraticCurveTo(x + width, y, x + width, y + roundedCornerRadius);
 			canvas.lineTo(x + width, y + height - roundedCornerRadius);
 			canvas.quadraticCurveTo(x + width, y + height, x + width - roundedCornerRadius, y + height);
 			canvas.lineTo(x + roundedCornerRadius, y + height);
