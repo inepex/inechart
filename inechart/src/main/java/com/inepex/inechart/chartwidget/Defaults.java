@@ -111,4 +111,11 @@ public class Defaults {
 	public static final int textContainerPadding_V = 2;
 	//legend
 	public static final Rectangle legendSymbol = new Rectangle(28, 9,new ShapeProperties(new LineProperties(0), color()));
+	//intervalchart
+	public static final double yValue = 1.0;
+	public static final String name = "DataSet No. ";
+	public static final ShapeProperties intervalShapeProperties(){
+		return new ShapeProperties(new LineProperties(1.2, null), null);
+	}
+	public static final double intervalRoundedCornerRadius = 3.2;
 }

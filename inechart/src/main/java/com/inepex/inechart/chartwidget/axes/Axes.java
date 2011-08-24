@@ -95,16 +95,30 @@ public class Axes extends IneChartModule {
 				createDefaultTickAndLabelForAxis(axis);
 			}
 			removeAllGOAndLabelRelatedToAxis(axis);
-			createGOsAndLabelsForAxis(axis);
+			createGOsAndLabelsForAxis(axis, true);
 		}
 	}
 	
-	
+	public void updateForPaddingCalculation(){
+		for (Axis axis : axes) {
+			if (axis.autoCreateTicks){
+				// auto calc tick's positions and apply defaults
+				tickFactory.autoCreateTicks(axis);
+				createDefaultTickAndLabelForAxis(axis);
+			}
+			else if(axis.defaultTick != null){
+				//apply default tick properties
+				createDefaultTickAndLabelForAxis(axis);
+			}
+			removeAllGOAndLabelRelatedToAxis(axis);
+			createGOsAndLabelsForAxis(axis, false);
+		}
+	}
 
 	public void updateWithOutAutoTickCreation(){
 		for (Axis axis : axes) {
 			removeAllGOAndLabelRelatedToAxis(axis);
-			createGOsAndLabelsForAxis(axis);
+			createGOsAndLabelsForAxis(axis, true);
 		}
 	}
 	
@@ -314,7 +328,7 @@ public class Axes extends IneChartModule {
 		}
 	}
 
-	void createGOsAndLabelsForAxis(Axis axis) {
+	void createGOsAndLabelsForAxis(Axis axis, boolean storeOrDisplayGOs) {
 		GraphicalObjectContainer goc = new GraphicalObjectContainer();
 		double startX = 0, startY = 0, endX = 0, endY = 0;
 		Axis perpAxis;
@@ -444,17 +458,19 @@ public class Axes extends IneChartModule {
 		paddingAroundAxes.put(axis, paddingAroundAxis);
 		gosPerAxis.put(axis, goc);
 		axisLinePosition.put(axis, axis.isHorizontal() ? startY : startX);
-		graphicalObjectContainer.addAllGraphicalObject(goc);
-		//replace Texts w styledlabel
-		for(Tick t : textMap.keySet()){
-			Text text = textMap.get(t);
-			StyledLabel lbl = new StyledLabel(t.getText());
-			TextPositionerBase.calcTextPosition(text);
-			lbl.setLeft((int) text.getBasePointX());
-			lbl.setTop((int) text.getBasePointY());
-			lbl.copyLookoutProperties(t.textContainer);
-			this.labelsPerAxis.get(axis).add(lbl);
-			labelFactory.addAndDisplayStyledLabel(lbl);
+		if(storeOrDisplayGOs){
+			graphicalObjectContainer.addAllGraphicalObject(goc);
+			//replace Texts w styledlabel
+			for(Tick t : textMap.keySet()){
+				Text text = textMap.get(t);
+				StyledLabel lbl = new StyledLabel(t.getText());
+				TextPositionerBase.calcTextPosition(text);
+				lbl.setLeft((int) text.getBasePointX());
+				lbl.setTop((int) text.getBasePointY());
+				lbl.copyLookoutProperties(t.textContainer);
+				this.labelsPerAxis.get(axis).add(lbl);
+				labelFactory.addAndDisplayStyledLabel(lbl);
+			}
 		}
 	}
 	

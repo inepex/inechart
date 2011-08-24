@@ -14,6 +14,7 @@ import com.google.gwt.user.client.ui.Composite;
 import com.inepex.inechart.chartwidget.axes.Axes;
 import com.inepex.inechart.chartwidget.axes.TickFactoryGWT;
 import com.inepex.inechart.chartwidget.barchart.BarChart;
+import com.inepex.inechart.chartwidget.intervalchart.IntervalChart;
 import com.inepex.inechart.chartwidget.label.ChartTitle;
 import com.inepex.inechart.chartwidget.label.GWTLabelFactory;
 import com.inepex.inechart.chartwidget.label.LabelFactoryBase;
@@ -122,11 +123,12 @@ public class IneChart extends Composite{
 //		Log.debug(System.currentTimeMillis() - start2 + " ms - labelFactory update");
 //		start2 = System.currentTimeMillis();
 		
-		axes.update();
+		
 //		Log.info(System.currentTimeMillis() - start2 + " ms - axes update");
 //		start2 = System.currentTimeMillis();
 		//scale moduls 
 		if (autoScaleModuls){
+			axes.updateForPaddingCalculation();
 			double[] padding = new double[]{0,0,0,0};
 			for (IneChartModule modul : moduls) {
 				if(modul instanceof IneChartModule2D && ((IneChartModule2D) modul).autoCalcPadding){
@@ -142,6 +144,9 @@ public class IneChart extends Composite{
 			axes.updateWithOutAutoTickCreation();
 //			Log.info(System.currentTimeMillis() - start2 + " ms - axes second update");
 //			start2 = System.currentTimeMillis();
+		}
+		else{
+			axes.update();
 		}
 		//FIXME think about removing focus...
 		// update moduls if present, update only focused
@@ -194,6 +199,13 @@ public class IneChart extends Composite{
 		moduls.add(bc);
 		eventManager.addViewportChangeHandler(bc.innerEventHandler);
 		return bc;
+	}
+	
+	public IntervalChart createIntervalChart(){
+		IntervalChart ic = new IntervalChart(drawingArea, labelFactory, axes, eventManager);
+		moduls.add(ic);
+		eventManager.addViewportChangeHandler(ic.innerEventHandler);
+		return ic;
 	}
 
 	Axes getAxes() {
@@ -355,7 +367,13 @@ public class IneChart extends Composite{
 		return viewportSelectorChart;
 	}
 	
-	
+	/**
+	 * Can return null
+	 * @return
+	 */
+	public EventBus getEventBus(){
+		return eventManager.getEventBus();
+	}
 	
 	
 	

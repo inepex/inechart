@@ -241,7 +241,7 @@ public class DataSet {
 		sortCollections();
 		isUpToDate = true;
 		if(name == null){
-			name = "Data Set No.: " + ++autoNameMaxIndex;
+			name = Defaults.name + ++autoNameMaxIndex;
 		}
 		if(color == null){
 			color = colorSet.getNextColor();

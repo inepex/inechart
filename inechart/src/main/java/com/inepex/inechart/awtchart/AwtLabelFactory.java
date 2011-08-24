@@ -235,5 +235,11 @@ public class AwtLabelFactory extends LabelFactoryBase {
 	}
 
 	@Override
-	protected void measurePadding() {}	
+	protected void measurePadding() {}
+
+	@Override
+	protected void removeDisplayedStyledLabel(StyledLabel label) {
+		// TODO Auto-generated method stub
+		
+	}	
 }

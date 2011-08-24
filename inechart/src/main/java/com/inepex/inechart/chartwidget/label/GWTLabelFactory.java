@@ -52,7 +52,7 @@ public class GWTLabelFactory extends LabelFactoryBase{
 		mainPanel = new FlowPanel();
 		chartMainPanel.add(mainPanel, 0, 0);
 		mainPanel.setPixelSize(canvas.getWidth(), canvas.getHeight());
-		DOM.setStyleAttribute(mainPanel.getElement(), "position", "realtive");
+		DOM.setStyleAttribute(mainPanel.getElement(), "position", "relative");
 		topPanel = new FlowPanel();
 		botPanel = new FlowPanel();
 		
@@ -80,7 +80,7 @@ public class GWTLabelFactory extends LabelFactoryBase{
 		DOM.setStyleAttribute(leftWrapper.getElement(), "left", "0px");
 		DOM.setStyleAttribute(rightWrapper.getElement(), "right", "0px");
 		
-		//the position and the height must be set later of sidepanelss
+		//the position and the height must be set later of sidepanels
 		mainPanel.add(topPanel);
 		mainPanel.add(botPanel);
 		mainPanel.add(rightWrapper);
@@ -296,7 +296,7 @@ public class GWTLabelFactory extends LabelFactoryBase{
 
 	@Override
 	protected void createStyledLabel(StyledLabel label) {
-		if(chartTitle == null){
+		if(label == null){
 			return;
 		}
 		Widget labelW = createHTMLFromText(label.getText());
@@ -350,6 +350,16 @@ public class GWTLabelFactory extends LabelFactoryBase{
 			detachedWidgetMap.put(chartTitle, w);
 		}
 		return w;
+	}
+
+	
+	@Override
+	protected void removeDisplayedStyledLabel(StyledLabel label) {
+		Widget w = textContainerWidgetMap.get(label);
+		if(w != null){
+			w.removeFromParent();
+			textContainerWidgetMap.remove(label);
+		}
 	}
 	
 }

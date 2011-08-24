@@ -88,6 +88,8 @@ public abstract class LabelFactoryBase extends IneChartModule{
  	 */
  	public abstract void updateStyledLabel(StyledLabel label);
  	
+ 	protected abstract void removeDisplayedStyledLabel(StyledLabel label);
+ 	
  	protected abstract void measurePadding();
  	
  	public void setChartTitle(ChartTitle chartTitle) {
@@ -112,6 +114,7 @@ public abstract class LabelFactoryBase extends IneChartModule{
 	
 	public void removeStyledLabel(StyledLabel label){
 		styledLabels.remove(label);
+		removeDisplayedStyledLabel(label);
 	}
 	
 	public void addAndDisplayStyledLabel(StyledLabel label){
