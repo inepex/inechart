@@ -113,7 +113,9 @@ public class ViewportChangeEventStack {
 		//remove merged events
 		for(Long time : eventsToMerge.keySet()){
 			ViewportChangeEvent ev = events.get(time);
-			if(addressedModul != null && ev.getAddressedModuls() != null )
+			if(addressedModul != null && ev.getAddressedModuls() != null ){
+				
+			}
 		}
 		
 		return event;
