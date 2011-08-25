@@ -31,6 +31,7 @@ public class IneChartEventManager implements HasAllMouseHandlers, ViewportChange
 	protected HandlerManager handlerManager;
 	protected IneChart parent;
 	
+	
 	public IneChartEventManager(IneChart parent) {
 		this.parent = parent;
 		handlerManager = new HandlerManager(parent);
@@ -54,6 +55,7 @@ public class IneChartEventManager implements HasAllMouseHandlers, ViewportChange
 			eventBus.fireEvent(event);
 	}
 
+	
 	protected void fireInnerEvent(GwtEvent<?> event){
 		handlerManager.fireEvent(event);
 		if(parent.isRedrawNeeded()){
@@ -68,6 +70,7 @@ public class IneChartEventManager implements HasAllMouseHandlers, ViewportChange
 			
 		}
 	}
+	
 	
 	public void addViewportChangeHandler(ViewportChangeHandler handler){
 		handlerManager.addHandler(ViewportChangeEvent.TYPE, handler);
@@ -114,27 +117,7 @@ public class IneChartEventManager implements HasAllMouseHandlers, ViewportChange
 		return handlerManager.addHandler(ClickEvent.getType(), handler);
 	}
 
-	@Override
-	public void onMove(ViewportChangeEvent event, double dx, double dy) {
-		if(event.getSourceChart() != null && event.getSourceChart().equals(parent))
-			return;
-		if(event.getAddressedCharts() == null || event.getAddressedCharts().contains(parent)){
-			fireInnerEvent(event);
-		}
-	}
-
-
-	@Override
-	public void onSet(ViewportChangeEvent event, double xMin, double yMin,
-			double xMax, double yMax) {
-		if(event.getSourceChart() != null && event.getSourceChart().equals(parent))
-			return;
-		if(event.getAddressedCharts() == null || event.getAddressedCharts().contains(parent)){
-			fireInnerEvent(event);
-		}
-	}
-
-
+	
 	@Override
 	public void onMouseUp(MouseUpEvent event) {
 		fireInnerEvent(event);
@@ -164,24 +147,70 @@ public class IneChartEventManager implements HasAllMouseHandlers, ViewportChange
 		fireInnerEvent(event);
 	}
 	
+	
 	@Override
 	public void onClick(ClickEvent event) {
 		fireInnerEvent(event);
 	}
 
+	
 	public void fireViewportChangedEvent(ViewportChangeEvent event){
 		fireInnerEvent(event);
 		setSourceChart(event);
 		fireEvent(event);
 	}
 	
+	
 	private void setSourceChart(IneChartEvent<?> event){
 		event.setSourceChart(parent);
 	}
 
+	
 	public Element getCaptureElement(){
 		return parent.getElement();
 	}
+
+
+	@Override
+	public void onMoveAlongX(ViewportChangeEvent event, double dx) {
+		checkAddressAndFireIfRelevant(event);
+	}
+
+
+	@Override
+	public void onMoveAlongY(ViewportChangeEvent event, double dy) {
+		checkAddressAndFireIfRelevant(event);
+	}
+
+
+	@Override
+	public void onSetX(ViewportChangeEvent event, double xMin, double xMax) {
+		checkAddressAndFireIfRelevant(event);
+	}
+
+
+	@Override
+	public void onSetY(ViewportChangeEvent event, double yMin, double yMax) {
+		checkAddressAndFireIfRelevant(event);
+	}
 	
+	@Override
+	public void onMove(ViewportChangeEvent event, double dx, double dy) {
+		checkAddressAndFireIfRelevant(event);
+	}
+
+
+	@Override
+	public void onSet(ViewportChangeEvent event, double xMin, double yMin,
+			double xMax, double yMax) {
+		checkAddressAndFireIfRelevant(event);
+	}
 	
+	private void checkAddressAndFireIfRelevant(IneChartEvent<?> event){
+		if(event.getSourceChart() != null && event.getSourceChart().equals(parent))
+			return;
+		if(event.getAddressedCharts() == null || event.getAddressedCharts().contains(parent)){
+			fireInnerEvent(event);
+		}
+	}
 }

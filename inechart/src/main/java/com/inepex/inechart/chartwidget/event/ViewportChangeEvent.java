@@ -16,9 +16,41 @@ public class ViewportChangeEvent extends IneChartEvent<ViewportChangeHandler> {
 	protected double xMax;
 	protected double yMax;
 	protected List<IneChartModule2D> addressedModuls;
+	protected boolean isXChange;
+	protected boolean isYChange;
 	
 	public ViewportChangeEvent(){
 		this(null, 0, 0, null);
+	}
+	
+	public ViewportChangeEvent(double min, double max, boolean isX) {
+		super(null);
+		if(isX){
+			this.xMin = min;
+			this.xMax = max;
+		}
+		else{
+			this.yMin = min;
+			this.yMax = max;
+		}
+		this.isXChange = isX;
+		this.isYChange = !isX;
+	}
+	
+	public ViewportChangeEvent(double distance, boolean isX) {
+		super(null);
+		if(isX){
+			dx = distance;
+		}
+		else{
+			dy = distance;
+		}
+		this.isXChange = isX;
+		this.isYChange = !isX;
+	}
+
+	public ViewportChangeEvent(double xMin, double yMin, double xMax, double yMax) {
+		this(null, xMin, yMin, xMax, yMax, null);
 	}
 
 	public ViewportChangeEvent(IneChart sourceChart, double xMin,
@@ -29,7 +61,12 @@ public class ViewportChangeEvent extends IneChartEvent<ViewportChangeHandler> {
 		this.yMin = yMin;
 		this.xMax = xMax;
 		this.yMax = yMax;
+		this.isXChange = isYChange = true;
 		setAddressedModuls(addressedModuls);
+	}
+	
+	public ViewportChangeEvent(double dx, double dy){
+		this(null, dx, dy, null);
 	}
 
 	public ViewportChangeEvent(IneChart sourceChart, double dx, double dy,
@@ -37,6 +74,7 @@ public class ViewportChangeEvent extends IneChartEvent<ViewportChangeHandler> {
 		super(sourceChart);
 		this.dx = dx;
 		this.dy = dy;
+		this.isXChange = isYChange = true;
 		setAddressedModuls(addressedModuls);
 	}
 	
@@ -60,14 +98,65 @@ public class ViewportChangeEvent extends IneChartEvent<ViewportChangeHandler> {
 
 	@Override
 	protected void dispatch(ViewportChangeHandler handler) {
-		if(dx != 0 || dy != 0)
-			handler.onMove(this,dx, dy);
-		else
-			handler.onSet(this,xMin, yMin, xMax, yMax);
+		if(dx != 0 || dy != 0) { 
+			if(isXChange && !isYChange) {
+				handler.onMoveAlongX(this, dx);
+			}
+			else if(!isXChange && isYChange) {
+				handler.onMoveAlongY(this, dy);
+			}
+			else {
+				handler.onMove(this,dx, dy);
+			}
+		}
+		else{
+			if(isXChange && !isYChange) {
+				handler.onSetX(this, xMin, xMax);
+			}
+			else if(!isXChange && isYChange) {
+				handler.onSetY(this, yMin, yMax);
+			}
+			else {
+				handler.onSet(this,xMin, yMin, xMax, yMax);
+			}
+		}
 	}
 
 	
 	public List<IneChartModule2D> getAddressedModuls(){
 		return addressedModuls;
 	}
+	
+	public boolean isXChange() {
+		return isXChange;
+	}
+	
+	public boolean isYChange() {
+		return isYChange;
+	}
+
+	public double getDx() {
+		return dx;
+	}
+
+	public double getDy() {
+		return dy;
+	}
+
+	public double getxMin() {
+		return xMin;
+	}
+
+	public double getyMin() {
+		return yMin;
+	}
+
+	public double getxMax() {
+		return xMax;
+	}
+
+	public double getyMax() {
+		return yMax;
+	}
+	
 }

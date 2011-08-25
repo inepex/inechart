@@ -490,9 +490,12 @@ public class LineChart extends IneChartModule2D implements PointSelectionHandler
 				}
 			}
 		}
-		if(curve.useCurveLineForNormalPoint){
+		if(curve.useCurveLinePropertiesForShape){
 			if(normal != null){
 				normal.getProperties().setLineProperties(curve.lineProperties != null ? curve.lineProperties : new LineProperties(Defaults.lineWidth, curve.dataSet.getColor()));
+			}
+			if(selected != null){
+				selected.getProperties().setLineProperties(curve.lineProperties != null ? curve.lineProperties : new LineProperties(Defaults.lineWidth, curve.dataSet.getColor()));
 			}
 		}
 		if(onlyOverlay){
@@ -586,7 +589,10 @@ public class LineChart extends IneChartModule2D implements PointSelectionHandler
 		if(legendEntries == null){
 			TreeMap<String, Color> entries = new TreeMap<String, Color>();
 			for(Curve c : curves){
-				entries.put(c.getDataSet().getName(), c.getDataSet().getColor());
+				entries.put(c.getDataSet().getName(),
+						c.getLineProperties() != null && c.getLineProperties().getLineColor() != null ?
+								c.getLineProperties().getLineColor() :
+									c.getDataSet().getColor());
 			}
 
 			return entries;
@@ -652,9 +658,9 @@ public class LineChart extends IneChartModule2D implements PointSelectionHandler
 
 	@Override
 	protected void onMouseOver(MouseEvent<?> event) {
-		if(selectPoint == PointSelectionMode.On_Over || selectPoint == PointSelectionMode.Closest_To_Cursor){
-			selectPointEvent(getClosestToMousePoints(event));
-		}
+//		if(selectPoint == PointSelectionMode.On_Over || selectPoint == PointSelectionMode.Closest_To_Cursor){
+//			selectPointEvent(getClosestToMousePoints(event));
+//		}
 	}
 
 	@Override
@@ -775,8 +781,12 @@ public class LineChart extends IneChartModule2D implements PointSelectionHandler
 		}
 		for(Curve c : justDeselected.keySet()){
 			double[] data = getValuePair(justDeselected.get(c)[0], justDeselected.get(c)[1]);
-			if(c.selectedPoints.contains(data)){
-				c.selectedPoints.remove(data);
+//			if(c.selectedPoints.contains(data)){
+//				c.selectedPoints.remove(data);
+//			}
+			double[] reference = getElementIfExist(data, c.selectedPoints);
+			if(reference != null){
+				c.selectedPoints.remove(reference);
 			}
 		}
 		
@@ -841,6 +851,15 @@ public class LineChart extends IneChartModule2D implements PointSelectionHandler
 				event.getPoint()[1] < yAxis.getMax() && event.getPoint()[1] > yAxis.getMin()){
 			selectedPointsPerCurve.get(curve).remove(getCanvasPosition(event.getPoint()[0], event.getPoint()[1]));
 		}
+	}
+	
+	private static double[] getElementIfExist(double[] elementToRetrieve, ArrayList<double[]> collection){
+		for(double[] d : collection){
+			if(elementToRetrieve[0] == d[0] && elementToRetrieve[1] == d[1]){
+				return d;
+			}
+		}
+		return null;
 	}
 }
 

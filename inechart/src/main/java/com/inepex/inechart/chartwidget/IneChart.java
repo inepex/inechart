@@ -340,7 +340,7 @@ public class IneChart extends Composite{
 				for(Curve c : ((LineChart)module).getCurves()){
 					vpLineChart.addCurve(c);
 				}
-				vpLineChart.setDisplayEntries(false);
+				vpLineChart.setDisplayLegendEntries(false);
 				rs.setModulToSelectFrom(vpLineChart);
 				rs.getAddressedModuls().add((IneChartModule2D) module);
 				break;
@@ -350,7 +350,7 @@ public class IneChart extends Composite{
 				for(DataSet d : ((BarChart) module).getDataSets()){
 					vpBarChart.addDataSet(d,((BarChart) module).getLookout(d));
 				}
-				vpBarChart.setDisplayEntries(false);
+				vpBarChart.setDisplayLegendEntries(false);
 				rs.setModulToSelectFrom(vpBarChart);
 				rs.getAddressedModuls().add((IneChartModule2D) module);
 				break;

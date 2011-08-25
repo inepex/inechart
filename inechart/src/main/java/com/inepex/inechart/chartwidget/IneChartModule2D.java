@@ -132,6 +132,50 @@ public abstract class IneChartModule2D extends IneChartModule implements HasCoor
 				IneChartModule2D.this.onMouseOut(event);
 			}
 		}
+
+		@Override
+		public void onMoveAlongX(ViewportChangeEvent event, double dx) {
+			if(!isAddressed(event))
+				return;
+			if(xAxis.getModulToAlign() == IneChartModule2D.this){
+				xAxis.setMin(xAxis.getMin() + dx);
+				xAxis.setMax(xAxis.getMax() + dx);
+				redrawNeeded = true;
+			}
+		}
+
+		@Override
+		public void onMoveAlongY(ViewportChangeEvent event, double dy) {
+			if(!isAddressed(event))
+				return;
+			if(yAxis.getModulToAlign() == IneChartModule2D.this){
+				yAxis.setMin(yAxis.getMin() + dy);
+				yAxis.setMax(yAxis.getMax() + dy);
+				redrawNeeded = true;
+			}
+		}
+
+		@Override
+		public void onSetX(ViewportChangeEvent event, double xMin, double xMax) {
+			if(!isAddressed(event))
+				return;
+			if(xAxis.getModulToAlign() == IneChartModule2D.this){
+				xAxis.setMin(xMin);
+				xAxis.setMax(xMax);
+				redrawNeeded = true;
+			}
+		}
+
+		@Override
+		public void onSetY(ViewportChangeEvent event, double yMin, double yMax) {
+			if(!isAddressed(event))
+				return;
+			if(yAxis.getModulToAlign() == IneChartModule2D.this){
+				yAxis.setMin(yMin);
+				yAxis.setMax(yMax);
+				redrawNeeded = true;
+			}
+		}
 	
 	}
 	
@@ -671,7 +715,7 @@ public abstract class IneChartModule2D extends IneChartModule implements HasCoor
 	protected abstract void onMouseMove(MouseMoveEvent event);
 
 	@Override
-	public void setDisplayEntries(boolean displayEntries) {
+	public void setDisplayLegendEntries(boolean displayEntries) {
 		this.displayLegendEntries = displayEntries;
 	}
 

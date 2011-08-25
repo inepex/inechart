@@ -56,7 +56,7 @@ public class Curve implements HasZIndex, HasShadow, Comparable<Curve>{
 	Shape normalPoint;
 	Shape selectedPoint;
 	boolean applyCurveShadowForPoint = true;
-	boolean useCurveLineForNormalPoint = true;
+	boolean useCurveLinePropertiesForShape = true;
 	ArrayList<double[]> selectedPoints;
 
 	// shadow
@@ -361,7 +361,7 @@ public class Curve implements HasZIndex, HasShadow, Comparable<Curve>{
 	 * @return the useCurveLinePropertiesForShape
 	 */
 	public boolean isUseCurveLinePropertiesForShape() {
-		return useCurveLineForNormalPoint;
+		return useCurveLinePropertiesForShape;
 	}
 
 
@@ -370,7 +370,7 @@ public class Curve implements HasZIndex, HasShadow, Comparable<Curve>{
 	 */
 	public void setUseCurveLinePropertiesForShape(
 			boolean useCurveLinePropertiesForShape) {
-		this.useCurveLineForNormalPoint = useCurveLinePropertiesForShape;
+		this.useCurveLinePropertiesForShape = useCurveLinePropertiesForShape;
 	}
 
 }

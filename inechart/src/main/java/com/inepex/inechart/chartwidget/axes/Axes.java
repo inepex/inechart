@@ -194,7 +194,7 @@ public class Axes extends IneChartModule {
 				}
 			}
 			// Tick line
-			if (tick.tickLine != null) {
+			if (tick.tickLine != null && tick.tickLength > 0) {
 				Line tickLine = new Line(tickStartX, tickStartY, tickEndX, tickEndY, tickLineZIndex, createContext(tick.tickLine));
 				goc.addGraphicalObject(tickLine);
 			}
@@ -720,21 +720,21 @@ public class Axes extends IneChartModule {
 		for(Tick t : axis.getTicks()){
 			//use given defaults
 			if(axis.defaultTick != null) {
-				if( axis.defaultTick.gridLine != null){
+//				if( axis.defaultTick.gridLine != null){
 					t.setGridLine(axis.defaultTick.gridLine);
-				}
-				if(axis.defaultTick.formatString != null){
+//				}
+//				if(axis.defaultTick.formatString != null){
 					t.setFormatString(axis.defaultTick.formatString);
-				}
-				if(axis.defaultTick.textContainer != null){
+//				}
+//				if(axis.defaultTick.textContainer != null){
 					t.setTextContainer(axis.defaultTick.textContainer);
-				}
-				if(axis.defaultTick.tickLine != null){
+//				}
+//				if(axis.defaultTick.tickLine != null){
 					t.setTickLine(axis.defaultTick.tickLine);
-				}
-				if(axis.defaultTick.tickPosition != null){
+//				}
+//				if(axis.defaultTick.tickPosition != null){
 					t.setTickPosition(axis.defaultTick.tickPosition);
-				}
+//				}
 				t.setTickLength(axis.defaultTick.tickLength);
 			}
 			// use default defaults :)

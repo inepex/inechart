@@ -117,5 +117,8 @@ public class Defaults {
 	public static final ShapeProperties intervalShapeProperties(){
 		return new ShapeProperties(new LineProperties(1.2, null), null);
 	}
-	public static final double intervalRoundedCornerRadius = 3.2;
+	public static final double intervalRoundedCornerRadius = 0;
+	
+	//event
+	public static final long minimumTimeOutBetweenVPEvents = 79;
 }

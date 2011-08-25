@@ -176,17 +176,18 @@ public class RectangularSelection extends SelectionBase{
 		double xMax = modulToSelectFrom.getValueForCanvasX(x + w);
 		double yMin = modulToSelectFrom.getValueForCanvasY(y);
 		double yMax = modulToSelectFrom.getValueForCanvasY(y + h);
+		ViewportChangeEvent event = null;
 		switch (selectionMode) {
 		case Horizontal:
-			yMin = modulToSelectFrom.getYAxis().getMin();
-			yMax = modulToSelectFrom.getYAxis().getMax();
+			event  = new ViewportChangeEvent(xMin, xMax, true);
 			break;			
 		case Vertical:
-			xMin = modulToSelectFrom.getXAxis().getMin();
-			xMax = modulToSelectFrom.getXAxis().getMax();
+			event  = new ViewportChangeEvent(yMin, yMax, false);
+			break;
+		case Both:
+			event  = new ViewportChangeEvent(xMin, yMin, xMax, yMax);
 			break;
 		}
-		ViewportChangeEvent event = new ViewportChangeEvent(null, xMin, yMin, xMax, yMax, null);
 		event.setAddressedCharts(addressedCharts);
 		event.setAddressedModuls(addressedModuls);
 		eventManager.fireViewportChangedEvent(event);

@@ -22,7 +22,7 @@ public interface HasLegendEntries {
 	/**
 	 * sets if this module should display its entries or not
 	 */
-	void setDisplayEntries(boolean displayEntries);
+	void setDisplayLegendEntries(boolean displayEntries);
 	/**
 	 * 
 	 * @return true if this module displayes entries in legend

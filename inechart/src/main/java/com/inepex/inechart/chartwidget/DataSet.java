@@ -384,4 +384,12 @@ public class DataSet {
 		if(!allowDuplicateXes)
 			eliminateDuplicateEntries();
 	}
+	
+	/**
+	 * Empties data
+	 */
+	public void clear(){
+		this.xValues.clear();
+		this.yValues.clear();
+	}
 }
