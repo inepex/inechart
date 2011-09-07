@@ -41,6 +41,7 @@ public class RectangularSelection extends SelectionBase{
 			if(mouseDownCoords == null)
 				return;
 			DOM.releaseCapture(eventManager.getCaptureElement());
+//			eventManager.releaseFocus();
 			areaSelected();
 			mouseDownCoords = null;	
 			dragging = false;
@@ -71,7 +72,9 @@ public class RectangularSelection extends SelectionBase{
 					if(y + height > modulToSelectFrom.getHeight() + modulToSelectFrom.getTopPadding())
 						y = modulToSelectFrom.getHeight() + modulToSelectFrom.getTopPadding() - height;				
 					mouseDownCoords = actualCoords;
-					areaSelected();
+					if(!fireEventAfterDragging){
+						areaSelected();
+					}
 				}
 				else{
 					switch (selectionMode) {
@@ -113,6 +116,7 @@ public class RectangularSelection extends SelectionBase{
 			}
 			dragging = isDraggableSelection && isOverSelection(event);
 			DOM.setCapture(eventManager.getCaptureElement());
+//			eventManager.blindAllModules();
 		}
 
 		@Override
@@ -127,6 +131,7 @@ public class RectangularSelection extends SelectionBase{
 	protected int[] mouseDownCoords;
 	protected boolean displayRectangleAfterSelection;
 	protected boolean isDraggableSelection;
+	protected boolean fireEventAfterDragging;
 	protected boolean rectangleSelected;
 	protected boolean invertSelection;
 	protected int minSelectionSize;
@@ -153,6 +158,7 @@ public class RectangularSelection extends SelectionBase{
 		rectangleSelected = false;
 		dragging = false;
 		isDraggableSelection = true;
+		fireEventAfterDragging = true;
 	}
 	
 	/**

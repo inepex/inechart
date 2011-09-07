@@ -53,7 +53,7 @@ public abstract class IneChartModule implements Comparable<IneChartModule> {
 		modulComparatorID = ++highestModulComparatorID;
 		graphicalObjectContainer = new GraphicalObjectContainer();
 		this.canvas = canvas;
-		canHandleEvents = false;
+		canHandleEvents = true;
 		requestFocus = false;
 		isVisible = true;
 	}

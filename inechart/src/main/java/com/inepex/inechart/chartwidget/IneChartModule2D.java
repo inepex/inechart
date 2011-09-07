@@ -57,6 +57,8 @@ public abstract class IneChartModule2D extends IneChartModule implements HasCoor
 		
 		@Override
 		public void onMove(ViewportChangeEvent event, double dx, double dy) {
+			if(!canHandleEvents)
+				return;
 			if(!isAddressed(event))
 				return;
 			if(xAxis.getModulToAlign() == IneChartModule2D.this){
@@ -74,6 +76,8 @@ public abstract class IneChartModule2D extends IneChartModule implements HasCoor
 		@Override
 		public void onSet(ViewportChangeEvent event, double xMin, double yMin,
 				double xMax, double yMax) {
+			if(!canHandleEvents)
+				return;
 			if(!isAddressed(event))
 				return;
 			if(xAxis.getModulToAlign() == IneChartModule2D.this){
@@ -90,12 +94,16 @@ public abstract class IneChartModule2D extends IneChartModule implements HasCoor
 
 		@Override
 		public void onClick(ClickEvent event) {
+			if(!canHandleEvents)
+				return;
 			if(getValuePair(event) != null)
 				IneChartModule2D.this.onClick(event);
 		}
 
 		@Override
 		public void onMouseUp(MouseUpEvent event) {
+			if(!canHandleEvents)
+				return;
 			if(getValuePair(event) != null)
 				IneChartModule2D.this.onMouseUp(event);
 		}
@@ -108,6 +116,8 @@ public abstract class IneChartModule2D extends IneChartModule implements HasCoor
 
 		@Override
 		public void onMouseDown(MouseDownEvent event) {
+			if(!canHandleEvents)
+				return;
 			if(getValuePair(event) != null)
 				IneChartModule2D.this.onMouseDown(event);
 		}
@@ -120,6 +130,8 @@ public abstract class IneChartModule2D extends IneChartModule implements HasCoor
 
 		@Override
 		public void onMouseMove(MouseMoveEvent event) {
+			if(!canHandleEvents)
+				return;
 			if(getValuePair(event) != null){
 				if(!isMouseOverModul){
 					isMouseOverModul = true;
@@ -135,6 +147,8 @@ public abstract class IneChartModule2D extends IneChartModule implements HasCoor
 
 		@Override
 		public void onMoveAlongX(ViewportChangeEvent event, double dx) {
+			if(!canHandleEvents)
+				return;
 			if(!isAddressed(event))
 				return;
 			if(xAxis.getModulToAlign() == IneChartModule2D.this){
@@ -146,6 +160,8 @@ public abstract class IneChartModule2D extends IneChartModule implements HasCoor
 
 		@Override
 		public void onMoveAlongY(ViewportChangeEvent event, double dy) {
+			if(!canHandleEvents)
+				return;
 			if(!isAddressed(event))
 				return;
 			if(yAxis.getModulToAlign() == IneChartModule2D.this){
@@ -157,6 +173,8 @@ public abstract class IneChartModule2D extends IneChartModule implements HasCoor
 
 		@Override
 		public void onSetX(ViewportChangeEvent event, double xMin, double xMax) {
+			if(!canHandleEvents)
+				return;
 			if(!isAddressed(event))
 				return;
 			if(xAxis.getModulToAlign() == IneChartModule2D.this){
@@ -168,6 +186,8 @@ public abstract class IneChartModule2D extends IneChartModule implements HasCoor
 
 		@Override
 		public void onSetY(ViewportChangeEvent event, double yMin, double yMax) {
+			if(!canHandleEvents)
+				return;
 			if(!isAddressed(event))
 				return;
 			if(yAxis.getModulToAlign() == IneChartModule2D.this){

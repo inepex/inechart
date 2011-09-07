@@ -38,7 +38,6 @@ public class Curve implements HasZIndex, HasShadow, Comparable<Curve>{
 		return dataSet;
 	}
 
-
 	/* Lookout */
 	// Fills
 	TreeMap<Curve, Color> toCurveFills;
@@ -49,7 +48,7 @@ public class Curve implements HasZIndex, HasShadow, Comparable<Curve>{
 	boolean hasLine = true;
 	LineProperties lineProperties;
 	boolean autoFill = false;
-	ArrayList<double[]> discontinuities;
+	ArrayList<DataPoint> discontinuities;
 
 	// points
 	boolean hasPoint = false;
@@ -57,7 +56,7 @@ public class Curve implements HasZIndex, HasShadow, Comparable<Curve>{
 	Shape selectedPoint;
 	boolean applyCurveShadowForPoint = true;
 	boolean useCurveLinePropertiesForShape = true;
-	ArrayList<double[]> selectedPoints;
+	ArrayList<DataPoint> selectedPoints;
 
 	// shadow
 	Color shadowColor;
@@ -69,8 +68,8 @@ public class Curve implements HasZIndex, HasShadow, Comparable<Curve>{
 	 * Creates an empty curve
 	 */
 	public Curve() {
-		selectedPoints = new ArrayList<double[]>();
-		discontinuities = new ArrayList<double[]>();
+		selectedPoints = new ArrayList<DataPoint>();
+		discontinuities = new ArrayList<DataPoint>();
 		setShadowOffsetY(Defaults.shadowOffsetX);
 		setShadowOffsetX(Defaults.shadowOffsetY);
 		setShadowColor(Defaults.shadowColor());

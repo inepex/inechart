@@ -1,13 +1,14 @@
 package com.inepex.inechart.chartwidget.event;
 
 import com.inepex.inechart.chartwidget.linechart.Curve;
+import com.inepex.inechart.chartwidget.linechart.DataPoint;
 
 public class PointSelectionEvent extends IneChartEvent<PointSelectionHandler> {
 	
 	public static final Type<PointSelectionHandler> TYPE = new Type<PointSelectionHandler>();
 	
 	boolean selected;
-	double[] point;
+	DataPoint point;
 	Curve curve;
 	
 	public PointSelectionEvent() {
@@ -15,12 +16,12 @@ public class PointSelectionEvent extends IneChartEvent<PointSelectionHandler> {
 	}
 	
 	public PointSelectionEvent(boolean selected,
-			double[] point){
+			DataPoint point){
 		this(selected, point, null);
 	}
 	
 	public PointSelectionEvent(boolean selected,
-			double[] point, Curve curve) {
+			DataPoint point, Curve curve) {
 		super(null);
 		this.selected = selected;
 		this.point = point;
@@ -59,14 +60,14 @@ public class PointSelectionEvent extends IneChartEvent<PointSelectionHandler> {
 	/**
 	 * @return the point
 	 */
-	public double[] getPoint() {
+	public DataPoint getPoint() {
 		return point;
 	}
 
 	/**
 	 * @param point the point to set
 	 */
-	public void setPoint(double[] point) {
+	public void setPoint(DataPoint point) {
 		this.point = point;
 	}
 

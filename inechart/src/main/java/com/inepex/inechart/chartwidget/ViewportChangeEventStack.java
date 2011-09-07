@@ -3,27 +3,64 @@ package com.inepex.inechart.chartwidget;
 import java.util.ArrayList;
 import java.util.TreeMap;
 
-import com.google.gwt.event.shared.EventBus;
+import com.google.gwt.core.client.Scheduler;
+import com.google.gwt.core.client.Scheduler.RepeatingCommand;
 import com.inepex.inechart.chartwidget.event.ViewportChangeEvent;
 
 public class ViewportChangeEventStack {
-	
+
 	private TreeMap<Long, ViewportChangeEvent> events;
-	private EventBus eventBus;
 	private long minimumTimeOut;
 	private long lastSent;
-	
-	public ViewportChangeEventStack(EventBus eventBus) {
-		this.eventBus = eventBus;
+	private RepeatingCommand firingCommmand;
+	private boolean firingScheduled;
+	private IneChartEventManager eventManager;
+
+	public ViewportChangeEventStack(IneChartEventManager eventManager) {
 		events = new TreeMap<Long, ViewportChangeEvent>();
 		minimumTimeOut = Defaults.minimumTimeOutBetweenVPEvents;
 		lastSent = System.currentTimeMillis();
+		firingScheduled = false;
+		this.eventManager = eventManager;
 	}
-	
+
 	public void pushEvent(ViewportChangeEvent viewportChangeEvent){
 		events.put(System.currentTimeMillis(), viewportChangeEvent);
+		scheduleFiring();
 	}
-	
+
+	private void scheduleFiring(){
+		if(firingScheduled)
+			return;
+		firingScheduled = true;
+
+		firingCommmand = new RepeatingCommand() {
+			@Override
+			public boolean execute() {
+				fireEvent(mergeEvents());
+				if(events.size() > 0){
+					scheduleFiring();
+				}
+				firingScheduled = false;
+				eventManager.eventFinished();
+				return false;
+			}
+		};
+
+		long now = System.currentTimeMillis();
+		int delay = 1;
+		if(now - lastSent < minimumTimeOut){
+			delay = (int) (minimumTimeOut - (now - lastSent));
+		}
+		Scheduler.get().scheduleFixedDelay(firingCommmand, delay);
+
+	}
+
+	private void fireEvent(ViewportChangeEvent event){
+		eventManager.fireInnerEvent(event);
+		lastSent = System.currentTimeMillis();
+	}
+
 	private ViewportChangeEvent mergeEvents(){
 		TreeMap<IneChartModule2D, TreeMap<Long, ViewportChangeEvent>> eventsSortedByAddress = new TreeMap<IneChartModule2D, TreeMap<Long,ViewportChangeEvent>>();
 		TreeMap<Long, ViewportChangeEvent> addressedToAll = new TreeMap<Long, ViewportChangeEvent>();
@@ -63,7 +100,7 @@ public class ViewportChangeEventStack {
 		if(eventsToMerge == null){
 			return null;
 		}
-					
+
 		double xMin = 0, xMax = 0, yMin = 0, yMax = 0;
 		double dx = 0, dy = 0;
 		boolean isXChange = false, isYChange = false;
@@ -109,16 +146,20 @@ public class ViewportChangeEventStack {
 			}
 		}
 		event.addAddressedModul(addressedModul);
-		
+
 		//remove merged events
 		for(Long time : eventsToMerge.keySet()){
 			ViewportChangeEvent ev = events.get(time);
-			if(addressedModul != null && ev.getAddressedModuls() != null ){
-				
+			if(addressedModul != null && ev.getAddressedModuls() != null && ev.getAddressedModuls().size() > 1){
+				ev.getAddressedModuls().remove(addressedModul);
+			}
+			else{
+				events.remove(time);
 			}
 		}
-		
 		return event;
 	}
+	
 
+	
 }

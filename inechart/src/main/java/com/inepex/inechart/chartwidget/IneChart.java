@@ -242,6 +242,12 @@ public class IneChart extends Composite{
 		}
 		focus = modul;
 	}
+	
+	protected void setCanHandleEventsForAllModule(boolean canHandleEvents){
+		for (IneChartModule m : moduls) {
+			m.canHandleEvents = canHandleEvents;
+		}
+	}
 
 	private void releaseFocusIfPossible() {
 		if (focus != null) {
