@@ -63,7 +63,7 @@ public class GWTLabelFactory extends LabelFactoryBase{
 		leftWrapper.add(leftPanel);
 		rightWrapper.add(rightPanel);
 		
-		DOM.setStyleAttribute(mainPanel.getElement(), "position", "realtive");
+		DOM.setStyleAttribute(mainPanel.getElement(), "position", "relative");
 		DOM.setStyleAttribute(topPanel.getElement(), "position", "absolute");
 		DOM.setStyleAttribute(topPanel.getElement(), "top", "0px");
 		DOM.setStyleAttribute(botPanel.getElement(), "position", "absolute");
