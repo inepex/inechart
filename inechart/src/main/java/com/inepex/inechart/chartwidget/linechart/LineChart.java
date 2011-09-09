@@ -69,6 +69,7 @@ public class LineChart extends IneChartModule2D implements PointSelectionHandler
 	int pointMouseOverRadius;
 
 	PointSelectionMode selectPoint;
+	boolean singlePointSelection;
 	
 	// model fields
 	ArrayList<Curve> curves = new ArrayList<Curve>();
@@ -112,6 +113,7 @@ public class LineChart extends IneChartModule2D implements PointSelectionHandler
 		selectPoint = Defaults.selectPoint;
 		autoScaleViewport = true;
 		pointMouseOverRadius = Defaults.pointMouseOverRadius;
+		singlePointSelection = true;
 	}
 
 	public void addCurve(Curve curve) {
@@ -236,10 +238,9 @@ public class LineChart extends IneChartModule2D implements PointSelectionHandler
 		curve.dataSet.update();
 		List<double[]> dataPairs = curve.dataSet.getDataPairs();
 		ArrayList<DataPoint> calculatedPoints = new ArrayList<DataPoint>();
-		ArrayList<DataPoint> selectedPoints = new ArrayList<DataPoint>();
+	
 		for(DataPoint selected : curve.selectedPoints){
 			setDataPoint(selected);
-			selectedPoints.add(selected);
 		}
 
 		for(double[] dataPair : dataPairs){
@@ -695,7 +696,7 @@ public class LineChart extends IneChartModule2D implements PointSelectionHandler
 	 * @param e
 	 * @return
 	 */
-	protected TreeMap<Curve, DataPoint> getMouseOverPoints(MouseEvent<?> e){
+	public TreeMap<Curve, DataPoint> getMouseOverPoints(MouseEvent<?> e){
 		TreeMap<Curve, DataPoint> mouseOver = new TreeMap<Curve, DataPoint>();
 		int[] eventLocation = getCoords(e);
 		for(Curve c : curves){
@@ -724,7 +725,7 @@ public class LineChart extends IneChartModule2D implements PointSelectionHandler
 	 * @param e
 	 * @return
 	 */
-	protected TreeMap<Curve, DataPoint> getClosestToMousePoints(MouseEvent<?> e){
+	public TreeMap<Curve, DataPoint> getClosestToMousePoints(MouseEvent<?> e){
 		TreeMap<Curve, DataPoint> mouseOver = new TreeMap<Curve, DataPoint>();
 		int[] eventLocation = getCoords(e);
 		for(Curve c : curves){
@@ -760,7 +761,7 @@ public class LineChart extends IneChartModule2D implements PointSelectionHandler
 				if(!prevSelected.contains(actual)){
 					//single point selection in this modes
 					if(prevSelected.size() > 0 && 
-							(selectPoint == PointSelectionMode.Closest_To_Cursor ||
+							(singlePointSelection || selectPoint == PointSelectionMode.Closest_To_Cursor ||
 							selectPoint == PointSelectionMode.On_Over)){
 						justDeselected.put(c, prevSelected.get(0));
 						prevSelected.clear();
@@ -817,8 +818,9 @@ public class LineChart extends IneChartModule2D implements PointSelectionHandler
 
 	@Override
 	public void onSelect(PointSelectionEvent event) {
-		if(!canHandleEvents)
+		if(!canHandleEvents){
 			return;
+		}
 		Curve curve = event.getCurve();
 		if(curve == null){
 			for(Curve c : curves){
@@ -834,10 +836,13 @@ public class LineChart extends IneChartModule2D implements PointSelectionHandler
 	
 		if(!curve.selectedPoints.contains(event.getPoint())){
 			setDataPoint(event.getPoint());
+			if(singlePointSelection){
+				curve.selectedPoints.clear();
+			}
 			curve.selectedPoints.add(event.getPoint());
+			updateOverLay();
 		}
-	
-		updateOverLay();
+
 	}
 
 	@Override
@@ -858,18 +863,27 @@ public class LineChart extends IneChartModule2D implements PointSelectionHandler
 		}
 		if(curve.selectedPoints.contains(event.getPoint())) {
 			curve.selectedPoints.remove(event.getPoint());
+			updateOverLay();
 		}
 //		if(event.getPoint()[0] < xAxis.getMax() && event.getPoint()[0] > xAxis.getMin() && 
 //				event.getPoint()[1] < yAxis.getMax() && event.getPoint()[1] > yAxis.getMin()){
 //			selectedPointsPerCurve.get(curve).remove(getCanvasPosition(event.getPoint()[0], event.getPoint()[1]));
 //		}
-		updateOverLay();
+		
 	}
 	
 	private void setDataPoint(DataPoint dataPoint) {
 		double[] canvasPos = getCanvasPosition(dataPoint.x, dataPoint.y);
 		dataPoint.actualXPos = canvasPos[0];
 		dataPoint.actualYPos = canvasPos[1];
+	}
+
+	public boolean isSinglePointSelection() {
+		return singlePointSelection;
+	}
+	
+	public void setSinglePointSelection(boolean singlePointSelection) {
+		this.singlePointSelection = singlePointSelection;
 	}
 	
 }

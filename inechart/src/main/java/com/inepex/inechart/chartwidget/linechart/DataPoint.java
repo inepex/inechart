@@ -33,4 +33,63 @@ public class DataPoint implements Comparable<DataPoint> {
 		}
 		else return 0;
 	}
+	
+	@Override
+	public boolean equals(Object obj) {
+		if(obj instanceof DataPoint && ((DataPoint) obj).x == this.x && ((DataPoint) obj).y == this.y)
+			return true;
+		else
+			return false;
+		
+	}
+
+
+
+	public double getX() {
+		return x;
+	}
+
+
+
+	public void setX(double x) {
+		this.x = x;
+	}
+
+
+
+	public double getY() {
+		return y;
+	}
+
+
+
+	public void setY(double y) {
+		this.y = y;
+	}
+
+
+
+	public double getActualXPos() {
+		return actualXPos;
+	}
+
+
+
+	public void setActualXPos(double actualXPos) {
+		this.actualXPos = actualXPos;
+	}
+
+
+
+	public double getActualYPos() {
+		return actualYPos;
+	}
+
+
+
+	public void setActualYPos(double actualYPos) {
+		this.actualYPos = actualYPos;
+	}
+	
+	
 }

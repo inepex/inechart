@@ -597,7 +597,7 @@ public class Axes extends IneChartModule {
 	
 	Context createFillContext(Color color) {
 		return new Context(
-				Defaults.alpha,
+				color.getAlpha(),
 				color.getColor(),
 				0,
 				color.getColor(),
