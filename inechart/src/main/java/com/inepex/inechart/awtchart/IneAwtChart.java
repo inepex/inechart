@@ -199,7 +199,7 @@ public class IneAwtChart  extends JLayeredPane {
 			}
 		}
 
-		drawingArea.removeAllGraphicalObject();
+		drawingArea.removeAllGraphicalObjects();
 		for (IneChartModule modul : moduls) {
 			if (modul.isVisible()){
 				drawingArea.addAllGraphicalObject(modul.getGraphicalObjectContainer());

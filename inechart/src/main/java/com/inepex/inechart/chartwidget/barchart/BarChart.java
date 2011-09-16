@@ -239,7 +239,7 @@ public class BarChart extends IneChartModule2D implements HasShadow, HasZIndex {
 		normalizeData();
 		updateLookOut();
 
-		graphicalObjectContainer.removeAllGraphicalObject();
+		graphicalObjectContainer.removeAllGraphicalObjects();
 		ArrayList<Double> xes = new ArrayList<Double>();
 		for (double x : normalizedData.keySet()) {
 			xes.add(x);

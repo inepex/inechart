@@ -14,6 +14,7 @@ import com.inepex.inechart.chartwidget.Defaults;
 import com.inepex.inechart.chartwidget.IneChartEventManager;
 import com.inepex.inechart.chartwidget.IneChartModule2D;
 import com.inepex.inechart.chartwidget.axes.Axes;
+import com.inepex.inechart.chartwidget.event.PointHoverListener;
 import com.inepex.inechart.chartwidget.event.PointSelectionEvent;
 import com.inepex.inechart.chartwidget.event.PointSelectionHandler;
 import com.inepex.inechart.chartwidget.label.LabelFactoryBase;
@@ -90,6 +91,8 @@ public class LineChart extends IneChartModule2D implements PointSelectionHandler
 	 * all {@link GraphicalObject}s related to point chart per curve
 	 */
 	TreeMap<Curve, GraphicalObjectContainer> pointChartGOsPerCurve;
+	
+	ArrayList<PointHoverListener> pointHoverListeners;
 
 	public LineChart(DrawingArea canvas, LabelFactoryBase labelFactory, Axes axes) {
 		this(canvas, labelFactory, axes, null, null);
@@ -105,6 +108,7 @@ public class LineChart extends IneChartModule2D implements PointSelectionHandler
 		lineChartGOsPerCurve = new TreeMap<Curve, GraphicalObjectContainer>();
 		pointChartGOsPerCurve = new TreeMap<Curve, GraphicalObjectContainer>();
 		overlayGosPerCurve = new TreeMap<Curve, GraphicalObjectContainer>();
+		pointHoverListeners = new ArrayList<PointHoverListener>();
 		useOverlay = true;
 		if(eventManager != null){
 			eventManager.addPointSelectionHandler(this);
@@ -171,7 +175,7 @@ public class LineChart extends IneChartModule2D implements PointSelectionHandler
 	public void update() {
 		if (curves == null || curves.size() == 0)
 			return;
-		graphicalObjectContainer.removeAllGraphicalObject();
+		graphicalObjectContainer.removeAllGraphicalObjects();
 		//do model to canvas calculations
 		for (Curve curve : curves) {
 			if(curve.hasLine){
@@ -208,7 +212,7 @@ public class LineChart extends IneChartModule2D implements PointSelectionHandler
 	}	
 
 	protected void updateOverLay(){
-		overlay.removeAllGraphicalObject();
+		overlay.removeAllGraphicalObjects();
 		for(Curve curve:overlayGosPerCurve.keySet()){
 			if(overlayGosPerCurve.get(curve) != null){
 				overlay.addAllGraphicalObject(overlayGosPerCurve.get(curve));
@@ -237,8 +241,14 @@ public class LineChart extends IneChartModule2D implements PointSelectionHandler
 	protected void calculatePointsForCurve(Curve curve){
 		curve.dataSet.update();
 		List<double[]> dataPairs = curve.dataSet.getDataPairs();
-		ArrayList<DataPoint> calculatedPoints = new ArrayList<DataPoint>();
-	
+		ArrayList<DataPoint> calculatedPoints = calculatedPointsPerCurve.get(curve);
+		if(calculatedPoints == null){
+			calculatedPoints = new ArrayList<DataPoint>();
+			calculatedPointsPerCurve.put(curve, calculatedPoints);
+		}
+		else{
+			calculatedPoints.clear();
+		}
 		for(DataPoint selected : curve.selectedPoints){
 			setDataPoint(selected);
 		}
@@ -257,7 +267,6 @@ public class LineChart extends IneChartModule2D implements PointSelectionHandler
 				calculatedPoints.add(point);
 			}
 		}
-		calculatedPointsPerCurve.put(curve, calculatedPoints);
 	}
 
 	protected void createFillPathForCurve(Curve curve){
@@ -346,10 +355,13 @@ public class LineChart extends IneChartModule2D implements PointSelectionHandler
 	 * @param curve
 	 */
 	protected void createLineChartGOs(Curve curve) {
-		GraphicalObjectContainer gos = new GraphicalObjectContainer();
-		lineChartGOsPerCurve.put(curve, gos);
+		GraphicalObjectContainer gos = lineChartGOsPerCurve.get(curve);
+		if(gos == null){
+			gos = new GraphicalObjectContainer();
+			lineChartGOsPerCurve.put(curve, gos);
+		}
+		gos.removeAllGraphicalObjects();
 		Path strokePath = visiblePathPerCurve.get(curve);
-
 
 		if (curve.hasLine && strokePath != null) {
 			Path line = new Path(strokePath);
@@ -443,18 +455,30 @@ public class LineChart extends IneChartModule2D implements PointSelectionHandler
 	 * {@link #pointChartGOsPerCurve} container
 	 * 
 	 * @param curve
-	 * @param onlyOverlay TODO
+	 * @param onlyOverlay
 	 */
 	protected void createPointChartGOs(Curve curve, boolean onlyOverlay) {
 		ArrayList<DataPoint> calculatedPoints = calculatedPointsPerCurve.get(curve);
-		GraphicalObjectContainer goc = new GraphicalObjectContainer();
-		GraphicalObjectContainer overlayGoc = new GraphicalObjectContainer();
-		overlayGosPerCurve.put(curve, overlayGoc);
-		if(!onlyOverlay){
-			pointChartGOsPerCurve.put(curve, goc);
-			if(calculatedPoints == null || calculatedPoints.size() == 0)
-				return;
+		if(calculatedPoints == null || calculatedPoints.size() == 0){
+			return;
 		}
+		GraphicalObjectContainer goc = pointChartGOsPerCurve.get(curve);
+		if(goc == null){
+			goc = new GraphicalObjectContainer();
+			pointChartGOsPerCurve.put(curve, goc);
+		}
+		else{
+			goc.removeAllGraphicalObjects();
+		}
+		GraphicalObjectContainer overlayGoc = overlayGosPerCurve.get(curve);
+		if(overlayGoc == null){
+			overlayGoc = new GraphicalObjectContainer();
+			overlayGosPerCurve.put(curve, overlayGoc);
+		}
+		else{
+			overlayGoc.removeAllGraphicalObjects();
+		}
+		
 		Shape normal = curve.normalPoint;
 		Shape selected = curve.selectedPoint;
 		if(normal == null && selected == null){
@@ -683,8 +707,12 @@ public class LineChart extends IneChartModule2D implements PointSelectionHandler
 
 	@Override
 	protected void onMouseMove(MouseMoveEvent event) {
+		TreeMap<Curve, DataPoint> hoveredPoints = getMouseOverPoints(event);
+		for(PointHoverListener phl : pointHoverListeners){
+			phl.onPointHover(hoveredPoints);
+		}
 		if(selectPoint == PointSelectionMode.On_Over){
-			selectPointEvent(getMouseOverPoints(event));
+			selectPointEvent(hoveredPoints);
 		}
 		else if(selectPoint == PointSelectionMode.Closest_To_Cursor){
 			selectPointEvent(getClosestToMousePoints(event));
@@ -884,6 +912,14 @@ public class LineChart extends IneChartModule2D implements PointSelectionHandler
 	
 	public void setSinglePointSelection(boolean singlePointSelection) {
 		this.singlePointSelection = singlePointSelection;
+	}
+	
+	public void addPointHoverListener(PointHoverListener pointHoverListener){
+		pointHoverListeners.add(pointHoverListener);
+	}
+	
+	public void removePointHoverListener(PointHoverListener pointHoverListener){
+		pointHoverListeners.remove(pointHoverListener);
 	}
 	
 }

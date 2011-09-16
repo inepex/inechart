@@ -106,7 +106,7 @@ public class IntervalChart extends IneChartModule2D {
 
 	@Override
 	public void update() {
-		graphicalObjectContainer.removeAllGraphicalObject();
+		graphicalObjectContainer.removeAllGraphicalObjects();
 		for(IntervalDataSet dataSet : dataSets){
 			graphicalObjectContainer.addAllGraphicalObject(createInterval(dataSet));
 		}

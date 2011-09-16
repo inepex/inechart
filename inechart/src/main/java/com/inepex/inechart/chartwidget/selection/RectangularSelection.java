@@ -46,7 +46,7 @@ public class RectangularSelection extends SelectionBase{
 			mouseDownCoords = null;	
 			dragging = false;
 			if(!displayRectangleAfterSelection){
-				canvas.removeAllGraphicalObject();
+				canvas.removeAllGraphicalObjects();
 				canvas.update();
 			}
 		}
@@ -217,7 +217,7 @@ public class RectangularSelection extends SelectionBase{
 	protected void updateSelection(int x, int y, int width, int height){
 		if(w < minSelectionSize || h < minSelectionSize){
 			rectangleSelected = false;
-			canvas.removeAllGraphicalObject();
+			canvas.removeAllGraphicalObjects();
 			canvas.update();
 		}
 		if(invertSelection){
@@ -233,7 +233,7 @@ public class RectangularSelection extends SelectionBase{
 			canvas.getCanvasWidget().strokeRect(x, y, width, height);
 		}
 		else{
-			canvas.removeAllGraphicalObject();
+			canvas.removeAllGraphicalObjects();
 			Rectangle r = new Rectangle(width, height, x, y, selectionLookOut);
 			canvas.addAllGraphicalObject(r.toGraphicalObjects());
 			canvas.update();

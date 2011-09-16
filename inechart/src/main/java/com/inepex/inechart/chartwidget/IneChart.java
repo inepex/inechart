@@ -17,6 +17,7 @@ import com.inepex.inechart.chartwidget.barchart.BarChart;
 import com.inepex.inechart.chartwidget.intervalchart.IntervalChart;
 import com.inepex.inechart.chartwidget.label.ChartTitle;
 import com.inepex.inechart.chartwidget.label.GWTLabelFactory;
+import com.inepex.inechart.chartwidget.label.HoverPanel;
 import com.inepex.inechart.chartwidget.label.LabelFactoryBase;
 import com.inepex.inechart.chartwidget.label.Legend;
 import com.inepex.inechart.chartwidget.linechart.Curve;
@@ -51,9 +52,6 @@ public class IneChart extends Composite{
 		return isUpdatingInProgress;
 	}
 
-
-
-	// properties
 	private int canvasWidth;
 	private int canvasHeight;
 	
@@ -63,13 +61,9 @@ public class IneChart extends Composite{
 
 	public IneChart(int width, int height) {
 		//dimensions, layout
-		canvasHeight = height;
-		canvasWidth = width;
 		mainPanel = new AbsolutePanel();
-		mainPanel.setPixelSize(width, height);
 		initWidget(mainPanel);
-		drawingArea = new DrawingAreaGWT(canvasWidth, canvasHeight, false);
-		mainPanel.add(drawingArea.getWidget(),0,0);
+		setSize(width, height);
 		
 		moduls = new ArrayList<IneChartModule>();
 		labelFactory = new GWTLabelFactory(drawingArea,mainPanel);
@@ -85,7 +79,12 @@ public class IneChart extends Composite{
 	}
 	
 	public void setSize(int width, int height){
-		//TODO
+		canvasHeight = height;
+		canvasWidth = width;
+		mainPanel.clear();
+		mainPanel.setPixelSize(width, height);
+		drawingArea = new DrawingAreaGWT(canvasWidth, canvasHeight, false);
+		mainPanel.add(drawingArea.getWidget(), 0, 0);
 	}
 
 	public boolean isRedrawNeeded(){
@@ -159,7 +158,7 @@ public class IneChart extends Composite{
 			}
 		}
 
-		drawingArea.removeAllGraphicalObject();
+		drawingArea.removeAllGraphicalObjects();
 		for (IneChartModule modul : moduls) {
 			if (modul.isVisible){
 				drawingArea.addAllGraphicalObject(modul.graphicalObjectContainer);
@@ -380,16 +379,7 @@ public class IneChart extends Composite{
 	public EventBus getEventBus(){
 		return eventManager.getEventBus();
 	}
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
+
 	
 	
 	
