@@ -39,6 +39,11 @@ public class DrawingAreaGWT extends DrawingArea {
 	protected Canvas canvasGWT;
 	protected AbsolutePanel panel;
 	protected TextPositioner textPositioner;
+	protected Context context; 
+	
+	public DrawingAreaGWT(int width, int height){
+		this(width, height, false);
+	}
 	
 	/**
 	 * Creates a {@link DrawingArea} with the given dimensions
@@ -62,6 +67,7 @@ public class DrawingAreaGWT extends DrawingArea {
 		
 		panel.add(canvas, 0, 0);
 		clear();
+		context = null;
 	}
 	
 	/**
@@ -134,9 +140,9 @@ public class DrawingAreaGWT extends DrawingArea {
 		applyContext(path.getContext());
 		ArrayList<PathElement> pathElements = path.getPathElements();
 		if((path.hasFill() == false && path.hasStroke() == false )||
-				pathElements.size() < 1)
+				pathElements.size() < 1){
 			return;
-		
+		}
 		canvas.beginPath();
 		canvas.moveTo(path.getBasePointX(), path.getBasePointY());
 		for(PathElement pe : pathElements){
@@ -153,13 +159,13 @@ public class DrawingAreaGWT extends DrawingArea {
 				canvas.moveTo(mTo.getEndPointX(), mTo.getEndPointY());
 			}
 		}
-		if(path.hasStroke())
+		if(path.hasStroke()){
 			canvas.stroke();
+		}
 		//if its a closed path then we can fill it
 		if(path.hasFill()
 				&& pathElements.get(pathElements.size()-1).getEndPointX() == path.getBasePointX() &&
-				pathElements.get(pathElements.size()-1).getEndPointY() == path.getBasePointY()
-				){
+				pathElements.get(pathElements.size()-1).getEndPointY() == path.getBasePointY() ){
 			canvas.fill();
 		}
 	}
@@ -227,17 +233,32 @@ public class DrawingAreaGWT extends DrawingArea {
 	 */
 	protected void applyContext(Context context){
 		if(canvas != null){
-			canvas.setLineJoin("round");
-			canvas.setLineCap("square");
-			canvas.setGlobalAlpha(context.getAlpha());
-			canvas.setFillStyle(context.getFillColor());
-			canvas.setStrokeStyle(context.getStrokeColor());
-			canvas.setLineWidth(context.getStrokeWidth());
-			if(!createShadows && (context.getShadowOffsetX() != 0 || context.getShadowOffsetY() != 0)){
-				canvas.setShadowColor(context.getShadowColor());
-				canvas.setShadowOffsetX(context.getShadowOffsetX());
-				canvas.setShadowOffsetY(context.getShadowOffsetY());
-				
+			if(this.context == null){
+				canvas.setLineJoin("round");
+				canvas.setLineCap("square");
+			}
+			if(this.context == null || context.getAlpha() != this.context.getAlpha()){
+				canvas.setGlobalAlpha(context.getAlpha());
+			}
+			if(this.context == null || !context.getFillColor().equals(this.context.getFillColor())){
+				canvas.setFillStyle(context.getFillColor());
+			}
+			if(this.context == null || !context.getStrokeColor().equals(this.context.getStrokeColor())){
+				canvas.setStrokeStyle(context.getStrokeColor());
+			}
+			if(this.context == null || context.getStrokeWidth() != this.context.getStrokeWidth()){
+				canvas.setLineWidth(context.getStrokeWidth());
+			}
+			if(!createShadows){
+				if(this.context == null || this.context.getShadowOffsetX() != context.getShadowOffsetX()){
+					canvas.setShadowOffsetX(context.getShadowOffsetX());
+				}
+				if(this.context == null || this.context.getShadowOffsetY() != context.getShadowOffsetY()){
+					canvas.setShadowOffsetX(context.getShadowOffsetX());
+				}
+				if(this.context == null || !this.context.getShadowColor().equals(context.getShadowColor())){
+					canvas.setShadowColor(context.getShadowColor());
+				}
 			}
 		}
 		else{
@@ -248,10 +269,9 @@ public class DrawingAreaGWT extends DrawingArea {
 			canvasGWT.getContext2d().setStrokeStyle(context.getStrokeColor());
 			canvasGWT.getContext2d().setLineWidth(context.getStrokeWidth());
 		}
-		
+		this.context = context;
 	}
 
-	
 	@Override
 	protected void drawArc(Arc arc) {
 		// TODO Auto-generated method stub

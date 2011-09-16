@@ -42,7 +42,7 @@ public class GraphicalObjectContainer {
 		this.graphicalObjects.remove(graphicalObject);
 	}
 	
-	public void removeAllGraphicalObject(){
+	public void removeAllGraphicalObjects(){
 		this.graphicalObjects.clear();
 	}
 	
