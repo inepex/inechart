@@ -215,7 +215,7 @@ public class RectangularSelection extends SelectionBase{
 	}
 
 	protected void updateSelection(int x, int y, int width, int height){
-		if(w < minSelectionSize || h < minSelectionSize){
+		if(height < minSelectionSize || width < minSelectionSize){
 			rectangleSelected = false;
 			canvas.removeAllGraphicalObjects();
 			canvas.update();
@@ -243,6 +243,17 @@ public class RectangularSelection extends SelectionBase{
 		this.w = width;
 		this.h = height;
 		rectangleSelected = true;
+	}
+	
+	public void resetSelection(boolean fireEvent){
+		updateSelection(0, 0, 0, 0);
+		if(fireEvent){
+			modulToSelectFrom.setAutoScaleViewport(true);
+			ViewportChangeEvent event = new ViewportChangeEvent(1, true); //HACK, TODO resolve later
+			event.setAddressedCharts(addressedCharts);
+			event.setAddressedModuls(addressedModuls);
+			eventManager.fireViewportChangedEvent(event);
+		}
 	}
 
 	protected void updateCursor(MouseEvent<?> event){

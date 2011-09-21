@@ -63,10 +63,15 @@ public class IneChart extends Composite{
 		//dimensions, layout
 		mainPanel = new AbsolutePanel();
 		initWidget(mainPanel);
-		setSize(width, height);
+		drawingArea = new DrawingAreaGWT(width, height);
+		mainPanel.add(drawingArea.getWidget(), 0, 0);
+		canvasHeight = height;
+		canvasWidth = width;
+		mainPanel.setPixelSize(width, height);
+		drawingArea.setSize(width, height);
 		
 		moduls = new ArrayList<IneChartModule>();
-		labelFactory = new GWTLabelFactory(drawingArea,mainPanel);
+		labelFactory = new GWTLabelFactory(drawingArea, mainPanel);
 		axes = new Axes(drawingArea,labelFactory);
 		axes.setTickFactory(new TickFactoryGWT());
 		
@@ -81,10 +86,8 @@ public class IneChart extends Composite{
 	public void setSize(int width, int height){
 		canvasHeight = height;
 		canvasWidth = width;
-		mainPanel.clear();
 		mainPanel.setPixelSize(width, height);
-		drawingArea = new DrawingAreaGWT(canvasWidth, canvasHeight, false);
-		mainPanel.add(drawingArea.getWidget(), 0, 0);
+		drawingArea.setSize(width, height);
 	}
 
 	public boolean isRedrawNeeded(){
