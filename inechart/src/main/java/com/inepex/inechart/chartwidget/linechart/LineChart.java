@@ -1,6 +1,8 @@
 package com.inepex.inechart.chartwidget.linechart;
 
 import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Collections;
 import java.util.List;
 import java.util.TreeMap;
 
@@ -75,10 +77,10 @@ public class LineChart extends IneChartModule2D implements PointSelectionHandler
 	// model fields
 	ArrayList<Curve> curves = new ArrayList<Curve>();
 	int highestZIndex = 1;
-	/**
-	 * stores the calculated points inside viewport
-	 */
-	TreeMap<Curve, ArrayList<DataPoint>> calculatedPointsPerCurve;
+//	/**
+//	 * stores the calculated points inside viewport
+//	 */
+//	TreeMap<Curve, ArrayList<DataPoint>> calculatedPointsPerCurve;
 	TreeMap<Curve, Path> visiblePathPerCurve;
 	TreeMap<Curve, Path> fillPathPerCurve;
 
@@ -102,7 +104,7 @@ public class LineChart extends IneChartModule2D implements PointSelectionHandler
 	public LineChart(DrawingArea canvas, LabelFactoryBase labelFactory, Axes axes, DrawingArea overLay, IneChartEventManager eventManager) {
 		super(canvas, labelFactory, axes, eventManager);
 		this.overlay = overLay;
-		calculatedPointsPerCurve = new TreeMap<Curve, ArrayList<DataPoint>>();
+//		calculatedPointsPerCurve = new TreeMap<Curve, ArrayList<DataPoint>>();
 		visiblePathPerCurve = new TreeMap<Curve, Path>();
 		fillPathPerCurve = new TreeMap<Curve, Path>();
 		lineChartGOsPerCurve = new TreeMap<Curve, GraphicalObjectContainer>();
@@ -241,32 +243,32 @@ public class LineChart extends IneChartModule2D implements PointSelectionHandler
 	protected void calculatePointsForCurve(Curve curve){
 		curve.dataSet.update();
 		List<double[]> dataPairs = curve.dataSet.getDataPairs();
-		ArrayList<DataPoint> calculatedPoints = calculatedPointsPerCurve.get(curve);
-		if(calculatedPoints == null){
-			calculatedPoints = new ArrayList<DataPoint>();
-			calculatedPointsPerCurve.put(curve, calculatedPoints);
-		}
-		else{
-			calculatedPoints.clear();
-		}
+		
 		for(DataPoint selected : curve.selectedPoints){
 			setDataPoint(selected);
 		}
 
+		//TODO DataSet pointAdded/removed events!!
+		//iterate through dataPairs and add if s
 		for(double[] dataPair : dataPairs){
 			DataPoint point = new DataPoint(dataPair[0], dataPair[1]);
-			double[] calculated = getCanvasPosition(dataPair[0], dataPair[1]);	
-			point.actualXPos = calculated[0];
-			point.actualYPos = calculated[1];
-			if(point.x > xAxis.getMax()){
-				if(curve.dataSet.isSortable()){
-					break;
-				}
+			if(curve.dataPoints.contains(point)){
+				point = curve.dataPoints.get(curve.dataPoints.indexOf(point));
 			}
-			else if(point.x >= xAxis.getMin() && point.y >= yAxis.getMin() && point.y <= yAxis.getMax()){
-				calculatedPoints.add(point);
+			else{
+				curve.dataPoints.add(point);
 			}
+			setDataPoint(point);
+//			if(point.x > xAxis.getMax()){
+//				if(curve.dataSet.isSortable()){
+//					break;
+//				}
+//			}
+//			else if(point.x >= xAxis.getMin() && point.y >= yAxis.getMin() && point.y <= yAxis.getMax()){
+//				calculatedPoints.add(point);
+//			}
 		}
+		Collections.sort(curve.dataPoints);
 	}
 
 	protected void createFillPathForCurve(Curve curve){
@@ -458,8 +460,7 @@ public class LineChart extends IneChartModule2D implements PointSelectionHandler
 	 * @param onlyOverlay
 	 */
 	protected void createPointChartGOs(Curve curve, boolean onlyOverlay) {
-		ArrayList<DataPoint> calculatedPoints = calculatedPointsPerCurve.get(curve);
-		if(calculatedPoints == null || calculatedPoints.size() == 0){
+		if(curve.dataPoints.size() == 0){
 			return;
 		}
 		GraphicalObjectContainer goc = pointChartGOsPerCurve.get(curve);
@@ -532,7 +533,10 @@ public class LineChart extends IneChartModule2D implements PointSelectionHandler
 			}
 		}
 		else{
-			for(DataPoint point : calculatedPoints){
+			for(DataPoint point : curve.dataPoints){
+				if(!point.isInViewport){
+					continue;
+				}
 				//selected
 				if(curve.selectedPoints.contains(point)){
 					if(selected != null){
@@ -732,7 +736,10 @@ public class LineChart extends IneChartModule2D implements PointSelectionHandler
 				continue;
 			}
 			DataPoint overed = null;
-			for(DataPoint point : calculatedPointsPerCurve.get(c)){
+			for(DataPoint point : c.dataPoints){
+				if(!point.isInViewport){
+					continue;
+				}
 				if(point.actualXPos >= eventLocation[0]  - pointMouseOverRadius &&
 						point.actualXPos <= eventLocation[0]  + pointMouseOverRadius &&
 						point.actualYPos >= eventLocation[1] - pointMouseOverRadius &&
@@ -762,10 +769,13 @@ public class LineChart extends IneChartModule2D implements PointSelectionHandler
 			}
 			DataPoint overed = null;
 			double closestDiff = Double.MAX_VALUE;
-			for(DataPoint pair : calculatedPointsPerCurve.get(c)){
-				if(Math.abs(pair.actualXPos - eventLocation[0]) < closestDiff){
-					closestDiff = Math.abs(pair.actualXPos - eventLocation[0]);
-					overed = pair;
+			for(DataPoint point : c.dataPoints){
+				if(!point.isInViewport){
+					continue;
+				}
+				if(Math.abs(point.actualXPos - eventLocation[0]) < closestDiff){
+					closestDiff = Math.abs(point.actualXPos - eventLocation[0]);
+					overed = point;
 				}
 			}
 			if(overed != null){
@@ -773,6 +783,14 @@ public class LineChart extends IneChartModule2D implements PointSelectionHandler
 			}
 		}
 		return mouseOver;
+	}
+	
+	public boolean isPointVisible(DataPoint dataPoint){
+		if(dataPoint.getX() >= xAxis.getMin() && dataPoint.getX() <= xAxis.getMax() &&
+				dataPoint.getY() >= yAxis.getMin() && dataPoint.getY() <= yAxis.getMax()){
+			return true;
+		}
+		return false;
 	}
 	
 	protected void selectPointEvent(TreeMap<Curve, DataPoint> selectedPoints){
@@ -852,7 +870,7 @@ public class LineChart extends IneChartModule2D implements PointSelectionHandler
 		Curve curve = event.getCurve();
 		if(curve == null){
 			for(Curve c : curves){
-				if(c.dataSet.getDataPairs().contains(event.getPoint())){
+				if(c.dataPoints.contains(event.getPoint())){
 					curve = c;
 					break;
 				}
@@ -880,7 +898,7 @@ public class LineChart extends IneChartModule2D implements PointSelectionHandler
 		Curve curve = event.getCurve();
 		if(curve == null){
 			for(Curve c : curves){
-				if(c.dataSet.getDataPairs().contains(event.getPoint())){
+				if(c.dataPoints.contains(event.getPoint())){
 					curve = c;
 					break;
 				}
@@ -904,6 +922,7 @@ public class LineChart extends IneChartModule2D implements PointSelectionHandler
 		double[] canvasPos = getCanvasPosition(dataPoint.x, dataPoint.y);
 		dataPoint.actualXPos = canvasPos[0];
 		dataPoint.actualYPos = canvasPos[1];
+		dataPoint.isInViewport = isPointVisible(dataPoint);
 	}
 
 	public boolean isSinglePointSelection() {

@@ -32,12 +32,10 @@ public class Curve implements HasZIndex, HasShadow, Comparable<Curve>{
 	DataSet dataSet;
 
 	/**
-	 * @return the dataSet
+	 * {@link DataPoint} objects created from {@link #dataSet}
 	 */
-	public DataSet getDataSet() {
-		return dataSet;
-	}
-
+	ArrayList<DataPoint> dataPoints;
+	
 	/* Lookout */
 	// Fills
 	TreeMap<Curve, Color> toCurveFills;
@@ -74,6 +72,7 @@ public class Curve implements HasZIndex, HasShadow, Comparable<Curve>{
 		setShadowOffsetX(Defaults.shadowOffsetY);
 		setShadowColor(Defaults.shadowColor());
 		comparableNo = highestComparableNo++;
+		dataPoints = new ArrayList<DataPoint>();
 	}
 
 
@@ -102,6 +101,13 @@ public class Curve implements HasZIndex, HasShadow, Comparable<Curve>{
 //		toYFills.clear();
 	}
 
+	/**
+	 * @return the dataSet
+	 */
+	public DataSet getDataSet() {
+		return dataSet;
+	}
+	
 	/**
 	 * Fills the area between this and the given curve
 	 * 
