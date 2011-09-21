@@ -93,6 +93,17 @@ public class DrawingAreaGWT extends DrawingArea {
 		clear();
 	}
 	
+	public void setSize(int width, int height){
+		if(canvasGWT == null && canvas != null){
+			canvas.removeFromParent();
+			canvas = new CanvasWidget(width, height);
+			panel.add(canvas, 0, 0);
+		}
+		this.width = width;
+		this.height = height;
+		panel.setPixelSize(width, height);
+	}
+	
 	/**
 	 * Use this method to add this to a panel
 	 * if it uses {@link Canvas} 
