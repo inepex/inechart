@@ -17,7 +17,6 @@ import com.inepex.inechart.chartwidget.barchart.BarChart;
 import com.inepex.inechart.chartwidget.intervalchart.IntervalChart;
 import com.inepex.inechart.chartwidget.label.ChartTitle;
 import com.inepex.inechart.chartwidget.label.GWTLabelFactory;
-import com.inepex.inechart.chartwidget.label.HoverPanel;
 import com.inepex.inechart.chartwidget.label.LabelFactoryBase;
 import com.inepex.inechart.chartwidget.label.Legend;
 import com.inepex.inechart.chartwidget.linechart.Curve;
