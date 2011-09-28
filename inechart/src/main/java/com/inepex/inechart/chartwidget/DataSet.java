@@ -3,6 +3,7 @@ package com.inepex.inechart.chartwidget;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.TreeMap;
@@ -291,24 +292,18 @@ public class DataSet {
 	protected void eliminateDuplicateEntries(){
 		if(allowDuplicateXes || xValues.isEmpty() || xValues.size() > yValues.size())
 			return;
-		ArrayList<double[]> valuePairs = new ArrayList<double[]>();
+		//tmpmap for removing x duplications
+		HashMap<Double, Double> tmpMap = new HashMap<Double, Double>();
 		for(int i=0;i<xValues.size();i++){
 			double x = xValues.get(i);
-			//we added the same x previously
-			if(xValues.indexOf(x) != i){
-				//overwrite older entry
-				valuePairs.set(xValues.indexOf(x), new double[]{x, yValues.get(i)});
-			}
-			else{
-				valuePairs.add(new double[]{xValues.get(i), yValues.get(i)});
-			}
+			tmpMap.put(xValues.get(i), yValues.get(i));
 		}
 		
 		xValues.clear();
 		yValues.clear();
-		for(int i=0; i<valuePairs.size();i++){
-			xValues.add(valuePairs.get(i)[0]);
-			yValues.add(valuePairs.get(i)[1]);
+		for(Double xVal : tmpMap.keySet()){
+			xValues.add(xVal);
+			yValues.add(tmpMap.get(xVal));
 		}
 	}
 	/**
