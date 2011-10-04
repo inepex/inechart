@@ -53,7 +53,6 @@ public abstract class GraphicalObject implements Comparable<GraphicalObject>{
 			
 			@Override
 			public int compare(GraphicalObject o1, GraphicalObject o2) {
-				double diff = o1.zIndex - o2.zIndex;
 				if(o1.zIndex > o2.zIndex)
 					return 1;
 				else if(o1.zIndex < o2.zIndex)

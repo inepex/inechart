@@ -5,6 +5,9 @@
 	<inherits name="com.inepex.inegraphics.impl.IneCanvas"/>
 	
 	
+<!-- 	<inherits name="com.allen_sauer.gwt.log.gwt-log-DEBUG" /> -->
+
+	
 	
 	<source path="impl"/>
 	<source path="shared"/>

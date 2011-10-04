@@ -74,8 +74,16 @@ public abstract class DrawingArea extends GraphicalObjectContainer{
 	 *  
 	 */
 	public void update(){
-		Collections.sort(graphicalObjects, GraphicalObject.getZXComparator());
+//		Log.debug("+++++++++++++++++++++++++++++++++++++++++++++++++++++++++");
+//		long start = System.currentTimeMillis();
+//		Collections.sort(graphicalObjects, GraphicalObject.getZXComparator());
+//		Collections.sort(graphicalObjects);
+		Collections.sort(graphicalObjects, GraphicalObject.getZComparator());
+//		Log.debug((System.currentTimeMillis() - start) + " ms : sorting GOs");
+//		start = System.currentTimeMillis();
 		clear();
+//		Log.debug((System.currentTimeMillis() - start) + " ms : clearing canvas");
+//		start = System.currentTimeMillis();
 		if(graphicalObjects.size() == 0)
 			return;
 		/*
@@ -94,13 +102,16 @@ public abstract class DrawingArea extends GraphicalObjectContainer{
 				gos.clear();
 			}
 			if(createShadows &&
-					(go.getContext().shadowOffsetX != 0 || go.getContext().shadowOffsetY != 0))
+					(go.getContext().shadowOffsetX != 0 || go.getContext().shadowOffsetY != 0)){
 				drawGraphicalObjectShadow(go);
+			}
 			gos.add(go);
 		}
 		for(GraphicalObject go2 : gos){
 			drawGraphicalObject(go2);
 		}
+//		Log.debug((System.currentTimeMillis() - start) + " ms : drawing GOs");
+//		Log.debug("+++++++++++++++++++++++++++++++++++++++++++++++++++++++++");
 	}
 	
 	protected void drawGraphicalObject(GraphicalObject go){

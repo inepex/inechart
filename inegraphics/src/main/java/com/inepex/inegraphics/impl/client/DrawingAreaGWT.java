@@ -141,8 +141,10 @@ public class DrawingAreaGWT extends DrawingArea {
 	
 	@Override
 	protected void clear() {
-		canvas.setWidth(width);
-		canvas.setHeight(height);
+//		canvas.setWidth(width);
+//		canvas.setHeight(height);
+		canvas.setFillStyle("white");
+		canvas.clearRect(0, 0, width, height);
 		textPositioner.removeAllText();
 	}
 
@@ -207,12 +209,12 @@ public class DrawingAreaGWT extends DrawingArea {
 			canvas.lineTo(x + roundedCornerRadius, y + height);
 			canvas.quadraticCurveTo(x, y + height, x , y + height  - roundedCornerRadius);
 			canvas.closePath();
-		}
-		if(rectangle.hasFill()){
-			canvas.fill();
-		}
-		if(rectangle.hasStroke()){
-			canvas.stroke();
+			if(rectangle.hasFill()){
+				canvas.fill();
+			}
+			if(rectangle.hasStroke()){
+				canvas.stroke();
+			}
 		}
 	}
 
