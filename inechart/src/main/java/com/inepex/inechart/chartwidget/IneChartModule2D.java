@@ -3,7 +3,6 @@ package com.inepex.inechart.chartwidget;
 import java.util.ArrayList;
 import java.util.TreeMap;
 
-import com.allen_sauer.gwt.log.client.Log;
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;
 import com.google.gwt.event.dom.client.MouseDownEvent;
