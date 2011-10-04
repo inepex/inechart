@@ -5,7 +5,7 @@
 	<groupId>com.inepex</groupId>
 	<artifactId>inechart</artifactId>
 	<packaging>jar</packaging>
-	<version>1.0.22</version>
+	<version>1.0.23</version>
 	<name>inechart</name>
 	<url>http://maven.apache.org</url>
 	<repositories>
@@ -31,7 +31,7 @@
 		<dependency>
 			<groupId>com.inepex</groupId>
 			<artifactId>inegraphics</artifactId>
-			<version>1.2.10</version>
+			<version>1.2.11</version>
 		</dependency>
 	</dependencies>
 	<build>
@@ -60,15 +60,15 @@
 					<descriptorRefs>
 						<descriptorRef>jar-with-dependencies</descriptorRef>
 					</descriptorRefs>
-				</configuration>	
+				</configuration>
 			</plugin>
 		</plugins>
 	</build>
-		<distributionManagement>
-    <repository>
-      <id>inepex</id>
-      <name>Inepex Repository</name>
-      <url>http://maven.inepex.com:8081/nexus/content/repositories/releases</url>
-    </repository>
-  </distributionManagement>
+	<distributionManagement>
+		<repository>
+			<id>inepex</id>
+			<name>Inepex Repository</name>
+			<url>http://maven.inepex.com:8081/nexus/content/repositories/releases</url>
+		</repository>
+	</distributionManagement>
 </project>
