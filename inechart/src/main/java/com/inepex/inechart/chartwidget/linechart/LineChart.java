@@ -179,24 +179,37 @@ public class LineChart extends IneChartModule2D implements PointSelectionHandler
 			return;
 		graphicalObjectContainer.removeAllGraphicalObjects();
 		//do model to canvas calculations
+//		long start;
 		for (Curve curve : curves) {
+//			Log.debug("----"+curve.getDataSet().getName()+"-----");
 			if(curve.hasLine){
+//				start = System.currentTimeMillis();
 				createVisiblePathForCurve(curve);
+//				Log.debug("visiblePath calc: " + (System.currentTimeMillis() - start) + " ms");
 			}
 			if(shouldCalculateFillPathForCurve(curve)){
+//				start = System.currentTimeMillis();
 				createFillPathForCurve(curve);
+//				Log.debug("fillPath calc: " + (System.currentTimeMillis() - start) + " ms");
 			}
 			if(curve.hasPoint){
+//				start = System.currentTimeMillis();
 				calculatePointsForCurve(curve);
+//				Log.debug("point calc: " + (System.currentTimeMillis() - start) + " ms");
 			}
 		}
 		//remove previous and create new GOs
 		for (Curve curve : curves) {
+//			Log.debug("----"+curve.getDataSet().getName()+"-----");
 			if(curve.hasLine){
+//				start = System.currentTimeMillis();
 				createLineChartGOs(curve);
+//				Log.debug("lineChart GO creation: " + (System.currentTimeMillis() - start) + " ms");
 			}
 			if(curve.hasPoint){
+//				start = System.currentTimeMillis();
 				createPointChartGOs(curve, false);
+//				Log.debug("pointChart GO creation: " + (System.currentTimeMillis() - start) + " ms");
 			}
 		}
 		for(Curve curve:curves){
@@ -241,24 +254,35 @@ public class LineChart extends IneChartModule2D implements PointSelectionHandler
 	}
 
 	protected void calculatePointsForCurve(Curve curve){
+//		long start = System.currentTimeMillis();
 		curve.dataSet.update();
 		List<double[]> dataPairs = curve.dataSet.getDataPairs();
 		
 		for(DataPoint selected : curve.selectedPoints){
 			setDataPoint(selected);
 		}
-
+//		Log.debug("    selected points calc: " + (System.currentTimeMillis() - start) + " ms");
+		
 		//TODO DataSet pointAdded/removed events!!
 		//iterate through dataPairs and add if s
+		curve.dataPoints.clear();
 		for(double[] dataPair : dataPairs){
 			DataPoint point = new DataPoint(dataPair[0], dataPair[1]);
-			if(curve.dataPoints.contains(point)){
-				point = curve.dataPoints.get(curve.dataPoints.indexOf(point));
-			}
-			else{
-				curve.dataPoints.add(point);
-			}
 			setDataPoint(point);
+			curve.dataPoints.add(point);
+//			start = System.currentTimeMillis();
+//			DataPoint point = new DataPoint(dataPair[0], dataPair[1]);
+//			if(curve.dataPoints.contains(point)){
+//				Log.debug("    § curve.dataPoints.contains ?: " + (System.currentTimeMillis() - start) + " ms");
+//				point = curve.dataPoints.get(curve.dataPoints.indexOf(point));
+//			}
+//			else{
+//				Log.debug("    § curve.dataPoints.contains ?: " + (System.currentTimeMillis() - start) + " ms");
+//				curve.dataPoints.add(point);
+//			}
+//			start = System.currentTimeMillis();
+//			setDataPoint(point);
+//			Log.debug("    § setting data point: " + (System.currentTimeMillis() - start) + " ms");
 //			if(point.x > xAxis.getMax()){
 //				if(curve.dataSet.isSortable()){
 //					break;
@@ -268,7 +292,10 @@ public class LineChart extends IneChartModule2D implements PointSelectionHandler
 //				calculatedPoints.add(point);
 //			}
 		}
+//		Log.debug("    normal points calc: " + (System.currentTimeMillis() - start) + " ms");
+//		start = System.currentTimeMillis();
 		Collections.sort(curve.dataPoints);
+//		Log.debug("    sorting points: " + (System.currentTimeMillis() - start) + " ms");
 	}
 
 	protected void createFillPathForCurve(Curve curve){
@@ -919,10 +946,14 @@ public class LineChart extends IneChartModule2D implements PointSelectionHandler
 	}
 	
 	private void setDataPoint(DataPoint dataPoint) {
+//		long start = System.currentTimeMillis();
 		double[] canvasPos = getCanvasPosition(dataPoint.x, dataPoint.y);
+//		Log.debug("    § canvas position calc: " + (System.currentTimeMillis() - start) + " ms");
+//		start = System.currentTimeMillis();
 		dataPoint.actualXPos = canvasPos[0];
 		dataPoint.actualYPos = canvasPos[1];
 		dataPoint.isInViewport = isPointVisible(dataPoint);
+//		Log.debug("    § is point visible?: " + (System.currentTimeMillis() - start) + " ms");
 	}
 
 	public boolean isSinglePointSelection() {

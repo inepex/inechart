@@ -245,15 +245,8 @@ public class RectangularSelection extends SelectionBase{
 		rectangleSelected = true;
 	}
 	
-	public void resetSelection(boolean fireEvent){
+	public void resetSelection(){
 		updateSelection(0, 0, 0, 0);
-		if(fireEvent){
-			modulToSelectFrom.setAutoScaleViewport(true);
-			ViewportChangeEvent event = new ViewportChangeEvent(1, true); //HACK, TODO resolve later
-			event.setAddressedCharts(addressedCharts);
-			event.setAddressedModuls(addressedModuls);
-			eventManager.fireViewportChangedEvent(event);
-		}
 	}
 
 	protected void updateCursor(MouseEvent<?> event){

@@ -608,18 +608,19 @@ public class Axes extends IneChartModule {
 	}
 
 	void removeAllGOAndLabelRelatedToAxis(Axis axis) {
-		if (gosPerAxis.get(axis) != null) {
-			for (GraphicalObject go : gosPerAxis.get(axis).getGraphicalObjects()) {
-				graphicalObjectContainer.removeGraphicalObject(go);
-			}
+		if (gosPerAxis.get(axis) == null) {
+			return;
 		}
-		gosPerAxis.remove(axis);
+		for(GraphicalObject go : gosPerAxis.get(axis).getGraphicalObjects()){
+			graphicalObjectContainer.removeGraphicalObject(go);
+		}
+		gosPerAxis.get(axis).removeAllGraphicalObjects();
 		if(labelsPerAxis.get(axis) == null)
 			return;
 		for(StyledLabel l : labelsPerAxis.get(axis)){
 			labelFactory.removeStyledLabel(l);
 		}
-		labelsPerAxis.clear();
+		labelsPerAxis.get(axis).clear();
 	}
 
 	public double[] getActualModulPaddingForAxis(Axis axis){

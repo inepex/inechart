@@ -3,6 +3,7 @@ package com.inepex.inechart.chartwidget;
 import java.util.ArrayList;
 import java.util.TreeMap;
 
+import com.allen_sauer.gwt.log.client.Log;
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;
 import com.google.gwt.event.dom.client.MouseDownEvent;
@@ -571,6 +572,7 @@ public abstract class IneChartModule2D extends IneChartModule implements HasCoor
 	 * @return
 	 */
  	public double[] getCanvasPosition(double x, double y) {
+//		long start = System.currentTimeMillis();
 		double[] ret = new double[2];
 		if (xAxis.isHorizontal())
 			ret[0] = getCanvasX(x);
@@ -580,6 +582,7 @@ public abstract class IneChartModule2D extends IneChartModule implements HasCoor
 			ret[1] = getCanvasY(x);
 		else
 			ret[1] = getCanvasY(y);
+//		Log.debug("    !canvas position calc: " + (System.currentTimeMillis() - start) + " ms");
 		return ret;
 	}
 

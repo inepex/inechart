@@ -123,8 +123,8 @@ public class IneChart extends Composite{
 		labelFactory.update();
 //		Log.debug(System.currentTimeMillis() - start2 + " ms - labelFactory update");
 //		start2 = System.currentTimeMillis();
-		
-		
+//		
+//		
 //		Log.info(System.currentTimeMillis() - start2 + " ms - axes update");
 //		start2 = System.currentTimeMillis();
 		//scale moduls 
