@@ -1,13 +1,12 @@
 package com.inepex.inecharttest.client.showcase;
 
 
-import java.util.TreeMap;
-
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;
 import com.google.gwt.event.dom.client.KeyPressEvent;
 import com.google.gwt.event.dom.client.KeyPressHandler;
 import com.google.gwt.user.client.ui.Button;
+import com.google.gwt.user.client.ui.CheckBox;
 import com.google.gwt.user.client.ui.FlexTable;
 import com.google.gwt.user.client.ui.FlowPanel;
 import com.google.gwt.user.client.ui.Label;
@@ -15,15 +14,19 @@ import com.google.gwt.user.client.ui.TextBox;
 import com.inepex.inechart.chartwidget.IneChart;
 import com.inepex.inechart.chartwidget.linechart.Curve;
 import com.inepex.inechart.chartwidget.linechart.LineChart;
-import com.inepex.inechart.chartwidget.properties.Color;
-import com.inepex.inechart.chartwidget.properties.LineProperties;
-import com.inepex.inegraphics.impl.client.canvas.CanvasWidget;
 
 public class SpeedTest extends FlowPanel {
 	IneChart chart = null;
 	TextBox chartWidthTB;
 	TextBox chartHeightTB;
 	TextBox pointCountTB;
+	CheckBox sinusOrLine;
+	CheckBox axes;
+	CheckBox labels;
+	CheckBox shadows;
+	CheckBox points;
+	CheckBox filterByXDensity;
+	
 	Button go;
 	Curve sineCurve;
 	FlexTable results;
@@ -67,6 +70,13 @@ public class SpeedTest extends FlowPanel {
 		pointCountTB.addClickHandler(clickClear);
 //		pointCountTB.setStyleName("AlignMid");
 		
+		labels = new CheckBox("labels");
+		axes = new CheckBox("axes");
+		shadows = new CheckBox("shadows");
+		points = new CheckBox("points");
+		filterByXDensity = new CheckBox("filterX");
+		sinusOrLine = new CheckBox("sinus/line");
+		
 		go = new Button("update()");
 		go.addClickHandler(new ClickHandler() {
 			
@@ -82,7 +92,14 @@ public class SpeedTest extends FlowPanel {
 		results.setWidget(0, 0, chartWidthTB);
 		results.setWidget(0, 1, chartHeightTB);
 		results.setWidget(0, 2, pointCountTB);
-		results.setWidget(0, 3, go);
+		results.setWidget(0, 3, sinusOrLine);
+		results.setWidget(0, 4, labels);
+		results.setWidget(0, 5, axes);
+		results.setWidget(0, 6, shadows);
+		results.setWidget(0, 7, points);
+		results.setWidget(0, 8, filterByXDensity);		
+		results.setWidget(0, 9, go);
+
 		results.setWidget(1, 0, new Label("Results"));
 		results.getFlexCellFormatter().setColSpan(1, 0, 4);
 		results.setWidget(2, 0, new Label("Chart width"));
@@ -108,19 +125,25 @@ public class SpeedTest extends FlowPanel {
 			this.remove(chart);
 		}
 		chart = new IneChart(Integer.parseInt(chartWidthTB.getText()), Integer.parseInt(chartHeightTB.getText()));
+		chart.getDrawingArea().setCreateShadows(shadows.getValue());
 		this.add(chart);
 		
-		sineCurve = new Curve(DataGenerator.generateSinePeriod(Integer.parseInt(pointCountTB.getText())));
+		if (sinusOrLine.getValue())
+			sineCurve = new Curve(DataGenerator.generateSinePeriod(Integer.parseInt(pointCountTB.getText())));
+		else 
+			sineCurve = new Curve(DataGenerator.generatePlainData(Integer.parseInt(pointCountTB.getText())));
 		LineChart lc= chart.createLineChart();
+		sineCurve.getDataSet().setAllowDuplicateXes(true);
 		lc.addCurve(sineCurve);
-		lc.getXAxis().setAutoCreateTicks(true);
-		lc.getXAxis().setAutoCreateGrids(true);
-		lc.getYAxis().setAutoCreateTicks(true);
-		lc.getYAxis().setAutoCreateGrids(true);
-		sineCurve.setHasPoints(true);
-		sineCurve.addFill(0d, new Color(sineCurve.getDataSet().getColor().getColor(),0.5));
+		lc.getXAxis().setAutoCreateGrids(axes.getValue());			
+		lc.getYAxis().setAutoCreateGrids(axes.getValue());
+		lc.getXAxis().setAutoCreateTicks(labels.getValue());
+		lc.getYAxis().setAutoCreateTicks(labels.getValue());			
+
+		sineCurve.setHasPoints(points.getValue());
+//		sineCurve.addFill(0d, new Color(sineCurve.getDataSet().getColor().getColor(),0.5));
 		chart.setChartTitle("Sine curve", "One period with "+Integer.parseInt(pointCountTB.getText())+" data samples");
-		long start = System.currentTimeMillis();
+		final long start = System.currentTimeMillis();
 		chart.update();
 		long end = System.currentTimeMillis();
 		
@@ -129,6 +152,8 @@ public class SpeedTest extends FlowPanel {
 		results.setWidget(row, 1, new Label(chartHeightTB.getText()));
 		results.setWidget(row, 2, new Label(pointCountTB.getText()));
 		results.setWidget(row, 3, new Label(end - start + " ms "));
+		
+		
 	}
 
 }

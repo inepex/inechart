@@ -61,6 +61,16 @@ public class DataGenerator {
 		}
 		return dataSet;
 	}
+	
+	public static DataSet generatePlainData(int sampleCount){
+		DataSet dataSet = new DataSet(true, false);
+		dataSet.addDataPair(0.0, 3.0);
+		for(double sample = 1.0; sample < sampleCount-1; sample++){
+			dataSet.addDataPair(sample, 1.0);
+		}
+		dataSet.addDataPair(sampleCount-1, 0.0);
+		return dataSet;
+	}
 
 	public static TreeMap<Double, Double> generateSine(int periodCount, int samplesInPeriod){
 		TreeMap<Double, Double> map = new TreeMap<Double, Double>();
