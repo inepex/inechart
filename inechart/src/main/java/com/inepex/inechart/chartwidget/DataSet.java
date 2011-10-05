@@ -289,6 +289,10 @@ public class DataSet {
 			yValues.add(valuePairs.get(i)[1]);
 		}
 	}
+	
+	/**
+	 * incredible slow with large dataset!
+	 */
 	protected void eliminateDuplicateEntries(){
 		if(allowDuplicateXes || xValues.isEmpty() || xValues.size() > yValues.size())
 			return;
@@ -370,7 +374,7 @@ public class DataSet {
 	}
 
 	/**
-	 * If set true any newly added x (and its y) will overwrite the previous entry,
+	 * Incredible slow for large dataset! If set true any newly added x (and its y) will overwrite the previous entry,
 	 * and the dataSet will apply this change immediately (eliminates duplicate entries).
 	 * @param allowDuplicateXes
 	 */
