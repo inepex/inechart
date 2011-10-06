@@ -8,6 +8,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.TreeMap;
 
+import com.google.gwt.user.client.ui.Label;
+import com.google.gwt.user.client.ui.RootPanel;
 import com.inepex.inechart.chartwidget.misc.ColorSet;
 import com.inepex.inechart.chartwidget.properties.Color;
 
@@ -294,10 +296,11 @@ public class DataSet {
 	 * incredible slow with large dataset!
 	 */
 	protected void eliminateDuplicateEntries(){
+		long start = System.currentTimeMillis();
 		if(allowDuplicateXes || xValues.isEmpty() || xValues.size() > yValues.size())
 			return;
 		//tmpmap for removing x duplications
-		HashMap<Double, Double> tmpMap = new HashMap<Double, Double>();
+		TreeMap<Double, Double> tmpMap = new TreeMap<Double, Double>();
 		for(int i=0;i<xValues.size();i++){
 			double x = xValues.get(i);
 			tmpMap.put(xValues.get(i), yValues.get(i));
@@ -309,6 +312,7 @@ public class DataSet {
 			xValues.add(xVal);
 			yValues.add(tmpMap.get(xVal));
 		}
+		RootPanel.get().add(new Label("Elimination: " + (System.currentTimeMillis() - start) + "ms"));
 	}
 	/**
 	 * @return the xMax
