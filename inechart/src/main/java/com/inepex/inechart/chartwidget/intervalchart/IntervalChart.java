@@ -124,7 +124,7 @@ public class IntervalChart extends IneChartModule2D {
 			top = Math.max(getCanvasY(dataSet.getyValue()), topPadding);
 //			height = getCanvasDistanceY(Math.abs(dataSet.getyValue()));
 			height = Math.abs(getCanvasY(dataSet.getyValue()) - getCanvasY(0));
-			width = Math.min(getCanvasX(interval[1]), leftPadding + getWidth() - left);
+			width = Math.min(getCanvasX(interval[1]), leftPadding + getWidth()) - left;
 			Rectangle r = new Rectangle(width, height, left, top, dataSet.getShapeProperties());
 			r.setRoundedCornerR(dataSet.getRoundedCornerRadius());
 			goc.addAllGraphicalObject(r.toGraphicalObjects());
