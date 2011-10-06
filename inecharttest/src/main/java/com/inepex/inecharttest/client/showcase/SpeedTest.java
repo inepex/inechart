@@ -25,7 +25,7 @@ public class SpeedTest extends FlowPanel {
 	CheckBox labels;
 	CheckBox shadows;
 	CheckBox points;
-	CheckBox filterByXDensity;
+	CheckBox eliminateDuplicates;
 	
 	Button go;
 	Curve sineCurve;
@@ -74,7 +74,7 @@ public class SpeedTest extends FlowPanel {
 		axes = new CheckBox("axes");
 		shadows = new CheckBox("shadows");
 		points = new CheckBox("points");
-		filterByXDensity = new CheckBox("filterX");
+		eliminateDuplicates = new CheckBox("elimininate duplicates");
 		sinusOrLine = new CheckBox("sinus/line");
 		
 		go = new Button("update()");
@@ -97,7 +97,7 @@ public class SpeedTest extends FlowPanel {
 		results.setWidget(0, 5, axes);
 		results.setWidget(0, 6, shadows);
 		results.setWidget(0, 7, points);
-		results.setWidget(0, 8, filterByXDensity);		
+		results.setWidget(0, 8, eliminateDuplicates);		
 		results.setWidget(0, 9, go);
 
 		results.setWidget(1, 0, new Label("Results"));
@@ -133,7 +133,7 @@ public class SpeedTest extends FlowPanel {
 		else 
 			sineCurve = new Curve(DataGenerator.generatePlainData(Integer.parseInt(pointCountTB.getText())));
 		LineChart lc= chart.createLineChart();
-		sineCurve.getDataSet().setAllowDuplicateXes(true);
+		sineCurve.getDataSet().setAllowDuplicateXes(!eliminateDuplicates.getValue());
 		lc.addCurve(sineCurve);
 		lc.getXAxis().setAutoCreateGrids(axes.getValue());			
 		lc.getYAxis().setAutoCreateGrids(axes.getValue());
