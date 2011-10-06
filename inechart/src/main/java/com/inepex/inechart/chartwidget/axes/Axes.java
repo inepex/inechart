@@ -213,6 +213,9 @@ public class Axes extends IneChartModule {
 	}
 	
 	void createTickText(Axis axis, Axis perpAxis, Tick tick, double tickStartX, double tickStartY){
+		if(tick.formatString != null){
+			tick.text.setText( tickFactory.formatTickText(tick, axis.axisDataType));
+		}
 		if (tick.text != null && tick.text.getText().length() > 0) {
 			//calculate the text position relative to tick
 			BasePointXPosition h = null;
@@ -270,9 +273,6 @@ public class Axes extends IneChartModule {
 			case Top:
 				v = BasePointYPosition.TOP;
 				break;
-			}
-			if(tick.formatString != null){
-				tick.text.setText( tickFactory.formatTickText(tick, axis.axisDataType));
 			}
 			Text text = new Text(tick.text.getText(), tickStartX, tickStartY, h, v);
 			text.setFontFamily(tick.text.getTextProperties().getFontFamily());

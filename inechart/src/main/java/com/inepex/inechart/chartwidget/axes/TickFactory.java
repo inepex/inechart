@@ -1,6 +1,8 @@
 package com.inepex.inechart.chartwidget.axes;
 
 import java.util.ArrayList;
+import java.util.Date;
+import java.util.Iterator;
 import java.util.TreeMap;
 
 import com.inepex.inechart.chartwidget.axes.Axis.AxisDataType;
@@ -14,6 +16,74 @@ import com.inepex.inechart.chartwidget.axes.Axis.AxisDirection;
  */
 public abstract class TickFactory {
 
+	protected class AllowedTickSizePair{
+		double multiplier;
+		TimeUnits timeUnit;
+		public AllowedTickSizePair(double multiplier, TimeUnits timeUnit) {
+			this.multiplier = multiplier;
+			this.timeUnit = timeUnit;
+		}
+		public AllowedTickSizePair(AllowedTickSizePair oth){
+			this.multiplier = oth.multiplier;
+			this.timeUnit = oth.timeUnit;
+		}
+	}
+
+	/**
+	 * Approximate duration of time units in milliseconds
+	 */
+	protected enum TimeUnits{
+		Second(1000),
+		Minute(60 * Second.durationMS),
+		Hour(60 * Minute.durationMS),
+		Day(24 * Hour.durationMS),
+		Month(30 * Day.durationMS),
+		Year(365.2425 * Day.durationMS);
+
+		private double durationMS;
+		private TimeUnits(double ms) {
+			this.durationMS = ms;
+		}		
+		public double durationMS(){
+			return durationMS;
+		}		
+	}
+
+	protected final ArrayList<AllowedTickSizePair> allowedTickSizePairs = new ArrayList<TickFactory.AllowedTickSizePair>();
+
+	public TickFactory() {
+		allowedTickSizePairs.add(new AllowedTickSizePair(1, TimeUnits.Second));
+		allowedTickSizePairs.add(new AllowedTickSizePair(2, TimeUnits.Second));
+		allowedTickSizePairs.add(new AllowedTickSizePair(5, TimeUnits.Second));
+		allowedTickSizePairs.add(new AllowedTickSizePair(10, TimeUnits.Second));
+		allowedTickSizePairs.add(new AllowedTickSizePair(30, TimeUnits.Second));
+
+		allowedTickSizePairs.add(new AllowedTickSizePair(1, TimeUnits.Minute));
+		allowedTickSizePairs.add(new AllowedTickSizePair(2, TimeUnits.Minute));
+		allowedTickSizePairs.add(new AllowedTickSizePair(5, TimeUnits.Minute));
+		allowedTickSizePairs.add(new AllowedTickSizePair(10, TimeUnits.Minute));
+		allowedTickSizePairs.add(new AllowedTickSizePair(30, TimeUnits.Minute));
+
+		allowedTickSizePairs.add(new AllowedTickSizePair(1, TimeUnits.Hour));
+		allowedTickSizePairs.add(new AllowedTickSizePair(2, TimeUnits.Hour));
+		allowedTickSizePairs.add(new AllowedTickSizePair(4, TimeUnits.Hour));
+		allowedTickSizePairs.add(new AllowedTickSizePair(8, TimeUnits.Hour));
+		allowedTickSizePairs.add(new AllowedTickSizePair(12, TimeUnits.Hour));
+
+		allowedTickSizePairs.add(new AllowedTickSizePair(1, TimeUnits.Day));
+		allowedTickSizePairs.add(new AllowedTickSizePair(2, TimeUnits.Day));
+		allowedTickSizePairs.add(new AllowedTickSizePair(3, TimeUnits.Day));
+
+		allowedTickSizePairs.add(new AllowedTickSizePair(0.25, TimeUnits.Month));
+		allowedTickSizePairs.add(new AllowedTickSizePair(0.5, TimeUnits.Month));
+		allowedTickSizePairs.add(new AllowedTickSizePair(1, TimeUnits.Month));
+		allowedTickSizePairs.add(new AllowedTickSizePair(2, TimeUnits.Month));
+		allowedTickSizePairs.add(new AllowedTickSizePair(3, TimeUnits.Month));
+		allowedTickSizePairs.add(new AllowedTickSizePair(6, TimeUnits.Month));
+
+		allowedTickSizePairs.add(new AllowedTickSizePair(1, TimeUnits.Year));
+	}
+
 	public abstract String formatTickText(Tick tick, AxisDataType dataType); 
 
 	public ArrayList<Tick> filterFequentTicks(Axis axis, ArrayList<Tick> visibleTicks) {
@@ -25,7 +95,7 @@ public abstract class TickFactory {
 		}
 		avgTextLength = sum / new Double(visibleTicks.size());
 		double avgTextWidth = avgTextLength * 10;
-		
+
 		sum = 0.0;
 		double avgDistanceBetweenTicks = 0.0;
 		for (int i = 0; i<visibleTicks.size()-1; i++){
@@ -42,11 +112,11 @@ public abstract class TickFactory {
 			}	
 		}
 		avgDistanceBetweenTicks = sum / new Double(visibleTicks.size());
-		
+
 		if (axis.getAxisDirection() == AxisDirection.Vertical_Ascending_To_Top) {
 			avgTextWidth = 10;
 		}
-		
+
 		ArrayList<Tick> filteredTicks = new ArrayList<Tick>();
 		if (avgDistanceBetweenTicks < avgTextWidth) {
 			Long ratio = Math.round(avgTextWidth / avgDistanceBetweenTicks);
@@ -63,7 +133,7 @@ public abstract class TickFactory {
 		}
 		return filteredTicks;
 	}
-	
+
 	/**
 	 * Creates ticks for the given axis
 	 * @param axis
@@ -72,7 +142,7 @@ public abstract class TickFactory {
 		autoCreateTicks(axis,
 				(int) Math.round(axis.isHorizontal() ? 
 						0.4 * Math.sqrt(axis.modulToAlign.getWidth()) :
-						0.5 * Math.sqrt(axis.modulToAlign.getHeight())));
+							0.5 * Math.sqrt(axis.modulToAlign.getHeight())));
 	}
 
 	/**
@@ -81,12 +151,16 @@ public abstract class TickFactory {
 	 * @param tickNo
 	 */
 	public void autoCreateTicks(Axis axis, int tickNo) {
-		if (axis.axisDataType == AxisDataType.Number)
+		axis.ticks.clear();
+		if (axis.axisDataType == AxisDataType.Number){
 			setNumberAxis(axis, tickNo);
+		}
+		else{
+			setTimeAxis(axis, tickNo);
+		}
 	}
 
-	void setNumberAxis(Axis axis, int tickNo) {
-		axis.ticks.clear();
+	protected void setNumberAxis(Axis axis, int tickNo) {
 		// delta between ticks
 		double delta = (axis.max - axis.min) / tickNo;
 		// log(base10)delta
@@ -106,7 +180,7 @@ public abstract class TickFactory {
 		size *= nDelta;
 		double start =  (Double)Math.floor(axis.min / size) * size;
 		int i = 0;
-		
+
 		/**
 		 * Double bug :
 		 * Bug appeared (May 25th) incharttest/SpeedTest.java devMode:
@@ -125,24 +199,135 @@ public abstract class TickFactory {
 		for(Tick t : clearDoubleBugs(ticks,decimal)){
 			axis.addTick(t);
 		}
-		
+
 	}
-	
-	
-	
-	
-	
-	
-	
-	
-	
+
+	protected int floorInBase(int n, double base){
+		return (int) (base * Math.floor((double)n / base));
+	}
+
+	@SuppressWarnings("deprecation")
+	protected void setTimeAxis(Axis axis, int tickNo){
+		AllowedTickSizePair tickTimeAndMultiplier = new AllowedTickSizePair(1, TimeUnits.Minute);
+		double delta = (axis.getMax() - axis.getMin()) / tickNo;
+		Iterator<AllowedTickSizePair> tickSIt = allowedTickSizePairs.iterator();
+		AllowedTickSizePair prevTickS = tickSIt.next();
+		AllowedTickSizePair actualTickS;
+		while(tickSIt.hasNext()){
+			actualTickS = tickSIt.next();
+			if(delta < prevTickS.multiplier * prevTickS.timeUnit.durationMS + actualTickS.timeUnit.durationMS / 2){
+				tickTimeAndMultiplier = new AllowedTickSizePair(prevTickS);
+				break;
+			}
+			prevTickS = actualTickS;
+		}
+		double magn;
+		double norm;
+		// special-case the possibility of several years
+		if (tickTimeAndMultiplier.timeUnit.equals(TimeUnits.Year)) {
+			magn = Math.pow(10, Math.floor(Math.log(delta / TimeUnits.Year.durationMS()) / Math.log(10)));
+			norm = (delta / TimeUnits.Year.durationMS()) / magn;
+			if (norm < 1.5){
+				tickTimeAndMultiplier.multiplier = 1;
+			}
+			else if (norm < 3){
+				tickTimeAndMultiplier.multiplier = 2;
+			}
+			else if (norm < 7.5){
+				tickTimeAndMultiplier.multiplier = 5;
+			}
+			else{
+				tickTimeAndMultiplier.multiplier = 10;
+			}
+			tickTimeAndMultiplier.multiplier *= magn;
+		}
+
+		double step = tickTimeAndMultiplier.multiplier * tickTimeAndMultiplier.timeUnit.durationMS();
+		Date date = new Date((long) axis.getMin());
+
+		switch (tickTimeAndMultiplier.timeUnit) {
+		case Second:
+			date.setSeconds((int) floorInBase(date.getSeconds(), tickTimeAndMultiplier.multiplier));
+			break;
+		case Minute:
+			date.setMinutes((int) floorInBase(date.getMinutes(), tickTimeAndMultiplier.multiplier));
+			break;
+		case Hour:
+			date.setHours((int) floorInBase(date.getHours(), tickTimeAndMultiplier.multiplier));
+			break;
+		case Month:
+			date.setMonth((int) floorInBase(date.getMonth(), tickTimeAndMultiplier.multiplier));
+			break;
+		case Year:
+			date.setYear((int) floorInBase(date.getYear() + 1900, tickTimeAndMultiplier.multiplier) - 1900);
+			break;
+		}
+		date = new Date(date.getYear(), date.getMonth(), date.getDate(), date.getHours(), date.getMinutes(), date.getSeconds());
+//		date = new Date
+		
+		if (step >= TimeUnits.Minute.durationMS()){
+			date.setSeconds(0);
+		}
+		if (step >= TimeUnits.Hour.durationMS()){
+			date.setMinutes(0);
+		}
+		if (step >= TimeUnits.Day.durationMS()){
+			date.setHours(0);
+		}
+		if (step >= TimeUnits.Day.durationMS() * 4){
+			date.setDate(1);
+		}
+		if (step >= TimeUnits.Year.durationMS()){
+			date.setMonth(0);
+		}
+
+		double carry = 0, v = Double.NaN, prev;
+		ArrayList<Tick> ticks = new ArrayList<Tick>();
+		do {
+			prev = v;
+			v = date.getTime();
+			ticks.add(new Tick(v));
+			if (tickTimeAndMultiplier.timeUnit.equals(TimeUnits.Month)) {
+				if (tickTimeAndMultiplier.multiplier < 1) {
+					date.setDate(1);
+					double start = date.getTime();
+					date.setMonth(date.getMonth() + 1);
+					double end = date.getTime();
+					date.setTime((long) (v + carry * TimeUnits.Hour.durationMS() + (end - start) * tickTimeAndMultiplier.multiplier));
+					carry = date.getHours();
+					date.setHours(0);
+				}
+				else{
+					date.setMonth((int) (date.getMonth() + tickTimeAndMultiplier.multiplier));
+				}
+			}
+			else if (tickTimeAndMultiplier.timeUnit.equals(TimeUnits.Year)) {
+				date.setYear((int) (date.getYear() + tickTimeAndMultiplier.multiplier));
+			}
+			else{
+				date.setTime((long) (v + step));
+			}
+		} 
+		while (v < axis.getMax() && v != prev);
+		
+		//TODO auto textformat
+		
+		
+		axis.setTicks(ticks);
+	}
+
+
+
+
+
+
 	/*
 	 *
 	 *  Hacks Part
 	 *  Does not contain any valuable code.
 	 *  
 	 */
-	
+
 	/**
 	 * Does NOT work.
 	 * @param ticks
@@ -155,7 +340,7 @@ public abstract class TickFactory {
 			double fixed = t.position;
 			if(splitted[1].contains("9999")){
 				fixed = ((float)Math.pow(10f,decimal))*Math.round(((float)Math.pow(10,-decimal)*t.position));
-				
+
 			}
 			else if(splitted[1].contains("0000")){
 				if(fixed < 0){
@@ -210,7 +395,7 @@ public abstract class TickFactory {
 		}
 		return temp;
 	}
-	
+
 	Double fix9999(double toFix, int decimal){
 		String s = ((Double)toFix).toString();
 		int i = s.indexOf("9999");
@@ -231,15 +416,15 @@ public abstract class TickFactory {
 			fixed = Double.parseDouble(plus) + clipD;
 		else
 			fixed = clipD - Double.parseDouble(plus);
-//		if(fixed.toString().contains("9999")){
-//			fixed = (double) (((float)Math.pow(10f,decimal))*Math.round(((float)Math.pow(10,-decimal)*fixed)));
-//		}
+		//		if(fixed.toString().contains("9999")){
+		//			fixed = (double) (((float)Math.pow(10f,decimal))*Math.round(((float)Math.pow(10,-decimal)*fixed)));
+		//		}
 		if(fixed.toString().contains("0000")){
 			int k = fixed.toString().indexOf("0000");
 			String clip2 = fixed.toString().substring(0, k+1);
 			fixed = Double.parseDouble(clip2);
 		}
-		
+
 		return fixed;
 	}
 

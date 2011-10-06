@@ -348,31 +348,40 @@ public class LineChart extends IneChartModule2D implements PointSelectionHandler
 			if(curve.dataSet.isSortable() && dataPair[0] > xAxis.getMax()){
 				ready =  true;
 			}
-			if(lastDataPair != null && !curve.discontinuities.contains(dataPair)){
-				double[] intersection = DrawingAreaAssist.getIntersection(
-						lastDataPair[0], lastDataPair[1],
-						dataPair[0], dataPair[1],
-						xAxis.getMin(),
-						yAxis.getMin(),
-						xAxis.getMax() - xAxis.getMin(),
-						yAxis.getMax() - yAxis.getMin());
-				if(intersection != null){
-					if(path == null){
-						path = new Path(getCanvasX(intersection[0]), getCanvasY(intersection[1]), curve.zIndex, null, true, false);
-						path.lineTo(getCanvasX(intersection[2]), getCanvasY(intersection[3]), false);
-					}
-					else{
-						if(lastLineEnd[0] != intersection[0] || lastLineEnd[1] != intersection[1]){
-							path.moveTo(getCanvasX(intersection[0]), getCanvasY(intersection[1]), false);
-						}
-						path.lineTo(getCanvasX(intersection[2]), getCanvasY(intersection[3]), false);
-					}
-					lastLineEnd = new double[]{intersection[2], intersection[3]};
-				}
+
+			if(curve.uncalcedDiscontinuities.contains(dataPair[0])){
+				lastDataPair = null;
 			}
-			lastDataPair = dataPair;
+			else{
+				if(lastDataPair != null){
+					double[] intersection = DrawingAreaAssist.getIntersection(
+							lastDataPair[0], lastDataPair[1],
+							dataPair[0], dataPair[1],
+							xAxis.getMin(),
+							yAxis.getMin(),
+							xAxis.getMax() - xAxis.getMin(),
+							yAxis.getMax() - yAxis.getMin());
+					if(intersection != null){
+						if(path == null){
+							path = new Path(getCanvasX(intersection[0]), getCanvasY(intersection[1]), curve.zIndex, null, true, false);
+							path.lineTo(getCanvasX(intersection[2]), getCanvasY(intersection[3]), false);
+						}
+						else{
+							if(lastLineEnd[0] != intersection[0] || lastLineEnd[1] != intersection[1]){
+								path.moveTo(getCanvasX(intersection[0]), getCanvasY(intersection[1]), false);
+							}
+							path.lineTo(getCanvasX(intersection[2]), getCanvasY(intersection[3]), false);
+						}
+						lastLineEnd = new double[]{intersection[2], intersection[3]};
+					}
+				}
+				lastDataPair = dataPair;
+			}
+			
 		}
-		visiblePathPerCurve.put(curve, path);
+		if(path != null){
+			visiblePathPerCurve.put(curve, path);
+		}
 	}
 
 	/**

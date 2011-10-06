@@ -47,6 +47,7 @@ public class Curve implements HasZIndex, HasShadow, Comparable<Curve>{
 	LineProperties lineProperties;
 	boolean autoFill = false;
 	ArrayList<DataPoint> discontinuities;
+	ArrayList<Double> uncalcedDiscontinuities;
 
 	// points
 	boolean hasPoint = false;
@@ -68,6 +69,7 @@ public class Curve implements HasZIndex, HasShadow, Comparable<Curve>{
 	public Curve() {
 		selectedPoints = new ArrayList<DataPoint>();
 		discontinuities = new ArrayList<DataPoint>();
+		uncalcedDiscontinuities = new ArrayList<Double>();
 		setShadowOffsetY(Defaults.shadowOffsetX);
 		setShadowOffsetX(Defaults.shadowOffsetY);
 		setShadowColor(Defaults.shadowColor());
@@ -378,4 +380,24 @@ public class Curve implements HasZIndex, HasShadow, Comparable<Curve>{
 		this.useCurveLinePropertiesForShape = useCurveLinePropertiesForShape;
 	}
 
+//	public DataPoint getDataPointForX(double x){
+//		for(DataPoint dp : dataPoints){
+//			if(x == dp.x){
+//				return dp;
+//			}
+//		}
+//		return null;
+//	}
+//	
+//	public void addDiscontinuity(DataPoint dp){
+//		discontinuities.add(dp);
+//	}
+//	
+//	public void removeDiscontinuity(DataPoint dp){
+//		discontinuities.remove(dp);
+//	}
+	
+	public void addDiscontinuity(double discontinuity){
+		uncalcedDiscontinuities.add(discontinuity);
+	}
 }

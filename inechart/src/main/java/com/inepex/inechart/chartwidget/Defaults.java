@@ -115,7 +115,7 @@ public class Defaults {
 	public static final double yValue = 1.0;
 	public static final String name = "DataSet No. ";
 	public static final ShapeProperties intervalShapeProperties(){
-		return new ShapeProperties(new LineProperties(1.2, null), null);
+		return new ShapeProperties(new LineProperties(0, null), null);
 	}
 	public static final double intervalRoundedCornerRadius = 0;
 	
