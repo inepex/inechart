@@ -23,6 +23,7 @@ import com.inepex.inegraphics.shared.DrawingArea;
 /**
  * 
  * Class for positioning and organizing legends.
+ * The displayed objects are shown as widgets.
  * 
  * @author Miklós Süveges / Inepex Ltd.
  */
@@ -352,7 +353,6 @@ public class GWTLabelFactory extends LabelFactoryBase{
 		return w;
 	}
 
-	
 	@Override
 	protected void removeDisplayedStyledLabel(StyledLabel label) {
 		Widget w = textContainerWidgetMap.get(label);

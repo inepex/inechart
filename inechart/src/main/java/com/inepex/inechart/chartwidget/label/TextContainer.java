@@ -100,7 +100,6 @@ public class TextContainer implements Comparable<TextContainer>{
 		this.rightPadding = rightPadding;
 	}
 	
-
 	/**
 	 * @return the left
 	 */

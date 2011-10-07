@@ -21,9 +21,9 @@ import com.inepex.inechart.chartwidget.label.LabelFactoryBase;
 import com.inepex.inechart.chartwidget.label.Legend;
 import com.inepex.inechart.chartwidget.linechart.Curve;
 import com.inepex.inechart.chartwidget.linechart.LineChart;
+import com.inepex.inechart.chartwidget.misc.SelectionRange;
 import com.inepex.inechart.chartwidget.piechart.PieChart;
 import com.inepex.inechart.chartwidget.selection.RectangularSelection;
-import com.inepex.inechart.chartwidget.selection.RectangularSelection.RectangularSelectionMode;
 import com.inepex.inegraphics.impl.client.DrawingAreaGWT;
 
 public class IneChart extends Composite{
@@ -363,7 +363,7 @@ public class IneChart extends Composite{
 				break;
 			}
 		}
-		rs.setSelectionMode(RectangularSelectionMode.Horizontal);
+		rs.setSelectionMode(SelectionRange.Horizontal);
 		rs.getAddressedCharts().add(this);
 		rs.setDisplayRectangleAfterSelection(true);
 		if(eventManager.getEventBus() == null){

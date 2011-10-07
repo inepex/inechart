@@ -16,14 +16,14 @@ import com.inepex.inechart.chartwidget.axes.Axis.AxisDirection;
  */
 public abstract class TickFactory {
 
-	protected class AllowedTickSizePair{
+	protected class TickSizePair{
 		double multiplier;
 		TimeUnits timeUnit;
-		public AllowedTickSizePair(double multiplier, TimeUnits timeUnit) {
+		public TickSizePair(double multiplier, TimeUnits timeUnit) {
 			this.multiplier = multiplier;
 			this.timeUnit = timeUnit;
 		}
-		public AllowedTickSizePair(AllowedTickSizePair oth){
+		public TickSizePair(TickSizePair oth){
 			this.multiplier = oth.multiplier;
 			this.timeUnit = oth.timeUnit;
 		}
@@ -49,39 +49,39 @@ public abstract class TickFactory {
 		}		
 	}
 
-	protected final ArrayList<AllowedTickSizePair> allowedTickSizePairs = new ArrayList<TickFactory.AllowedTickSizePair>();
+	protected final ArrayList<TickSizePair> allowedTickSizePairs = new ArrayList<TickFactory.TickSizePair>();
 
 	public TickFactory() {
-		allowedTickSizePairs.add(new AllowedTickSizePair(1, TimeUnits.Second));
-		allowedTickSizePairs.add(new AllowedTickSizePair(2, TimeUnits.Second));
-		allowedTickSizePairs.add(new AllowedTickSizePair(5, TimeUnits.Second));
-		allowedTickSizePairs.add(new AllowedTickSizePair(10, TimeUnits.Second));
-		allowedTickSizePairs.add(new AllowedTickSizePair(30, TimeUnits.Second));
+		allowedTickSizePairs.add(new TickSizePair(1, TimeUnits.Second));
+		allowedTickSizePairs.add(new TickSizePair(2, TimeUnits.Second));
+		allowedTickSizePairs.add(new TickSizePair(5, TimeUnits.Second));
+		allowedTickSizePairs.add(new TickSizePair(10, TimeUnits.Second));
+		allowedTickSizePairs.add(new TickSizePair(30, TimeUnits.Second));
 
-		allowedTickSizePairs.add(new AllowedTickSizePair(1, TimeUnits.Minute));
-		allowedTickSizePairs.add(new AllowedTickSizePair(2, TimeUnits.Minute));
-		allowedTickSizePairs.add(new AllowedTickSizePair(5, TimeUnits.Minute));
-		allowedTickSizePairs.add(new AllowedTickSizePair(10, TimeUnits.Minute));
-		allowedTickSizePairs.add(new AllowedTickSizePair(30, TimeUnits.Minute));
+		allowedTickSizePairs.add(new TickSizePair(1, TimeUnits.Minute));
+		allowedTickSizePairs.add(new TickSizePair(2, TimeUnits.Minute));
+		allowedTickSizePairs.add(new TickSizePair(5, TimeUnits.Minute));
+		allowedTickSizePairs.add(new TickSizePair(10, TimeUnits.Minute));
+		allowedTickSizePairs.add(new TickSizePair(30, TimeUnits.Minute));
 
-		allowedTickSizePairs.add(new AllowedTickSizePair(1, TimeUnits.Hour));
-		allowedTickSizePairs.add(new AllowedTickSizePair(2, TimeUnits.Hour));
-		allowedTickSizePairs.add(new AllowedTickSizePair(4, TimeUnits.Hour));
-		allowedTickSizePairs.add(new AllowedTickSizePair(8, TimeUnits.Hour));
-		allowedTickSizePairs.add(new AllowedTickSizePair(12, TimeUnits.Hour));
+		allowedTickSizePairs.add(new TickSizePair(1, TimeUnits.Hour));
+		allowedTickSizePairs.add(new TickSizePair(2, TimeUnits.Hour));
+		allowedTickSizePairs.add(new TickSizePair(4, TimeUnits.Hour));
+		allowedTickSizePairs.add(new TickSizePair(8, TimeUnits.Hour));
+		allowedTickSizePairs.add(new TickSizePair(12, TimeUnits.Hour));
 
-		allowedTickSizePairs.add(new AllowedTickSizePair(1, TimeUnits.Day));
-		allowedTickSizePairs.add(new AllowedTickSizePair(2, TimeUnits.Day));
-		allowedTickSizePairs.add(new AllowedTickSizePair(3, TimeUnits.Day));
+		allowedTickSizePairs.add(new TickSizePair(1, TimeUnits.Day));
+		allowedTickSizePairs.add(new TickSizePair(2, TimeUnits.Day));
+		allowedTickSizePairs.add(new TickSizePair(3, TimeUnits.Day));
 
-		allowedTickSizePairs.add(new AllowedTickSizePair(0.25, TimeUnits.Month));
-		allowedTickSizePairs.add(new AllowedTickSizePair(0.5, TimeUnits.Month));
-		allowedTickSizePairs.add(new AllowedTickSizePair(1, TimeUnits.Month));
-		allowedTickSizePairs.add(new AllowedTickSizePair(2, TimeUnits.Month));
-		allowedTickSizePairs.add(new AllowedTickSizePair(3, TimeUnits.Month));
-		allowedTickSizePairs.add(new AllowedTickSizePair(6, TimeUnits.Month));
+		allowedTickSizePairs.add(new TickSizePair(0.25, TimeUnits.Month));
+		allowedTickSizePairs.add(new TickSizePair(0.5, TimeUnits.Month));
+		allowedTickSizePairs.add(new TickSizePair(1, TimeUnits.Month));
+		allowedTickSizePairs.add(new TickSizePair(2, TimeUnits.Month));
+		allowedTickSizePairs.add(new TickSizePair(3, TimeUnits.Month));
+		allowedTickSizePairs.add(new TickSizePair(6, TimeUnits.Month));
 
-		allowedTickSizePairs.add(new AllowedTickSizePair(1, TimeUnits.Year));
+		allowedTickSizePairs.add(new TickSizePair(1, TimeUnits.Year));
 	}
 
 	public abstract String formatTickText(Tick tick, AxisDataType dataType); 
@@ -185,8 +185,8 @@ public abstract class TickFactory {
 		 * Double bug :
 		 * Bug appeared (May 25th) incharttest/SpeedTest.java devMode:
 		 * -chart height 400 px, yAxis (vertical)
-		 * while 0.6 would have been the good value it was 0.600000000001
-		 * while debugging eclipse's 'watch expression' feature said that 0.3 * 2 = 0.60000000001 (manually typed)
+		 * while 0.6 should have been the good value it was 0.600000000001
+		 * while debugging eclipse's 'watch expression' feature showed that 0.3 * 2 = 0.60000000001 (manually typed)
 		 * quite peculiar...
 		 * values:
 		 * start = -1, delta = 0.2222... nDelta = 2.2222..., size = 0.2
@@ -208,15 +208,15 @@ public abstract class TickFactory {
 
 	@SuppressWarnings("deprecation")
 	protected void setTimeAxis(Axis axis, int tickNo){
-		AllowedTickSizePair tickTimeAndMultiplier = new AllowedTickSizePair(1, TimeUnits.Minute);
+		TickSizePair tickTimeAndMultiplier = new TickSizePair(1, TimeUnits.Minute);
 		double delta = (axis.getMax() - axis.getMin()) / tickNo;
-		Iterator<AllowedTickSizePair> tickSIt = allowedTickSizePairs.iterator();
-		AllowedTickSizePair prevTickS = tickSIt.next();
-		AllowedTickSizePair actualTickS;
+		Iterator<TickSizePair> tickSIt = allowedTickSizePairs.iterator();
+		TickSizePair prevTickS = tickSIt.next();
+		TickSizePair actualTickS;
 		while(tickSIt.hasNext()){
 			actualTickS = tickSIt.next();
 			if(delta < prevTickS.multiplier * prevTickS.timeUnit.durationMS + actualTickS.timeUnit.durationMS / 2){
-				tickTimeAndMultiplier = new AllowedTickSizePair(prevTickS);
+				tickTimeAndMultiplier = new TickSizePair(prevTickS);
 				break;
 			}
 			prevTickS = actualTickS;
@@ -263,7 +263,6 @@ public abstract class TickFactory {
 			break;
 		}
 		date = new Date(date.getYear(), date.getMonth(), date.getDate(), date.getHours(), date.getMinutes(), date.getSeconds());
-//		date = new Date
 		
 		if (step >= TimeUnits.Minute.durationMS()){
 			date.setSeconds(0);
@@ -310,8 +309,38 @@ public abstract class TickFactory {
 		} 
 		while (v < axis.getMax() && v != prev);
 		
-		//TODO auto textformat
-		
+		if(axis.defaultTick == null || axis.defaultTick.formatString == null || axis.defaultTick.formatString.length() == 0){
+			String formatString = "";
+			double totalDomain = axis.getMax() - axis.getMin();
+			if(step < TimeUnits.Minute.durationMS()){
+				formatString = "hh:mm:ss";
+			}
+			else if(step < TimeUnits.Day.durationMS()){
+				if(totalDomain < 2 * TimeUnits.Day.durationMS()){
+					formatString = "hh:ss";
+				}
+				else{
+					formatString = "MMM dd hh:ss";
+				}
+			}
+			else if(step < TimeUnits.Month.durationMS()){
+				formatString = "MMM dd";
+			}
+			else if(step < TimeUnits.Year.durationMS()){
+				if(totalDomain < TimeUnits.Year.durationMS()){
+					formatString = "MMM";
+				}
+				else{
+					formatString = "MMM yyyy";
+				}
+			}
+			else{
+				formatString = "yyyy";
+			}
+			for(Tick t : ticks){
+				t.setFormatString(formatString);
+			}
+		}
 		
 		axis.setTicks(ticks);
 	}

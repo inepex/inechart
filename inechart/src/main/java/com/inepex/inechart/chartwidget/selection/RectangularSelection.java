@@ -14,27 +14,13 @@ import com.google.gwt.user.client.DOM;
 import com.inepex.inechart.chartwidget.Defaults;
 import com.inepex.inechart.chartwidget.IneChartEventManager;
 import com.inepex.inechart.chartwidget.event.ViewportChangeEvent;
+import com.inepex.inechart.chartwidget.misc.SelectionRange;
 import com.inepex.inechart.chartwidget.shape.Rectangle;
 import com.inepex.inegraphics.impl.client.DrawingAreaGWT;
 
 
 public class RectangularSelection extends SelectionBase{
 
-	public enum RectangularSelectionMode{
-		/**
-		 * The selection is free over x and y values 
-		 */
-		Both,
-		/**
-		 * Only y values may vary
-		 */
-		Vertical,
-		/**
-		 * Only x values may vary
-		 */
-		Horizontal
-	}
-	
 	protected class MouseHandler implements MouseDownHandler, MouseMoveHandler, MouseUpHandler, ClickHandler{
 		@Override
 		public void onMouseUp(MouseUpEvent event) {
@@ -126,7 +112,7 @@ public class RectangularSelection extends SelectionBase{
 		}
 	}
 		
-	protected RectangularSelectionMode selectionMode;
+	protected SelectionRange selectionMode;
 	protected MouseHandler handler;
 	protected int[] mouseDownCoords;
 	protected boolean displayRectangleAfterSelection;
@@ -145,7 +131,7 @@ public class RectangularSelection extends SelectionBase{
 	 */
 	public RectangularSelection(DrawingAreaGWT canvas, IneChartEventManager eventManager) {
 		super(eventManager, canvas);
-		selectionMode = RectangularSelectionMode.Both;
+		selectionMode = SelectionRange.Both;
 		selectionLookOut = Defaults.selectionLookout();
 		minSelectionSize = Defaults.minSelectionSize;
 		modulToSelectFrom = null;
@@ -164,14 +150,14 @@ public class RectangularSelection extends SelectionBase{
 	/**
 	 * @return the selectionMode
 	 */
-	public RectangularSelectionMode getSelectionMode() {
+	public SelectionRange getSelectionMode() {
 		return selectionMode;
 	}
 
 	/**
 	 * @param selectionMode the selectionMode to set
 	 */
-	public void setSelectionMode(RectangularSelectionMode selectionMode) {
+	public void setSelectionMode(SelectionRange selectionMode) {
 		this.selectionMode = selectionMode;
 	}
 
