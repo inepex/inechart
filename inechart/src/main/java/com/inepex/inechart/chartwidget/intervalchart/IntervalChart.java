@@ -11,7 +11,7 @@ import com.google.gwt.event.dom.client.MouseUpEvent;
 import com.inepex.inechart.chartwidget.IneChartEventManager;
 import com.inepex.inechart.chartwidget.IneChartModule2D;
 import com.inepex.inechart.chartwidget.axes.Axes;
-import com.inepex.inechart.chartwidget.label.LabelFactoryBase;
+import com.inepex.inechart.chartwidget.label.LabelFactory;
 import com.inepex.inechart.chartwidget.linechart.Curve;
 import com.inepex.inechart.chartwidget.properties.Color;
 import com.inepex.inechart.chartwidget.shape.Rectangle;
@@ -23,7 +23,7 @@ public class IntervalChart extends IneChartModule2D {
 	private ArrayList<IntervalDataSet> dataSets;
 
 	public IntervalChart(DrawingArea canvas,
-			LabelFactoryBase labelFactoryBase, Axes axes,
+			LabelFactory labelFactoryBase, Axes axes,
 			IneChartEventManager eventManager) {
 		super(canvas, labelFactoryBase, axes, eventManager);
 		dataSets = new ArrayList<IntervalDataSet>();
@@ -79,7 +79,7 @@ public class IntervalChart extends IneChartModule2D {
 	}
 
 	@Override
-	public void updateModulesAxes() {
+	public void preUpdateModule() {
 		if(autoScaleViewport){
 			double yMin = 0;
 			double yMax = -Double.MAX_VALUE;
@@ -101,7 +101,7 @@ public class IntervalChart extends IneChartModule2D {
 			yAxis.setMin(yMin);
 			autoScaleViewport = false;
 		}
-		super.updateModulesAxes();
+		super.preUpdateModule();
 	}
 
 	@Override

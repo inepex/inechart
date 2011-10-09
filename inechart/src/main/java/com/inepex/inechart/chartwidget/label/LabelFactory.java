@@ -12,7 +12,7 @@ import com.inepex.inegraphics.shared.DrawingArea;
  * @author Miklós Süveges / Inepex Ltd.
  *
  */
-public abstract class LabelFactoryBase extends IneChartModule{
+public abstract class LabelFactory extends IneChartModule{
 
 	protected ChartTitle chartTitle;
 	protected Legend legend;
@@ -36,7 +36,7 @@ public abstract class LabelFactoryBase extends IneChartModule{
 		return ret;
 	}
 		
- 	protected LabelFactoryBase(DrawingArea canvas) {
+ 	protected LabelFactory(DrawingArea canvas) {
 		super(canvas);
 		legendOwners = new ArrayList<HasLegendEntries>();
 		styledLabels = new ArrayList<StyledLabel>();

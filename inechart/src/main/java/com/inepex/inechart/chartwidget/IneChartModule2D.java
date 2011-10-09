@@ -22,7 +22,7 @@ import com.inepex.inechart.chartwidget.axes.Axis.AxisDirection;
 import com.inepex.inechart.chartwidget.event.ViewportChangeEvent;
 import com.inepex.inechart.chartwidget.event.ViewportChangeHandler;
 import com.inepex.inechart.chartwidget.label.HasLegendEntries;
-import com.inepex.inechart.chartwidget.label.LabelFactoryBase;
+import com.inepex.inechart.chartwidget.label.LabelFactory;
 import com.inepex.inechart.chartwidget.properties.Color;
 import com.inepex.inechart.chartwidget.properties.LineProperties;
 import com.inepex.inegraphics.impl.client.DrawingAreaGWT;
@@ -205,7 +205,7 @@ public abstract class IneChartModule2D extends IneChartModule implements HasCoor
 	protected Axis yAxis;
 	protected ArrayList<Axis> extraAxes;
 	protected Axes axes;
-	protected LabelFactoryBase labelFactory;
+	protected LabelFactory labelFactory;
 	protected IneChartEventManager eventManager;
 
 	protected boolean autoScaleViewport;
@@ -228,7 +228,7 @@ public abstract class IneChartModule2D extends IneChartModule implements HasCoor
 	protected boolean displayLegendEntries = true;
 	protected TreeMap<String, Color> legendEntries;
 	
-	protected IneChartModule2D(DrawingArea canvas, LabelFactoryBase labelFactoryBase, Axes axes, IneChartEventManager eventManager) {
+	protected IneChartModule2D(DrawingArea canvas, LabelFactory labelFactoryBase, Axes axes, IneChartEventManager eventManager) {
 		super(canvas);
 		this.labelFactory = labelFactoryBase;
 		labelFactory.addLegendOwner(this);
@@ -257,7 +257,10 @@ public abstract class IneChartModule2D extends IneChartModule implements HasCoor
 		}		
 	}
 
-	public void updateModulesAxes(){
+	/**
+	 * a module should override this method to calculate and set its axes before the update() call
+	 */
+	public void preUpdateModule(){
 		alignExtraAxes();
 	}
 	
@@ -305,13 +308,15 @@ public abstract class IneChartModule2D extends IneChartModule implements HasCoor
 	
 	public double[] getPaddingForAxes(){
 		double[] padding = new double[]{minTopPadding,minRightPadding,minBottomPadding,minLeftPadding};
-		if(xAxis.isVisible())
-			padding = LabelFactoryBase.mergePaddings(padding, axes.getActualModulPaddingForAxis(xAxis));
-		if(yAxis.isVisible())
-			padding = LabelFactoryBase.mergePaddings(padding, axes.getActualModulPaddingForAxis(yAxis));
+		if(xAxis.isVisible()) {
+			padding = LabelFactory.mergePaddings(padding, axes.getActualModulPaddingForAxis(xAxis));
+		}
+		if(yAxis.isVisible()) {
+			padding = LabelFactory.mergePaddings(padding, axes.getActualModulPaddingForAxis(yAxis));
+		}
 		for(Axis axis : extraAxes){
 			if(axis.isVisible())
-				padding = LabelFactoryBase.mergePaddings(padding, axes.getActualModulPaddingForAxis(axis));
+				padding = LabelFactory.mergePaddings(padding, axes.getActualModulPaddingForAxis(axis));
 		}
 		return padding;
 	}
@@ -618,6 +623,9 @@ public abstract class IneChartModule2D extends IneChartModule implements HasCoor
 		return autoCalcPadding;
 	}
 
+	/**
+	 * @param autocalcPadding if true the module should be positioned manually
+	 */
 	public void setAutoCalcPadding(boolean autocalcPadding) {
 		this.autoCalcPadding = autocalcPadding;
 	}

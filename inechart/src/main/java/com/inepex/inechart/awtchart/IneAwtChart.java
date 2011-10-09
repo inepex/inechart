@@ -19,7 +19,7 @@ import com.inepex.inechart.chartwidget.IneChartModule2D;
 import com.inepex.inechart.chartwidget.axes.Axes;
 import com.inepex.inechart.chartwidget.barchart.BarChart;
 import com.inepex.inechart.chartwidget.label.ChartTitle;
-import com.inepex.inechart.chartwidget.label.LabelFactoryBase;
+import com.inepex.inechart.chartwidget.label.LabelFactory;
 import com.inepex.inechart.chartwidget.linechart.LineChart;
 import com.inepex.inechart.chartwidget.piechart.PieChart;
 import com.inepex.inegraphics.awt.DrawingAreaAwt;
@@ -111,7 +111,7 @@ public class IneAwtChart  extends JLayeredPane {
 		return axes;
 	}
 	
-	LabelFactoryBase getLabelFactor() {
+	LabelFactory getLabelFactor() {
 		return labelFactory;
 	}
 
@@ -160,7 +160,7 @@ public class IneAwtChart  extends JLayeredPane {
 		if (autoScaleModuls){
 			for (IneChartModule modul : moduls) {
 				if(modul instanceof IneChartModule2D){
-					((IneChartModule2D) modul).updateModulesAxes();
+					((IneChartModule2D) modul).preUpdateModule();
 				}
 			}
 		}
@@ -173,10 +173,10 @@ public class IneAwtChart  extends JLayeredPane {
 			double[] padding = new double[4];
 			for (IneChartModule modul : moduls) {
 				if(modul instanceof IneChartModule2D && ((IneChartModule2D) modul).isAutoCalcPadding()){
-					padding = LabelFactoryBase.mergePaddings(padding,((IneChartModule2D) modul).getPaddingForAxes());
+					padding = LabelFactory.mergePaddings(padding,((IneChartModule2D) modul).getPaddingForAxes());
 				}
 			}
-			padding = LabelFactoryBase.addPaddings(padding, labelFactory.getPaddingNeeded());
+			padding = LabelFactory.addPaddings(padding, labelFactory.getPaddingNeeded());
 			for (IneChartModule modul : moduls) {
 				if(modul instanceof IneChartModule2D && ((IneChartModule2D) modul).isAutoCalcPadding()){
 					((IneChartModule2D) modul).setPadding(padding);

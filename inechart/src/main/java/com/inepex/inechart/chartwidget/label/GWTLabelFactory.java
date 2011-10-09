@@ -27,7 +27,7 @@ import com.inepex.inegraphics.shared.DrawingArea;
  * 
  * @author Miklós Süveges / Inepex Ltd.
  */
-public class GWTLabelFactory extends LabelFactoryBase{
+public class GWTLabelFactory extends LabelFactory{
 	AbsolutePanel chartMainPanel;
 	FlowPanel mainPanel;
 	TreeMap<TextContainer, Widget> textContainerWidgetMap;

@@ -18,7 +18,7 @@ import javax.swing.JLabel;
 import javax.swing.JPanel;
 
 import com.inepex.inechart.chartwidget.label.HasLegendEntries;
-import com.inepex.inechart.chartwidget.label.LabelFactoryBase;
+import com.inepex.inechart.chartwidget.label.LabelFactory;
 import com.inepex.inechart.chartwidget.label.StyledLabel;
 import com.inepex.inechart.chartwidget.label.Text;
 import com.inepex.inechart.chartwidget.label.TextContainer;
@@ -27,7 +27,7 @@ import com.inepex.inegraphics.awt.ColorUtil;
 import com.inepex.inegraphics.awt.DrawingAreaAwt;
 import com.inepex.inegraphics.shared.DrawingArea;
 
-public class AwtLabelFactory extends LabelFactoryBase {
+public class AwtLabelFactory extends LabelFactory {
 	
 	JPanel mainPanel;
 	JPanel topPanel;

@@ -19,7 +19,7 @@ import com.inepex.inechart.chartwidget.axes.Axes;
 import com.inepex.inechart.chartwidget.event.PointHoverListener;
 import com.inepex.inechart.chartwidget.event.PointSelectionEvent;
 import com.inepex.inechart.chartwidget.event.PointSelectionHandler;
-import com.inepex.inechart.chartwidget.label.LabelFactoryBase;
+import com.inepex.inechart.chartwidget.label.LabelFactory;
 import com.inepex.inechart.chartwidget.properties.Color;
 import com.inepex.inechart.chartwidget.properties.LineProperties;
 import com.inepex.inechart.chartwidget.properties.LineProperties.LineStyle;
@@ -96,12 +96,12 @@ public class LineChart extends IneChartModule2D implements PointSelectionHandler
 	
 	ArrayList<PointHoverListener> pointHoverListeners;
 
-	public LineChart(DrawingArea canvas, LabelFactoryBase labelFactory, Axes axes) {
+	public LineChart(DrawingArea canvas, LabelFactory labelFactory, Axes axes) {
 		this(canvas, labelFactory, axes, null, null);
 		useOverlay = false;
 	}
 
-	public LineChart(DrawingArea canvas, LabelFactoryBase labelFactory, Axes axes, DrawingArea overLay, IneChartEventManager eventManager) {
+	public LineChart(DrawingArea canvas, LabelFactory labelFactory, Axes axes, DrawingArea overLay, IneChartEventManager eventManager) {
 		super(canvas, labelFactory, axes, eventManager);
 		this.overlay = overLay;
 //		calculatedPointsPerCurve = new TreeMap<Curve, ArrayList<DataPoint>>();
@@ -145,7 +145,7 @@ public class LineChart extends IneChartModule2D implements PointSelectionHandler
 	}
 
 	@Override
-	public void updateModulesAxes() {
+	public void preUpdateModule() {
 		if (curves == null || curves.size() == 0)
 			return;
 		if (autoScaleViewport) {
@@ -170,7 +170,7 @@ public class LineChart extends IneChartModule2D implements PointSelectionHandler
 			xAxis.setMin(xMin);
 			yAxis.setMin(yMin);
 		}
-		super.updateModulesAxes();
+		super.preUpdateModule();
 	}
 
 	@Override

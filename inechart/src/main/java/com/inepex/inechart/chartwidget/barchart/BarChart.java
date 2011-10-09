@@ -16,7 +16,7 @@ import com.inepex.inechart.chartwidget.Defaults;
 import com.inepex.inechart.chartwidget.IneChartModule2D;
 import com.inepex.inechart.chartwidget.axes.Axes;
 import com.inepex.inechart.chartwidget.axes.Axis.AxisDirection;
-import com.inepex.inechart.chartwidget.label.LabelFactoryBase;
+import com.inepex.inechart.chartwidget.label.LabelFactory;
 import com.inepex.inechart.chartwidget.misc.ColorSet;
 import com.inepex.inechart.chartwidget.misc.HasShadow;
 import com.inepex.inechart.chartwidget.misc.HasZIndex;
@@ -101,7 +101,7 @@ public class BarChart extends IneChartModule2D implements HasShadow, HasZIndex {
 	
 	protected ArrayList<ShapeProperties> lookOut;
 
-	public BarChart(DrawingArea canvas, LabelFactoryBase labelFactory, Axes axes) {
+	public BarChart(DrawingArea canvas, LabelFactory labelFactory, Axes axes) {
 		super(canvas,labelFactory, axes, null);
 		dataSets = new ArrayList<DataSet>();
 		normalizedData = new TreeMap<Double, ArrayList<Double>>();
@@ -860,7 +860,7 @@ public class BarChart extends IneChartModule2D implements HasShadow, HasZIndex {
 	}
 
 	@Override
-	public void updateModulesAxes() {
+	public void preUpdateModule() {
 		if (dataSets.size() == 0)
 			return;
 		if (autoScaleViewport) {
@@ -870,7 +870,7 @@ public class BarChart extends IneChartModule2D implements HasShadow, HasZIndex {
 		}
 
 		// update axes and viewport
-		super.updateModulesAxes();
+		super.preUpdateModule();
 	}
 
 	@Override

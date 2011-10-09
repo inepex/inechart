@@ -27,6 +27,10 @@ public abstract class TickFactory {
 			this.multiplier = oth.multiplier;
 			this.timeUnit = oth.timeUnit;
 		}
+		
+		public double getDurationMS(){
+			return multiplier * timeUnit.durationMS;
+		}
 	}
 
 	/**
@@ -56,23 +60,27 @@ public abstract class TickFactory {
 		allowedTickSizePairs.add(new TickSizePair(2, TimeUnits.Second));
 		allowedTickSizePairs.add(new TickSizePair(5, TimeUnits.Second));
 		allowedTickSizePairs.add(new TickSizePair(10, TimeUnits.Second));
+		allowedTickSizePairs.add(new TickSizePair(20, TimeUnits.Second));
 		allowedTickSizePairs.add(new TickSizePair(30, TimeUnits.Second));
 
 		allowedTickSizePairs.add(new TickSizePair(1, TimeUnits.Minute));
 		allowedTickSizePairs.add(new TickSizePair(2, TimeUnits.Minute));
 		allowedTickSizePairs.add(new TickSizePair(5, TimeUnits.Minute));
 		allowedTickSizePairs.add(new TickSizePair(10, TimeUnits.Minute));
+		allowedTickSizePairs.add(new TickSizePair(20, TimeUnits.Minute));
 		allowedTickSizePairs.add(new TickSizePair(30, TimeUnits.Minute));
 
 		allowedTickSizePairs.add(new TickSizePair(1, TimeUnits.Hour));
 		allowedTickSizePairs.add(new TickSizePair(2, TimeUnits.Hour));
 		allowedTickSizePairs.add(new TickSizePair(4, TimeUnits.Hour));
+		allowedTickSizePairs.add(new TickSizePair(6, TimeUnits.Hour));
 		allowedTickSizePairs.add(new TickSizePair(8, TimeUnits.Hour));
 		allowedTickSizePairs.add(new TickSizePair(12, TimeUnits.Hour));
 
 		allowedTickSizePairs.add(new TickSizePair(1, TimeUnits.Day));
 		allowedTickSizePairs.add(new TickSizePair(2, TimeUnits.Day));
 		allowedTickSizePairs.add(new TickSizePair(3, TimeUnits.Day));
+		allowedTickSizePairs.add(new TickSizePair(5, TimeUnits.Day));
 
 		allowedTickSizePairs.add(new TickSizePair(0.25, TimeUnits.Month));
 		allowedTickSizePairs.add(new TickSizePair(0.5, TimeUnits.Month));
@@ -141,8 +149,8 @@ public abstract class TickFactory {
 	public void autoCreateTicks(Axis axis) {
 		autoCreateTicks(axis,
 				(int) Math.round(axis.isHorizontal() ? 
-						0.4 * Math.sqrt(axis.modulToAlign.getWidth()) :
-							0.5 * Math.sqrt(axis.modulToAlign.getHeight())));
+						0.345 * Math.sqrt(axis.modulToAlign.getWidth()) :
+							0.476 * Math.sqrt(axis.modulToAlign.getHeight())));
 	}
 
 	/**
@@ -215,16 +223,17 @@ public abstract class TickFactory {
 		TickSizePair actualTickS;
 		while(tickSIt.hasNext()){
 			actualTickS = tickSIt.next();
-			if(delta < prevTickS.multiplier * prevTickS.timeUnit.durationMS + actualTickS.timeUnit.durationMS / 2){
+			if(delta < (prevTickS.getDurationMS() +	actualTickS.getDurationMS()) / 2){
 				tickTimeAndMultiplier = new TickSizePair(prevTickS);
 				break;
 			}
 			prevTickS = actualTickS;
 		}
-		double magn;
-		double norm;
+		
 		// special-case the possibility of several years
 		if (tickTimeAndMultiplier.timeUnit.equals(TimeUnits.Year)) {
+			double magn;
+			double norm;
 			magn = Math.pow(10, Math.floor(Math.log(delta / TimeUnits.Year.durationMS()) / Math.log(10)));
 			norm = (delta / TimeUnits.Year.durationMS()) / magn;
 			if (norm < 1.5){
@@ -242,7 +251,7 @@ public abstract class TickFactory {
 			tickTimeAndMultiplier.multiplier *= magn;
 		}
 
-		double step = tickTimeAndMultiplier.multiplier * tickTimeAndMultiplier.timeUnit.durationMS();
+		double step = tickTimeAndMultiplier.getDurationMS();
 		Date date = new Date((long) axis.getMin());
 
 		switch (tickTimeAndMultiplier.timeUnit) {
@@ -313,18 +322,22 @@ public abstract class TickFactory {
 			String formatString = "";
 			double totalDomain = axis.getMax() - axis.getMin();
 			if(step < TimeUnits.Minute.durationMS()){
-				formatString = "hh:mm:ss";
+				formatString = "mm:ss";
+			}
+			else if(step < TimeUnits.Hour.durationMS()){
+				formatString = "H:mm";
 			}
 			else if(step < TimeUnits.Day.durationMS()){
 				if(totalDomain < 2 * TimeUnits.Day.durationMS()){
-					formatString = "hh:ss";
+					formatString = "H:mm";
 				}
 				else{
-					formatString = "MMM dd hh:ss";
+//					formatString = "dd k:mm";
+					formatString = "MMM d. H:mm";
 				}
 			}
 			else if(step < TimeUnits.Month.durationMS()){
-				formatString = "MMM dd";
+				formatString = "MMM d.";
 			}
 			else if(step < TimeUnits.Year.durationMS()){
 				if(totalDomain < TimeUnits.Year.durationMS()){

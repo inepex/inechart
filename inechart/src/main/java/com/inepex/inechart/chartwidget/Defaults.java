@@ -15,6 +15,10 @@ import com.inepex.inechart.chartwidget.shape.Rectangle;
 import com.inepex.inechart.chartwidget.shape.Shape;
 
 public class Defaults {
+	
+
+	public static final int chartWidth = 470;
+	public static final int chartHeight = 380;
 
 	//color
 	public static final double alpha = 1.0;

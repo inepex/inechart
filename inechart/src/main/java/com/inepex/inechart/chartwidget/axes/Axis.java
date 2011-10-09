@@ -301,6 +301,9 @@ public class Axis implements Comparable<Axis>, HasZIndex{
 	 *            the ticks to set
 	 */
 	public void setTicks(ArrayList<Tick> ticks) {
+		if (this.ticks != null){
+			this.ticks.clear();
+		}
 		this.ticks = ticks;
 		
 	}
@@ -412,6 +415,24 @@ public class Axis implements Comparable<Axis>, HasZIndex{
 		
 	}
 	
+	/**
+	 * 
+	 * @return the related modules main axis which is perpendicular to this axis
+	 */
+	public Axis getPerpendicularAxis(){
+		if(modulToAlign == null){
+			return null;
+		}
+		if (AxisDirection.isPerpendicular(this, modulToAlign.getYAxis())){
+			return modulToAlign.getYAxis();
+		}
+		else {
+			return modulToAlign.getXAxis();
+		}
+	}
+	
+	
+	
 	public boolean isFilterFrequentTicks() {
 		return filterFrequentTicks;
 	}
@@ -436,7 +457,6 @@ public class Axis implements Comparable<Axis>, HasZIndex{
 		this.autoCreateGrids = autoCreateGrids;
 	}
 
-	
 	/**
 	 * @return the defaultTick
 	 */

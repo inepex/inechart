@@ -17,7 +17,7 @@ import com.inepex.inechart.chartwidget.barchart.BarChart;
 import com.inepex.inechart.chartwidget.intervalchart.IntervalChart;
 import com.inepex.inechart.chartwidget.label.ChartTitle;
 import com.inepex.inechart.chartwidget.label.GWTLabelFactory;
-import com.inepex.inechart.chartwidget.label.LabelFactoryBase;
+import com.inepex.inechart.chartwidget.label.LabelFactory;
 import com.inepex.inechart.chartwidget.label.Legend;
 import com.inepex.inechart.chartwidget.linechart.Curve;
 import com.inepex.inechart.chartwidget.linechart.LineChart;
@@ -27,35 +27,22 @@ import com.inepex.inechart.chartwidget.selection.RectangularSelection;
 import com.inepex.inegraphics.impl.client.DrawingAreaGWT;
 
 public class IneChart extends Composite{
-	private static final int DEFAULT_WIDTH = 470;
-	private static final int DEFAULT_HEIGHT = 380;
 	private AbsolutePanel mainPanel;
 	private DrawingAreaGWT drawingArea;
-	private ArrayList<IneChartModule> moduls;
-	
+	private ArrayList<IneChartModule> modules;
+
 	private Axes axes;
 	private RectangularSelection selection = null;
-	private LabelFactoryBase labelFactory;
+	private LabelFactory labelFactory;
 	private IneChartEventManager eventManager;
-	
-	private IneChartModule focus;
-	
-	private boolean autoScaleModuls = true;
-	
-	private boolean isUpdatingInProgress = false;
 
-	/**
-	 * @return the isUpdatingInProgress
-	 */
-	public boolean isUpdatingInProgress() {
-		return isUpdatingInProgress;
-	}
+	private boolean autoScaleModules = true;
 
 	private int canvasWidth;
 	private int canvasHeight;
-	
+
 	public IneChart(){
-		this(DEFAULT_WIDTH, DEFAULT_HEIGHT);
+		this(Defaults.chartWidth, Defaults.chartHeight);
 	}
 
 	public IneChart(int width, int height) {
@@ -68,12 +55,12 @@ public class IneChart extends Composite{
 		canvasWidth = width;
 		mainPanel.setPixelSize(width, height);
 		drawingArea.setSize(width, height);
-		
-		moduls = new ArrayList<IneChartModule>();
+
+		modules = new ArrayList<IneChartModule>();
 		labelFactory = new GWTLabelFactory(drawingArea, mainPanel);
 		axes = new Axes(drawingArea,labelFactory);
 		axes.setTickFactory(new TickFactoryGWT());
-		
+
 		//event
 		eventManager = new IneChartEventManager(this);
 		addDomHandler(eventManager, MouseDownEvent.getType());
@@ -81,7 +68,7 @@ public class IneChart extends Composite{
 		addDomHandler(eventManager, MouseMoveEvent.getType());
 		addDomHandler(eventManager, ClickEvent.getType());
 	}
-	
+
 	public void setSize(int width, int height){
 		canvasHeight = height;
 		canvasWidth = width;
@@ -90,90 +77,62 @@ public class IneChart extends Composite{
 	}
 
 	public boolean isRedrawNeeded(){
-		for(IneChartModule m : moduls){
+		for(IneChartModule m : modules){
 			if(m.isRedrawNeeded()){
 				return true;
 			}
 		}
 		return false;
 	}
-	
-	public void update() {
-		isUpdatingInProgress = true;
-//		long start = System.currentTimeMillis();
-		releaseFocusIfPossible();
-		// grant focus if possible and requested
-		if (focus == null) {
-			for (IneChartModule modul : moduls) {
-				if (modul.isVisible && modul.requestFocus) {
-					focusModul(modul);
-					break;
-				}
-			}
-		}
 
-		if (autoScaleModuls){
-			for (IneChartModule modul : moduls) {
+	public void update() {
+		// pre-update modules
+		if (autoScaleModules){
+			for (IneChartModule modul : modules) {
 				if(modul instanceof IneChartModule2D){
-					((IneChartModule2D) modul).updateModulesAxes();
+					((IneChartModule2D) modul).preUpdateModule();
 				}
 			}
 		}
-//		long start2 = System.currentTimeMillis();
+		
 		labelFactory.update();
-//		Log.debug(System.currentTimeMillis() - start2 + " ms - labelFactory update");
-//		start2 = System.currentTimeMillis();
-//		
-//		
-//		Log.info(System.currentTimeMillis() - start2 + " ms - axes update");
-//		start2 = System.currentTimeMillis();
-		//scale moduls 
-		if (autoScaleModuls){
+	
+		//scale modules 
+		if (autoScaleModules){
 			axes.updateForPaddingCalculation();
-			double[] padding = new double[]{0,0,0,0};
-			for (IneChartModule modul : moduls) {
+			double[] modulePadding = new double[]{0,0,0,0};
+			for (IneChartModule modul : modules) {
 				if(modul instanceof IneChartModule2D && ((IneChartModule2D) modul).autoCalcPadding){
-					padding = LabelFactoryBase.mergePaddings(padding, ((IneChartModule2D) modul).getPaddingForAxes());
+					modulePadding = LabelFactory.mergePaddings(modulePadding, ((IneChartModule2D) modul).getPaddingForAxes());
 				}
 			}
-			padding = LabelFactoryBase.addPaddings(labelFactory.getPaddingNeeded(), padding);
-			for (IneChartModule modul : moduls) {
+			modulePadding = LabelFactory.addPaddings(labelFactory.getPaddingNeeded(), modulePadding);
+			for (IneChartModule modul : modules) {
 				if(modul instanceof IneChartModule2D && ((IneChartModule2D) modul).autoCalcPadding){
-					((IneChartModule2D) modul).setPadding(padding);
+					((IneChartModule2D) modul).setPadding(modulePadding);
 				}
 			}
 			axes.updateWithOutAutoTickCreation();
-//			Log.info(System.currentTimeMillis() - start2 + " ms - axes second update");
-//			start2 = System.currentTimeMillis();
 		}
-		else{
+		else {
 			axes.update();
 		}
-		//FIXME think about removing focus...
-		// update moduls if present, update only focused
-		if (focus != null) {
-			focus.update();
-		} 
-		else {
-			for (IneChartModule modul : moduls) {
-				modul.update();
-			}
+
+		//update modules
+		for (IneChartModule modul : modules) {
+			modul.update();
 		}
 
 		drawingArea.removeAllGraphicalObjects();
-		for (IneChartModule modul : moduls) {
+		for (IneChartModule modul : modules) {
 			if (modul.isVisible){
 				drawingArea.addAllGraphicalObject(modul.graphicalObjectContainer);
 			}
 		}
 		drawingArea.addAllGraphicalObject(axes.graphicalObjectContainer);
 		drawingArea.addAllGraphicalObject(labelFactory.graphicalObjectContainer);
-//		Log.info(System.currentTimeMillis() - start + " ms - modules update");
-//		start = System.currentTimeMillis();
 		drawingArea.update();
-//		Log.info(System.currentTimeMillis() - start + " ms - drawingArea update");
-//		Log.info("===============================================================");
-		isUpdatingInProgress = false;
+
 	}
 
 	/*
@@ -184,46 +143,46 @@ public class IneChart extends Composite{
 		DrawingAreaGWT overlay = new DrawingAreaGWT(canvasWidth, canvasHeight, false);
 		mainPanel.add(overlay.getWidget(),0,0);
 		LineChart chart = new LineChart(drawingArea, labelFactory, getAxes(), overlay, eventManager);
-		moduls.add(chart);
+		modules.add(chart);
 		eventManager.addViewportChangeHandler(chart.innerEventHandler);
 		return chart;
 	}
 
 	public PieChart createPieChart() {
 		PieChart chart = new PieChart(drawingArea, labelFactory, getAxes());
-		moduls.add(chart);
+		modules.add(chart);
 		return chart;
 	}
 
 	public BarChart createBarChart() {
 		BarChart bc = new BarChart(drawingArea, labelFactory, getAxes());
-		moduls.add(bc);
+		modules.add(bc);
 		eventManager.addViewportChangeHandler(bc.innerEventHandler);
 		return bc;
 	}
-	
+
 	public IntervalChart createIntervalChart(){
 		IntervalChart ic = new IntervalChart(drawingArea, labelFactory, axes, eventManager);
-		moduls.add(ic);
+		modules.add(ic);
 		eventManager.addViewportChangeHandler(ic.innerEventHandler);
 		return ic;
 	}
 
-	Axes getAxes() {
+	protected Axes getAxes() {
 		return axes;
 	}
-	
-	LabelFactoryBase getLabelFactory(){
+
+	protected LabelFactory getLabelFactory(){
 		return labelFactory;
 	}
-	
+
 	public RectangularSelection getRectangularSelection(){
 		if(selection == null){
 			DrawingAreaGWT selectionLayer = new DrawingAreaGWT(canvasWidth, canvasHeight, false);
 			this.selection = new RectangularSelection(selectionLayer,eventManager);
 			mainPanel.add(selectionLayer.getWidget(),0,0);
 			IneChartModule2D modulToSelectFrom = null;
-			for(IneChartModule m : moduls){
+			for(IneChartModule m : modules){
 				if(m instanceof IneChartModule2D){
 					modulToSelectFrom = (IneChartModule2D) m;
 					break;
@@ -234,77 +193,53 @@ public class IneChart extends Composite{
 		return selection;
 	}
 
-	private void focusModul(IneChartModule modul) {
-		for (IneChartModule m : moduls) {
-			if (m != modul)
-				m.canHandleEvents = false;
-			else
-				m.canHandleEvents = true;
-		}
-		focus = modul;
-	}
-	
 	protected void setCanHandleEventsForAllModule(boolean canHandleEvents){
-		for (IneChartModule m : moduls) {
+		for (IneChartModule m : modules) {
 			m.canHandleEvents = canHandleEvents;
 		}
 	}
 
-	private void releaseFocusIfPossible() {
-		if (focus != null) {
-			for (IneChartModule m : moduls) {
-				if (focus == m && m.requestFocus == false) {
-					for (IneChartModule m1 : moduls) {
-						m1.canHandleEvents = true;
-					}
-					focus = null;
-					return;
-				}
-			}
-		}
-	}
-	
 	/* public methods */
 	public List<LineChart> getLineCharts(){
 		ArrayList<LineChart> lineCharts = new ArrayList<LineChart>();
-		for(IneChartModule m : moduls){
+		for(IneChartModule m : modules){
 			if(m instanceof LineChart){
 				lineCharts.add((LineChart) m);
 			}
 		}
 		return lineCharts;
 	}
-	
+
 	public List<BarChart> getBarCharts(){
 		ArrayList<BarChart> barCharts = new ArrayList<BarChart>();
-		for(IneChartModule m : moduls){
+		for(IneChartModule m : modules){
 			if(m instanceof BarChart){
 				barCharts.add((BarChart) m);
 			}
 		}
 		return barCharts;
 	}
-	
+
 	public List<PieChart> getPieCharts(){
 		ArrayList<PieChart> pieCharts = new ArrayList<PieChart>();
-		for(IneChartModule m : moduls){
+		for(IneChartModule m : modules){
 			if(m instanceof PieChart){
 				pieCharts.add((PieChart) m);
 			}
 		}
 		return pieCharts;
 	}
- 	
-	public List<IneChartModule2D> getIneChartModul2Ds(){
+
+	public List<IneChartModule2D> getIneChartModule2Ds(){
 		ArrayList<IneChartModule2D> module2Ds = new ArrayList<IneChartModule2D>();
-		for(IneChartModule m : moduls){
+		for(IneChartModule m : modules){
 			if(m instanceof IneChartModule2D){
 				module2Ds.add((IneChartModule2D) m);
 			}
 		}
 		return module2Ds;
 	}
-	
+
 	public DrawingAreaGWT getDrawingArea() {
 		return this.drawingArea;
 	}
@@ -312,36 +247,44 @@ public class IneChart extends Composite{
 	public void setChartTitle(String title){
 		setChartTitle(new ChartTitle(title));
 	}
-	
+
 	public void setChartTitle(String title,String description){
 		setChartTitle(new ChartTitle(title,description));
 	}
-	
+
 	public void setChartTitle(ChartTitle title){
 		labelFactory.setChartTitle(title);
 	}
-	
+
 	public ChartTitle getChartTitle(){
 		return labelFactory.getChartTitle();
 	}
-	
+
 	public void setLegend(Legend legend){
 		labelFactory.setLegend(legend);
 	}
-	
+
 	public Legend getLegend(){
 		return labelFactory.getLegend();
 	}
-	
+
 	public void setEventBus(EventBus eventBus){
 		eventManager.setEventBus(eventBus);
 	}
-
+	
+	/**
+	 * Can return null
+	 * @return
+	 */
+	public EventBus getEventBus(){
+		return eventManager.getEventBus();
+	}
+	
 	public IneChart createViewportSelectorChart(int width, int height){
 		IneChart viewportSelectorChart = new IneChart(width, height);
 		RectangularSelection rs = viewportSelectorChart.getRectangularSelection();
-		
-		for(IneChartModule module : moduls){
+
+		for(IneChartModule module : modules){
 			if(module instanceof LineChart){
 				LineChart vpLineChart = viewportSelectorChart.createLineChart();
 				for(Curve c : ((LineChart)module).getCurves()){
@@ -370,24 +313,8 @@ public class IneChart extends Composite{
 			eventManager.setEventBus(new SimpleEventBus());
 		}
 		viewportSelectorChart.setEventBus(eventManager.getEventBus());
-		
+
 		return viewportSelectorChart;
 	}
-	
-	/**
-	 * Can return null
-	 * @return
-	 */
-	public EventBus getEventBus(){
-		return eventManager.getEventBus();
-	}
-
-	
-	
-	
-	
-	
-	
-	
 
 }

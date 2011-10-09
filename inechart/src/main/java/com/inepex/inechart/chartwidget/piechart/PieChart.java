@@ -10,7 +10,7 @@ import com.google.gwt.event.dom.client.MouseUpEvent;
 import com.inepex.inechart.chartwidget.Defaults;
 import com.inepex.inechart.chartwidget.IneChartModule2D;
 import com.inepex.inechart.chartwidget.axes.Axes;
-import com.inepex.inechart.chartwidget.label.LabelFactoryBase;
+import com.inepex.inechart.chartwidget.label.LabelFactory;
 import com.inepex.inechart.chartwidget.label.Legend;
 import com.inepex.inechart.chartwidget.properties.Color;
 import com.inepex.inegraphics.shared.Context;
@@ -22,7 +22,7 @@ public class PieChart extends IneChartModule2D{
 	Pie pie;
 	boolean showLegend = true;
 
-	public PieChart(DrawingArea canvas, LabelFactoryBase labelFactory, Axes axes) {
+	public PieChart(DrawingArea canvas, LabelFactory labelFactory, Axes axes) {
 		super(canvas, labelFactory, axes, null);
 	}
 
@@ -102,7 +102,7 @@ public class PieChart extends IneChartModule2D{
 		}
 	}
 	@Override
-	public void updateModulesAxes() {
+	public void preUpdateModule() {
 		// TODO Auto-generated method stub
 		
 	}
