@@ -5,6 +5,7 @@ import java.util.ArrayList;
 
 import com.inepex.inechart.chartwidget.IneChartModule;
 import com.inepex.inegraphics.shared.DrawingArea;
+import com.inepex.inegraphics.shared.gobjects.Text;
 
 /**
  * Base class for displaying texts in the chart.
@@ -42,9 +43,7 @@ public abstract class LabelFactory extends IneChartModule{
 		styledLabels = new ArrayList<StyledLabel>();
 		legend = new Legend();
 	}
- 	
- 	
- 	
+ 	 	
  	@Override
  	public void update() {
  		clear();	
@@ -134,5 +133,22 @@ public abstract class LabelFactory extends IneChartModule{
 	 */
 	public void setLegend(Legend legend) {
 		this.legend = legend;
+	}
+
+	public int[] measureStyledLabel(StyledLabel lbl){
+		Text text = new Text(lbl.getText().getText(), 0, 0);
+		text.setFontFamily(lbl.text.getTextProperties().getFontFamily());
+		text.setFontStyle(lbl.text.getTextProperties().getFontStyle());
+		text.setFontWeight(lbl.text.getTextProperties().getFontWeight());
+		text.setColor(lbl.text.getTextProperties().getColor().getColor());
+		text.setFontSize(lbl.text.getTextProperties().getFontSize());
+		canvas.measureText(text);
+		text.setWidth( (int) (text.getWidth() +
+				lbl.getLeftPadding() + lbl.getRightPadding() +
+				lbl.getBackground().getLineProperties().getLineWidth() * 2) );
+		text.setHeight( (int) (text.getHeight() + 
+				lbl.getTopPadding() + lbl.getBottomPadding() +
+				lbl.getBackground().getLineProperties().getLineWidth() * 2) );
+		return new int[]{text.getWidth(), text.getHeight()};
 	}
 }

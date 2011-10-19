@@ -10,7 +10,7 @@ import com.inepex.inechart.chartwidget.IneChartModule2D;
 import com.inepex.inechart.chartwidget.properties.ShapeProperties;
 import com.inepex.inegraphics.impl.client.DrawingAreaGWT;
 
-public abstract class SelectionBase {
+public abstract class RangeSelectionBase {
 
 	protected ShapeProperties selectionLookOut;
 	protected IneChartEventManager eventManager;
@@ -19,7 +19,7 @@ public abstract class SelectionBase {
 	protected List<IneChart> addressedCharts;
 	protected List<IneChartModule2D> addressedModuls;
 
-	protected SelectionBase(IneChartEventManager eventManager,
+	protected RangeSelectionBase(IneChartEventManager eventManager,
 			DrawingAreaGWT canvas) {
 		this.eventManager = eventManager;
 		this.canvas = canvas;

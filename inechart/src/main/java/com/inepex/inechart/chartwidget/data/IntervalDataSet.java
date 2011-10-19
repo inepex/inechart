@@ -1,33 +1,16 @@
-package com.inepex.inechart.chartwidget.intervalchart;
+package com.inepex.inechart.chartwidget.data;
 
 import java.util.ArrayList;
 
 import com.inepex.inechart.chartwidget.Defaults;
-import com.inepex.inechart.chartwidget.misc.ColorSet;
 import com.inepex.inechart.chartwidget.properties.Color;
 import com.inepex.inechart.chartwidget.properties.ShapeProperties;
 
-public class IntervalDataSet {
-	private static int autoNameMaxIndex = 0;
-	private static ColorSet colorSet = new ColorSet();
-	/**
-	 * @return the colorSet
-	 */
-	public static ColorSet getColorSet() {
-		return colorSet;
-	}
-
-	/**
-	 * @param colorSet the colorSet to set
-	 */
-	public static void setColorSet(ColorSet colorSet) {
-		IntervalDataSet.colorSet = colorSet;
-	}
-
+public class IntervalDataSet extends AbstractDataSet{
+	
 	private ArrayList<double[]> intervals;
 	private double yValue;
 
-	private String name;
 	private Color color;
 	
 	private ShapeProperties shapeProperties;
@@ -38,14 +21,14 @@ public class IntervalDataSet {
 	}
 	
 	public IntervalDataSet(ArrayList<double[]> intervals) {
-		this(intervals, Defaults.yValue, Defaults.name + ++autoNameMaxIndex, colorSet.getNextColor());
+		this(intervals, Defaults.yValue, Defaults.name + ++autotitleMaxIndex, colorSet.getNextColor());
 	}
 
 	public IntervalDataSet(ArrayList<double[]> intervals, double yValue,
-			String name, Color color) {
+			String title, Color color) {
+		super(title);
 		this.intervals = intervals;
 		this.yValue = yValue;
-		this.name = name;
 		this.color = color;
 		this.shapeProperties = Defaults.intervalShapeProperties();
 		shapeProperties.setFillColor(color);
@@ -54,11 +37,12 @@ public class IntervalDataSet {
 	}
 	
 	public IntervalDataSet(ArrayList<double[]> intervals, double yValue,
-			String name, ShapeProperties shapeProperties,
+			String title, ShapeProperties shapeProperties,
 			int roundedCornerRadius) {
+		super();
 		this.intervals = intervals;
 		this.yValue = yValue;
-		this.name = name;
+		this.title = title;
 		this.shapeProperties = shapeProperties;
 		this.roundedCornerRadius = roundedCornerRadius;
 	}
@@ -88,14 +72,6 @@ public class IntervalDataSet {
 
 	public void setyValue(double yValue) {
 		this.yValue = yValue;
-	}
-
-	public String getName() {
-		return name;
-	}
-
-	public void setName(String name) {
-		this.name = name;
 	}
 
 	public Color getColor() {

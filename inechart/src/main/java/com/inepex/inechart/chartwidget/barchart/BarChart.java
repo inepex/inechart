@@ -14,9 +14,9 @@ import com.google.gwt.event.dom.client.MouseUpEvent;
 import com.inepex.inechart.chartwidget.DataSet;
 import com.inepex.inechart.chartwidget.Defaults;
 import com.inepex.inechart.chartwidget.IneChartModule2D;
-import com.inepex.inechart.chartwidget.axes.Axes;
+import com.inepex.inechart.chartwidget.ModuleAssist;
 import com.inepex.inechart.chartwidget.axes.Axis.AxisDirection;
-import com.inepex.inechart.chartwidget.label.LabelFactory;
+import com.inepex.inechart.chartwidget.event.DataSetChangeEvent;
 import com.inepex.inechart.chartwidget.misc.ColorSet;
 import com.inepex.inechart.chartwidget.misc.HasShadow;
 import com.inepex.inechart.chartwidget.misc.HasZIndex;
@@ -25,7 +25,6 @@ import com.inepex.inechart.chartwidget.properties.LineProperties;
 import com.inepex.inechart.chartwidget.properties.ShapeProperties;
 import com.inepex.inechart.chartwidget.shape.Rectangle;
 import com.inepex.inechart.chartwidget.shape.Shape;
-import com.inepex.inegraphics.shared.DrawingArea;
 import com.inepex.inegraphics.shared.DrawingAreaAssist;
 import com.inepex.inegraphics.shared.GraphicalObjectContainer;
 
@@ -101,8 +100,8 @@ public class BarChart extends IneChartModule2D implements HasShadow, HasZIndex {
 	
 	protected ArrayList<ShapeProperties> lookOut;
 
-	public BarChart(DrawingArea canvas, LabelFactory labelFactory, Axes axes) {
-		super(canvas,labelFactory, axes, null);
+	public BarChart(ModuleAssist moduleAssist) {
+		super(moduleAssist);
 		dataSets = new ArrayList<DataSet>();
 		normalizedData = new TreeMap<Double, ArrayList<Double>>();
 		lookOut = new ArrayList<ShapeProperties>();
@@ -942,6 +941,12 @@ public class BarChart extends IneChartModule2D implements HasShadow, HasZIndex {
 	 */
 	public ArrayList<DataSet> getDataSets() {
 		return dataSets;
+	}
+
+	@Override
+	protected void onDataSetChange(DataSetChangeEvent event) {
+		// TODO Auto-generated method stub
+		
 	}
 
 }

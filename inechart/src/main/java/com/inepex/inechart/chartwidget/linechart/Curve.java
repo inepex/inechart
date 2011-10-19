@@ -6,6 +6,7 @@ import java.util.TreeMap;
 import com.inepex.inechart.chartwidget.DataSet;
 import com.inepex.inechart.chartwidget.Defaults;
 import com.inepex.inechart.chartwidget.axes.Tick;
+import com.inepex.inechart.chartwidget.data.XYDataSet;
 import com.inepex.inechart.chartwidget.misc.HasShadow;
 import com.inepex.inechart.chartwidget.misc.HasZIndex;
 import com.inepex.inechart.chartwidget.properties.Color;
@@ -55,6 +56,7 @@ public class Curve implements HasZIndex, HasShadow, Comparable<Curve>{
 	Shape selectedPoint;
 	boolean applyCurveShadowForPoint = true;
 	boolean useCurveLinePropertiesForShape = true;
+	
 	ArrayList<DataPoint> selectedPoints;
 
 	// shadow
@@ -75,6 +77,9 @@ public class Curve implements HasZIndex, HasShadow, Comparable<Curve>{
 		setShadowColor(Defaults.shadowColor());
 		comparableNo = highestComparableNo++;
 		dataPoints = new ArrayList<DataPoint>();
+		
+		XYDataSet ds = new XYDataSet();
+		
 	}
 
 
@@ -98,9 +103,6 @@ public class Curve implements HasZIndex, HasShadow, Comparable<Curve>{
 		this.dataSet = dataSet;
 		discontinuities.clear();
 		selectedPoints.clear();
-//		toCanvasYFills.clear();
-//		toCurveFills.clear();
-//		toYFills.clear();
 	}
 
 	/**

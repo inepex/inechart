@@ -12,6 +12,9 @@ public class TickFactoryGWT extends TickFactory {
 
 	@Override
 	public String formatTickText(Tick tick, AxisDataType dataType) {
+//		if(format.length() == 0){
+//			return ((Double)value).toString();
+//		}
 		String formatted = "";
 		try{
 			switch (dataType) {
@@ -27,6 +30,29 @@ public class TickFactoryGWT extends TickFactory {
 		}
 		catch (Exception e) {
 			formatted = ((Double)tick.position).toString();
+		}
+		return formatted;
+	}
+	
+	public static String formatValue(Axis axis, double value, String format){
+		if(format.length() == 0){
+			return ((Double)value).toString();
+		}
+		String formatted = "";
+		try{
+			switch (axis.axisDataType) {
+			case Number:
+				NumberFormat nf = NumberFormat.getFormat(format);
+				formatted = nf.format(value);
+				break;
+			case Time:
+				DateTimeFormat dtf = DateTimeFormat.getFormat(format);
+				formatted = dtf.format(new Date((long)value));
+				break;
+			}
+		}
+		catch (Exception e) {
+			formatted = ((Double)value).toString();
 		}
 		return formatted;
 	}

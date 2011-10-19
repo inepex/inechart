@@ -1,7 +1,6 @@
 package com.inepex.inechart.chartwidget.linechart;
 
 import java.util.ArrayList;
-import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
 import java.util.TreeMap;
@@ -13,13 +12,12 @@ import com.google.gwt.event.dom.client.MouseMoveEvent;
 import com.google.gwt.event.dom.client.MouseUpEvent;
 import com.google.gwt.user.client.Event;
 import com.inepex.inechart.chartwidget.Defaults;
-import com.inepex.inechart.chartwidget.IneChartEventManager;
 import com.inepex.inechart.chartwidget.IneChartModule2D;
-import com.inepex.inechart.chartwidget.axes.Axes;
+import com.inepex.inechart.chartwidget.ModuleAssist;
+import com.inepex.inechart.chartwidget.event.DataSetChangeEvent;
 import com.inepex.inechart.chartwidget.event.PointHoverListener;
 import com.inepex.inechart.chartwidget.event.PointSelectionEvent;
 import com.inepex.inechart.chartwidget.event.PointSelectionHandler;
-import com.inepex.inechart.chartwidget.label.LabelFactory;
 import com.inepex.inechart.chartwidget.properties.Color;
 import com.inepex.inechart.chartwidget.properties.LineProperties;
 import com.inepex.inechart.chartwidget.properties.LineProperties.LineStyle;
@@ -67,12 +65,13 @@ public class LineChart extends IneChartModule2D implements PointSelectionHandler
 	 * while all normal state points drawn on inherited canvas.
 	 */
 	DrawingArea overlay;
-	boolean useOverlay;
 	TreeMap<Curve, GraphicalObjectContainer> overlayGosPerCurve;
 	int pointMouseOverRadius;
 
 	PointSelectionMode selectPoint;
 	boolean singlePointSelection;
+	Crosshair crosshair;
+	boolean useCrosshair = false;
 	
 	// model fields
 	ArrayList<Curve> curves = new ArrayList<Curve>();
@@ -96,14 +95,11 @@ public class LineChart extends IneChartModule2D implements PointSelectionHandler
 	
 	ArrayList<PointHoverListener> pointHoverListeners;
 
-	public LineChart(DrawingArea canvas, LabelFactory labelFactory, Axes axes) {
-		this(canvas, labelFactory, axes, null, null);
-		useOverlay = false;
-	}
-
-	public LineChart(DrawingArea canvas, LabelFactory labelFactory, Axes axes, DrawingArea overLay, IneChartEventManager eventManager) {
-		super(canvas, labelFactory, axes, eventManager);
-		this.overlay = overLay;
+	public LineChart(ModuleAssist moduleAssist) {
+		super(moduleAssist);
+		if(moduleAssist.isClientSide()){
+			this.overlay = moduleAssist.createLayer(this);
+		}
 //		calculatedPointsPerCurve = new TreeMap<Curve, ArrayList<DataPoint>>();
 		visiblePathPerCurve = new TreeMap<Curve, Path>();
 		fillPathPerCurve = new TreeMap<Curve, Path>();
@@ -111,15 +107,16 @@ public class LineChart extends IneChartModule2D implements PointSelectionHandler
 		pointChartGOsPerCurve = new TreeMap<Curve, GraphicalObjectContainer>();
 		overlayGosPerCurve = new TreeMap<Curve, GraphicalObjectContainer>();
 		pointHoverListeners = new ArrayList<PointHoverListener>();
-		useOverlay = true;
-		if(eventManager != null){
-			eventManager.addPointSelectionHandler(this);
+		if(moduleAssist.getEventManager() != null){
+			moduleAssist.getEventManager().addPointSelectionHandler(this);
 		}
 		// defaults
 		selectPoint = Defaults.selectPoint;
 		autoScaleViewport = true;
 		pointMouseOverRadius = Defaults.pointMouseOverRadius;
 		singlePointSelection = true;
+		
+		
 	}
 
 	public void addCurve(Curve curve) {
@@ -220,13 +217,15 @@ public class LineChart extends IneChartModule2D implements PointSelectionHandler
 				graphicalObjectContainer.addAllGraphicalObject(pointChartGOsPerCurve.get(curve));
 			}
 		}
-		if(useOverlay){
+		if(moduleAssist.isClientSide()){
 			updateOverLay();
 		}
 		super.update();
 	}	
 
 	protected void updateOverLay(){
+		if(useCrosshair)
+			return;
 		overlay.removeAllGraphicalObjects();
 		for(Curve curve:overlayGosPerCurve.keySet()){
 			if(overlayGosPerCurve.get(curve) != null){
@@ -268,29 +267,11 @@ public class LineChart extends IneChartModule2D implements PointSelectionHandler
 		curve.dataPoints.clear();
 		for(double[] dataPair : dataPairs){
 			DataPoint point = new DataPoint(dataPair[0], dataPair[1]);
+			if(curve.dataSet.isSortable() && point.x > xAxis.getMax()){
+				break;
+			}
 			setDataPoint(point);
 			curve.dataPoints.add(point);
-//			start = System.currentTimeMillis();
-//			DataPoint point = new DataPoint(dataPair[0], dataPair[1]);
-//			if(curve.dataPoints.contains(point)){
-//				Log.debug("    § curve.dataPoints.contains ?: " + (System.currentTimeMillis() - start) + " ms");
-//				point = curve.dataPoints.get(curve.dataPoints.indexOf(point));
-//			}
-//			else{
-//				Log.debug("    § curve.dataPoints.contains ?: " + (System.currentTimeMillis() - start) + " ms");
-//				curve.dataPoints.add(point);
-//			}
-//			start = System.currentTimeMillis();
-//			setDataPoint(point);
-//			Log.debug("    § setting data point: " + (System.currentTimeMillis() - start) + " ms");
-//			if(point.x > xAxis.getMax()){
-//				if(curve.dataSet.isSortable()){
-//					break;
-//				}
-//			}
-//			else if(point.x >= xAxis.getMin() && point.y >= yAxis.getMin() && point.y <= yAxis.getMax()){
-//				calculatedPoints.add(point);
-//			}
 		}
 //		Log.debug("    normal points calc: " + (System.currentTimeMillis() - start) + " ms");
 //		start = System.currentTimeMillis();
@@ -538,20 +519,11 @@ public class LineChart extends IneChartModule2D implements PointSelectionHandler
 					normal.setShadowOffsetX(curve.shadowOffsetX);
 					normal.setShadowOffsetY(curve.shadowOffsetY);
 				}
-//				if(selected != null){
-//					selected.setShadowColor(curve.shadowColor);
-//					selected.setShadowOffsetX(curve.shadowOffsetX);
-//					selected.setShadowOffsetY(curve.shadowOffsetY);
-//				}
 			}
 			else{
 				if(normal != null){
 					normal.setShadowOffsetX(0);
 					normal.setShadowOffsetY(0);
-				}
-				if(selected != null){
-					selected.setShadowOffsetX(0);
-					selected.setShadowOffsetY(0);
 				}
 			}
 		}
@@ -576,7 +548,7 @@ public class LineChart extends IneChartModule2D implements PointSelectionHandler
 				//selected
 				if(curve.selectedPoints.contains(point)){
 					if(selected != null){
-						if(useOverlay){
+						if(moduleAssist.isClientSide()){
 							//we put normal point on backing canvas
 							if(normal != null){
 								goc.addAllGraphicalObject(createPoint(point, normal));
@@ -627,7 +599,7 @@ public class LineChart extends IneChartModule2D implements PointSelectionHandler
 				graphicalObjectContainer.removeGraphicalObject(go);
 			}
 		}
-		if (useOverlay && overlayGosPerCurve.containsKey(curve)){
+		if (moduleAssist.isClientSide() && overlayGosPerCurve.containsKey(curve)){
 			for (GraphicalObject go : overlayGosPerCurve.get(curve).getGraphicalObjects()) {
 				overlay.removeGraphicalObject(go);
 			}
@@ -830,7 +802,7 @@ public class LineChart extends IneChartModule2D implements PointSelectionHandler
 	}
 	
 	protected void selectPointEvent(TreeMap<Curve, DataPoint> selectedPoints){
-		if(!useOverlay)
+		if(!moduleAssist.isClientSide())
 			return;
 		TreeMap<Curve, DataPoint> justSelected = new TreeMap<Curve, DataPoint>();
 		TreeMap<Curve, DataPoint> justDeselected = new TreeMap<Curve, DataPoint>();
@@ -884,17 +856,20 @@ public class LineChart extends IneChartModule2D implements PointSelectionHandler
 			createPointChartGOs(c, true);
 		}
 		updateOverLay();
+		if(useCrosshair){
+			crosshair.selectPoint(selectedPoints.firstKey(), selectedPoints.get(selectedPoints.firstKey()));
+		}
 		
 		//fire events
 		for(Curve c : justSelected.keySet()){
 			PointSelectionEvent e = new PointSelectionEvent(
 					true, justSelected.get(c), c);
-			eventManager.fireEvent(e);
+			moduleAssist.getEventManager().fireEvent(e);
 		}
 		for(Curve c : justDeselected.keySet()){
 			PointSelectionEvent e = new PointSelectionEvent(
 					false,justSelected.get(c), c);
-			eventManager.fireEvent(e);
+			moduleAssist.getEventManager().fireEvent(e);
 		}
 	}
 
@@ -981,5 +956,20 @@ public class LineChart extends IneChartModule2D implements PointSelectionHandler
 		pointHoverListeners.remove(pointHoverListener);
 	}
 	
+	public Crosshair getCrosshair(){
+		if(crosshair == null){
+			crosshair = new Crosshair(moduleAssist);
+			crosshair.setDrawingArea(overlay);
+			crosshair.setLineChart(this);
+			useCrosshair = true;
+		}
+		return crosshair;
+	}
+
+	@Override
+	protected void onDataSetChange(DataSetChangeEvent event) {
+		// TODO Auto-generated method stub
+		
+	}
 }
 

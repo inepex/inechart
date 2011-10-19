@@ -28,23 +28,12 @@ public abstract class IneChartModule implements Comparable<IneChartModule> {
 	 * The modul should not recieve (handle) events when false
 	 */
 	protected boolean canHandleEvents;
-	/**
-	 * The modul can request focus from its parent, which will be granted at the
-	 * next update() call on parent {@link IneChart}, if other modul is not
-	 * focused. If Focused: - other modul's canRecieveEvents field is set to
-	 * false, - they will not be updated (their graphicalObjects will be
-	 * freezed)
-	 * 
-	 * Set back to false if finished
-	 */
-	protected boolean requestFocus;
+
 	/**
 	 * @return the graphicalObjectContainer
 	 */
 	protected boolean isVisible;
-	
-	
-	
+		
 	public GraphicalObjectContainer getGraphicalObjectContainer() {
 		return graphicalObjectContainer;
 	}
@@ -54,7 +43,6 @@ public abstract class IneChartModule implements Comparable<IneChartModule> {
 		graphicalObjectContainer = new GraphicalObjectContainer();
 		this.canvas = canvas;
 		canHandleEvents = true;
-		requestFocus = false;
 		isVisible = true;
 	}
 
@@ -87,20 +75,6 @@ public abstract class IneChartModule implements Comparable<IneChartModule> {
 	@Override
 	public int compareTo(IneChartModule o) {
 		return modulComparatorID - o.modulComparatorID;
-	}
-
-	/**
-	 * @return the requestFocus
-	 */
-	public boolean isRequestFocus() {
-		return requestFocus;
-	}
-
-	/**
-	 * @param requestFocus the requestFocus to set
-	 */
-	public void setRequestFocus(boolean requestFocus) {
-		this.requestFocus = requestFocus;
 	}
 
 	/**

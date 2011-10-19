@@ -9,6 +9,7 @@ import com.google.gwt.event.dom.client.MouseMoveEvent;
 import com.google.gwt.event.dom.client.MouseUpEvent;
 import com.google.gwt.event.shared.EventBus;
 import com.google.gwt.event.shared.SimpleEventBus;
+import com.google.gwt.user.client.DOM;
 import com.google.gwt.user.client.ui.AbsolutePanel;
 import com.google.gwt.user.client.ui.Composite;
 import com.inepex.inechart.chartwidget.axes.Axes;
@@ -35,6 +36,8 @@ public class IneChart extends Composite{
 	private RectangularSelection selection = null;
 	private LabelFactory labelFactory;
 	private IneChartEventManager eventManager;
+	
+	private ModuleAssist moduleAssist;
 
 	private boolean autoScaleModules = true;
 
@@ -67,6 +70,12 @@ public class IneChart extends Composite{
 		addDomHandler(eventManager, MouseUpEvent.getType());
 		addDomHandler(eventManager, MouseMoveEvent.getType());
 		addDomHandler(eventManager, ClickEvent.getType());
+		
+		moduleAssist = new ModuleAssist(this);
+		moduleAssist.setAxes(axes);
+		moduleAssist.setEventManager(eventManager);
+		moduleAssist.setLabelFactory(labelFactory);
+		moduleAssist.setMainCanvas(drawingArea);
 	}
 
 	public void setSize(int width, int height){
@@ -74,6 +83,9 @@ public class IneChart extends Composite{
 		canvasWidth = width;
 		mainPanel.setPixelSize(width, height);
 		drawingArea.setSize(width, height);
+		for(DrawingAreaGWT da:moduleAssist.getLayers()){
+			da.setSize(width, height);
+		}
 	}
 
 	public boolean isRedrawNeeded(){
@@ -142,39 +154,32 @@ public class IneChart extends Composite{
 	public LineChart createLineChart() {
 		DrawingAreaGWT overlay = new DrawingAreaGWT(canvasWidth, canvasHeight, false);
 		mainPanel.add(overlay.getWidget(),0,0);
-		LineChart chart = new LineChart(drawingArea, labelFactory, getAxes(), overlay, eventManager);
+		LineChart chart = new LineChart(moduleAssist);
 		modules.add(chart);
 		eventManager.addViewportChangeHandler(chart.innerEventHandler);
 		return chart;
 	}
 
 	public PieChart createPieChart() {
-		PieChart chart = new PieChart(drawingArea, labelFactory, getAxes());
+		PieChart chart = new PieChart(moduleAssist);
 		modules.add(chart);
 		return chart;
 	}
 
 	public BarChart createBarChart() {
-		BarChart bc = new BarChart(drawingArea, labelFactory, getAxes());
+		BarChart bc = new BarChart(moduleAssist);
 		modules.add(bc);
 		eventManager.addViewportChangeHandler(bc.innerEventHandler);
 		return bc;
 	}
 
 	public IntervalChart createIntervalChart(){
-		IntervalChart ic = new IntervalChart(drawingArea, labelFactory, axes, eventManager);
+		IntervalChart ic = new IntervalChart(moduleAssist);
 		modules.add(ic);
 		eventManager.addViewportChangeHandler(ic.innerEventHandler);
 		return ic;
 	}
 
-	protected Axes getAxes() {
-		return axes;
-	}
-
-	protected LabelFactory getLabelFactory(){
-		return labelFactory;
-	}
 
 	public RectangularSelection getRectangularSelection(){
 		if(selection == null){
@@ -317,4 +322,20 @@ public class IneChart extends Composite{
 		return viewportSelectorChart;
 	}
 
+	protected DrawingAreaGWT createLayer(){
+		DrawingAreaGWT layer = new DrawingAreaGWT(canvasWidth, canvasHeight);
+		mainPanel.add(layer.getWidget(), 0, 0);
+		return layer;
+	}
+	
+	protected void removeLayer(DrawingAreaGWT layer){
+		mainPanel.remove(layer.getWidget());
+	}
+	
+	protected void setLayerOrder(ArrayList<DrawingAreaGWT> layers){
+		int zIndex = 0;
+		for(DrawingAreaGWT layer:layers){
+			DOM.setElementAttribute(layer.getWidget().getElement(), "zIndex", zIndex++ +"");
+		}
+	}
 }

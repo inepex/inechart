@@ -8,24 +8,20 @@ import com.google.gwt.event.dom.client.MouseDownEvent;
 import com.google.gwt.event.dom.client.MouseEvent;
 import com.google.gwt.event.dom.client.MouseMoveEvent;
 import com.google.gwt.event.dom.client.MouseUpEvent;
-import com.inepex.inechart.chartwidget.IneChartEventManager;
 import com.inepex.inechart.chartwidget.IneChartModule2D;
-import com.inepex.inechart.chartwidget.axes.Axes;
-import com.inepex.inechart.chartwidget.label.LabelFactory;
-import com.inepex.inechart.chartwidget.linechart.Curve;
+import com.inepex.inechart.chartwidget.ModuleAssist;
+import com.inepex.inechart.chartwidget.data.IntervalDataSet;
+import com.inepex.inechart.chartwidget.event.DataSetChangeEvent;
 import com.inepex.inechart.chartwidget.properties.Color;
 import com.inepex.inechart.chartwidget.shape.Rectangle;
-import com.inepex.inegraphics.shared.DrawingArea;
 import com.inepex.inegraphics.shared.GraphicalObjectContainer;
 
 public class IntervalChart extends IneChartModule2D {
 
 	private ArrayList<IntervalDataSet> dataSets;
 
-	public IntervalChart(DrawingArea canvas,
-			LabelFactory labelFactoryBase, Axes axes,
-			IneChartEventManager eventManager) {
-		super(canvas, labelFactoryBase, axes, eventManager);
+	public IntervalChart(ModuleAssist moduleAssist) {
+		super(moduleAssist);
 		dataSets = new ArrayList<IntervalDataSet>();
 	}
 
@@ -37,7 +33,7 @@ public class IntervalChart extends IneChartModule2D {
 	public TreeMap<String, Color> getLegendEntries() {
 		TreeMap<String, Color> entries = new TreeMap<String, Color>();
 		for(IntervalDataSet ds : dataSets){
-			entries.put(ds.getName(), ds.getColor());
+			entries.put(ds.getTitle(), ds.getColor());
 		}
 		return entries;
 	}
@@ -130,6 +126,12 @@ public class IntervalChart extends IneChartModule2D {
 			goc.addAllGraphicalObject(r.toGraphicalObjects());
 		}
 		return goc;
+	}
+
+	@Override
+	protected void onDataSetChange(DataSetChangeEvent event) {
+		// TODO Auto-generated method stub
+		
 	}
 
 }

@@ -19,7 +19,7 @@ import com.inepex.inechart.chartwidget.shape.Rectangle;
 import com.inepex.inegraphics.impl.client.DrawingAreaGWT;
 
 
-public class RectangularSelection extends SelectionBase{
+public class RectangularSelection extends RangeSelectionBase{
 
 	protected class MouseHandler implements MouseDownHandler, MouseMoveHandler, MouseUpHandler, ClickHandler{
 		@Override
@@ -259,4 +259,14 @@ public class RectangularSelection extends SelectionBase{
 		else
 			return false;
 	}
+
+	public boolean isInvertSelection() {
+		return invertSelection;
+	}
+
+	public void setInvertSelection(boolean invertSelection) {
+		this.invertSelection = invertSelection;
+	}
+	
+	
 }

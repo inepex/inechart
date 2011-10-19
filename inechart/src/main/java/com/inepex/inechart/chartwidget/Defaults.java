@@ -50,7 +50,7 @@ public class Defaults {
 	
 	//selection
 	public static final ShapeProperties selectionLookout(){
-		return new ShapeProperties(new LineProperties(1.2, new Color("#FFFF66", 0.84)), new Color("#FFFF66", 0.66));
+		return new ShapeProperties(new LineProperties(1.2, new Color("#FFFFFF", 0.84)), new Color("#FFFFFF", 0.66));
 	}
 	public static final int minSelectionSize = 4;
 	//chart title
@@ -125,4 +125,19 @@ public class Defaults {
 	
 	//event
 	public static final long minimumTimeOutBetweenVPEvents = 79;
+	
+	//crosshair
+	public static final LineProperties crosshair(){
+		return new LineProperties(2, new Color("red", 0.8));
+	}
+	
+	public static final TextContainer crosshairTextBox(){
+		TextContainer tc = new TextContainer();
+		tc.setPadding(4);
+		tc.setBackground(new ShapeProperties(crosshair(), new Color("white", 0.6)));
+		return tc;
+	}
+	public static final TextProperties crosshairTextProperties(){
+		return new TextProperties("Calibri, Verdana, Arial, sans-serif", 12, "normal", "normal", new Color("red"));
+	}
 }
