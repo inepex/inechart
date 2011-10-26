@@ -10,82 +10,12 @@ import com.inepex.inegraphics.shared.DrawingArea;
 
 public class ModuleAssist {
 
-	public int minZIndex = 0;
-	public static final int mainCanvasZIndex = 0;
-	public int maxZIndex = 0;
-	public static final int TOP = Integer.MAX_VALUE;
-	public static final int BOT = Integer.MIN_VALUE;
-
-	public class CanvasLayer implements Comparable<CanvasLayer>{
-
-		ArrayList<IneChartModule> users;
-		DrawingAreaGWT canvas;
-		int zIndex;
-		CanvasLayer layerAbove;
-
-		public CanvasLayer(IneChartModule user,
-				DrawingAreaGWT canvas, int zIndex) {
-
-			this.users = new ArrayList<IneChartModule>();
-			users.add(user);
-			this.canvas = canvas;
-			setzIndex(zIndex);
-			this.zIndex = zIndex;
-		}
-		
-		public void addUser(IneChartModule m){
-			users.add(m);
-		}
-		
-		public ArrayList<IneChartModule> getUsers() {
-			return users;
-		}
-
-		public void setUsers(ArrayList<IneChartModule> users) {
-			this.users = users;
-		}
-
-		public DrawingAreaGWT getCanvas() {
-			return canvas;
-		}
-
-		public void setCanvas(DrawingAreaGWT canvas) {
-			this.canvas = canvas;
-		}
-
-		public int getzIndex() {
-			return zIndex;
-		}
-
-		public void setzIndex(int zIndex) {
-			switch(zIndex){
-			case BOT:
-				this.zIndex = --minZIndex;
-				break;
-			case TOP:
-				this.zIndex = ++maxZIndex;
-				break;
-			default:
-				this.zIndex = zIndex;
-				if(zIndex > maxZIndex)
-					maxZIndex = zIndex;
-				else if(zIndex < minZIndex)
-					minZIndex = zIndex;
-			}
-		}
-
-		@Override
-		public int compareTo(CanvasLayer o) {
-			return zIndex - o.zIndex;
-		}
-	}
-
 	protected Axes axes;
 	protected LabelFactory labelFactory;
 	protected IneChartEventManager eventManager;
 	protected DrawingArea mainCanvas;
 	protected final IneChart clientSideChart;
-	protected ArrayList<CanvasLayer> layers;
+	protected ArrayList<Layer> layers;
 
 	public ModuleAssist(){
 		clientSideChart = null;
@@ -93,7 +23,7 @@ public class ModuleAssist {
 
 	public ModuleAssist(IneChart clientSideChart) {
 		this.clientSideChart = clientSideChart;
-		layers = new ArrayList<ModuleAssist.CanvasLayer>();
+		layers = new ArrayList<Layer>();
 	}
 
 	public boolean isClientSide() {
@@ -131,72 +61,79 @@ public class ModuleAssist {
 	public void setMainCanvas(DrawingArea mainCanvas) {
 		this.mainCanvas = mainCanvas;
 	}
-
-	public DrawingAreaGWT createLayer(IneChartModule module){
-		return createLayer(module, TOP);
+	
+	public Layer createAndAttachLayer(){
+		return createAndAttachLayer(Layer.TO_TOP);
 	}
 	
-	public DrawingAreaGWT createLayer(IneChartModule module, int zIndex){
+	public Layer createAndAttachLayer(int zIndex){
 		if(!isClientSide()){
 			return null;
 		}
-		CanvasLayer layer = new CanvasLayer(module, clientSideChart.createLayer(), zIndex);
+		Layer layer = new Layer(clientSideChart.createLayer(), zIndex);
 		layers.add(layer);
-		clientSideChart.setLayerOrder(getLayers());
-		return layer.canvas;
+		updateLayerOrder();
+		return layer;
 	}
 	
-	public void linkLayers(DrawingAreaGWT bottomLayer, DrawingAreaGWT topLayer){
-		CanvasLayer bot = findLayer(bottomLayer);
-		if(bot == null){
-			return;
-		}
-		CanvasLayer top = findLayer(topLayer);
-		if(top == null){
-			return;
-		}
-		bot.layerAbove = top;
+	public void addLinkedLayers(LinkedLayers layerGroup){
+		removeLayers(layerGroup);
+		layers.add(layerGroup);
+		updateLayerOrder();
 	}
 	
-	public void delinkLayers(DrawingAreaGWT bottomLayer, DrawingAreaGWT topLayer){
-		CanvasLayer bot = findLayer(bottomLayer);
-		if(bot == null){
+	public void addCanvasToLayer(Layer layer){
+		if(layer.getCanvas() != null || layer instanceof LinkedLayers){
 			return;
 		}
-		bot.layerAbove = null;
+		layer.setCanvas(clientSideChart.createLayer());
 	}
 	
-	
-	private CanvasLayer findLayer(DrawingAreaGWT layer){
-		for(CanvasLayer lyr:layers){
-			if(layer == lyr.canvas){
-				return lyr;
+	private void removeLayers(LinkedLayers layerGroup){
+		for(Layer layer : layerGroup.getLayers()){
+			if(layer instanceof LinkedLayers){
+				removeLayers((LinkedLayers) layer);
 			}
-		}	
-		return null;
-	}
-	
-	public void destroyLayer(DrawingAreaGWT layer){
-		CanvasLayer cLyr = findLayer(layer);
-		if(cLyr != null){
-			clientSideChart.removeLayer(cLyr.canvas);
-			layers.remove(cLyr);
+			else{
+				layers.remove(layer);
+			}
 		}
-		
 	}
 	
+	public void destroyLayer(Layer layer){
+		if(layer instanceof LinkedLayers){
+			for(Layer lyr : ((LinkedLayers) layer).getLayers()){
+				destroyLayer(lyr);
+			}
+		}
+		else{
+			clientSideChart.removeLayer(layer.getCanvas());
+		}
+		layers.remove(layer);
+	}
+		
 	public ArrayList<DrawingAreaGWT> getLayers(){
 		Collections.sort(layers);
 		ArrayList<DrawingAreaGWT> ordered = new ArrayList<DrawingAreaGWT>();
-		for(CanvasLayer lyr:layers){
-			if(ordered.contains(lyr.canvas)){
-				continue;
-			}
-			ordered.add(lyr.canvas);
-			if(lyr.layerAbove != null){
-				ordered.add(lyr.layerAbove.canvas);
-			}
+		for(Layer lyr:layers){
+			findCanvases(ordered, lyr);
 		}
 		return ordered;
 	}
+	
+	public void updateLayerOrder(){
+		clientSideChart.setLayerOrder(getLayers());
+	}
+	
+	private void findCanvases(ArrayList<DrawingAreaGWT> layers, Layer layer){
+		if(layer instanceof LinkedLayers){
+			for(Layer lyr:((LinkedLayers) layer).getLayers()){
+				findCanvases(layers, lyr);
+			}
+		}
+		else{
+			layers.add(layer.getCanvas());
+		}
+	}
+
 }

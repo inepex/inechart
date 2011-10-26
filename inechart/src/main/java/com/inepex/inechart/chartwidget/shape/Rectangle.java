@@ -3,7 +3,6 @@ package com.inepex.inechart.chartwidget.shape;
 import java.util.ArrayList;
 
 import com.inepex.inechart.chartwidget.Defaults;
-import com.inepex.inechart.chartwidget.properties.Color;
 import com.inepex.inechart.chartwidget.properties.ShapeProperties;
 import com.inepex.inegraphics.shared.Context;
 import com.inepex.inegraphics.shared.gobjects.GraphicalObject;
@@ -132,5 +131,37 @@ public class Rectangle extends Shape {
 	 */
 	public void setRoundedCornerR(double roundedCornerR) {
 		this.roundedCornerR = roundedCornerR;
+	}
+
+	@Override
+	public GraphicalObject toInteractiveGraphicalObject(int distance) {
+		if(distance <= 0){
+			if(outer == null && inner == null){
+				toGraphicalObjects();
+			}
+			if(outer != null){
+				return outer;
+			}
+			if(inner != null){
+				return inner;
+			}
+			return null;
+		}
+		else{
+			toGraphicalObjects();
+			if(outer != null){
+				((com.inepex.inegraphics.shared.gobjects.Rectangle)outer).setWidth((int) (width + 2 * distance));
+				return outer;
+			}
+			if(inner != null){
+				((com.inepex.inegraphics.shared.gobjects.Rectangle)inner).setWidth((int) (width + 2 * distance));
+				return inner;
+			}
+			else{
+				return new com.inepex.inegraphics.shared.gobjects.Rectangle(0,0, (int) (width + 2 * distance), (int) (width + 2 * distance),roundedCornerR,0,
+						new Context(Defaults.alpha, Defaults.colorString, 0, Defaults.colorString),
+						true,properties.getFillColor() == null);
+			}
+		}
 	}
 }

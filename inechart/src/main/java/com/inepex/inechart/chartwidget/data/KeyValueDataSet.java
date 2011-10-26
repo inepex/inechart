@@ -131,13 +131,13 @@ public class KeyValueDataSet extends AbstractXYDataSet{
 		if(x > xMax){
 			xMax = x;
 		}
-		else if(x < xMin){
+		if(x < xMin){
 			xMin = x;
 		}
 		if(y > yMax){
 			yMax = y;
 		}
-		else if(y < yMin){
+		if(y < yMin){
 			yMin = y;
 		}
 	}

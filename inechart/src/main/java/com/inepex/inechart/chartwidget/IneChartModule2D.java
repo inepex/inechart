@@ -596,7 +596,6 @@ public abstract class IneChartModule2D extends IneChartModule implements HasCoor
 	 * @return
 	 */
  	public double[] getCanvasPosition(double x, double y) {
-//		long start = System.currentTimeMillis();
 		double[] ret = new double[2];
 		if (xAxis.isHorizontal())
 			ret[0] = getCanvasX(x);
@@ -606,7 +605,6 @@ public abstract class IneChartModule2D extends IneChartModule implements HasCoor
 			ret[1] = getCanvasY(x);
 		else
 			ret[1] = getCanvasY(y);
-//		Log.debug("    !canvas position calc: " + (System.currentTimeMillis() - start) + " ms");
 		return ret;
 	}
 

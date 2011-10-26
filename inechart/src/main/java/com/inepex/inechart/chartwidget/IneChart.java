@@ -22,6 +22,7 @@ import com.inepex.inechart.chartwidget.label.LabelFactory;
 import com.inepex.inechart.chartwidget.label.Legend;
 import com.inepex.inechart.chartwidget.linechart.Curve;
 import com.inepex.inechart.chartwidget.linechart.LineChart;
+import com.inepex.inechart.chartwidget.linechart.LineChart2;
 import com.inepex.inechart.chartwidget.misc.SelectionRange;
 import com.inepex.inechart.chartwidget.piechart.PieChart;
 import com.inepex.inechart.chartwidget.selection.RectangularSelection;
@@ -154,6 +155,15 @@ public class IneChart extends Composite{
 		DrawingAreaGWT overlay = new DrawingAreaGWT(canvasWidth, canvasHeight, false);
 		mainPanel.add(overlay.getWidget(),0,0);
 		LineChart chart = new LineChart(moduleAssist);
+		modules.add(chart);
+		eventManager.addViewportChangeHandler(chart.innerEventHandler);
+		return chart;
+	}
+	
+	public LineChart2 createLineChart2() {
+		DrawingAreaGWT overlay = new DrawingAreaGWT(canvasWidth, canvasHeight, false);
+		mainPanel.add(overlay.getWidget(),0,0);
+		LineChart2 chart = new LineChart2(moduleAssist);
 		modules.add(chart);
 		eventManager.addViewportChangeHandler(chart.innerEventHandler);
 		return chart;

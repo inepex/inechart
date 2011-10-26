@@ -67,17 +67,6 @@ MouseDownHandler, MouseOutHandler, MouseMoveHandler, MouseOverHandler, MouseUpHa
 
 	protected void fireInnerEvent(GwtEvent<?> event){
 		handlerManager.fireEvent(event);
-		//		if(parent.isRedrawNeeded()){
-		////			Scheduler.get().scheduleDeferred(new ScheduledCommand() {
-		////				
-		////				@Override
-		////				public void execute() {
-		//			if(!parent.isUpdatingInProgress())
-		//				parent.update();
-		////				}
-		////			});
-		//			
-		//		}
 	}
 
 
@@ -137,15 +126,6 @@ MouseDownHandler, MouseOutHandler, MouseMoveHandler, MouseOverHandler, MouseUpHa
 		return handlerManager.addHandler(ClickEvent.getType(), handler);
 	}
 
-	
-//	public HandlerRegistration addModuleMouseOutHandler(ModuleMouseOutHandler handler){
-//		return handlerManager.addHandler(ModuleMouseOutEvent.TYPE, handler);
-//	}
-//	
-//	public HandlerRegistration addModuleMouseOverHandler(ModuleMouseOverHandler handler){
-//		return handlerManager.addHandler(ModuleMouseOverEvent.TYPE, handler);
-//	}
-//	
 	public HandlerRegistration addDataEntrySelectionHandler(DataEntrySelectionHandler handler){
 		return handlerManager.addHandler(DataEntrySelectionEvent.TYPE, handler);
 	}
@@ -156,36 +136,42 @@ MouseDownHandler, MouseOutHandler, MouseMoveHandler, MouseOverHandler, MouseUpHa
 
 	@Override
 	public void onMouseUp(MouseUpEvent event) {
+		event.preventDefault();
 		fireInnerEvent(event);
 	}
 
 
 	@Override
 	public void onMouseOver(MouseOverEvent event) {
+		event.preventDefault();
 		fireInnerEvent(event);
 	}
 
 
 	@Override
 	public void onMouseMove(MouseMoveEvent event) {
+		event.preventDefault();
 		fireInnerEvent(event);
 	}
 
 
 	@Override
 	public void onMouseOut(MouseOutEvent event) {
+		event.preventDefault();
 		fireInnerEvent(event);
 	}
 
 
 	@Override
 	public void onMouseDown(MouseDownEvent event) {
+		event.preventDefault();
 		fireInnerEvent(event);
 	}
 
 
 	@Override
 	public void onClick(ClickEvent event) {
+		event.preventDefault();
 		fireInnerEvent(event);
 	}
 

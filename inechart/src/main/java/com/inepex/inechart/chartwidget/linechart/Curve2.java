@@ -3,6 +3,7 @@ package com.inepex.inechart.chartwidget.linechart;
 import java.util.ArrayList;
 import java.util.TreeMap;
 
+import com.inepex.inechart.chartwidget.Defaults;
 import com.inepex.inechart.chartwidget.axes.Tick;
 import com.inepex.inechart.chartwidget.data.AbstractDataEntry;
 import com.inepex.inechart.chartwidget.data.AbstractXYDataSet;
@@ -62,7 +63,10 @@ public class Curve2 implements HasZIndex, HasShadow, Comparable<Curve2>{
 		comparableNo = highestComparableNo++;
 		dataPoints = new ArrayList<DataPoint2>();
 		selectedPoints = new ArrayList<DataPoint2>();
-//		pointShape = Defaults.normalPoint();
+		discontinuitiesAsPoint = new ArrayList<DataPoint2>();
+		setShadowOffsetY(Defaults.shadowOffsetX);
+		setShadowOffsetX(Defaults.shadowOffsetY);
+		setShadowColor(Defaults.shadowColor());
 	}
 
 	

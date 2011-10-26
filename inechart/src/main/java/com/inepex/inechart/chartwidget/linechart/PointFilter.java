@@ -96,8 +96,8 @@ public class PointFilter {
 		
 		switch (policy) {
 		case average:
-			ret.canvasX = (maxX - minX) / 2;
-			ret.canvasY = (maxY - minY) / 2;
+			ret.canvasX = minX + (maxX - minX) / 2;
+			ret.canvasY = minY + (maxY - minY) / 2;
 			break;
 		case higher:
 			ret.canvasX = maxX;
@@ -119,5 +119,28 @@ public class PointFilter {
 		else return false;
 	}
 
+	public int getHorizontalFilter() {
+		return horizontalFilter;
+	}
+
+	public void setHorizontalFilter(int horizontalFilter) {
+		this.horizontalFilter = horizontalFilter;
+	}
+
+	public int getVerticalFilter() {
+		return verticalFilter;
+	}
+
+	public void setVerticalFilter(int verticalFilter) {
+		this.verticalFilter = verticalFilter;
+	}
+
+	public Policy getPolicy() {
+		return policy;
+	}
+
+	public void setPolicy(Policy policy) {
+		this.policy = policy;
+	}
 
 }

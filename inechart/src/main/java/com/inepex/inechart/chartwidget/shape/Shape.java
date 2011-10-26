@@ -30,7 +30,9 @@ public abstract class Shape implements HasShadow, HasZIndex {
 	 * 
 	 * @return
 	 */
-	abstract public ArrayList<GraphicalObject> toGraphicalObjects();
+ 	public abstract ArrayList<GraphicalObject> toGraphicalObjects();
+	
+ 	public abstract GraphicalObject toInteractiveGraphicalObject(int distance);
 
 
 	@Override

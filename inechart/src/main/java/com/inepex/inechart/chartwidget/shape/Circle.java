@@ -32,8 +32,8 @@ public class Circle extends Shape {
 					.getLineWidth(), Defaults.colorString, shadowOffsetX,
 					shadowOffsetY, shadowColor == null ? 0d
 							: shadowColor.getAlpha(),
-					shadowColor == null ? Defaults.colorString : shadowColor
-							.getColor());
+							shadowColor == null ? Defaults.colorString : shadowColor
+									.getColor());
 			outer = new com.inepex.inegraphics.shared.gobjects.Circle(0, 0,
 					this.zIndex, outerContext, true, false, this.radius);
 		}
@@ -44,13 +44,13 @@ public class Circle extends Shape {
 					// shadowOffsetX,
 					// shadowOffsetY,
 					0, 0, shadowColor == null ? 0d : shadowColor.getAlpha(),
-					shadowColor == null ? Defaults.colorString : shadowColor
-							.getColor());
+							shadowColor == null ? Defaults.colorString : shadowColor
+									.getColor());
 			inner = new com.inepex.inegraphics.shared.gobjects.Circle(0, 0,
 					zIndex, innerContext, false, true,
 					outer == null ? radius : radius
 							- properties.getLineProperties().getLineWidth()/2d 
-							);
+					);
 		}
 
 		ArrayList<GraphicalObject> toRet = new ArrayList<GraphicalObject>();
@@ -74,6 +74,38 @@ public class Circle extends Shape {
 	 */
 	public void setRadius(double radius) {
 		this.radius = radius;
+	}
+
+	@Override
+	public GraphicalObject toInteractiveGraphicalObject(int distance) {
+		if(distance <= 0){
+			if(outer == null && inner == null){
+				toGraphicalObjects();
+			}
+			if(outer != null){
+				return outer;
+			}
+			if(inner != null){
+				return inner;
+			}
+			return null;
+		}
+		else{
+			toGraphicalObjects();
+			if(outer != null){
+				((com.inepex.inegraphics.shared.gobjects.Circle)outer).setRadius(radius + distance);
+				return outer;
+			}
+			if(inner != null){
+				((com.inepex.inegraphics.shared.gobjects.Circle)inner).setRadius(radius + distance);
+				return inner;
+			}
+			else{
+				return new com.inepex.inegraphics.shared.gobjects.Circle(0, 0, 0,
+						new Context(Defaults.alpha, Defaults.colorString, 0, Defaults.colorString),
+						true, properties.getFillColor() == null, radius + distance);
+			}
+		}
 	}
 
 }

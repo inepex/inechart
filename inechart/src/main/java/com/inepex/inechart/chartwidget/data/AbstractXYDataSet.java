@@ -21,6 +21,13 @@ public abstract class AbstractXYDataSet extends AbstractDataSet {
 	protected AbstractXYDataSet(String title, String description) {
 		this.title = title;
 		this.description = description;
+		this.color = colorSet.getNextColor();
+	}
+	
+	protected AbstractXYDataSet(String title, String description, Color color) {
+		this.color = color;
+		this.title = title;
+		this.description = description;
 	}
 
 
