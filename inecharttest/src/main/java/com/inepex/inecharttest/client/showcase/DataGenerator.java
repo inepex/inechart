@@ -5,6 +5,7 @@ import java.util.TreeMap;
 
 import com.google.gwt.user.client.Random;
 import com.inepex.inechart.chartwidget.DataSet;
+import com.inepex.inechart.chartwidget.data.KeyValueDataSet;
 
 public class DataGenerator {
 
@@ -91,11 +92,20 @@ public class DataGenerator {
 		}
 		return data;
 	}
+	
 	public static ArrayList<Double> generateBarChartDataSet(int min, int max, int sampleCount){
 		ArrayList<Double> data = new ArrayList<Double>();
 		for(int i=0; i<sampleCount;i++){
 			data.add((double) (Random.nextInt(max-min+1) + min));
 		}
 		return data;
+	}
+	
+	public static KeyValueDataSet generateKeyValueDataSet(int sampleCount){
+		KeyValueDataSet ds = new KeyValueDataSet();
+		for(int i=0; i< sampleCount; i++){
+			ds.addDataPair(i, Random.nextDouble()*10);
+		}
+		return ds;
 	}
 }
