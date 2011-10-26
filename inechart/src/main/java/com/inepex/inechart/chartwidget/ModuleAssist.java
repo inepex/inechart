@@ -21,6 +21,7 @@ public class ModuleAssist {
 		ArrayList<IneChartModule> users;
 		DrawingAreaGWT canvas;
 		int zIndex;
+		CanvasLayer layerAbove;
 
 		public CanvasLayer(IneChartModule user,
 				DrawingAreaGWT canvas, int zIndex) {
@@ -145,11 +146,56 @@ public class ModuleAssist {
 		return layer.canvas;
 	}
 	
+	public void linkLayers(DrawingAreaGWT bottomLayer, DrawingAreaGWT topLayer){
+		CanvasLayer bot = findLayer(bottomLayer);
+		if(bot == null){
+			return;
+		}
+		CanvasLayer top = findLayer(topLayer);
+		if(top == null){
+			return;
+		}
+		bot.layerAbove = top;
+	}
+	
+	public void delinkLayers(DrawingAreaGWT bottomLayer, DrawingAreaGWT topLayer){
+		CanvasLayer bot = findLayer(bottomLayer);
+		if(bot == null){
+			return;
+		}
+		bot.layerAbove = null;
+	}
+	
+	
+	private CanvasLayer findLayer(DrawingAreaGWT layer){
+		for(CanvasLayer lyr:layers){
+			if(layer == lyr.canvas){
+				return lyr;
+			}
+		}	
+		return null;
+	}
+	
+	public void destroyLayer(DrawingAreaGWT layer){
+		CanvasLayer cLyr = findLayer(layer);
+		if(cLyr != null){
+			clientSideChart.removeLayer(cLyr.canvas);
+			layers.remove(cLyr);
+		}
+		
+	}
+	
 	public ArrayList<DrawingAreaGWT> getLayers(){
 		Collections.sort(layers);
 		ArrayList<DrawingAreaGWT> ordered = new ArrayList<DrawingAreaGWT>();
 		for(CanvasLayer lyr:layers){
+			if(ordered.contains(lyr.canvas)){
+				continue;
+			}
 			ordered.add(lyr.canvas);
+			if(lyr.layerAbove != null){
+				ordered.add(lyr.layerAbove.canvas);
+			}
 		}
 		return ordered;
 	}

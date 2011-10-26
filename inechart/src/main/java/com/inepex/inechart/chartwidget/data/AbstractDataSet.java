@@ -1,9 +1,7 @@
 package com.inepex.inechart.chartwidget.data;
 
-import java.util.ArrayList;
-
-import com.google.gwt.event.shared.EventBus;
 import com.inepex.inechart.chartwidget.Defaults;
+import com.inepex.inechart.chartwidget.IneChartEventManager;
 import com.inepex.inechart.chartwidget.event.DataSetChangeEvent;
 import com.inepex.inechart.chartwidget.misc.ColorSet;
 import com.inepex.inechart.chartwidget.misc.HasTitle;
@@ -30,10 +28,8 @@ public abstract class AbstractDataSet implements HasTitle{
 	
 	protected boolean attached = false;
 	
-	protected EventBus eventBus;
-	
-	protected ArrayList<DataEntry> dataEntries;
-	
+	protected IneChartEventManager eventManager;
+		
 	protected AbstractDataSet() {
 		this(Defaults.name + ++autotitleMaxIndex);
 	}
@@ -45,36 +41,8 @@ public abstract class AbstractDataSet implements HasTitle{
 	protected AbstractDataSet(String title, String description) {
 		this.title = title;
 		this.description = description;
-		this.dataEntries = new ArrayList<DataEntry>();
 	}
 
-	protected DataEntry getEntryByKey(double key){
-		for(DataEntry de : dataEntries){
-			if(Double.compare(key, de.key) == 0){
-				return de;
-			}
-		}
-		return null;
-	}
-	
-	protected DataEntry getEntryByTitle(String title){
-		for(DataEntry de : dataEntries){
-			if(title.equals(de.title)){
-				return de;
-			}
-		}
-		return null;
-	}
-	
-	protected DataEntry getEntryByValue(double value){
-		for(DataEntry de : dataEntries){
-			if(Double.compare(value, de.value) == 0){
-				return de;
-			}
-		}
-		return null;
-	}
-	
 	@Override
 	public void setTitle(String title) {
 		this.title = title;
@@ -97,9 +65,9 @@ public abstract class AbstractDataSet implements HasTitle{
 		return description;
 	}
 	
-	protected void fireDataSetChangeEvent(){
-		if (attached && eventBus != null) {
-			eventBus.fireEvent(new DataSetChangeEvent(this));
+	public void fireDataSetChangeEvent(){
+		if (attached && eventManager != null) {
+			eventManager.fireEvent(new DataSetChangeEvent(this));
 		}
 	}
 
@@ -111,12 +79,8 @@ public abstract class AbstractDataSet implements HasTitle{
 		this.attached = attached;
 	}
 
-	public EventBus getEventBus() {
-		return eventBus;
-	}
-
-	public void setEventBus(EventBus eventBus) {
-		this.eventBus = eventBus;
+	public void setEventManager(IneChartEventManager eventManager) {
+		this.eventManager = eventManager;
 	}
 	
 }

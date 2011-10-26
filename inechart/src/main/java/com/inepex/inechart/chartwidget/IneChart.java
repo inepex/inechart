@@ -49,10 +49,12 @@ public class IneChart extends Composite{
 	}
 
 	public IneChart(int width, int height) {
+		moduleAssist = new ModuleAssist(this);
 		//dimensions, layout
 		mainPanel = new AbsolutePanel();
 		initWidget(mainPanel);
 		drawingArea = new DrawingAreaGWT(width, height);
+		moduleAssist.setMainCanvas(drawingArea);
 		mainPanel.add(drawingArea.getWidget(), 0, 0);
 		canvasHeight = height;
 		canvasWidth = width;
@@ -60,22 +62,19 @@ public class IneChart extends Composite{
 		drawingArea.setSize(width, height);
 
 		modules = new ArrayList<IneChartModule>();
-		labelFactory = new GWTLabelFactory(drawingArea, mainPanel);
-		axes = new Axes(drawingArea,labelFactory);
-		axes.setTickFactory(new TickFactoryGWT());
-
+		labelFactory = new GWTLabelFactory(moduleAssist, mainPanel);
+		moduleAssist.setLabelFactory(labelFactory);
+		axes = new Axes(moduleAssist, new TickFactoryGWT());
+		moduleAssist.setAxes(axes);
+		
 		//event
 		eventManager = new IneChartEventManager(this);
+		moduleAssist.setEventManager(eventManager);
 		addDomHandler(eventManager, MouseDownEvent.getType());
 		addDomHandler(eventManager, MouseUpEvent.getType());
 		addDomHandler(eventManager, MouseMoveEvent.getType());
 		addDomHandler(eventManager, ClickEvent.getType());
-		
-		moduleAssist = new ModuleAssist(this);
-		moduleAssist.setAxes(axes);
-		moduleAssist.setEventManager(eventManager);
-		moduleAssist.setLabelFactory(labelFactory);
-		moduleAssist.setMainCanvas(drawingArea);
+
 	}
 
 	public void setSize(int width, int height){
@@ -88,14 +87,14 @@ public class IneChart extends Composite{
 		}
 	}
 
-	public boolean isRedrawNeeded(){
-		for(IneChartModule m : modules){
-			if(m.isRedrawNeeded()){
-				return true;
-			}
-		}
-		return false;
-	}
+//	public boolean isRedrawNeeded(){
+//		for(IneChartModule m : modules){
+//			if(m.isRedrawNeeded()){
+//				return true;
+//			}
+//		}
+//		return false;
+//	}
 
 	public void update() {
 		// pre-update modules

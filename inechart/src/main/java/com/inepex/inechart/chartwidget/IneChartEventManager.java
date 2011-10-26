@@ -20,7 +20,12 @@ import com.google.gwt.event.shared.EventBus;
 import com.google.gwt.event.shared.GwtEvent;
 import com.google.gwt.event.shared.HandlerManager;
 import com.google.gwt.event.shared.HandlerRegistration;
+import com.google.gwt.event.shared.HasHandlers;
 import com.google.gwt.user.client.Element;
+import com.inepex.inechart.chartwidget.event.DataEntrySelectionEvent;
+import com.inepex.inechart.chartwidget.event.DataEntrySelectionHandler;
+import com.inepex.inechart.chartwidget.event.DataSetChangeEvent;
+import com.inepex.inechart.chartwidget.event.DataSetChangeHandler;
 import com.inepex.inechart.chartwidget.event.IneChartEvent;
 import com.inepex.inechart.chartwidget.event.PointSelectionEvent;
 import com.inepex.inechart.chartwidget.event.PointSelectionHandler;
@@ -28,12 +33,12 @@ import com.inepex.inechart.chartwidget.event.ViewportChangeEvent;
 import com.inepex.inechart.chartwidget.event.ViewportChangeHandler;
 
 public class IneChartEventManager implements HasAllMouseHandlers, ViewportChangeHandler, PointSelectionHandler,
-	MouseDownHandler, MouseOutHandler, MouseMoveHandler, MouseOverHandler, MouseUpHandler, ClickHandler, HasClickHandlers {
+MouseDownHandler, MouseOutHandler, MouseMoveHandler, MouseOverHandler, MouseUpHandler, ClickHandler, HasClickHandlers, HasHandlers {
 	protected EventBus eventBus = null;
 	protected HandlerManager handlerManager;
 	protected IneChart parent;
 	protected ViewportChangeEventStack viewportChangeEventStack;
-	
+
 	public IneChartEventManager(IneChart parent) {
 		this.parent = parent;
 		handlerManager = new HandlerManager(parent);
@@ -45,52 +50,52 @@ public class IneChartEventManager implements HasAllMouseHandlers, ViewportChange
 		return eventBus;
 	}
 
-	
+
 	public void setEventBus(EventBus eventBus) {
 		this.eventBus = eventBus;
 		eventBus.addHandler(ViewportChangeEvent.TYPE, this);
 		eventBus.addHandler(PointSelectionEvent.TYPE, this);
 	}
-	
-	
+
+
 	@Override
 	public void fireEvent(GwtEvent<?> event){
 		if(eventBus != null)
 			eventBus.fireEvent(event);
 	}
 
-	
+
 	protected void fireInnerEvent(GwtEvent<?> event){
 		handlerManager.fireEvent(event);
-//		if(parent.isRedrawNeeded()){
-////			Scheduler.get().scheduleDeferred(new ScheduledCommand() {
-////				
-////				@Override
-////				public void execute() {
-//			if(!parent.isUpdatingInProgress())
-//				parent.update();
-////				}
-////			});
-//			
-//		}
+		//		if(parent.isRedrawNeeded()){
+		////			Scheduler.get().scheduleDeferred(new ScheduledCommand() {
+		////				
+		////				@Override
+		////				public void execute() {
+		//			if(!parent.isUpdatingInProgress())
+		//				parent.update();
+		////				}
+		////			});
+		//			
+		//		}
 	}
-	
-	
+
+
 	protected void eventFinished(){
 		parent.update();
 	}
-	
+
 
 	public void addViewportChangeHandler(ViewportChangeHandler handler){
 		handlerManager.addHandler(ViewportChangeEvent.TYPE, handler);
 	}
 
-	
+
 	public void addPointSelectionHandler(PointSelectionHandler handler){
 		handlerManager.addHandler(PointSelectionEvent.TYPE, handler);
 	}
-	
-	
+
+
 	@Override
 	public HandlerRegistration addMouseDownHandler(MouseDownHandler handler) {
 		return handlerManager.addHandler(MouseDownEvent.getType(), handler);
@@ -126,13 +131,29 @@ public class IneChartEventManager implements HasAllMouseHandlers, ViewportChange
 		return handlerManager.addHandler(MouseWheelEvent.getType(), handler);
 	}
 
-	
+
 	@Override
 	public HandlerRegistration addClickHandler(ClickHandler handler) {
 		return handlerManager.addHandler(ClickEvent.getType(), handler);
 	}
 
 	
+//	public HandlerRegistration addModuleMouseOutHandler(ModuleMouseOutHandler handler){
+//		return handlerManager.addHandler(ModuleMouseOutEvent.TYPE, handler);
+//	}
+//	
+//	public HandlerRegistration addModuleMouseOverHandler(ModuleMouseOverHandler handler){
+//		return handlerManager.addHandler(ModuleMouseOverEvent.TYPE, handler);
+//	}
+//	
+	public HandlerRegistration addDataEntrySelectionHandler(DataEntrySelectionHandler handler){
+		return handlerManager.addHandler(DataEntrySelectionEvent.TYPE, handler);
+	}
+	
+	public HandlerRegistration addDataSetChangeHandler(DataSetChangeHandler handler){
+		return handlerManager.addHandler(DataSetChangeEvent.TYPE, handler);
+	}
+
 	@Override
 	public void onMouseUp(MouseUpEvent event) {
 		fireInnerEvent(event);
@@ -161,26 +182,26 @@ public class IneChartEventManager implements HasAllMouseHandlers, ViewportChange
 	public void onMouseDown(MouseDownEvent event) {
 		fireInnerEvent(event);
 	}
-	
-	
+
+
 	@Override
 	public void onClick(ClickEvent event) {
 		fireInnerEvent(event);
 	}
 
-	
+
 	public void fireViewportChangedEvent(ViewportChangeEvent event){
 		setSourceChart(event);
 		viewportChangeEventStack.pushEvent(event);
 		fireEvent(event);
 	}
-	
-	
+
+
 	private void setSourceChart(IneChartEvent<?> event){
 		event.setSourceChart(parent);
 	}
 
-	
+
 	public Element getCaptureElement(){
 		return parent.getElement();
 	}
@@ -208,8 +229,8 @@ public class IneChartEventManager implements HasAllMouseHandlers, ViewportChange
 	public void onSetY(ViewportChangeEvent event, double yMin, double yMax) {
 		checkAddressAndFireIfRelevant(event);
 	}
-	
-	
+
+
 	@Override
 	public void onMove(ViewportChangeEvent event, double dx, double dy) {
 		checkAddressAndFireIfRelevant(event);
@@ -221,8 +242,8 @@ public class IneChartEventManager implements HasAllMouseHandlers, ViewportChange
 			double xMax, double yMax) {
 		checkAddressAndFireIfRelevant(event);
 	}
-	
-	
+
+
 	private void checkAddressAndFireIfRelevant(IneChartEvent<?> event){
 		if(event.getSourceChart() != null && event.getSourceChart().equals(parent))
 			return;
@@ -237,25 +258,20 @@ public class IneChartEventManager implements HasAllMouseHandlers, ViewportChange
 	}
 
 
-	
 	@Override
 	public void onSelect(PointSelectionEvent event) {
 		fireInnerEvent(event);
-		
+
 	}
 
 
 	@Override
 	public void onDeselect(PointSelectionEvent event) {
 		fireInnerEvent(event);
-		
+
 	}
-	
+
 	public void blindAllModules(){
 		parent.setCanHandleEventsForAllModule(false);
-	}
-	
-	public void releaseFocus(){
-		parent.setCanHandleEventsForAllModule(true);
 	}
 }

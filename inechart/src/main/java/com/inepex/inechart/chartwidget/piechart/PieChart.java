@@ -11,6 +11,7 @@ import com.inepex.inechart.chartwidget.Defaults;
 import com.inepex.inechart.chartwidget.IneChartModule2D;
 import com.inepex.inechart.chartwidget.ModuleAssist;
 import com.inepex.inechart.chartwidget.axes.Axes;
+import com.inepex.inechart.chartwidget.event.DataEntrySelectionEvent;
 import com.inepex.inechart.chartwidget.event.DataSetChangeEvent;
 import com.inepex.inechart.chartwidget.label.LabelFactory;
 import com.inepex.inechart.chartwidget.label.Legend;
@@ -147,6 +148,18 @@ public class PieChart extends IneChartModule2D{
 
 	@Override
 	protected void onDataSetChange(DataSetChangeEvent event) {
+		// TODO Auto-generated method stub
+		
+	}
+
+	@Override
+	protected void onSelect(DataEntrySelectionEvent event) {
+		// TODO Auto-generated method stub
+		
+	}
+
+	@Override
+	protected void onDeselect(DataEntrySelectionEvent event) {
 		// TODO Auto-generated method stub
 		
 	}

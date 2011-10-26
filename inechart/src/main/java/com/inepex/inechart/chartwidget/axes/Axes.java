@@ -7,6 +7,7 @@ import com.inepex.inechart.chartwidget.Defaults;
 import com.inepex.inechart.chartwidget.IneChart;
 import com.inepex.inechart.chartwidget.IneChartModule;
 import com.inepex.inechart.chartwidget.IneChartModule2D;
+import com.inepex.inechart.chartwidget.ModuleAssist;
 import com.inepex.inechart.chartwidget.axes.Axis.AxisDirection;
 import com.inepex.inechart.chartwidget.axes.Axis.AxisPosition;
 import com.inepex.inechart.chartwidget.label.LabelFactory;
@@ -15,7 +16,6 @@ import com.inepex.inechart.chartwidget.properties.Color;
 import com.inepex.inechart.chartwidget.properties.LineProperties;
 import com.inepex.inegraphics.impl.client.TextPositionerBase;
 import com.inepex.inegraphics.shared.Context;
-import com.inepex.inegraphics.shared.DrawingArea;
 import com.inepex.inegraphics.shared.DrawingAreaAssist;
 import com.inepex.inegraphics.shared.GraphicalObjectContainer;
 import com.inepex.inegraphics.shared.gobjects.GraphicalObject;
@@ -50,15 +50,16 @@ public class Axes extends IneChartModule {
 	private static final int tickLineZIndex = axisLineZIndex + 1;
 
 
-	public Axes(DrawingArea canvas,  LabelFactory labelFactory) {
-		super(canvas);
+	public Axes(ModuleAssist moduleAssist, TickFactory tickFactory) {
+		super(moduleAssist);
 		axes = new ArrayList<Axis>();
 		gosPerAxis = new TreeMap<Axis, GraphicalObjectContainer>();
 		labelsPerAxis = new TreeMap<Axis, ArrayList<StyledLabel>>();
 		paddingAroundAxes = new TreeMap<Axis, double[]>();
 		boundingBoxes = new TreeMap<Axis, double[]>();
 		textMap = new TreeMap<Tick, Text>();
-		this.labelFactory = labelFactory;
+		this.labelFactory = moduleAssist.getLabelFactory();
+		setTickFactory(tickFactory);
 	}
 
 	public Axis createAxis(AxisDirection direction, IneChartModule2D modulToAlign) {

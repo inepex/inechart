@@ -17,6 +17,7 @@ import javax.swing.JComponent;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
 
+import com.inepex.inechart.chartwidget.ModuleAssist;
 import com.inepex.inechart.chartwidget.label.HasLegendEntries;
 import com.inepex.inechart.chartwidget.label.LabelFactory;
 import com.inepex.inechart.chartwidget.label.StyledLabel;
@@ -25,7 +26,6 @@ import com.inepex.inechart.chartwidget.label.TextContainer;
 import com.inepex.inechart.chartwidget.misc.HorizontalPosition;
 import com.inepex.inegraphics.awt.ColorUtil;
 import com.inepex.inegraphics.awt.DrawingAreaAwt;
-import com.inepex.inegraphics.shared.DrawingArea;
 
 public class AwtLabelFactory extends LabelFactory {
 	
@@ -35,8 +35,8 @@ public class AwtLabelFactory extends LabelFactory {
 	JPanel leftPanel;
 	JPanel rightPanel;
 	
-	public AwtLabelFactory(DrawingArea canvas, JPanel labelPanel) {
-		super(canvas);
+	public AwtLabelFactory(ModuleAssist moduleAssist, JPanel labelPanel) {
+		super(moduleAssist);
 		mainPanel = labelPanel;
 		initLayout();
 	}

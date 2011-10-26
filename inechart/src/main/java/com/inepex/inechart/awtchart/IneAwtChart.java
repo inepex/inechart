@@ -63,10 +63,9 @@ public class IneAwtChart  extends JLayeredPane {
 
 		initLayout();
 
-		moduleAssist.setLabelFactory(new AwtLabelFactory(moduleAssist.getMainCanvas(), labelPanel));
+		moduleAssist.setLabelFactory(new AwtLabelFactory(moduleAssist, labelPanel));
 		moduls = new ArrayList<IneChartModule>();
-		moduleAssist.setAxes(new Axes(moduleAssist.getMainCanvas(), moduleAssist.getLabelFactory()));
-		moduleAssist.getAxes().setTickFactory(new AwtTickFactory());
+		moduleAssist.setAxes(new Axes(moduleAssist,new AwtTickFactory()));
 
 	}
 

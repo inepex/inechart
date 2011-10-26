@@ -3,7 +3,6 @@ package com.inepex.inechart.chartwidget.shape;
 import java.util.ArrayList;
 
 import com.inepex.inechart.chartwidget.Defaults;
-import com.inepex.inechart.chartwidget.properties.Color;
 import com.inepex.inechart.chartwidget.properties.ShapeProperties;
 import com.inepex.inegraphics.shared.Context;
 import com.inepex.inegraphics.shared.gobjects.GraphicalObject;
@@ -61,7 +60,6 @@ public class Circle extends Shape {
 			toRet.add(inner);
 		return toRet;
 	}
-
 
 	/**
 	 * @return the radius

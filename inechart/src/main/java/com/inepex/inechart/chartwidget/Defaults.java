@@ -3,7 +3,8 @@ package com.inepex.inechart.chartwidget;
 import com.inepex.inechart.chartwidget.label.StyledLabel;
 import com.inepex.inechart.chartwidget.label.Text;
 import com.inepex.inechart.chartwidget.label.TextContainer;
-import com.inepex.inechart.chartwidget.linechart.LineChart.PointSelectionMode;
+import com.inepex.inechart.chartwidget.linechart.PointFilter.Policy;
+import com.inepex.inechart.chartwidget.linechart.PointSelectionMode;
 import com.inepex.inechart.chartwidget.misc.HorizontalPosition;
 import com.inepex.inechart.chartwidget.misc.VerticalPosition;
 import com.inepex.inechart.chartwidget.properties.Color;
@@ -48,6 +49,13 @@ public class Defaults {
 		return new TextProperties("Verdana, Arial, sans-serif", 13, "normal", "normal", color());
 	}
 	
+	//data
+	private static int uniqueEntryNameNo = 0;
+	private static final String uniqueEntryName = "Untitled entry #"; 
+	public static String uniqueEntryName(){
+		return uniqueEntryName + ++uniqueEntryNameNo;
+	}
+	
 	//selection
 	public static final ShapeProperties selectionLookout(){
 		return new ShapeProperties(new LineProperties(1.2, new Color("#FFFFFF", 0.84)), new Color("#FFFFFF", 0.66));
@@ -88,8 +96,11 @@ public class Defaults {
 	}
 	public static final double fillOpacity = 0.4;
 	public static final double lineWidth = 2.1;
-	public static final PointSelectionMode selectPoint = PointSelectionMode.On_Click;
+	public static final com.inepex.inechart.chartwidget.linechart.PointSelectionMode selectPoint = PointSelectionMode.On_Click;
 	public static final int pointMouseOverRadius = 10;
+	public static final int verticalFilter = 0;
+	public static final int hotizontalFilter = 10;
+	public static final Policy filterPolicy = Policy.average;
 	
 	//shadow
 	public static final double shadowOffsetX = 1.2;

@@ -4,7 +4,7 @@ package com.inepex.inechart.chartwidget.label;
 import java.util.ArrayList;
 
 import com.inepex.inechart.chartwidget.IneChartModule;
-import com.inepex.inegraphics.shared.DrawingArea;
+import com.inepex.inechart.chartwidget.ModuleAssist;
 import com.inepex.inegraphics.shared.gobjects.Text;
 
 /**
@@ -37,8 +37,8 @@ public abstract class LabelFactory extends IneChartModule{
 		return ret;
 	}
 		
- 	protected LabelFactory(DrawingArea canvas) {
-		super(canvas);
+ 	protected LabelFactory(ModuleAssist moduleAssist) {
+		super(moduleAssist);
 		legendOwners = new ArrayList<HasLegendEntries>();
 		styledLabels = new ArrayList<StyledLabel>();
 		legend = new Legend();
@@ -61,7 +61,7 @@ public abstract class LabelFactory extends IneChartModule{
  		
  		measurePadding();
  		
- 		super.update();
+// 		super.update();
  	}
  	
  	

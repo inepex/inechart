@@ -1,27 +1,27 @@
 package com.inepex.inechart.chartwidget.event;
 
-import com.inepex.inechart.chartwidget.linechart.Curve;
-import com.inepex.inechart.chartwidget.linechart.DataPoint;
+import com.inepex.inechart.chartwidget.linechart.Curve2;
+import com.inepex.inechart.chartwidget.linechart.DataPoint2;
 
 public class PointSelectionEvent extends IneChartEvent<PointSelectionHandler> {
 	
 	public static final Type<PointSelectionHandler> TYPE = new Type<PointSelectionHandler>();
 	
 	boolean selected;
-	DataPoint point;
-	Curve curve;
+	DataPoint2 point;
+	Curve2 curve;
 	
 	public PointSelectionEvent() {
 		this(false, null, null);
 	}
 	
 	public PointSelectionEvent(boolean selected,
-			DataPoint point){
+			DataPoint2 point){
 		this(selected, point, null);
 	}
 	
 	public PointSelectionEvent(boolean selected,
-			DataPoint point, Curve curve) {
+			DataPoint2 point, Curve2 curve) {
 		super(null);
 		this.selected = selected;
 		this.point = point;
@@ -60,28 +60,28 @@ public class PointSelectionEvent extends IneChartEvent<PointSelectionHandler> {
 	/**
 	 * @return the point
 	 */
-	public DataPoint getPoint() {
+	public DataPoint2 getPoint() {
 		return point;
 	}
 
 	/**
 	 * @param point the point to set
 	 */
-	public void setPoint(DataPoint point) {
+	public void setPoint(DataPoint2 point) {
 		this.point = point;
 	}
 
 	/**
 	 * @return the curve
 	 */
-	public Curve getCurve() {
+	public Curve2 getCurve() {
 		return curve;
 	}
 
 	/**
 	 * @param curve the curve to set
 	 */
-	public void setCurve(Curve curve) {
+	public void setCurve(Curve2 curve) {
 		this.curve = curve;
 	}
 

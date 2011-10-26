@@ -15,10 +15,10 @@ import com.google.gwt.user.client.ui.Label;
 import com.google.gwt.user.client.ui.RootPanel;
 import com.google.gwt.user.client.ui.VerticalPanel;
 import com.google.gwt.user.client.ui.Widget;
+import com.inepex.inechart.chartwidget.ModuleAssist;
 import com.inepex.inechart.chartwidget.misc.HorizontalPosition;
 import com.inepex.inechart.chartwidget.properties.Color;
 import com.inepex.inechart.chartwidget.properties.TextProperties;
-import com.inepex.inegraphics.shared.DrawingArea;
 
 /**
  * 
@@ -41,8 +41,8 @@ public class GWTLabelFactory extends LabelFactory{
 	FlowPanel leftWrapper;
 	
 
-	public GWTLabelFactory(DrawingArea canvas, AbsolutePanel chartMainPanel) {
-		super(canvas);
+	public GWTLabelFactory(ModuleAssist moduleAssist, AbsolutePanel chartMainPanel) {
+		super(moduleAssist);
 		this.chartMainPanel = chartMainPanel;
 		textContainerWidgetMap = new TreeMap<TextContainer, Widget>();
 		detachedWidgetMap = new TreeMap<TextContainer, Widget>();

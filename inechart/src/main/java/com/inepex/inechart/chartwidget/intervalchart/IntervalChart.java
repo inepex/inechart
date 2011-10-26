@@ -11,6 +11,7 @@ import com.google.gwt.event.dom.client.MouseUpEvent;
 import com.inepex.inechart.chartwidget.IneChartModule2D;
 import com.inepex.inechart.chartwidget.ModuleAssist;
 import com.inepex.inechart.chartwidget.data.IntervalDataSet;
+import com.inepex.inechart.chartwidget.event.DataEntrySelectionEvent;
 import com.inepex.inechart.chartwidget.event.DataSetChangeEvent;
 import com.inepex.inechart.chartwidget.properties.Color;
 import com.inepex.inechart.chartwidget.shape.Rectangle;
@@ -130,6 +131,18 @@ public class IntervalChart extends IneChartModule2D {
 
 	@Override
 	protected void onDataSetChange(DataSetChangeEvent event) {
+		// TODO Auto-generated method stub
+		
+	}
+
+	@Override
+	protected void onSelect(DataEntrySelectionEvent event) {
+		// TODO Auto-generated method stub
+		
+	}
+
+	@Override
+	protected void onDeselect(DataEntrySelectionEvent event) {
 		// TODO Auto-generated method stub
 		
 	}
