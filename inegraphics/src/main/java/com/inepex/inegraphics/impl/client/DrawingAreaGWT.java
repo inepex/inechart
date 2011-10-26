@@ -429,7 +429,9 @@ public class DrawingAreaGWT extends DrawingArea implements HasHandlers, ClickHan
 
 	@Override
 	public void removeGraphicalObject(GraphicalObject graphicalObject) {
-		innerEventHandler.mouseOvered.remove(graphicalObject);
+		if(innerEventHandler != null){
+			innerEventHandler.mouseOvered.remove(graphicalObject);
+		}
 		super.removeGraphicalObject(graphicalObject);
 	}
 
