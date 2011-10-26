@@ -1,15 +1,34 @@
 package com.inepex.inegraphics.impl.client;
 
 import java.util.ArrayList;
+
 import com.google.gwt.canvas.client.Canvas;
 import com.google.gwt.canvas.dom.client.Context2d;
+import com.google.gwt.event.dom.client.ClickEvent;
+import com.google.gwt.event.dom.client.ClickHandler;
+import com.google.gwt.event.dom.client.MouseEvent;
+import com.google.gwt.event.dom.client.MouseMoveEvent;
+import com.google.gwt.event.dom.client.MouseMoveHandler;
+import com.google.gwt.event.shared.GwtEvent;
+import com.google.gwt.event.shared.GwtEvent.Type;
+import com.google.gwt.event.shared.HandlerManager;
+import com.google.gwt.event.shared.HandlerRegistration;
+import com.google.gwt.event.shared.HasHandlers;
 import com.google.gwt.user.client.ui.AbsolutePanel;
 import com.google.gwt.user.client.ui.Widget;
 import com.inepex.inegraphics.impl.client.canvas.CanvasWidget;
+import com.inepex.inegraphics.impl.client.event.DrawingAreaClickEvent;
+import com.inepex.inegraphics.impl.client.event.DrawingAreaMouseEventHandler;
+import com.inepex.inegraphics.impl.client.event.GOClickEvent;
+import com.inepex.inegraphics.impl.client.event.GOMouseOutEvent;
+import com.inepex.inegraphics.impl.client.event.GOMouseOverEvent;
+import com.inepex.inegraphics.impl.client.event.GraphicalObjectEvent;
+import com.inepex.inegraphics.impl.client.event.GraphicalObjectEventHandler;
 import com.inepex.inegraphics.shared.Context;
 import com.inepex.inegraphics.shared.DrawingArea;
 import com.inepex.inegraphics.shared.gobjects.Arc;
 import com.inepex.inegraphics.shared.gobjects.Circle;
+import com.inepex.inegraphics.shared.gobjects.GraphicalObject;
 import com.inepex.inegraphics.shared.gobjects.Line;
 import com.inepex.inegraphics.shared.gobjects.LineTo;
 import com.inepex.inegraphics.shared.gobjects.MoveTo;
@@ -29,22 +48,90 @@ import com.inepex.inegraphics.shared.gobjects.Text;
  * @author Miklós Süveges / Inepex Ltd.
  *
  */
-public class DrawingAreaGWT extends DrawingArea {
+public class DrawingAreaGWT extends DrawingArea implements HasHandlers, ClickHandler, MouseMoveHandler{
+
+	private class InnerEventHandler implements MouseMoveHandler, ClickHandler{
+
+		ArrayList<GraphicalObject> mouseOvered = new ArrayList<GraphicalObject>();
+
+		protected boolean isInteractive(){
+			//			if(!interactiveMode){
+			//				return false;
+			//			}
+			if(useBatchedEvents){
+				return handlerManager.getHandlerCount(DrawingAreaClickEvent.TYPE) > 0;
+			}
+			else{
+				return handlerManager.getHandlerCount(GraphicalObjectEvent.TYPE) > 0;
+			}
+		}
+
+		@Override
+		public void onClick(ClickEvent event) {
+			if(!isInteractive()){
+				return;
+			}
+			if(listenMouseMove){
+				for(GraphicalObject go : mouseOvered){
+					fireEvent(new GOClickEvent(go));
+				}
+			}
+			else{
+				for(GraphicalObject go : graphicalObjects){
+					if(MouseAssist.isMouseOver(getMouseCoords(event), go)){
+						fireEvent(new GOClickEvent(go));
+					}
+				}
+			}
+		}
+
+		@Override
+		public void onMouseMove(MouseMoveEvent event) {
+			if(!isInteractive() || !listenMouseMove){
+				return;
+			}
+			for(GraphicalObject go : graphicalObjects){
+				if(MouseAssist.isMouseOver(getMouseCoords(event), go)){
+					if(!mouseOvered.contains(go)){
+						mouseOvered.add(go);
+						fireEvent(new GOMouseOverEvent(go));
+					}
+				}
+				else if(mouseOvered.contains(go)){
+					mouseOvered.remove(go);
+					fireEvent(new GOMouseOutEvent(go));
+				}
+			}
+		}
+
+	}
+
+	public int[] getMouseCoords(MouseEvent<?> event){
+		return new int[]{event.getRelativeX(canvas.getElement()), event.getRelativeY(canvas.getElement())};
+	}
 	
 	public static boolean isHTML5Compatible(){
 		return Canvas.isSupported();		
 	}
-	
+
 	protected CanvasWidget canvas;
 	protected Canvas canvasGWT;
 	protected AbsolutePanel panel;
 	protected TextPositioner textPositioner;
 	protected Context context; 
-	
+
+	protected InnerEventHandler innerEventHandler;
+	protected HandlerManager handlerManager;
+	protected boolean interactiveMode = false;
+	protected boolean listenMouseMove = true;
+	protected boolean useBatchedEvents = true;
+
+	protected ArrayList<HandlerRegistration> handlerRegistrations;
+
 	public DrawingAreaGWT(int width, int height){
 		this(width, height, false);
 	}
-	
+
 	/**
 	 * Creates a {@link DrawingArea} with the given dimensions
 	 * @param width px
@@ -64,12 +151,13 @@ public class DrawingAreaGWT extends DrawingArea {
 			this.canvas = canvas;
 			textPositioner = new TextPositioner(panel);
 		}
-		
+
 		panel.add(canvas, 0, 0);
 		clear();
 		context = null;
+		//		initEventHandling();
 	}
-	
+
 	/**
 	 * Creates a {@link DrawingArea}
 	 * @param canvas {@link CanvasWidget} used for drawing
@@ -82,6 +170,7 @@ public class DrawingAreaGWT extends DrawingArea {
 		panel.add(canvas, 0, 0);
 		textPositioner = new TextPositioner(panel);
 		clear();
+		//		initEventHandling();
 	}
 
 	public DrawingAreaGWT(Canvas canvas){
@@ -91,8 +180,23 @@ public class DrawingAreaGWT extends DrawingArea {
 		panel.setPixelSize(width, height);
 		panel.add(canvas, 0, 0);
 		clear();
+		//		initEventHandling();
 	}
-	
+
+	protected void initEventHandling(){
+		if(handlerManager == null){
+			handlerManager = new HandlerManager(this);
+		}
+		if(innerEventHandler == null){
+			innerEventHandler = new InnerEventHandler();
+		}
+		if(handlerRegistrations == null){
+			handlerRegistrations = new ArrayList<HandlerRegistration>();
+		}
+		handlerRegistrations.add(canvas.addDomHandler(innerEventHandler, MouseMoveEvent.getType()));
+		handlerRegistrations.add(canvas.addDomHandler(innerEventHandler, ClickEvent.getType()));
+	}
+
 	public void setSize(int width, int height){
 		if(canvasGWT == null && canvas != null){
 			canvas.removeFromParent();
@@ -103,7 +207,7 @@ public class DrawingAreaGWT extends DrawingArea {
 		this.height = height;
 		panel.setPixelSize(width, height);
 	}
-	
+
 	/**
 	 * Use this method to add this to a panel
 	 * if it uses {@link Canvas} 
@@ -118,7 +222,7 @@ public class DrawingAreaGWT extends DrawingArea {
 			return panel;
 		}
 	}
-	
+
 	/**
 	 * Use this method for explicitly draw on the canvas.
 	 * Use getWidget() method for adding it to the document.
@@ -128,7 +232,7 @@ public class DrawingAreaGWT extends DrawingArea {
 
 		return canvas;
 	}
-	
+
 	/**
 	 * If {@link Canvas} is used as view
 	 * return its {@link Context2d} 
@@ -136,13 +240,13 @@ public class DrawingAreaGWT extends DrawingArea {
 	 */
 	public Context2d getContext2d(){
 		return null;
-		
+
 	}
-	
+
 	@Override
 	protected void clear() {
-//		canvas.setWidth(width);
-//		canvas.setHeight(height);
+		//		canvas.setWidth(width);
+		//		canvas.setHeight(height);
 		canvas.setFillStyle("white");
 		canvas.clearRect(0, 0, width, height);
 		textPositioner.removeAllText();
@@ -177,8 +281,9 @@ public class DrawingAreaGWT extends DrawingArea {
 		}
 		//if its a closed path then we can fill it
 		if(path.hasFill()
-				&& pathElements.get(pathElements.size()-1).getEndPointX() == path.getBasePointX() &&
-				pathElements.get(pathElements.size()-1).getEndPointY() == path.getBasePointY() ){
+				//				&& pathElements.get(pathElements.size()-1).getEndPointX() == path.getBasePointX() &&
+				//				pathElements.get(pathElements.size()-1).getEndPointY() == path.getBasePointY() 
+				){
 			canvas.fill();
 		}
 	}
@@ -239,7 +344,7 @@ public class DrawingAreaGWT extends DrawingArea {
 		canvas.lineTo(line.getEndPointX(), line.getEndPointY());
 		canvas.stroke();
 	}
-	
+
 	/**
 	 * Sets the context variables of the canvas.
 	 * @param context
@@ -248,7 +353,7 @@ public class DrawingAreaGWT extends DrawingArea {
 		if(canvas != null){
 			if(this.context == null){
 				canvas.setLineJoin("round");
-				canvas.setLineCap("square");
+				canvas.setLineCap("butt");
 			}
 			if(this.context == null || context.getAlpha() != this.context.getAlpha()){
 				canvas.setGlobalAlpha(context.getAlpha());
@@ -288,9 +393,9 @@ public class DrawingAreaGWT extends DrawingArea {
 	@Override
 	protected void drawArc(Arc arc) {
 		// TODO Auto-generated method stub
-		
+
 	}
-	
+
 	@Override
 	protected void drawText(Text text) {
 		if(textPositioner != null)
@@ -308,4 +413,83 @@ public class DrawingAreaGWT extends DrawingArea {
 	public void measureText(Text text) {
 		textPositioner.measureText(text);
 	}
+
+	@Override
+	public void fireEvent(GwtEvent<?> event) {
+		handlerManager.fireEvent(event);
+	}
+
+	public HandlerRegistration addGraphicalObjectEventHandler(GraphicalObjectEventHandler handler){
+		return handlerManager.addHandler(GraphicalObjectEvent.TYPE, handler);
+	}
+
+	public HandlerRegistration addDrawingAreaMouseEventHandler(DrawingAreaMouseEventHandler handler){
+		return handlerManager.addHandler(new Type<DrawingAreaMouseEventHandler>(), handler);
+	}
+
+	@Override
+	public void removeGraphicalObject(GraphicalObject graphicalObject) {
+		innerEventHandler.mouseOvered.remove(graphicalObject);
+		super.removeGraphicalObject(graphicalObject);
+	}
+
+	@Override
+	public void onMouseMove(MouseMoveEvent event) {
+		innerEventHandler.onMouseMove(event);
+	}
+
+	@Override
+	public void onClick(ClickEvent event) {
+		innerEventHandler.onClick(event);		
+	}
+
+
+	public boolean isInteractiveMode() {
+		return interactiveMode;
+	}
+
+
+	public void setInteractiveMode(boolean interactiveMode) {
+		this.interactiveMode = interactiveMode;
+		if(interactiveMode){
+			initEventHandling();
+		}
+		else if(handlerRegistrations != null){
+			for(HandlerRegistration hr : handlerRegistrations){
+				hr.removeHandler();
+			}
+			handlerRegistrations.clear();
+		}
+	}
+
+
+	public boolean isListenMouseMove() {
+		return listenMouseMove;
+	}
+
+
+	public void setListenMouseMove(boolean listenMouseMove) {
+		this.listenMouseMove = listenMouseMove;
+	}
+
+
+	public boolean isUseBatchedEvents() {
+		return useBatchedEvents;
+	}
+
+
+	public void setUseBatchedEvents(boolean useBatchedEvents) {
+		this.useBatchedEvents = useBatchedEvents;
+	}
+
+	public ArrayList<GraphicalObject> getMouseOverGOs(MouseEvent<?> event){
+		ArrayList<GraphicalObject> over = new ArrayList<GraphicalObject>();
+		for(GraphicalObject go : graphicalObjects){
+			if(MouseAssist.isMouseOver(getMouseCoords(event), go)){
+				over.add(go);
+			}
+		}
+		return over;
+	}
+	
 }
