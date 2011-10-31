@@ -1,101 +1,102 @@
 package com.inepex.inechart.chartwidget.linechart;
 
-public class DataPoint implements Comparable<DataPoint> {
-	/**
-	 * the x value of the point
-	 */
-	double x;
-	/**
-	 * the y value of the point
-	 */
-	double y;
-	/**
-	 * the x position of the point in the coordinate system of the canvas
-	 *  - might be invalid if the point is currently not visible
-	 */
-	double actualXPos;
-	/**
-	 * the y position of the point in the coordinate system of the canvas
-	 * - might be invalid if the point is currently not visible
-	 */
-	double actualYPos;
-	/**
-	 * if multiple points overlap this point might be filtered
-	 */
-	boolean filtered;
-	/**
-	 * true if this point is inside the actual visible intervals on the axes
-	 */
-	boolean isInViewport;
+import java.util.ArrayList;
+import java.util.Comparator;
+
+import com.inepex.inechart.chartwidget.data.XYDataEntry;
+
+public class DataPoint implements Comparable<DataPoint>{
+
+	public static Comparator<DataPoint> canvasXComparator = new Comparator<DataPoint>() {
+		
+		@Override
+		public int compare(DataPoint o1, DataPoint o2) {
+			return Double.compare(o1.canvasX, o2.canvasX);
+		}
+	};
 	
-
-	public DataPoint(double x, double y) {
-		super();
-		this.x = x;
-		this.y = y;
-		filtered = false;
-		isInViewport = false;
-		actualXPos = 0;
-		actualYPos = 0;
-	}
-
-	@Override
-	public int compareTo(DataPoint arg0) {
-		if(arg0.x > x){
-			return -1;
+	protected class SimpleXYDataEntry implements XYDataEntry{
+		double x, y;
+		
+		public SimpleXYDataEntry(double x, double y) {
+			this.x = x;
+			this.y = y;
 		}
-		else if(arg0.x < x){
-			return 1;
+
+		@Override
+		public int compareTo(XYDataEntry o) {
+			int i = Double.compare(x, o.getX());
+			if(i == 0){
+				i = Double.compare(y, o.getY());
+			}
+			return i;
 		}
-		else if(arg0.y > y){
-			return -1;
+
+		@Override
+		public double getX() {
+			return x;
 		}
-		else if(arg0.y < y){
-			return 1;
+
+		@Override
+		public double getY() {
+			return y;
 		}
-		else return 0;
-	}
-	
-	@Override
-	public boolean equals(Object obj) {
-		if(obj instanceof DataPoint && ((DataPoint) obj).x == this.x && ((DataPoint) obj).y == this.y) {
-			return true;
-		}
-		else {
-			return false;
-		}
-	}
-
-	public double getX() {
-		return x;
-	}
-
-	public void setX(double x) {
-		this.x = x;
-	}
-
-	public double getY() {
-		return y;
-	}
-
-	public void setY(double y) {
-		this.y = y;
-	}
-
-	public double getActualXPos() {
-		return actualXPos;
-	}
-
-	public void setActualXPos(double actualXPos) {
-		this.actualXPos = actualXPos;
-	}
-
-	public double getActualYPos() {
-		return actualYPos;
-	}
-
-	public void setActualYPos(double actualYPos) {
-		this.actualYPos = actualYPos;
 	}
 		
+	protected XYDataEntry data;
+	protected ArrayList<DataPoint> filteredPoints;
+	protected double canvasX, canvasY;
+	protected boolean isInViewport;
+
+	public DataPoint() {
+		filteredPoints = new ArrayList<DataPoint>();
+	}
+	
+	public DataPoint(double x, double y) {
+		filteredPoints = new ArrayList<DataPoint>();
+		data = new SimpleXYDataEntry(x, y);
+	}
+	
+	
+	public DataPoint(XYDataEntry data) {
+		filteredPoints = new ArrayList<DataPoint>();
+		this.data = data;
+	}
+	
+	protected void addFilteredPoint(DataPoint dp){
+		filteredPoints.add(dp);
+	}
+
+//	public void setData(XYDataEntry e){
+//		this.data = e;
+//	}
+
+	public XYDataEntry getData(){
+		return data;
+	}
+
+	public boolean containsHiddenData(){
+		return filteredPoints.size() > 1;
+	}
+
+	public ArrayList<DataPoint> getFilteredPoints(){
+		return filteredPoints;
+	}
+
+	public boolean isInViewport() {
+		return isInViewport;
+	}
+
+	public double getCanvasX() {
+		return canvasX;
+	}
+
+	public double getCanvasY() {
+		return canvasY;
+	}
+
+	@Override
+	public int compareTo(DataPoint o) {
+		return data.compareTo(o.data);
+	}
 }

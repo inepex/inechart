@@ -3,10 +3,11 @@ package com.inepex.inechart.chartwidget.linechart;
 import java.util.ArrayList;
 import java.util.TreeMap;
 
-import com.inepex.inechart.chartwidget.DataSet;
 import com.inepex.inechart.chartwidget.Defaults;
 import com.inepex.inechart.chartwidget.axes.Tick;
-import com.inepex.inechart.chartwidget.data.XYDataSet;
+import com.inepex.inechart.chartwidget.data.AbstractDataEntry;
+import com.inepex.inechart.chartwidget.data.AbstractXYDataSet;
+import com.inepex.inechart.chartwidget.data.XYDataEntry;
 import com.inepex.inechart.chartwidget.misc.HasShadow;
 import com.inepex.inechart.chartwidget.misc.HasZIndex;
 import com.inepex.inechart.chartwidget.properties.Color;
@@ -16,7 +17,7 @@ import com.inepex.inechart.chartwidget.shape.Shape;
 /**
  * 
  * Represents a Line- or a Point- (or both) curve's model.
- * Stores the {@link DataSet} and information about how it should be displayed.
+ * Stores the information about how it should be displayed.
  * 
  * @author Miklós Süveges / Inepex Ltd.
  * 
@@ -27,36 +28,30 @@ public class Curve implements HasZIndex, HasShadow, Comparable<Curve>{
 	private int comparableNo;
 
 	/**
-	 * data to display
-	 * curve must not change it.
+	 * Underlying data, curve must not change it
 	 */
-	DataSet dataSet;
-
+	AbstractXYDataSet dataSet;
+	
 	/**
-	 * {@link DataPoint} objects created from {@link #dataSet}
+	 * {@link DataPoint}s created from {@link AbstractDataEntry}s
 	 */
 	ArrayList<DataPoint> dataPoints;
 	
-	/* Lookout */
+	
 	// Fills
 	TreeMap<Curve, Color> toCurveFills;
-	TreeMap<Integer, Color> toCanvasYFills;
 	TreeMap<Double, Color> toYFills;
 	
 	// line
 	boolean hasLine = true;
 	LineProperties lineProperties;
 	boolean autoFill = false;
-	ArrayList<DataPoint> discontinuities;
-	ArrayList<Double> uncalcedDiscontinuities;
+	ArrayList<DataPoint> discontinuitiesAsPoint;
+	ArrayList<XYDataEntry> discontinuities;
 
 	// points
 	boolean hasPoint = false;
-	Shape normalPoint;
-	Shape selectedPoint;
-	boolean applyCurveShadowForPoint = true;
-	boolean useCurveLinePropertiesForShape = true;
-	
+	Shape pointShape;
 	ArrayList<DataPoint> selectedPoints;
 
 	// shadow
@@ -65,50 +60,26 @@ public class Curve implements HasZIndex, HasShadow, Comparable<Curve>{
 	boolean hasShadow = true;
 	int zIndex = Integer.MIN_VALUE;
 
-	/**
-	 * Creates an empty curve
-	 */
-	public Curve() {
+	public Curve(){
+		comparableNo = highestComparableNo++;
+		dataPoints = new ArrayList<DataPoint>();
 		selectedPoints = new ArrayList<DataPoint>();
-		discontinuities = new ArrayList<DataPoint>();
-		uncalcedDiscontinuities = new ArrayList<Double>();
+		discontinuities = new ArrayList<XYDataEntry>();
+		discontinuitiesAsPoint = new ArrayList<DataPoint>();
 		setShadowOffsetY(Defaults.shadowOffsetX);
 		setShadowOffsetX(Defaults.shadowOffsetY);
 		setShadowColor(Defaults.shadowColor());
-		comparableNo = highestComparableNo++;
-		dataPoints = new ArrayList<DataPoint>();
-		
-		XYDataSet ds = new XYDataSet();
-		
 	}
-
-
-	/**
-	 * Creates a curve from the given dataSet
-	 * 
-	 * @param dataSet
-	 */
-	public Curve(DataSet dataSet) {
+	
+	public Curve(AbstractXYDataSet dataSet){
 		this();
-		setdDataSet(dataSet);
-	}
-	
-	
-	/**
-	 * Sets a new dataSet
-	 * 
-	 * @param dataSet
-	 */
-	public void setdDataSet(DataSet dataSet) {
 		this.dataSet = dataSet;
-		discontinuities.clear();
-		selectedPoints.clear();
 	}
-
+	
 	/**
 	 * @return the dataSet
 	 */
-	public DataSet getDataSet() {
+	public AbstractXYDataSet getDataSet() {
 		return dataSet;
 	}
 	
@@ -153,18 +124,6 @@ public class Curve implements HasZIndex, HasShadow, Comparable<Curve>{
 		toYFills.put(tick.getPosition(), color);
 	}
 
-	/**
-	 * Fills the area between the curve and a horizontal line at a fix position
-	 * of the chart's canvas
-	 * 
-	 * @param y
-	 *            in px (independent from axis scaling)
-	 */
-	public void addFill(int y, Color color) {
-		if (this.toCanvasYFills == null)
-			toCanvasYFills = new TreeMap<Integer, Color>();
-		toCanvasYFills.put(y, color);
-	}
 
 	/**
 	 * Fills the area between this and the given curve
@@ -190,16 +149,6 @@ public class Curve implements HasZIndex, HasShadow, Comparable<Curve>{
 		toYFills.remove(y);
 	}
 
-	/**
-	 * Fills the area between the curve and a horizontal line at a fix position
-	 * of the chart's canvas
-	 * 
-	 * @param y
-	 *            in px (independent from axis scaling)
-	 */
-	public void removeFill(int y, Color color) {
-		toCanvasYFills.remove(y);
-	}
 
 	/**
 	 * @return the lineProperties
@@ -257,13 +206,6 @@ public class Curve implements HasZIndex, HasShadow, Comparable<Curve>{
 		this.shadowColor = shadowColor;
 	}
 
-	/**
-	 * @return the normalPointShape
-	 */
-	public Shape getNormalPointShape() {
-		return normalPoint;
-	}
-
 	public boolean isAutoFill() {
 		return autoFill;
 	}
@@ -285,14 +227,12 @@ public class Curve implements HasZIndex, HasShadow, Comparable<Curve>{
 		return comparableNo - o.comparableNo;
 	}
 
-
 	/**
 	 * @return the hasLine
 	 */
-	public boolean isHasLine() {
+	public boolean hasLine() {
 		return hasLine;
 	}
-
 
 	/**
 	 * @param hasLine the hasLine to set
@@ -301,14 +241,12 @@ public class Curve implements HasZIndex, HasShadow, Comparable<Curve>{
 		this.hasLine = hasLine;
 	}
 
-
 	/**
 	 * @return the hasPoint
 	 */
-	public boolean isHasPoint() {
+	public boolean hasPoint() {
 		return hasPoint;
 	}
-
 
 	/**
 	 * @param hasPoint the hasPoint to set
@@ -317,89 +255,63 @@ public class Curve implements HasZIndex, HasShadow, Comparable<Curve>{
 		this.hasPoint = hasPoint;
 	}
 
-
-	/**
-	 * @return the normalPoint
-	 */
-	public Shape getNormalPoint() {
-		return normalPoint;
+	public void addDiscontinuity(XYDataEntry discontinuity){
+		if(dataSet.containsXYDataEntry(discontinuity)){
+			discontinuities.add(discontinuity);
+		}
+		else if(dataSet.getEntry(discontinuity.getX(), discontinuity.getY()) != null){
+			discontinuities.add(dataSet.getEntry(discontinuity.getX(), discontinuity.getY()));
+		}
 	}
-
-
-	/**
-	 * @param normalPoint the normalPoint to set
-	 */
-	public void setNormalPoint(Shape normalPoint) {
-		this.normalPoint = normalPoint;
-	}
-
-
-	/**
-	 * @return the selectedPoint
-	 */
-	public Shape getSelectedPoint() {
-		return selectedPoint;
-	}
-
-
-	/**
-	 * @param selectedPoint the selectedPoint to set
-	 */
-	public void setSelectedPoint(Shape selectedPoint) {
-		this.selectedPoint = selectedPoint;
-	}
-
-
-	/**
-	 * @return the applyCurveShadowForPoint
-	 */
-	public boolean isApplyCurveShadowForPoint() {
-		return applyCurveShadowForPoint;
-	}
-
-
-	/**
-	 * @param applyCurveShadowForPoint the applyCurveShadowForPoint to set
-	 */
-	public void setApplyCurveShadowForPoint(boolean applyCurveShadowForPoint) {
-		this.applyCurveShadowForPoint = applyCurveShadowForPoint;
-	}
-
-
-	/**
-	 * @return the useCurveLinePropertiesForShape
-	 */
-	public boolean isUseCurveLinePropertiesForShape() {
-		return useCurveLinePropertiesForShape;
-	}
-
-
-	/**
-	 * @param useCurveLinePropertiesForShape the useCurveLinePropertiesForShape to set
-	 */
-	public void setUseCurveLinePropertiesForShape(
-			boolean useCurveLinePropertiesForShape) {
-		this.useCurveLinePropertiesForShape = useCurveLinePropertiesForShape;
-	}
-
-//	public DataPoint getDataPointForX(double x){
-//		for(DataPoint dp : dataPoints){
-//			if(x == dp.x){
-//				return dp;
-//			}
-//		}
-//		return null;
-//	}
-//	
-//	public void addDiscontinuity(DataPoint dp){
-//		discontinuities.add(dp);
-//	}
-//	
-//	public void removeDiscontinuity(DataPoint dp){
-//		discontinuities.remove(dp);
-//	}
 	
-	public void addDiscontinuity(double discontinuity){
-		uncalcedDiscontinuities.add(discontinuity);
+	public boolean isPointSelected(DataPoint dp){
+		for(DataPoint selected : selectedPoints){
+			if(selected.compareTo(dp) == 0){
+				return true;
+			}
+		}
+		return false;
+	}
+	
+	protected void selectPoint(DataPoint dp){
+		for(DataPoint selected : selectedPoints){
+			if(selected.compareTo(dp) == 0){
+				return;
+			}
+		}
+		selectedPoints.add(dp);
+	}
+	
+	protected void deselectPoint(DataPoint dp){
+		DataPoint toRemove = null;
+		for(DataPoint selected : selectedPoints){
+			if(selected.compareTo(dp) == 0){
+				toRemove = selected;
+				break;
+			}
+		}
+		if(toRemove != null){
+			selectedPoints.remove(toRemove);
+		}
+	}
+	
+	public DataPoint getPointBeforeX(double x){
+		DataPoint last = null;
+		for(DataPoint dp : dataPoints){
+			if(dp.data.getX() > x){
+				return last;
+			}
+			last = dp;
+		}
+		return null;
+	}
+	
+	public DataPoint getPointAfterX(double x){
+		for(DataPoint dp : dataPoints){
+			if(dp.data.getX() > x){
+				return dp;
+			}
+		}
+		return null;
 	}
 }

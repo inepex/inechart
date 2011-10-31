@@ -19,8 +19,6 @@ import java.util.TreeMap;
  */
 public class KeyValueDataSet extends AbstractXYDataSet{
 	
-	protected boolean allowXDuplicates = true;
-	protected boolean sortable = false;
 	protected boolean sorted = false;
 	
 	protected double xMax = - Double.MAX_VALUE, yMax = - Double.MAX_VALUE, xMin = Double.MAX_VALUE, yMin = Double.MAX_VALUE;
@@ -104,7 +102,7 @@ public class KeyValueDataSet extends AbstractXYDataSet{
 	}
 
 	public void removeEntry(double x){
-		KeyValueDataEntry e = getEntry(x);
+		KeyValueDataEntry e = (KeyValueDataEntry) getEntry(x);
 		if(e != null){
 			entries.remove(e);
 			findExtremes();
@@ -159,24 +157,15 @@ public class KeyValueDataSet extends AbstractXYDataSet{
 		return null;
 	}
 	
-	public KeyValueDataEntry getEntry(double x){
-		for(KeyValueDataEntry e : entries){
-			if(Double.compare(x, e.key) == 0){
-				return e;
-			}
-		}
-		return null;
-	}
-	
 	public double getY(double x){
-		KeyValueDataEntry e = getEntry(x);
+		KeyValueDataEntry e = (KeyValueDataEntry) getEntry(x);
 		return e == null ? 0 : e.value;
 	}
 	
 	protected void eliminateDuplicates(){
 		ArrayList<KeyValueDataEntry> toRemove = new ArrayList<KeyValueDataEntry>();
 		for(KeyValueDataEntry de : entries){
-			KeyValueDataEntry e = getEntry(de.key);
+			KeyValueDataEntry e = (KeyValueDataEntry) getEntry(de.key);
 			if(e != null && e != de){
 				toRemove.add(e);
 			}
@@ -229,23 +218,7 @@ public class KeyValueDataSet extends AbstractXYDataSet{
 		return list;
 	}
 
-	public boolean isAllowXDuplicates() {
-		return allowXDuplicates;
-	}
-
-	public void setAllowXDuplicates(boolean allowXDuplicates) {
-		this.allowXDuplicates = allowXDuplicates;
-	}
-
-	public boolean isSortable() {
-		return sortable;
-	}
-
-	public void setSortable(boolean sortable) {
-		this.sortable = sortable;
-	}
-
-	public ArrayList<KeyValueDataEntry> getEntries() {
+	public final ArrayList<KeyValueDataEntry> getEntries() {
 		sortIf();
 		return entries;
 	}
@@ -275,6 +248,42 @@ public class KeyValueDataSet extends AbstractXYDataSet{
 			return entries.contains(entry);
 		}
 		return false;
+	}
+
+	@Override
+	public ArrayList<XYDataEntry> getXYDataEntries(double fromX, double toX) {
+		ArrayList<XYDataEntry> map = new ArrayList<XYDataEntry>();
+		sortIf();
+		for(KeyValueDataEntry e : entries){
+			if(sortable && e.key > toX){
+				break;
+			}
+			if(e.key >= fromX && e.key <= toX){
+				map.add(e);
+			}
+		}
+		return map;
+	}
+
+	@Override
+	public XYDataEntry getEntry(double x, double y) {
+		for(KeyValueDataEntry e : entries){
+			if(Double.compare(x, e.key) == 0 && Double.compare(y, e.value) == 0){
+				return e;
+			}
+		}
+		return null;
+	}
+
+	
+	@Override
+	public XYDataEntry getEntry(double x) {
+		for(KeyValueDataEntry e : entries){
+			if(Double.compare(x, e.key) == 0){
+				return e;
+			}
+		}
+		return null;
 	}
 	
 }

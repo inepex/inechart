@@ -3,17 +3,16 @@ package com.inepex.inechart.chartwidget.linechart;
 import java.util.ArrayList;
 import java.util.TreeMap;
 
-import javax.swing.border.LineBorder;
-
-import org.w3c.css.sac.LangCondition;
-
+import com.google.gwt.event.dom.client.ClickEvent;
+import com.google.gwt.event.dom.client.MouseDownEvent;
+import com.google.gwt.event.dom.client.MouseEvent;
+import com.google.gwt.event.dom.client.MouseMoveEvent;
+import com.google.gwt.event.dom.client.MouseUpEvent;
 import com.inepex.inechart.chartwidget.Defaults;
+import com.inepex.inechart.chartwidget.Layer;
 import com.inepex.inechart.chartwidget.ModuleAssist;
-import com.inepex.inechart.chartwidget.axes.Axes;
+import com.inepex.inechart.chartwidget.axes.Axis.AxisDataType;
 import com.inepex.inechart.chartwidget.axes.TickFactoryGWT;
-import com.inepex.inechart.chartwidget.event.PointHoverListener;
-import com.inepex.inechart.chartwidget.label.GWTLabelFactory;
-import com.inepex.inechart.chartwidget.label.LabelFactory;
 import com.inepex.inechart.chartwidget.label.StyledLabel;
 import com.inepex.inechart.chartwidget.label.Text;
 import com.inepex.inechart.chartwidget.label.TextContainer;
@@ -21,21 +20,16 @@ import com.inepex.inechart.chartwidget.misc.SelectionRange;
 import com.inepex.inechart.chartwidget.properties.LineProperties;
 import com.inepex.inechart.chartwidget.properties.TextProperties;
 import com.inepex.inegraphics.shared.Context;
-import com.inepex.inegraphics.shared.DrawingArea;
+import com.inepex.inegraphics.shared.DrawingAreaAssist;
 import com.inepex.inegraphics.shared.GraphicalObjectContainer;
 import com.inepex.inegraphics.shared.gobjects.GraphicalObject;
 import com.inepex.inegraphics.shared.gobjects.Line;
 
-public class Crosshair implements LineChartSelection, PointHoverListener{
+public class Crosshair extends LineChartInteractiveModule{
 
-	Axes axes;
-	LabelFactory labelFactory;
-	DrawingArea drawingArea;
 	SelectionRange selectionRange;
 	TextContainer valueBox;
 	LineProperties lineProperties;
-
-	LineChart lineChart;
 
 	ArrayList<StyledLabel> styledLabels;
 	GraphicalObjectContainer gos;
@@ -44,75 +38,105 @@ public class Crosshair implements LineChartSelection, PointHoverListener{
 	String yFormat = "";
 	TextProperties textProperties;
 
-	public Crosshair(ModuleAssist moduleAssist) {
-		this.axes = moduleAssist.getAxes();
-		this.labelFactory = moduleAssist.getLabelFactory();
+	Curve curve;
+
+	Layer layer;
+
+	boolean continuousTracking;
+	int snapToValueRange;
+
+	DataPoint focused;
+
+	public Crosshair() {
+		super();
 		selectionRange = SelectionRange.Both;
 		valueBox = Defaults.crosshairTextBox();
 		lineProperties = Defaults.crosshair();	
 		textProperties = Defaults.tickTextProperties();
-
 		styledLabels = new ArrayList<StyledLabel>();
 		gos = new GraphicalObjectContainer();
-
+		snapToValueRange = Defaults.snapToValueRange;
+		continuousTracking = true;
 	}
 
-	@Override
-	public void setDrawingArea(DrawingArea drawingArea) {
-		this.drawingArea = drawingArea;
+	public Crosshair(Curve curve) {
+		this();
+		this.curve = curve;
 	}
 
-	@Override
-	public void selectPoint(Curve c, DataPoint dp) {
-		for(GraphicalObject go : gos.getGraphicalObjects()){
-			drawingArea.removeGraphicalObject(go);
+	protected void selectPoint(DataPoint dp) {
+		if(!checkDependencies() || (focused != null && dp.compareTo(focused) == 0)){
+			return;
 		}
-		gos.removeAllGraphicalObjects();
-		for(StyledLabel sl : styledLabels){
-			labelFactory.removeStyledLabel(sl);
-		}
-		styledLabels.clear();
+		focused = dp;
+		removeGOsAndLabels();
+		String formatString;
 		if(selectionRange == SelectionRange.Both || selectionRange == SelectionRange.Vertical){
-			Line vertical = new Line(dp.getActualXPos(), lineChart.getTopPadding(), dp.getActualXPos(), lineChart.getTopPadding() + lineChart.getHeight(), 0, createContext(lineProperties));
+			formatString = xFormat;
+			Line vertical = new Line(dp.canvasX, lineChart.getTopPadding(), dp.canvasX,
+					lineChart.getTopPadding() + lineChart.getHeight(), 0, createContext(lineProperties));
 			gos.addGraphicalObject(vertical);
-			if(xFormat == null || xFormat.length() == 0){
-				if(lineChart.getXAxis().getTicks().size() > 0){
-					xFormat = lineChart.getXAxis().getTicks().get(0).getFormatString();
+			if(formatString == null || formatString.length() == 0){
+				if(lineChart.getXAxis().getTicks().size() > 0 && lineChart.getXAxis().getTicks().get(0).getFormatString() != null){
+					formatString = lineChart.getXAxis().getTicks().get(0).getFormatString();
+				}
+				else if(lineChart.getXAxis().getDefaultTick() != null && lineChart.getXAxis().getDefaultTick().getFormatString() != null){
+					formatString = lineChart.getXAxis().getDefaultTick().getFormatString();
 				}
 			}
-			Text t = new Text(TickFactoryGWT.formatValue(lineChart.getXAxis(), dp.getX(), xFormat), textProperties);
+			if(formatString == null || formatString.length() == 0){
+				if(lineChart.getXAxis().getAxisDataType() == AxisDataType.Number){
+					formatString = Defaults.numberFormat;
+				}
+				else{
+					formatString = Defaults.dateFormat;
+				}
+			}
+			Text t = new Text(TickFactoryGWT.formatValue(lineChart.getXAxis(), dp.getData().getX(), formatString), textProperties);
 			StyledLabel sl = new StyledLabel(t);
 			sl.setBackground(this.valueBox.getBackground());
-			int[] dim = labelFactory.measureStyledLabel(sl);
-			sl.setLeft((int) (dp.getActualXPos() - dim[0] / 2));
+			int[] dim = moduleAssist.getLabelFactory().measureStyledLabel(sl);
+			sl.setLeft((int) (dp.canvasX - dim[0] / 2));
 			sl.setTop((int) (lineChart.getTopPadding() + lineChart.getHeight()));
 			styledLabels.add(sl);
 		}
 		if(selectionRange == SelectionRange.Both || selectionRange == SelectionRange.Horizontal){
-			Line horizontal = new Line(lineChart.getLeftPadding(), dp.getActualYPos(), lineChart.getLeftPadding() + lineChart.getWidth(), dp.getActualYPos(), 0, createContext(lineProperties));
+			formatString = yFormat;
+			Line horizontal = new Line(lineChart.getLeftPadding(), dp.canvasY, lineChart.getLeftPadding() + lineChart.getWidth(), 
+					dp.canvasY, 0, createContext(lineProperties));
 			gos.addGraphicalObject(horizontal);
-			if(yFormat == null || yFormat.length() == 0){
-				if(lineChart.getYAxis().getTicks().size() > 0){
-					yFormat = lineChart.getYAxis().getTicks().get(0).getFormatString();
+			if(formatString == null || formatString.length() == 0){
+				if(lineChart.getYAxis().getTicks().size() > 0 && lineChart.getYAxis().getTicks().get(0).getFormatString() != null){
+					formatString = lineChart.getYAxis().getTicks().get(0).getFormatString();
+				}
+				else if(lineChart.getYAxis().getDefaultTick() != null && lineChart.getYAxis().getDefaultTick().getFormatString() != null){
+					formatString = lineChart.getYAxis().getDefaultTick().getFormatString();
 				}
 			}
-			Text t = new Text(TickFactoryGWT.formatValue(lineChart.getYAxis(), dp.getY(), yFormat), textProperties);
+			if(formatString == null || formatString.length() == 0){
+				if(lineChart.getYAxis().getAxisDataType() == AxisDataType.Number){
+					formatString = Defaults.numberFormat;
+				}
+				else{
+					formatString = Defaults.dateFormat;
+				}
+			}
+			Text t = new Text(TickFactoryGWT.formatValue(lineChart.getYAxis(), dp.getData().getY(), formatString), textProperties);
 			StyledLabel sl = new StyledLabel(t);
-
 			sl.setBackground(this.valueBox.getBackground());
-			int[] dim = labelFactory.measureStyledLabel(sl);
+			int[] dim = moduleAssist.getLabelFactory().measureStyledLabel(sl);
 			sl.setLeft(lineChart.getLeftPadding() - dim[0]);
-			sl.setTop((int) (dp.getActualYPos() - dim[1] / 2));
-			
+			sl.setTop((int) (dp.canvasY - dim[1] / 2));
 			styledLabels.add(sl);
+
 		}
 
-		drawingArea.addAllGraphicalObject(gos);
+		layer.getCanvas().addAllGraphicalObject(gos);
 
-		drawingArea.update();
-		
+		layer.getCanvas().update();
+
 		for(StyledLabel sl : styledLabels){
-			labelFactory.addAndDisplayStyledLabel(sl);
+			moduleAssist.getLabelFactory().addAndDisplayStyledLabel(sl);
 		}
 	}
 
@@ -120,30 +144,135 @@ public class Crosshair implements LineChartSelection, PointHoverListener{
 		return new Context(lp.getLineColor().getAlpha(), lp.getLineColor().getColor(), lp.getLineWidth(), Defaults.colorString);
 	}
 
-	@Override
-	public void deselectPoint(Curve c, DataPoint dp) {
-		// TODO Auto-generated method stub
-
+	protected void removeGOsAndLabels(){
+		for(GraphicalObject go : gos.getGraphicalObjects()){
+			layer.getCanvas().removeGraphicalObject(go);
+		}
+		gos.removeAllGraphicalObjects();
+		for(StyledLabel sl : styledLabels){
+			moduleAssist.getLabelFactory().removeStyledLabel(sl);
+		}
+		styledLabels.clear();
 	}
 
 	@Override
 	public void update() {
+		clear();
+	}
+
+	protected void clear(){
+		if(checkDependencies()){
+			removeGOsAndLabels();
+			layer.getCanvas().update();
+		}
+		focused = null;
+	}
+
+	protected DataPoint getDataPoint(MouseEvent<?> event){
+		int[] point = lineChart.getCoords(event);
+		DataPoint dp = lineChart.getClosestDataToPoint(point, curve);
+		if(continuousTracking && (dp == null || snapToValueRange <= 0 ||
+				Math.abs(dp.canvasX - point[0]) > snapToValueRange 
+				)){
+			final double[] valuePair = lineChart.getValuePair(event);
+			if(valuePair == null){
+				return null;
+			}
+			DataPoint before = curve.getPointBeforeX(valuePair[0]);
+			if(before == null){
+				return null;
+			}
+			DataPoint after = curve.getPointAfterX(valuePair[0]);
+			if(after == null){
+				return null;
+			}
+			double canvasY = DrawingAreaAssist.getYIntercept(point[0], before.canvasX, before.canvasY, after.canvasX, after.canvasY);
+			final double dataY = DrawingAreaAssist.getYIntercept(valuePair[0], before.data.getX(), before.data.getY(), after.data.getX(), after.data.getY());
+			dp = new DataPoint(valuePair[0], dataY);
+			dp.canvasX = point[0];
+			dp.canvasY = canvasY;
+		}
+		return dp;
+	}
+
+	@Override
+	public void onMouseMove(MouseMoveEvent event) {
+		if(!checkDependencies()){
+			return;
+		}
+		DataPoint dp = getDataPoint(event);
+		if(dp == null){
+			update();
+		}
+		else{
+			selectPoint(dp);
+		}
+	}
+
+	@Override
+	public void onMouseDown(MouseDownEvent event) {
 		// TODO Auto-generated method stub
 
 	}
 
 	@Override
-	public void setLineChart(LineChart lineChart) {
-		this.lineChart = lineChart;
+	public void onMouseUp(MouseUpEvent event) {
+		// TODO Auto-generated method stub
+
 	}
 
+	@Override
+	public void onClick(ClickEvent event) {
+		// TODO Auto-generated method stub
+
+	}
 
 	@Override
-	public void onPointHover(TreeMap<Curve, DataPoint> hoveredPoints) {
-		if(hoveredPoints.size() > 0){
-			selectPoint(hoveredPoints.firstKey(), hoveredPoints.get(hoveredPoints.firstKey()));
+	public void onMouseOut(MouseEvent<?> event) {
+		update();
+	}
+
+	@Override
+	public void onMouseOver(MouseEvent<?> event) {
+		if(!checkDependencies()){
+			return;
+		}
+		DataPoint dp = getDataPoint(event);
+		if(dp == null){
+			update();
+		}
+		else{
+			selectPoint(dp);
 		}
 	}
 
+	@Override
+	protected void pointSelection(
+			TreeMap<Curve, ArrayList<DataPoint>> selectedPoints,
+			TreeMap<Curve, ArrayList<DataPoint>> deselectedPoints) {
+		// TODO Auto-generated method stub
+
+	}
+
+	@Override
+	public void attach(ModuleAssist moduleAssist, LineChart lineChart) {
+		if(curve == null && lineChart.curves.size() > 0){
+			curve = lineChart.curves.get(lineChart.curves.size() - 1);
+		}
+		super.attach(moduleAssist, lineChart);
+	}
+
+	protected boolean checkDependencies(){
+		if(curve == null){
+			return false;
+		}
+		if(layer == null){
+			layer = new Layer(Layer.TO_TOP);
+			moduleAssist.addCanvasToLayer(layer);
+			lineChart.getModuleLayer().addLayer(layer);
+			moduleAssist.updateLayerOrder();
+		}
+		return true;
+	}
 
 }

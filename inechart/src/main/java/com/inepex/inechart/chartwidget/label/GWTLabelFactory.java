@@ -182,7 +182,7 @@ public class GWTLabelFactory extends LabelFactory{
 			fp = new FlowPanel();
 		}	
 		for(HasLegendEntries legendEntryOwner : legendOwners){
-			if(legendEntryOwner.isDisplayEntries()){
+			if(legendEntryOwner.isDisplayLegendEntries()){
 				TreeMap<String, Color> legendEntries = legendEntryOwner.getLegendEntries();
 				if(legendEntries == null || legendEntries.size() == 0){
 					continue;

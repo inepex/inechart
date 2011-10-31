@@ -6,6 +6,8 @@ import java.util.List;
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.MouseDownEvent;
 import com.google.gwt.event.dom.client.MouseMoveEvent;
+import com.google.gwt.event.dom.client.MouseOutEvent;
+import com.google.gwt.event.dom.client.MouseOverEvent;
 import com.google.gwt.event.dom.client.MouseUpEvent;
 import com.google.gwt.event.shared.EventBus;
 import com.google.gwt.event.shared.SimpleEventBus;
@@ -22,7 +24,6 @@ import com.inepex.inechart.chartwidget.label.LabelFactory;
 import com.inepex.inechart.chartwidget.label.Legend;
 import com.inepex.inechart.chartwidget.linechart.Curve;
 import com.inepex.inechart.chartwidget.linechart.LineChart;
-import com.inepex.inechart.chartwidget.linechart.LineChart2;
 import com.inepex.inechart.chartwidget.misc.SelectionRange;
 import com.inepex.inechart.chartwidget.piechart.PieChart;
 import com.inepex.inechart.chartwidget.selection.RectangularSelection;
@@ -75,6 +76,8 @@ public class IneChart extends Composite{
 		addDomHandler(eventManager, MouseUpEvent.getType());
 		addDomHandler(eventManager, MouseMoveEvent.getType());
 		addDomHandler(eventManager, ClickEvent.getType());
+		addDomHandler(eventManager, MouseOutEvent.getType());
+		addDomHandler(eventManager, MouseOverEvent.getType());
 
 	}
 
@@ -152,7 +155,7 @@ public class IneChart extends Composite{
 	 */
 
 	public LineChart createLineChart() {
-		DrawingAreaGWT overlay = new DrawingAreaGWT(canvasWidth, canvasHeight, false);
+		DrawingAreaGWT overlay = new DrawingAreaGWT(canvasWidth, canvasHeight);
 		mainPanel.add(overlay.getWidget(),0,0);
 		LineChart chart = new LineChart(moduleAssist);
 		modules.add(chart);
@@ -160,10 +163,10 @@ public class IneChart extends Composite{
 		return chart;
 	}
 	
-	public LineChart2 createLineChart2() {
-		DrawingAreaGWT overlay = new DrawingAreaGWT(canvasWidth, canvasHeight, false);
+	public LineChart createLineChart2() {
+		DrawingAreaGWT overlay = new DrawingAreaGWT(canvasWidth, canvasHeight);
 		mainPanel.add(overlay.getWidget(),0,0);
-		LineChart2 chart = new LineChart2(moduleAssist);
+		LineChart chart = new LineChart(moduleAssist);
 		modules.add(chart);
 		eventManager.addViewportChangeHandler(chart.innerEventHandler);
 		return chart;
@@ -192,7 +195,7 @@ public class IneChart extends Composite{
 
 	public RectangularSelection getRectangularSelection(){
 		if(selection == null){
-			DrawingAreaGWT selectionLayer = new DrawingAreaGWT(canvasWidth, canvasHeight, false);
+			DrawingAreaGWT selectionLayer = new DrawingAreaGWT(canvasWidth, canvasHeight);
 			this.selection = new RectangularSelection(selectionLayer,eventManager);
 			mainPanel.add(selectionLayer.getWidget(),0,0);
 			IneChartModule2D modulToSelectFrom = null;

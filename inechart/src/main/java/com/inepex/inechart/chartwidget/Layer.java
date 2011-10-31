@@ -12,10 +12,8 @@ public class Layer implements Comparable<Layer>{
 	public static final int ALWAYS_TOP = Integer.MAX_VALUE;
 	public static final int ALWAYS_BOT = Integer.MIN_VALUE;
 	
-
 	private DrawingAreaGWT canvas;
 	private int zIndex;
-	
 
 	public Layer(int zIndex) {
 		this(null, zIndex);
@@ -63,6 +61,14 @@ public class Layer implements Comparable<Layer>{
 		}
 	}
 
+	public void bringToTop(){
+		setzIndex(TO_TOP);
+	}
+	
+	public void bringToBot(){
+		setzIndex(TO_BOT);
+	}
+	
 	@Override
 	public int compareTo(Layer o) {
 		return zIndex - o.zIndex;

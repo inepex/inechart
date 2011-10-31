@@ -112,8 +112,10 @@ public abstract class IneChartModule2D extends IneChartModule implements HasCoor
 		
 		@Override
 		public void onMouseOver(MouseOverEvent event) {
-//			if(getValuePair(event) != null)
-//				IneChartModule2D.this.onMouseOver(event);
+			if(!canHandleEvents)
+				return;
+			if(getValuePair(event) != null)
+				IneChartModule2D.this.onMouseOver(event);
 		}
 
 		@Override
@@ -126,8 +128,9 @@ public abstract class IneChartModule2D extends IneChartModule implements HasCoor
 
 		@Override
 		public void onMouseOut(MouseOutEvent event) {
-//			if(getValuePair(event) != null)
-//				IneChartModule2D.this.onMouseOut(event);
+			if(!canHandleEvents)
+				return;
+			IneChartModule2D.this.onMouseOut(event);
 		}
 
 		@Override
@@ -248,11 +251,17 @@ public abstract class IneChartModule2D extends IneChartModule implements HasCoor
 	protected boolean displayLegendEntries = true;
 	protected TreeMap<String, Color> legendEntries;
 	
+	protected LinkedLayers moduleLayer;
+	
 	protected IneChartModule2D(ModuleAssist moduleAssist) {
 		super(moduleAssist);
 		this.moduleAssist = moduleAssist;
 		moduleAssist.labelFactory.addLegendOwner(this);
 		autoScaleViewport = true;
+		if(moduleAssist.isClientSide()){
+			moduleLayer = new LinkedLayers();
+			moduleAssist.addLinkedLayers(moduleLayer);
+		}
 		// default axes
 		xAxis = new Axis();
 		xAxis.setAxisDirection(AxisDirection.Horizontal_Ascending_To_Right);
@@ -268,13 +277,13 @@ public abstract class IneChartModule2D extends IneChartModule implements HasCoor
 		if(moduleAssist.eventManager != null){
 			moduleAssist.eventManager.addMouseDownHandler(innerEventHandler);
 			moduleAssist.eventManager.addMouseMoveHandler(innerEventHandler);
-	//		eventManager.addMouseOutHandler(innerEventHandler);
-	//		eventManager.addMouseOverHandler(innerEventHandler);
+			moduleAssist.eventManager.addMouseOutHandler(innerEventHandler);
+			moduleAssist.eventManager.addMouseOverHandler(innerEventHandler);
 			moduleAssist.eventManager.addMouseUpHandler(innerEventHandler);
 			moduleAssist.eventManager.addClickHandler(innerEventHandler);
 			moduleAssist.eventManager.addDataEntrySelectionHandler(innerEventHandler);
 			moduleAssist.eventManager.addDataSetChangeHandler(innerEventHandler);
-		}		
+		}
 	}
 
 	/**
@@ -630,7 +639,7 @@ public abstract class IneChartModule2D extends IneChartModule implements HasCoor
 		}
 	}
 
-	protected boolean isInsideModul(double posXOnCanvas, double posYOnCanvas){
+	public boolean isInsideModul(double posXOnCanvas, double posYOnCanvas){
 		if(isInsideModul(posXOnCanvas, true) && isInsideModul(posYOnCanvas, false))
 			return true;
 		return false;
@@ -781,8 +790,12 @@ public abstract class IneChartModule2D extends IneChartModule implements HasCoor
 	}
 
 	@Override
-	public boolean isDisplayEntries() {
+	public boolean isDisplayLegendEntries() {
 		return displayLegendEntries;
+	}
+
+	public LinkedLayers getModuleLayer() {
+		return moduleLayer;
 	}
 
 	@Override

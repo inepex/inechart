@@ -17,10 +17,6 @@ public abstract class IneChartModule implements Comparable<IneChartModule> {
 	protected GraphicalObjectContainer graphicalObjectContainer;
 	protected DrawingArea canvas;
 
-//	/**
-//	 * Tells whether the module has been changed since its last update call.
-//	 * Typically set true after a module successfully handled a change event.
-//	 */
 	protected boolean redrawNeeded;
 	
 
@@ -45,16 +41,7 @@ public abstract class IneChartModule implements Comparable<IneChartModule> {
 		isVisible = true;
 	}
 
-//	/**
-//	 * If a subclass is to be changed after creation, it should override this method.
-//	 * If overridden, the subclass should update its {@link #graphicalObjectContainer} during this method,
-//	 * so the container {@link IneChart} can display the up-to-date graphics.
-//	 * Do not forget to call super.update()!
-//	 */
-//	public void update(){
-//		redrawNeeded = false;
-//	}
-	
+
 	public abstract void update();
 	
 	public GraphicalObjectContainer getGraphicalObjectContainer() {

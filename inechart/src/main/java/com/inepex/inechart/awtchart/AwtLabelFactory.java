@@ -135,7 +135,7 @@ public class AwtLabelFactory extends LabelFactory {
 		}
 		JPanel panel = new JPanel();		
 		for(HasLegendEntries legendEntryOwner : legendOwners){
-			if(legendEntryOwner.isDisplayEntries()){
+			if(legendEntryOwner.isDisplayLegendEntries()){
 				TreeMap<String, com.inepex.inechart.chartwidget.properties.Color> legendEntries = legendEntryOwner.getLegendEntries();
 				if(legendEntries == null || legendEntries.size() == 0){
 					continue;

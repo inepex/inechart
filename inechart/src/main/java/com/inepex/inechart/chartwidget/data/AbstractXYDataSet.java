@@ -9,6 +9,9 @@ import com.inepex.inechart.chartwidget.properties.Color;
 public abstract class AbstractXYDataSet extends AbstractDataSet {
 
 	protected Color color;
+	
+	protected boolean allowXDuplicates = false;
+	protected boolean sortable = true;
 		
 	protected AbstractXYDataSet() {
 		this(Defaults.name + ++autotitleMaxIndex);
@@ -30,7 +33,6 @@ public abstract class AbstractXYDataSet extends AbstractDataSet {
 		this.description = description;
 	}
 
-
 	public abstract double getxMax();
 
 	public abstract double getyMax();
@@ -40,8 +42,6 @@ public abstract class AbstractXYDataSet extends AbstractDataSet {
 	public abstract double getyMin();
 	
 	protected abstract double getXForEntry(AbstractDataEntry child);
-	
-	public abstract boolean isSortable();
 	
 	public Color getColor() {
 		return color;
@@ -54,6 +54,28 @@ public abstract class AbstractXYDataSet extends AbstractDataSet {
 	
 	public abstract boolean containsXYDataEntry(XYDataEntry entry);
 	
+	public abstract XYDataEntry getEntry(double x);
+	
+	public abstract XYDataEntry getEntry(double x, double y);
+	
 	public abstract ArrayList<XYDataEntry> getXYDataEntries();
+	
+	public abstract ArrayList<XYDataEntry> getXYDataEntries(double fromX, double toX);
+	
+	public boolean isAllowXDuplicates() {
+		return allowXDuplicates;
+	}
+
+	public void setAllowXDuplicates(boolean allowXDuplicates) {
+		this.allowXDuplicates = allowXDuplicates;
+	}
+
+	public boolean isSortable() {
+		return sortable;
+	}
+
+	public void setSortable(boolean sortable) {
+		this.sortable = sortable;
+	}
 
 }

@@ -16,15 +16,15 @@ import com.inepex.inegraphics.shared.gobjects.GraphicalObject;
 
 public class SimplePointSelection extends LineChartInteractiveModule {
 	
-	protected TreeMap<Curve2, Shape> selectedPointShapes;
+	protected TreeMap<Curve, Shape> selectedPointShapes;
 	protected Shape defaultSelectedPointShape;
-	protected TreeMap<Curve2, Layer> canvasPerCurve;
-	protected TreeMap<Curve2, ArrayList<GraphicalObject>> registeredInteractivePoints;
+	protected TreeMap<Curve, Layer> canvasPerCurve;
+	protected TreeMap<Curve, ArrayList<GraphicalObject>> registeredInteractivePoints;
 	
 	public SimplePointSelection() {
-		selectedPointShapes = new TreeMap<Curve2, Shape>();
-		canvasPerCurve = new TreeMap<Curve2, Layer>();
-		registeredInteractivePoints = new TreeMap<Curve2, ArrayList<GraphicalObject>>();
+		selectedPointShapes = new TreeMap<Curve, Shape>();
+		canvasPerCurve = new TreeMap<Curve, Layer>();
+		registeredInteractivePoints = new TreeMap<Curve, ArrayList<GraphicalObject>>();
 	}
 
 	@Override
@@ -53,10 +53,10 @@ public class SimplePointSelection extends LineChartInteractiveModule {
 
 	@Override
 	protected void pointSelection(
-			TreeMap<Curve2, ArrayList<DataPoint2>> selectedPoints,
-			TreeMap<Curve2, ArrayList<DataPoint2>> deselectedPoints) {
+			TreeMap<Curve, ArrayList<DataPoint>> selectedPoints,
+			TreeMap<Curve, ArrayList<DataPoint>> deselectedPoints) {
 		
-		for(Curve2 c : lineChart.curves){
+		for(Curve c : lineChart.curves){
 			if(c.hasPoint){
 				boolean updated = false;
 				if(selectedPoints.containsKey(c)){
@@ -77,7 +77,7 @@ public class SimplePointSelection extends LineChartInteractiveModule {
 						if(!registeredInteractivePoints.containsKey(c)){
 							registeredInteractivePoints.put(c, new ArrayList<GraphicalObject>());
 						}
-						for(DataPoint2 dp : selectedPoints.get(c)){
+						for(DataPoint dp : selectedPoints.get(c)){
 							canvasPerCurve.get(c).getCanvas().addAllGraphicalObject(lineChart.createPoint(c, dp, shape, true, registeredInteractivePoints.get(c)));
 						}
 						canvasPerCurve.get(c).getCanvas().update();
@@ -91,7 +91,7 @@ public class SimplePointSelection extends LineChartInteractiveModule {
 		
 	}
 	
-	protected void checkLayer(Curve2 c){
+	protected void checkLayer(Curve c){
 		if(!canvasPerCurve.containsKey(c)){
 			Layer lyr = new Layer(Layer.TO_TOP);
 			moduleAssist.addCanvasToLayer(lyr);
@@ -103,14 +103,14 @@ public class SimplePointSelection extends LineChartInteractiveModule {
 
 	@Override
 	protected void update() {
-		for(Curve2 c : lineChart.curves){
+		for(Curve c : lineChart.curves){
 			if(c.hasPoint){
 				updateLayer(c, null);
 			}
 		}
 	}
 	
-	protected void updateLayer(Curve2 curve, ArrayList<DataPoint2> points){
+	protected void updateLayer(Curve curve, ArrayList<DataPoint> points){
 		checkLayer(curve);
 		DrawingAreaGWT canvas = canvasPerCurve.get(curve).getCanvas();
 		Shape shape = selectedPointShapes.get(curve);
@@ -131,7 +131,7 @@ public class SimplePointSelection extends LineChartInteractiveModule {
 				lineChart.interactivePoints.remove(go);
 			}
 		}
-		for(DataPoint2 dp : points == null ? curve.selectedPoints : points){
+		for(DataPoint dp : points == null ? curve.selectedPoints : points){
 			if(dp.isInViewport){
 				canvas.addAllGraphicalObject(lineChart.createPoint(curve, dp, shape, true, registeredInteractivePoints.get(curve)));
 			}

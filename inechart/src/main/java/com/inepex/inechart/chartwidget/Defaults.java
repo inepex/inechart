@@ -151,4 +151,9 @@ public class Defaults {
 	public static final TextProperties crosshairTextProperties(){
 		return new TextProperties("Calibri, Verdana, Arial, sans-serif", 12, "normal", "normal", new Color("red"));
 	}
+	public static final int snapToValueRange = 5;
+	
+	//value format
+	public static final String dateFormat = "MMM d. H:mm";
+	public static final String numberFormat = "#.#";
 }

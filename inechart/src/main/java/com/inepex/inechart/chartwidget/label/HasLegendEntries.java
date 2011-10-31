@@ -8,7 +8,7 @@ public interface HasLegendEntries {
 	
 	TreeMap<String, Color> getLegendEntries();
 	
-	boolean isDisplayEntries();
+	boolean isDisplayLegendEntries();
 	
 	void setDisplayLegendEntries(boolean displayEntries);
 	

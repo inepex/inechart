@@ -7,6 +7,7 @@ import com.inepex.inechart.chartwidget.Defaults;
 import com.inepex.inechart.chartwidget.IneChart;
 import com.inepex.inechart.chartwidget.IneChartModule;
 import com.inepex.inechart.chartwidget.IneChartModule2D;
+import com.inepex.inechart.chartwidget.Layer;
 import com.inepex.inechart.chartwidget.ModuleAssist;
 import com.inepex.inechart.chartwidget.axes.Axis.AxisDirection;
 import com.inepex.inechart.chartwidget.axes.Axis.AxisPosition;
@@ -16,6 +17,7 @@ import com.inepex.inechart.chartwidget.properties.Color;
 import com.inepex.inechart.chartwidget.properties.LineProperties;
 import com.inepex.inegraphics.impl.client.TextPositionerBase;
 import com.inepex.inegraphics.shared.Context;
+import com.inepex.inegraphics.shared.DrawingArea;
 import com.inepex.inegraphics.shared.DrawingAreaAssist;
 import com.inepex.inegraphics.shared.GraphicalObjectContainer;
 import com.inepex.inegraphics.shared.gobjects.GraphicalObject;
@@ -41,6 +43,7 @@ public class Axes extends IneChartModule {
 
 	private TreeMap<Axis, GraphicalObjectContainer> gosPerAxis;
 	private TreeMap<Axis, ArrayList<StyledLabel>> labelsPerAxis;
+	private TreeMap<Axis, DrawingArea> canvasPerAxis;
 	private TreeMap<Tick, Text> textMap;
 	private TreeMap<Axis, double[]> paddingAroundAxes;
 	private TreeMap<Axis, double[]> boundingBoxes;
@@ -57,6 +60,7 @@ public class Axes extends IneChartModule {
 		labelsPerAxis = new TreeMap<Axis, ArrayList<StyledLabel>>();
 		paddingAroundAxes = new TreeMap<Axis, double[]>();
 		boundingBoxes = new TreeMap<Axis, double[]>();
+		canvasPerAxis = new TreeMap<Axis, DrawingArea>();
 		textMap = new TreeMap<Tick, Text>();
 		this.labelFactory = moduleAssist.getLabelFactory();
 		setTickFactory(tickFactory);
@@ -72,6 +76,19 @@ public class Axes extends IneChartModule {
 	}
 
 	public void addAxis(Axis axis) {
+		if(moduleAssist.isClientSide()){
+			if(axes.contains(axis.getPerpendicularAxis())){
+				canvasPerAxis.put(axis, canvasPerAxis.get(axis.getPerpendicularAxis()));
+			}
+			else{
+				Layer axisLayer = moduleAssist.createAndAttachLayer(Layer.ALWAYS_BOT);
+				axis.modulToAlign.getModuleLayer().addLayer(axisLayer);
+				canvasPerAxis.put(axis, axisLayer.getCanvas());
+			}
+		}
+		else{
+			canvasPerAxis.put(axis, canvas);
+		}		
 		axes.add(axis);
 	}
 
@@ -81,40 +98,50 @@ public class Axes extends IneChartModule {
 		labelsPerAxis.remove(axis);
 		axes.remove(axis);
 	}
+	
+	private void updateCanvases(){
+		if(moduleAssist.isClientSide()){
+			ArrayList<DrawingArea> updated = new ArrayList<DrawingArea>();
+			for(Axis axis : canvasPerAxis.keySet()){
+				if(!updated.contains(canvasPerAxis.get(axis))){
+					canvasPerAxis.get(axis).update();
+					updated.add(canvasPerAxis.get(axis));
+				}
+			}
+		}
+	}
 
 	@Override
 	public void update() {
 		for (Axis axis : axes) {
-			if (axis.autoCreateTicks){
-				// auto calc tick's positions and apply defaults
-				tickFactory.autoCreateTicks(axis);
-				createDefaultTickAndLabelForAxis(axis);
+			if (!axis.isVisible){
+				continue;
 			}
-			else if(axis.defaultTick != null){
-				//apply default tick properties
-				createDefaultTickAndLabelForAxis(axis);
-			}
+			setTicksIf(axis);
 			removeAllGOAndLabelRelatedToAxis(axis);
 			createGOsAndLabelsForAxis(axis);
 		}
+		updateCanvases();
 	}
-
+	
+	private void setTicksIf(Axis axis){
+		if (axis.autoCreateTicks){
+			// auto calc tick's positions and apply defaults
+			tickFactory.autoCreateTicks(axis);
+			createDefaultTickAndLabelForAxis(axis);
+		}
+		else if(axis.defaultTick != null){
+			//apply default tick properties
+			createDefaultTickAndLabelForAxis(axis);
+		}
+	}
+	
 	public void updateForPaddingCalculation(){
 		for (Axis axis : axes) {
 			if (!axis.isVisible){
 				continue;
 			}
-			if (axis.autoCreateTicks){
-				// auto calc tick's positions and apply defaults
-				tickFactory.autoCreateTicks(axis);
-				createDefaultTickAndLabelForAxis(axis);
-			}
-			else if(axis.defaultTick != null){
-				//apply default tick properties
-				createDefaultTickAndLabelForAxis(axis);
-			}
-			//			removeAllGOAndLabelRelatedToAxis(axis);
-			//			createGOsAndLabelsForAxis(axis, false);
+			setTicksIf(axis);
 			measurePaddingForAxis(axis);
 		}
 	}
@@ -127,9 +154,10 @@ public class Axes extends IneChartModule {
 			removeAllGOAndLabelRelatedToAxis(axis);
 			createGOsAndLabelsForAxis(axis);
 		}
+		updateCanvases();
 	}
 
-	void createAxisLine(Axis axis, GraphicalObjectContainer goc, double startX, double startY, double endX, double endY){
+	private void createAxisLine(Axis axis, GraphicalObjectContainer goc, double startX, double startY, double endX, double endY){
 		// TODO upper-, lower End
 		if (axis.getLineProperties() != null) {
 			Line axisLine = new Line(startX, startY, endX, endY, axisLineZIndex, createContext(axis.lineProperties));
@@ -137,7 +165,7 @@ public class Axes extends IneChartModule {
 		}
 	}
 
-	void createTickLinesLabelsGrids(Axis axis, Axis perpAxis, GraphicalObjectContainer goc, GraphicalObjectContainer gridGOs, double startX, double startY){
+	private void createTickLinesLabelsGrids(Axis axis, Axis perpAxis, GraphicalObjectContainer goc, GraphicalObjectContainer gridGOs, double startX, double startY){
 		// ticks
 		ArrayList<Tick> filtered = axis.getVisibleTicks();
 		if (axis.isFilterFrequentTicks()){
@@ -219,7 +247,7 @@ public class Axes extends IneChartModule {
 		}	
 	}
 
-	void createTickText(Axis axis, Axis perpAxis, Tick tick, double tickStartX, double tickStartY){
+	private void createTickText(Axis axis, Axis perpAxis, Tick tick, double tickStartX, double tickStartY){
 		if(tick.formatString != null){
 			tick.text.setText( tickFactory.formatTickText(tick, axis.axisDataType));
 		}
@@ -298,7 +326,7 @@ public class Axes extends IneChartModule {
 		}
 	}
 
-	void createFillBetweenTicks(Axis axis, GraphicalObjectContainer goc){
+	private void createFillBetweenTicks(Axis axis, GraphicalObjectContainer goc){
 		double x, y, width, height;
 		for (Object[] tickPair : axis.gridFills) {
 			if(((Tick) tickPair[0]).position >= axis.max || ((Tick) tickPair[1]).position <= axis.min)
@@ -335,7 +363,7 @@ public class Axes extends IneChartModule {
 		}
 	}
 
-	void createGOsAndLabelsForAxis(Axis axis) {
+	private void createGOsAndLabelsForAxis(Axis axis) {
 		GraphicalObjectContainer goc = new GraphicalObjectContainer();
 		double startX = 0, startY = 0, endX = 0, endY = 0;
 		Axis perpAxis = axis.getPerpendicularAxis();
@@ -469,7 +497,7 @@ public class Axes extends IneChartModule {
 		boundingBoxes.put(axis, axisBB);
 		gosPerAxis.put(axis, goc);
 
-		graphicalObjectContainer.addAllGraphicalObject(goc);
+		canvasPerAxis.get(axis).addAllGraphicalObject(goc);
 		//replace Texts w styledlabel
 		for(Tick t : textMap.keySet()){
 			Text text = textMap.get(t);
@@ -484,7 +512,7 @@ public class Axes extends IneChartModule {
 
 	}
 
-	void measurePaddingForAxis(Axis axis){
+	private void measurePaddingForAxis(Axis axis){
 		double axisStartX = axis.getModulToAlign().getLeftPadding(), axisStartY = axis.getModulToAlign().getTopPadding();
 		double axisEndX = axisStartX + (axis.isHorizontal() ? axis.getModulToAlign().getWidth() : 0);
 		double axisEndY = axisStartY + (axis.isHorizontal() ? 0 : axis.getModulToAlign().getHeight());
@@ -522,8 +550,7 @@ public class Axes extends IneChartModule {
 		boundingBoxes.put(axis, axisBB);
 	}
 
-
-	void createAxisLabel(Axis axis, Axis perpAxis, double[] boundingBox, double[] paddingAroundAxis, boolean display){
+	private void createAxisLabel(Axis axis, Axis perpAxis, double[] boundingBox, double[] paddingAroundAxis, boolean display){
 		if(axis.axisLabel == null || axis.axisLabel.getText().getText() == null || axis.axisLabel.getText().getText().length() == 0)
 			return;
 		Text text = new Text(axis.axisLabel.getText().getText(),0,0);
@@ -634,7 +661,7 @@ public class Axes extends IneChartModule {
 		}
 	}
 
-	Context createContext(LineProperties lineProperties) {
+	protected Context createContext(LineProperties lineProperties) {
 		return new Context(
 				lineProperties.getLineColor().getAlpha(),
 				lineProperties.getLineColor().getColor(),
@@ -646,7 +673,7 @@ public class Axes extends IneChartModule {
 				Defaults.colorString);
 	}
 
-	Context createFillContext(Color color) {
+	protected Context createFillContext(Color color) {
 		return new Context(
 				color.getAlpha(),
 				color.getColor(),
@@ -658,12 +685,12 @@ public class Axes extends IneChartModule {
 				Defaults.colorString);
 	}
 
-	void removeAllGOAndLabelRelatedToAxis(Axis axis) {
+	private void removeAllGOAndLabelRelatedToAxis(Axis axis) {
 		if (gosPerAxis.get(axis) == null) {
 			return;
 		}
 		for(GraphicalObject go : gosPerAxis.get(axis).getGraphicalObjects()){
-			graphicalObjectContainer.removeGraphicalObject(go);
+			canvasPerAxis.get(axis).removeGraphicalObject(go);
 		}
 		gosPerAxis.get(axis).removeAllGraphicalObjects();
 		if(labelsPerAxis.get(axis) == null) {

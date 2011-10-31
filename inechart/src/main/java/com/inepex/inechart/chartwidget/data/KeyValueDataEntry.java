@@ -19,8 +19,6 @@ public class KeyValueDataEntry extends ValueDataEntry{
 		fireChangeEvent();
 	}
 
-
-
 	@Override
 	public double getX() {
 		return key;

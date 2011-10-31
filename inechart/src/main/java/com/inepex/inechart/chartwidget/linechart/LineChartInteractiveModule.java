@@ -14,7 +14,7 @@ public abstract class LineChartInteractiveModule implements MouseMoveHandler, Mo
 	 MouseUpHandler, ClickHandler{
 
 	protected ModuleAssist moduleAssist;
-	protected LineChart2 lineChart;
+	protected LineChart lineChart;
 	protected boolean visible;
 	protected boolean canHandleEvents;
 
@@ -23,13 +23,13 @@ public abstract class LineChartInteractiveModule implements MouseMoveHandler, Mo
 	}
 
 	public LineChartInteractiveModule(ModuleAssist moduleAssist,
-			LineChart2 lineChart) {
+			LineChart lineChart) {
 		this();
 		attach(moduleAssist, lineChart);
 	}
 
 	public void attach(ModuleAssist moduleAssist,
-			LineChart2 lineChart) {
+			LineChart lineChart) {
 		this.moduleAssist = moduleAssist;
 		this.lineChart = lineChart;
 	}
@@ -40,7 +40,7 @@ public abstract class LineChartInteractiveModule implements MouseMoveHandler, Mo
 	
 	protected abstract void update();
 
-	protected abstract void pointSelection(TreeMap<Curve2, ArrayList<DataPoint2>> selectedPoints, TreeMap<Curve2, ArrayList<DataPoint2>> deselectedPoints);
+	protected abstract void pointSelection(TreeMap<Curve, ArrayList<DataPoint>> selectedPoints, TreeMap<Curve, ArrayList<DataPoint>> deselectedPoints);
 	
 
 }
