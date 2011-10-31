@@ -6,5 +6,7 @@ public class LineTo extends MoveTo {
 		super(endPointX, endPointY);
 	}
 
-	
+	public LineTo(LineTo copy){
+		super(copy);
+	}
 }

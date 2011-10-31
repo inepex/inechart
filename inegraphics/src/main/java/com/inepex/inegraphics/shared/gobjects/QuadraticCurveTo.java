@@ -9,6 +9,12 @@ public class QuadraticCurveTo extends MoveTo {
 		this.controlPointX = controlPointX;
 		this.controlPointY = controlPointY;
 	}
+	
+	public QuadraticCurveTo(QuadraticCurveTo copy){
+		super(copy);
+		this.controlPointX = copy.controlPointX;
+		this.controlPointY = copy.controlPointY;
+	}
 
 	/**
 	 * @return the controlPointX

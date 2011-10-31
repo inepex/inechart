@@ -23,10 +23,12 @@ public class Context {
 	protected double shadowOffsetY;
 	protected double shadowAlpha;
 	protected String shadowColor;
-//	protected double scaleX, scaleY;
 	
+	protected double[] transformation;
 	
-	
+	public Context(Context copy){
+		this(copy.alpha, copy.strokeColor, copy.strokeWidth, copy.fillColor, copy.shadowOffsetX, copy.shadowOffsetY, copy.shadowAlpha, copy.shadowColor);
+	}
 	
 	public Context(double alpha, String strokeColor, double strokeWidth,
 			String fillColor, double shadowOffsetX, double shadowOffsetY,

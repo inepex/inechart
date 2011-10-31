@@ -6,9 +6,12 @@ public abstract class PathElement {
 	
 
 	protected PathElement( double endPointX,double endPointY) {
-		
 		this.endPointX = endPointX;
 		this.endPointY = endPointY;
+	}
+	
+	protected PathElement(PathElement copy){
+		this(copy.endPointX, copy.endPointY);
 	}
 
 	/**

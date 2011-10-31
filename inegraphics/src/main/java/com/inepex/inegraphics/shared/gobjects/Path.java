@@ -16,8 +16,16 @@ public class Path extends GraphicalObject {
 	public Path(Path copy){
 		super(copy.basePointX, copy.basePointY, copy.zIndex, copy.context, copy.stroke, copy.fill);
 		this.elements = new ArrayList<PathElement>();
-		for(Object e : copy.elements.toArray()){
-			elements.add((PathElement) e);
+		for(PathElement e : copy.elements){
+			if(e instanceof QuadraticCurveTo){
+				elements.add(new QuadraticCurveTo((QuadraticCurveTo) e));
+			}
+			else if(e instanceof LineTo){
+				elements.add(new LineTo((LineTo) e));
+			}
+			else if(e instanceof MoveTo){
+				elements.add(new MoveTo((MoveTo) e));
+			}
 		}
 		alignElementsWithBasePoint = copy.alignElementsWithBasePoint;
 	}
@@ -48,7 +56,7 @@ public class Path extends GraphicalObject {
 		double x,y;
 		x = r * Math.cos(theta);
 		y = r * Math.sin(theta);
-		if( getLastPathElement() != null){
+		if(getLastPathElement() != null){
 			x += getLastPathElement().endPointX;
 			y += getLastPathElement().endPointY;
 		}
@@ -56,7 +64,7 @@ public class Path extends GraphicalObject {
 			x += basePointX;
 			y += basePointY;
 		}
-		elements.add(new MoveTo((int)x, (int)y));	
+		elements.add(new MoveTo(x, y));	
 		return this;
 	}
 	
@@ -72,9 +80,7 @@ public class Path extends GraphicalObject {
 			x += basePointX;
 			y += basePointY;
 		}
-		elements.add(new LineTo((int)x, (int)y));	
-		
-		
+		elements.add(new LineTo(x, y));	
 		return this;
 	}
 	

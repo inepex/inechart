@@ -118,7 +118,7 @@ public class DrawingAreaAssist {
 	 * @param height
 	 * @return null if the path has no common line points with a rectangle.
 	 */
-	public static Path clipStrokePathWithRectangle(Path pathToBeClipped, double x, double y, double width, double height){
+	public static Path clipStrokePathWithRectangle(Path pathToBeClipped, double x, double y, double width, double height, boolean isMonotonicGrowingOnX){
 		Path clippedPath = null;
 		if(pathToBeClipped == null)
 			return null;
@@ -136,6 +136,11 @@ public class DrawingAreaAssist {
 		for(PathElement e : pathToBeClipped.getPathElements()){
 			actX = e.getEndPointX();
 			actY = e.getEndPointY();
+			if(isMonotonicGrowingOnX && !basepointSet && actX < x){
+				lastX = actX;
+				lastY = actY;
+				continue;
+			}
 			double[] clipped = getIntersection(lastX, lastY, actX, actY, x, y, width, height);
 			if(clipped != null){
 				if(!basepointSet){
@@ -159,7 +164,7 @@ public class DrawingAreaAssist {
 			}
 			//actual element has no point in rect, but the path is set,
 			//we 'follow' the step's x, y change with moveTo 
-			if(clippedPath != null && (clipped == null || clipped[2] != actX || clipped[3] != actY)){
+			if(basepointSet && (clipped == null || clipped[2] != actX || clipped[3] != actY)){
 				double yTo =  (actY > y + height ? y + height : (actY < y ? y : actY));
 				double xTo =  (actX > x + width ? x + width : (actX < x ? x : actX));
 				//ends left to the rect
@@ -180,6 +185,9 @@ public class DrawingAreaAssist {
 			}
 			lastX = actX;
 			lastY = actY;
+			if(isMonotonicGrowingOnX && actX >= x + width){
+				break;
+			}
 		}
 		return clippedPath;
 	}
@@ -196,29 +204,44 @@ public class DrawingAreaAssist {
 	 * @return null if the path has no common points with a rectangle.
 	 */
 	public static Path clipFillPathWithRectangle(Path pathToBeClipped, double x, double y, double width, double height){
-		Path clippedPath = new Path(pathToBeClipped);
-		if(pathToBeClipped == null)
+		if(pathToBeClipped == null){
 			return null;
+		}
+			
+		Path path = null;
+		double[] lastPair = new double[]{pathToBeClipped.getBasePointX(), pathToBeClipped.getBasePointY()};
+		double[] lastLineEnd = null;
+		double rightEnd = x + width;
+		double botEnd = y + height;
 		
-		//determine basepoint
-		double bpX = pathToBeClipped.getBasePointX(), bpY = pathToBeClipped.getBasePointY();
-		if(pathToBeClipped.getBasePointX() < x){
-			bpX = x;
+		for(PathElement pe : pathToBeClipped.getPathElements()){
+			double x1 = pe.getEndPointX() > rightEnd ? rightEnd : (pe.getEndPointX() < x ? x : pe.getEndPointX());
+			double y1 = pe.getEndPointY() > botEnd ? botEnd : (pe.getEndPointY() < y ? y : pe.getEndPointY());
+			if(path == null){
+				path = new Path(x1, y1, pathToBeClipped.getzIndex(),
+								pathToBeClipped.getContext() == null ? null : new Context(pathToBeClipped.getContext()),
+								pathToBeClipped.hasStroke(), pathToBeClipped.hasFill());
+			}
+			else{
+				double[] intersection = DrawingAreaAssist.getIntersection(
+						lastPair[0], lastPair[1],
+						pe.getEndPointX(), pe.getEndPointY(),
+						x,
+						y,
+						width,
+						height);
+				if(intersection != null){
+					if(lastLineEnd[0] != intersection[0] || lastLineEnd[1] != intersection[1]){
+						path.lineTo(intersection[0], intersection[1], false);
+					}
+					path.lineTo(intersection[2], intersection[3], false);
+				}
+				path.lineTo(x1, y1, false);
+			}
+			lastPair = new double[]{pe.getEndPointX(), pe.getEndPointY()};
+			lastLineEnd = new double[]{x1,y1};
 		}
-		else if(pathToBeClipped.getBasePointX() > x + width){
-			bpX = x + width;
-		}
-		if(pathToBeClipped.getBasePointY() < y){
-			bpY = y;
-		}
-		else if(pathToBeClipped.getBasePointY() > y + height){
-			bpY = y + height;
-		}
-		clippedPath.setBasePointX(bpX);
-		clippedPath.setBasePointY(bpY);
-		clippedPath = replaceAllPathElementsWithLineTo(clippedPath);
-		
-		return clipStrokePathWithRectangle(clippedPath, x, y, width, height);
+		return path;
 	}
 	
 	
@@ -449,7 +472,6 @@ public class DrawingAreaAssist {
 				solidLinePath.hasFill());
 		double lastX = solidLinePath.getBasePointX(), lastY = solidLinePath.getBasePointY();
 		for(PathElement e : solidLinePath.getPathElements()){
-			
 			if(e instanceof LineTo){
 				final double length = calculateDistance(lastX, lastY, e.getEndPointX(), e.getEndPointY());
 				final double theta = calculateAngle(lastX, lastY, e.getEndPointX(), e.getEndPointY());
@@ -466,7 +488,7 @@ public class DrawingAreaAssist {
 					if(i % 2 == 0){
 						x += lineDX;
 						y += lineDY;
-						dashedPath.lineTo(x,y, false);
+						dashedPath.lineTo(x,y, false);						
 					}
 					else{
 						x += moveDX;

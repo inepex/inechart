@@ -138,7 +138,7 @@ public class DrawingAreaGWT extends DrawingArea implements HasHandlers, ClickHan
 	 * @param height px
 	 * @param useCanvas TODO
 	 */
-	public DrawingAreaGWT(int width, int height, boolean useCanvas) {
+	protected DrawingAreaGWT(int width, int height, boolean useCanvas) {
 		super(width, height);
 		this.panel = new AbsolutePanel();
 		panel.setPixelSize(width, height);
@@ -173,15 +173,15 @@ public class DrawingAreaGWT extends DrawingArea implements HasHandlers, ClickHan
 		//		initEventHandling();
 	}
 
-	public DrawingAreaGWT(Canvas canvas){
-		super(canvas.getCanvasElement().getWidth(), canvas.getCanvasElement().getHeight());
-		this.canvasGWT = canvas;
-		this.panel = new AbsolutePanel();
-		panel.setPixelSize(width, height);
-		panel.add(canvas, 0, 0);
-		clear();
-		//		initEventHandling();
-	}
+//	public DrawingAreaGWT(Canvas canvas){
+//		super(canvas.getCanvasElement().getWidth(), canvas.getCanvasElement().getHeight());
+//		this.canvasGWT = canvas;
+//		this.panel = new AbsolutePanel();
+//		panel.setPixelSize(width, height);
+//		panel.add(canvas, 0, 0);
+//		clear();
+//		//		initEventHandling();
+//	}
 
 	protected void initEventHandling(){
 		if(handlerManager == null){

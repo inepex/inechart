@@ -7,7 +7,9 @@ public class MoveTo extends PathElement {
 		super(endPointX, endPointY);
 	}
 
-
+	public MoveTo(MoveTo copy) {
+		super(copy);
+	}
 	
 
 }
