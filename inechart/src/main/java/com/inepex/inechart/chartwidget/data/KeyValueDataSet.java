@@ -285,5 +285,10 @@ public class KeyValueDataSet extends AbstractXYDataSet{
 		}
 		return null;
 	}
+
+	@Override
+	public void clear() {
+		entries.clear();		
+	}
 	
 }

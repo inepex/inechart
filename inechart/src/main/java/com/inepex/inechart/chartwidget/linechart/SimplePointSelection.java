@@ -57,7 +57,7 @@ public class SimplePointSelection extends LineChartInteractiveModule {
 			TreeMap<Curve, ArrayList<DataPoint>> deselectedPoints) {
 		
 		for(Curve c : lineChart.curves){
-			if(c.hasPoint){
+			if(c.hasPoint || lineChart.pointMouseOverRadius > 0){
 				boolean updated = false;
 				if(selectedPoints.containsKey(c)){
 					if(deselectedPoints.containsKey(c)){
@@ -104,7 +104,7 @@ public class SimplePointSelection extends LineChartInteractiveModule {
 	@Override
 	protected void update() {
 		for(Curve c : lineChart.curves){
-			if(c.hasPoint){
+			if(c.hasPoint || lineChart.pointMouseOverRadius > 0){
 				updateLayer(c, null);
 			}
 		}
@@ -127,11 +127,10 @@ public class SimplePointSelection extends LineChartInteractiveModule {
 		}
 		else{
 			for(GraphicalObject go : registeredInteractivePoints.get(curve)){
-				lineChart.interactiveGOsPerCurve.get(curve).removeGraphicalObject(go);
-				lineChart.interactivePoints.remove(go);
+				lineChart.resetInteractivePoint(curve, go);
 			}
 		}
-		for(DataPoint dp : points == null ? curve.selectedPoints : points){
+		for(DataPoint dp : points == null ? curve.getSelectedPoints() : points){
 			if(dp.isInViewport){
 				canvas.addAllGraphicalObject(lineChart.createPoint(curve, dp, shape, true, registeredInteractivePoints.get(curve)));
 			}
@@ -150,5 +149,17 @@ public class SimplePointSelection extends LineChartInteractiveModule {
 		// TODO Auto-generated method stub
 		
 	}
+
+	
+	public Shape getDefaultSelectedPointShape() {
+		return defaultSelectedPointShape;
+	}
+
+	
+	public void setDefaultSelectedPointShape(Shape defaultSelectedPointShape) {
+		this.defaultSelectedPointShape = defaultSelectedPointShape;
+	}
+
+	
 
 }

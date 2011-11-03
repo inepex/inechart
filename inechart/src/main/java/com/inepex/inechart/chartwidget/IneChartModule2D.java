@@ -73,6 +73,7 @@ public abstract class IneChartModule2D extends IneChartModule implements HasCoor
 				yAxis.setMax(yAxis.getMax() + dy);
 				redrawNeeded = true;
 			}
+			IneChartModule2D.this.onMove(event, dx, dy);
 		}
 
 		@Override
@@ -92,6 +93,7 @@ public abstract class IneChartModule2D extends IneChartModule implements HasCoor
 				yAxis.setMax(yMax);
 				redrawNeeded = true;
 			}
+			IneChartModule2D.this.onSet(event, xMin, yMin, xMax, yMax);
 		}
 
 		@Override
@@ -164,6 +166,7 @@ public abstract class IneChartModule2D extends IneChartModule implements HasCoor
 				xAxis.setMax(xAxis.getMax() + dx);
 				redrawNeeded = true;
 			}
+			IneChartModule2D.this.onMoveAlongX(event, dx);
 		}
 
 		@Override
@@ -177,6 +180,7 @@ public abstract class IneChartModule2D extends IneChartModule implements HasCoor
 				yAxis.setMax(yAxis.getMax() + dy);
 				redrawNeeded = true;
 			}
+			IneChartModule2D.this.onMoveAlongY(event, dy);
 		}
 
 		@Override
@@ -190,6 +194,7 @@ public abstract class IneChartModule2D extends IneChartModule implements HasCoor
 				xAxis.setMax(xMax);
 				redrawNeeded = true;
 			}
+			IneChartModule2D.this.onSetX(event, xMin, xMax);
 		}
 
 		@Override
@@ -203,6 +208,7 @@ public abstract class IneChartModule2D extends IneChartModule implements HasCoor
 				yAxis.setMax(yMax);
 				redrawNeeded = true;
 			}
+			IneChartModule2D.this.onSetY(event, yMin, yMax);
 		}
 
 		@Override
@@ -285,6 +291,36 @@ public abstract class IneChartModule2D extends IneChartModule implements HasCoor
 			moduleAssist.eventManager.addDataSetChangeHandler(innerEventHandler);
 		}
 	}
+	
+	protected abstract void onClick(ClickEvent event);
+
+	protected abstract void onMouseUp(MouseUpEvent event);
+	
+	protected abstract void onMouseOver(MouseEvent<?> event);
+
+	protected abstract void onMouseDown(MouseDownEvent event);
+
+	protected abstract void onMouseOut(MouseEvent<?> event);
+	
+	protected abstract void onMouseMove(MouseMoveEvent event);
+
+	protected abstract void onDataSetChange(DataSetChangeEvent event);
+	
+	protected abstract void onSelect(DataEntrySelectionEvent event);
+	
+	protected abstract void onDeselect(DataEntrySelectionEvent event);
+	
+	protected abstract void onMove(ViewportChangeEvent event, double dx, double dy);
+	
+	protected abstract void onMoveAlongX(ViewportChangeEvent event, double dx);
+	
+	protected abstract void onMoveAlongY(ViewportChangeEvent event, double dy);
+	
+	protected abstract void onSet(ViewportChangeEvent event, double xMin, double yMin, double xMax, double yMax);
+	
+	protected abstract void onSetX(ViewportChangeEvent event, double xMin, double xMax);
+	
+	protected abstract void onSetY(ViewportChangeEvent event, double yMin, double yMax);
 
 	/**
 	 * a module should override this method to calculate and set its axes before the update() call
@@ -765,24 +801,6 @@ public abstract class IneChartModule2D extends IneChartModule implements HasCoor
 	public void setMinRightPadding(int minRightPadding) {
 		this.minRightPadding = minRightPadding;
 	}
-
-	protected abstract void onClick(ClickEvent event);
-
-	protected abstract void  onMouseUp(MouseUpEvent event);
-	
-	protected abstract void onMouseOver(MouseEvent<?> event);
-
-	protected abstract void onMouseDown(MouseDownEvent event);
-
-	protected abstract void onMouseOut(MouseEvent<?> event);
-	
-	protected abstract void onMouseMove(MouseMoveEvent event);
-
-	protected abstract void onDataSetChange(DataSetChangeEvent event);
-	
-	protected abstract void onSelect(DataEntrySelectionEvent event);
-	
-	protected abstract void onDeselect(DataEntrySelectionEvent event);
 	
 	@Override
 	public void setDisplayLegendEntries(boolean displayEntries) {

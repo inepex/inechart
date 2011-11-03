@@ -18,6 +18,7 @@ import com.inepex.inechart.chartwidget.ModuleAssist;
 import com.inepex.inechart.chartwidget.axes.Axis.AxisDirection;
 import com.inepex.inechart.chartwidget.event.DataEntrySelectionEvent;
 import com.inepex.inechart.chartwidget.event.DataSetChangeEvent;
+import com.inepex.inechart.chartwidget.event.ViewportChangeEvent;
 import com.inepex.inechart.chartwidget.misc.ColorSet;
 import com.inepex.inechart.chartwidget.misc.HasShadow;
 import com.inepex.inechart.chartwidget.misc.HasZIndex;
@@ -958,6 +959,43 @@ public class BarChart extends IneChartModule2D implements HasShadow, HasZIndex {
 
 	@Override
 	protected void onDeselect(DataEntrySelectionEvent event) {
+		// TODO Auto-generated method stub
+		
+	}
+
+	@Override
+	protected void onMove(ViewportChangeEvent event, double dx, double dy) {
+		// TODO Auto-generated method stub
+		
+	}
+
+	@Override
+	protected void onMoveAlongX(ViewportChangeEvent event, double dx) {
+		// TODO Auto-generated method stub
+		
+	}
+
+	@Override
+	protected void onMoveAlongY(ViewportChangeEvent event, double dy) {
+		// TODO Auto-generated method stub
+		
+	}
+
+	@Override
+	protected void onSet(ViewportChangeEvent event, double xMin, double yMin,
+			double xMax, double yMax) {
+		// TODO Auto-generated method stub
+		
+	}
+
+	@Override
+	protected void onSetX(ViewportChangeEvent event, double xMin, double xMax) {
+		// TODO Auto-generated method stub
+		
+	}
+
+	@Override
+	protected void onSetY(ViewportChangeEvent event, double yMin, double yMax) {
 		// TODO Auto-generated method stub
 		
 	}

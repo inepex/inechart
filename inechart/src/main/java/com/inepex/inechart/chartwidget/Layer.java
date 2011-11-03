@@ -71,6 +71,6 @@ public class Layer implements Comparable<Layer>{
 	
 	@Override
 	public int compareTo(Layer o) {
-		return zIndex - o.zIndex;
+		return ((Integer)zIndex).compareTo(o.zIndex);
 	}
 }

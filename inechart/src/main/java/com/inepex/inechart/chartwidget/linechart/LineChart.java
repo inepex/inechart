@@ -1,7 +1,6 @@
 package com.inepex.inechart.chartwidget.linechart;
 
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.List;
 import java.util.TreeMap;
 
@@ -18,10 +17,13 @@ import com.inepex.inechart.chartwidget.IneChartModule2D;
 import com.inepex.inechart.chartwidget.Layer;
 import com.inepex.inechart.chartwidget.LinkedLayers;
 import com.inepex.inechart.chartwidget.ModuleAssist;
+import com.inepex.inechart.chartwidget.data.AbstractDataEntry;
 import com.inepex.inechart.chartwidget.data.XYDataEntry;
 import com.inepex.inechart.chartwidget.event.DataEntrySelectionEvent;
 import com.inepex.inechart.chartwidget.event.DataSetChangeEvent;
 import com.inepex.inechart.chartwidget.event.PointSelectionEvent;
+import com.inepex.inechart.chartwidget.event.PointSelectionHandler;
+import com.inepex.inechart.chartwidget.event.ViewportChangeEvent;
 import com.inepex.inechart.chartwidget.properties.Color;
 import com.inepex.inechart.chartwidget.properties.LineProperties.LineStyle;
 import com.inepex.inechart.chartwidget.shape.Circle;
@@ -36,7 +38,7 @@ import com.inepex.inegraphics.shared.gobjects.GraphicalObject;
 import com.inepex.inegraphics.shared.gobjects.Path;
 import com.inepex.inegraphics.shared.gobjects.PathElement;
 
-public class LineChart extends IneChartModule2D{
+public class LineChart extends IneChartModule2D implements PointSelectionHandler{
 
 	// model fields
 	ArrayList<Curve> curves;
@@ -86,7 +88,7 @@ public class LineChart extends IneChartModule2D{
 		pointSelectionMode = Defaults.selectPoint;
 		autoScaleViewport = true;
 		pointMouseOverRadius = Defaults.pointMouseOverRadius;
-		singlePointSelection = true;
+		singlePointSelection = false;
 		setPointFilter(new PointFilter());
 	}
 
@@ -174,7 +176,6 @@ public class LineChart extends IneChartModule2D{
 		if (curves == null || curves.size() == 0)
 			return;
 		graphicalObjectContainer.removeAllGraphicalObjects();
-
 		//do model to canvas calculations
 		for (Curve curve : curves) {
 			updateCurveModel(curve);
@@ -183,6 +184,9 @@ public class LineChart extends IneChartModule2D{
 		for (Curve curve : curves) {
 			removeAndCreateCurveGOs(curve);
 			drawGOsAndUpdateCanvasIfClient(curve);
+		}
+		for(LineChartInteractiveModule im : interactiveModules){
+			im.update();
 		}
 		super.update();
 	}
@@ -210,6 +214,14 @@ public class LineChart extends IneChartModule2D{
 		}
 		if(curve.hasPoint){
 			createPointChartGOs(curve);
+		}
+		else if(pointMouseOverRadius > 0){
+			for(DataPoint point : curve.dataPoints){
+				if(!point.isInViewport){
+					continue;
+				}
+				createInteractivePoint(curve, point, null, null);
+			}
 		}
 	}
 
@@ -244,31 +256,16 @@ public class LineChart extends IneChartModule2D{
 	 */
 	protected void calculatePointsForSortedCurve(Curve curve, double from, double to, boolean includeFrom, boolean includeTo){
 		List<XYDataEntry> dataPairs = curve.dataSet.getXYDataEntries(from, to);
-		List<DataPoint> toRemove = new ArrayList<DataPoint>();
-		for(DataPoint selected : curve.selectedPoints){
-			if(selected.data.getX() < from || (!includeFrom && selected.data.getX() == from)){
-				continue;
-			}
-			else if(selected.data.getX() > to || (!includeTo && selected.data.getX() == to)){
-				break;
-			}
-			if(curve.dataSet.containsXYDataEntry(selected.data)){
-				setDataPoint(selected);
-			}
-			else{
-				toRemove.add(selected);
-			}
-		}
-		for(DataPoint dp : toRemove){
-			curve.selectedPoints.remove(dp);
-		}
 		ArrayList<DataPoint> points = new ArrayList<DataPoint>();
 		for(XYDataEntry xyEntry : dataPairs){
 			if(xyEntry.getX() > to || (!includeTo && xyEntry.getX() == to)){
 				break;
 			}
 			if(xyEntry.getX() > from || (includeFrom && xyEntry.getX() == from)){
-				DataPoint dp = createDataPoint(xyEntry); 
+				DataPoint dp = createDataPoint(xyEntry);
+				if(curve.unfilterableEntries.contains(xyEntry)){
+					dp.unfilterable = true;
+				}
 				points.add(dp);
 				if(curve.discontinuities.contains(xyEntry)){
 					curve.discontinuitiesAsPoint.add(dp);
@@ -280,21 +277,9 @@ public class LineChart extends IneChartModule2D{
 
 	protected void calculatePointsForCurve(Curve curve){
 		List<XYDataEntry> dataPairs = curve.dataSet.getXYDataEntries();
-		List<DataPoint> toRemove = new ArrayList<DataPoint>();
-		Collections.sort(curve.selectedPoints);
-		for(DataPoint selected : curve.selectedPoints){
-			if(curve.dataSet.containsXYDataEntry(selected.data)){
-				setDataPoint(selected);
-			}
-			else{
-				toRemove.add(selected);
-			}
-		}
-		for(DataPoint dp : toRemove){
-			curve.selectedPoints.remove(dp);
-		}
 		curve.discontinuitiesAsPoint.clear();
 		curve.dataPoints.clear();
+		curve.entryPointMap.clear();
 		ArrayList<DataPoint> points = new ArrayList<DataPoint>();
 		if(curve.dataSet.isSortable()){
 			XYDataEntry last = null;
@@ -306,14 +291,20 @@ public class LineChart extends IneChartModule2D{
 			for(XYDataEntry xyEntry : dataPairs){
 				//bigger than vp min
 				if(xyEntry.getX() >= xAxis.getMin()){
-					if(last != null){
+					if(last != null && points.size() == 0){
 						DataPoint dp = createDataPoint(last); 
+						if(curve.unfilterableEntries.contains(last)){
+							dp.unfilterable = true;
+						}
 						points.add(dp);
 						if(curve.discontinuities.contains(last)){
 							curve.discontinuitiesAsPoint.add(dp);
 						}
 					}
 					DataPoint dp = createDataPoint(xyEntry); 
+					if(curve.unfilterableEntries.contains(xyEntry)){
+						dp.unfilterable = true;
+					}
 					points.add(dp);
 					if(curve.discontinuities.contains(xyEntry)){
 						curve.discontinuitiesAsPoint.add(dp);
@@ -323,6 +314,9 @@ public class LineChart extends IneChartModule2D{
 				else if(xyEntry.getX() > xAxis.getMax()){
 					if(firstAfterVP){
 						DataPoint dp = createDataPoint(xyEntry); 
+						if(curve.unfilterableEntries.contains(xyEntry)){
+							dp.unfilterable = true;
+						}
 						points.add(dp);
 						if(curve.discontinuities.contains(xyEntry)){
 							curve.discontinuitiesAsPoint.add(dp);
@@ -362,12 +356,14 @@ public class LineChart extends IneChartModule2D{
 				DataPoint dp = createDataPoint(beforeVPMin);
 				if(points.size() == 0 || DataPoint.canvasXComparator.compare(dp, points.get(0)) != 0){
 					curve.dataPoints.add(dp);
+					curve.entryPointMap.put(beforeVPMin, dp);
 				}
 			}
 			if(beforeVPMax != null && beforeVPMax != beforeVPMin){
 				DataPoint dp = createDataPoint(beforeVPMax);
 				if(points.size() == 0 || DataPoint.canvasXComparator.compare(dp, points.get(0)) != 0){
 					curve.dataPoints.add(dp);
+					curve.entryPointMap.put(beforeVPMax, dp);
 				}
 			}
 			curve.dataPoints.addAll(points);
@@ -375,21 +371,37 @@ public class LineChart extends IneChartModule2D{
 				DataPoint dp = createDataPoint(afterVPMin);
 				if(points.size() == 0 || DataPoint.canvasXComparator.compare(dp, points.get(points.size() - 1)) != 0){
 					curve.dataPoints.add(dp);
+					curve.entryPointMap.put(afterVPMin, dp);
 				}
 			}
 			if(afterVPMax != null && afterVPMax != afterVPMin){
 				DataPoint dp = createDataPoint(afterVPMax);
 				if(points.size() == 0 || DataPoint.canvasXComparator.compare(dp, points.get(points.size() - 1)) != 0){
 					curve.dataPoints.add(dp);
+					curve.entryPointMap.put(afterVPMax, dp);
 				}
 			}
 		}
 		else{
-			for(XYDataEntry map : dataPairs){
-				points.add(createDataPoint(map));
+			for(XYDataEntry entry : dataPairs){
+				DataPoint dp = createDataPoint(entry); 
+				if(curve.unfilterableEntries.contains(entry)){
+					dp.unfilterable = true;
+				}
+				points.add(dp);			
 			}
 			points = pointFilter.filterDataPoints(points);
 			curve.dataPoints.addAll(points);
+		}
+		for(DataPoint dp : points){
+			if(dp.containsHiddenData()){
+				for(DataPoint dp2 : dp.filteredPoints){
+					curve.entryPointMap.put(dp2.data, dp);
+				}
+			}
+			else{
+				curve.entryPointMap.put(dp.data, dp);
+			}
 		}
 	}
 
@@ -415,7 +427,7 @@ public class LineChart extends IneChartModule2D{
 		}
 		return false;
 	}
-	
+
 	protected Path createFillPathForCurve(Curve curve, double fromCanvasX, double toCanvasX){
 		Path path = null;
 		double[] lastPair = null;
@@ -614,7 +626,6 @@ public class LineChart extends IneChartModule2D{
 			normal.setZIndex(curve.zIndex);
 		}
 
-
 		if(curve.hasShadow){
 			if(normal != null){
 				normal.setShadowColor(curve.shadowColor);
@@ -631,6 +642,15 @@ public class LineChart extends IneChartModule2D{
 		}
 	}
 
+	/**
+	 * 
+	 * @param curve
+	 * @param point
+	 * @param shape
+	 * @param interactive
+	 * @param registeredInteractivePoints puts the interactive GO into this container
+	 * @return
+	 */
 	protected GraphicalObjectContainer createPoint(Curve curve, DataPoint point, Shape shape, boolean interactive, ArrayList<GraphicalObject> registeredInteractivePoints){
 		GraphicalObjectContainer goc = new GraphicalObjectContainer();
 		if(shape != null){
@@ -646,34 +666,80 @@ public class LineChart extends IneChartModule2D{
 				goc.addGraphicalObject(go);
 			}
 			if(interactive){
-				GraphicalObject go = shape.toInteractiveGraphicalObject(pointMouseOverRadius);
-				if (shape instanceof Circle) {
-					go.setBasePointX(point.canvasX);
-					go.setBasePointY(point.canvasY);
-				}
-				else if (shape instanceof Rectangle) {
-					go.setBasePointX(point.canvasX - ((Rectangle) shape).getWidth() / 2);
-					go.setBasePointY(point.canvasY - ((Rectangle) shape).getHeight() / 2);
-				}
-				interactivePoints.put(go, point);
-				GraphicalObjectContainer gos = interactiveGOsPerCurve.get(curve);
-				if(gos == null){
-					gos = new GraphicalObjectContainer();
-					interactiveGOsPerCurve.put(curve, gos);
-				}
-				gos.addGraphicalObject(go);
-				if(registeredInteractivePoints != null){
-					registeredInteractivePoints.add(go);
-				}
+				createInteractivePoint(curve, point, shape, registeredInteractivePoints);
 			}
 		}
 		return goc;
 	}
 
 	/**
-	 * Removes all {@link GraphicalObject} from this modul's
-	 * {@link GraphicalObjectContainer} based on {@link #lineChartGOsPerCurve} and
-	 * {@link #gosPerPoint} containers.
+	 * Creates an invisible {@link GraphicalObject} representing the mouseOver area of the given {@link DataPoint}
+	 * @param curve
+	 * @param point
+	 * @param shape
+	 * @param registeredInteractivePoints
+	 */
+	protected void createInteractivePoint(Curve curve, DataPoint point, Shape shape, ArrayList<GraphicalObject> registeredInteractivePoints){
+		GraphicalObject go;
+		if(shape != null){
+			go = shape.toInteractiveGraphicalObject(pointMouseOverRadius);
+		}
+		else{
+			shape = new Circle(1);
+			go = shape.toInteractiveGraphicalObject(pointMouseOverRadius);
+		}
+		if (shape instanceof Circle) {
+			go.setBasePointX(point.canvasX);
+			go.setBasePointY(point.canvasY);
+		}
+		else if (shape instanceof Rectangle) {
+			go.setBasePointX(point.canvasX - ((Rectangle) shape).getWidth() / 2);
+			go.setBasePointY(point.canvasY - ((Rectangle) shape).getHeight() / 2);
+		}
+		
+		GraphicalObjectContainer gos = interactiveGOsPerCurve.get(curve);
+		if(gos == null){
+			gos = new GraphicalObjectContainer();
+			interactiveGOsPerCurve.put(curve, gos);
+		}
+		//single interactive GO for a datapoint
+		if(interactivePoints.containsValue(point)){
+			GraphicalObject oldInteractiveGO = null;
+			for(GraphicalObject igo:interactivePoints.keySet()){
+				if(point == interactivePoints.get(igo)){
+					oldInteractiveGO = igo;
+					break;
+				}
+			}
+			interactivePoints.remove(oldInteractiveGO);
+			gos.removeGraphicalObject(oldInteractiveGO);
+		}
+		interactivePoints.put(go, point);
+		gos.addGraphicalObject(go);
+		if(registeredInteractivePoints != null){
+			registeredInteractivePoints.add(go);
+		}
+	}
+	
+	protected void resetInteractivePoint(Curve curve, GraphicalObject go){
+		if(interactivePoints.containsKey(go)){
+			DataPoint dp = interactivePoints.get(go);
+			interactivePoints.remove(go);
+			interactiveGOsPerCurve.get(curve).removeGraphicalObject(go);
+			//add default interactive go
+			Shape normal = curve.pointShape;
+			if(normal == null && curve.hasPoint){
+				//use defaults
+				normal = Defaults.normalPoint();	
+				normal.getProperties().getLineProperties().setLineColor(curve.dataSet.getColor());
+			}
+			createInteractivePoint(curve, dp, normal, null);
+		}
+	}
+
+	/**
+	 * Removes all {@link GraphicalObject} from the related {@link GraphicalObjectContainer} based on {@link #lineChartGOsPerCurve} and
+	 * {@link #pointChartGOsPerCurve} containers.
 	 * 
 	 * @param curve
 	 */
@@ -698,22 +764,22 @@ public class LineChart extends IneChartModule2D{
 		}
 	}
 
-	static Context createFillContext(Color fillColor) {
+	protected static Context createFillContext(Color fillColor) {
 		return new Context(fillColor.getAlpha(), Defaults.colorString, 0,
 				fillColor.getColor(), 0, 0, Defaults.alpha,
 				Defaults.colorString);
 	}
 
-	static Context createLineContext(Curve Curve2) {
+	protected static Context createLineContext(Curve curve) {
 		return new Context(
-				Curve2.lineProperties != null ? Curve2.lineProperties.getLineColor().getAlpha() :	Defaults.alpha,
-						Curve2.lineProperties != null ? Curve2.lineProperties.getLineColor().getColor() : Curve2.dataSet.getColor().getColor(),
-								Curve2.lineProperties != null ? Curve2.lineProperties.getLineWidth() : Defaults.lineWidth,
+				curve.lineProperties != null ? curve.lineProperties.getLineColor().getAlpha() :	Defaults.alpha,
+						curve.lineProperties != null ? curve.lineProperties.getLineColor().getColor() : curve.dataSet.getColor().getColor(),
+								curve.lineProperties != null ? curve.lineProperties.getLineWidth() : Defaults.lineWidth,
 										Defaults.colorString,
-										Curve2.hasShadow ? Curve2.shadowOffsetX : 0,
-												Curve2.hasShadow ? Curve2.shadowOffsetY : 0,
-														Curve2.shadowColor == null ? Defaults.alpha : Curve2.shadowColor.getAlpha(),
-																Curve2.shadowColor == null ? Defaults.colorString : Curve2.shadowColor.getColor());
+										curve.hasShadow ? curve.shadowOffsetX : 0,
+												curve.hasShadow ? curve.shadowOffsetY : 0,
+														curve.shadowColor == null ? Defaults.alpha : curve.shadowColor.getAlpha(),
+																curve.shadowColor == null ? Defaults.colorString : curve.shadowColor.getColor());
 	}
 
 	@Override
@@ -734,41 +800,38 @@ public class LineChart extends IneChartModule2D{
 		}
 	}
 
-	/**
-	 * @return the Curve2s
-	 */
-	public List<Curve> getCurves() {
-		return curves;
+	@Override
+	protected void onDataSetChange(DataSetChangeEvent event) {
+		//TODO
 	}
 
-	/**
-	 * @return the pointMouseOverRadius
-	 */
-	public int getPointMouseOverRadius() {
-		return pointMouseOverRadius;
+	@Override
+	protected void onSelect(DataEntrySelectionEvent event) {
+		dataEntrySelected(event);
 	}
 
-	/**
-	 * @param pointMouseOverRadius -1 if you want to use the default
-	 */
-	public void setPointMouseOverRadius(int pointMouseOverRadius) {
-		this.pointMouseOverRadius = pointMouseOverRadius;
+	@Override
+	protected void onDeselect(DataEntrySelectionEvent event) {
+		dataEntrySelected(event);
 	}
 
-	/**
-	 * @return the selectPoint
-	 */
-	public PointSelectionMode getPointSelectionMode() {
-		return pointSelectionMode;
+	protected void dataEntrySelected(DataEntrySelectionEvent event){
+		if(event.getDataEntry().getContainer() == null || !(event.getDataEntry() instanceof XYDataEntry)){
+			return;
+		}
+		for(Curve c : curves){
+			if(event.getDataEntry().getContainer() == c.dataSet && c.dataSet.containsXYDataEntry((XYDataEntry) event.getDataEntry())){
+				TreeMap<Curve, ArrayList<DataPoint>> selected = new TreeMap<Curve, ArrayList<DataPoint>>();
+				ArrayList<DataPoint> selectedList = new ArrayList<DataPoint>();
+				DataPoint dp = createDataPoint((XYDataEntry) event.getDataEntry());
+				selectedList.add(dp);
+				selected.put(c, selectedList);
+				interactPointEvent(selected, !event.isSelect(), event.isSelect());
+				break;
+			}
+		}
 	}
-
-	/**
-	 * @param selectPoint the selectPoint to set
-	 */
-	public void setPointSelectionMode(PointSelectionMode selectPoint) {
-		this.pointSelectionMode = selectPoint;
-	}
-
+	
 	@Override
 	protected void onClick(ClickEvent event) {
 		handleMouseEvents(event);
@@ -818,7 +881,6 @@ public class LineChart extends IneChartModule2D{
 		if(!moduleAssist.isClientSide()){
 			return;
 		}
-		//		long start = System.currentTimeMillis();
 		TreeMap<Curve, ArrayList<DataPoint>> overedPointsPerCurve;
 		if( (pointSelectionMode == PointSelectionMode.On_Click && event instanceof ClickEvent && event.getNativeButton() == Event.BUTTON_LEFT) 
 				|| (pointSelectionMode == PointSelectionMode.On_Right_Click && event instanceof ClickEvent && event.getNativeButton() == Event.BUTTON_RIGHT) ||
@@ -827,11 +889,10 @@ public class LineChart extends IneChartModule2D{
 
 			int[] coords = getCoords(event);
 			for(Curve c : interactiveGOsPerCurve.keySet()){
-				if(!c.hasPoint){
+				if(!c.hasPoint && pointMouseOverRadius <= 0){
 					continue;
 				}
 				for(GraphicalObject go : interactiveGOsPerCurve.get(c).getGraphicalObjects()){
-					//TODO mouseoverradius
 					if(MouseAssist.isMouseOver(coords, go) && interactivePoints.containsKey(go)){
 						ArrayList<DataPoint> list = overedPointsPerCurve.get(c);
 						if(list == null){
@@ -849,8 +910,6 @@ public class LineChart extends IneChartModule2D{
 			overedPointsPerCurve = getClosestToMousePoints(event);
 			interactPointEvent(overedPointsPerCurve, true, true);
 		}
-		//		Log.debug("mouseEvent update: " + (System.currentTimeMillis() - start) + "ms");
-
 	}
 
 	/**
@@ -865,7 +924,7 @@ public class LineChart extends IneChartModule2D{
 			return mouseOver;
 		}
 		for(Curve c : curves){
-			if(!c.hasPoint){
+			if(!c.hasPoint && pointMouseOverRadius <= 0){
 				continue;
 			}
 			DataPoint overed = null;
@@ -917,23 +976,10 @@ public class LineChart extends IneChartModule2D{
 		TreeMap<Curve, ArrayList<DataPoint>> justSelected = new TreeMap<Curve, ArrayList<DataPoint>>();
 		TreeMap<Curve, ArrayList<DataPoint>> justDeselected = new TreeMap<Curve, ArrayList<DataPoint>>();
 
-		for(Curve c : curves){
-			ArrayList<DataPoint> list = new ArrayList<DataPoint>();
-			if(interactedPoints.containsKey(c)){
-				for(DataPoint actual : interactedPoints.get(c)){
-					if(actual.containsHiddenData()){
-						for(DataPoint hidden : actual.filteredPoints){
-							list.add(hidden);
-						}
-					}
-					else{
-						list.add(actual);
-					}
-				}
-			}
+		for(Curve c : interactedPoints.keySet()){
 			justDeselected.put(c, new ArrayList<DataPoint>());
 			justSelected.put(c, new ArrayList<DataPoint>());
-			interactedPoints(c, list, justSelected.get(c), justDeselected.get(c));
+			interactedPoints(c, interactedPoints.get(c), justSelected.get(c), justDeselected.get(c));
 		}
 		//update model 
 		for(Curve c : justSelected.keySet()){
@@ -942,25 +988,24 @@ public class LineChart extends IneChartModule2D{
 				continue;
 			}
 			if(singlePointSelection || pointSelectionMode == PointSelectionMode.Closest_To_Cursor){
-				if(c.selectedPoints.size() > 0){
-					for(DataPoint dp : c.selectedPoints){
-						if(justDeselected.get(c) == null){
-							justDeselected.put(c, new ArrayList<DataPoint>());
-						}
-						justDeselected.get(c).add(dp);
-					}
-					c.selectedPoints.clear();
+				if(justDeselected.get(c) == null){
+					justDeselected.put(c, new ArrayList<DataPoint>());
 				}
-				c.selectedPoints.add(selected.get(0));
+				justDeselected.get(c).addAll(c.singleSelect(selected.get(0)));
+				for(int i = 1; i < selected.size(); i++){
+					selected.remove(i);
+				}
 			}
 			else{
-				c.selectedPoints.addAll(selected);
+				for(DataPoint dp : selected){
+					c.select(dp);
+				}
 			}
 		}
 		for(Curve c : justDeselected.keySet()){
 			ArrayList<DataPoint> deselected = justDeselected.get(c);
 			for(DataPoint dp : deselected){
-				c.selectedPoints.remove(dp);
+				c.deselect(dp);
 			}
 		}
 
@@ -975,29 +1020,48 @@ public class LineChart extends IneChartModule2D{
 				for(DataPoint dp : selected){
 					PointSelectionEvent e = new PointSelectionEvent(true, dp, c);
 					moduleAssist.getEventManager().fireEvent(e);
+					XYDataEntry entry = dp.data;
+					if(dp.containsHiddenData()){
+						entry = dp.filteredPoints.get(0).data;
+					}
+					DataEntrySelectionEvent de = new DataEntrySelectionEvent((AbstractDataEntry) entry, this, true);
+					moduleAssist.getEventManager().fireEvent(de);
 				}
 			}
 		}
 		if(fireDeselect){
 			for(Curve c : justDeselected.keySet()){
-				ArrayList<DataPoint> selected = justDeselected.get(c);
-				for(DataPoint dp : selected){
+				ArrayList<DataPoint> deselected = justDeselected.get(c);
+				for(DataPoint dp : deselected){
 					PointSelectionEvent e = new PointSelectionEvent(false, dp, c);
 					moduleAssist.getEventManager().fireEvent(e);
+					XYDataEntry entry = dp.data;
+					if(dp.containsHiddenData()){
+						entry = dp.filteredPoints.get(0).data;
+					}
+					DataEntrySelectionEvent de = new DataEntrySelectionEvent((AbstractDataEntry) entry, this, false);
+					moduleAssist.getEventManager().fireEvent(de);
 				}
 			}
 		}
 	}
 
+	/**
+	 * Determines the state of the given interacted points
+	 * @param curve
+	 * @param interactedPoints
+	 * @param selected 
+	 * @param deselected
+	 */
 	private void interactedPoints(Curve curve, ArrayList<DataPoint> interactedPoints, ArrayList<DataPoint> selected, ArrayList<DataPoint> deselected){
-		//if a point was selected and still selected, no state change any other way state change
+		//if a point was selected and still selected: no state change, any other way: state change
 		if(pointSelectionMode == PointSelectionMode.Closest_To_Cursor || pointSelectionMode == PointSelectionMode.On_Over){
 			for(DataPoint dp : interactedPoints){
 				if(!curve.isPointSelected(dp)){
 					selected.add(dp);					
 				}
 			}
-			for(DataPoint dp : curve.selectedPoints){
+			for(DataPoint dp : curve.getSelectedPoints()){
 				if(!interactedPoints.contains(dp)){
 					deselected.add(dp);
 				}
@@ -1016,7 +1080,7 @@ public class LineChart extends IneChartModule2D{
 		}
 	}
 
-	private void setDataPoint(DataPoint dataPoint) {
+	protected void setDataPoint(DataPoint dataPoint) {
 		double[] canvasPos = getCanvasPosition(dataPoint.data.getX(), dataPoint.data.getY());
 		dataPoint.canvasX = canvasPos[0];
 		dataPoint.canvasY = canvasPos[1];
@@ -1032,38 +1096,6 @@ public class LineChart extends IneChartModule2D{
 		this.singlePointSelection = singlePointSelection;
 	}
 
-	@Override
-	protected void onDataSetChange(DataSetChangeEvent event) {
-		//TODO
-	}
-
-	@Override
-	protected void onSelect(DataEntrySelectionEvent event) {
-		dataEntrySelected(event);
-	}
-
-	@Override
-	protected void onDeselect(DataEntrySelectionEvent event) {
-		dataEntrySelected(event);
-	}
-
-	protected void dataEntrySelected(DataEntrySelectionEvent event){
-		if(event.getDataEntry().getContainer() == null || !(event.getDataEntry() instanceof XYDataEntry)){
-			return;
-		}
-		for(Curve c : curves){
-			if(c.hasPoint && event.getDataEntry().getContainer() == c.dataSet && c.dataSet.containsXYDataEntry((XYDataEntry) event.getDataEntry())){
-				TreeMap<Curve, ArrayList<DataPoint>> selected = new TreeMap<Curve, ArrayList<DataPoint>>();
-				ArrayList<DataPoint> selectedList = new ArrayList<DataPoint>();
-				DataPoint dp = createDataPoint((XYDataEntry) event.getDataEntry());
-				selectedList.add(dp);
-				selected.put(c, selectedList);
-				interactPointEvent(selected, !event.isSelect(), event.isSelect());
-				break;
-			}
-		}
-	}
-
 	public PointFilter getPointFilter() {
 		return pointFilter;
 	}
@@ -1076,6 +1108,92 @@ public class LineChart extends IneChartModule2D{
 	public void addInteractiveModule(LineChartInteractiveModule module){
 		interactiveModules.add(module);
 		module.attach(moduleAssist, this);
+	}
+
+	/**
+	 * @return the Curves
+	 */
+	public List<Curve> getCurves() {
+		return curves;
+	}
+
+	/**
+	 * @return the pointMouseOverRadius
+	 */
+	public int getPointMouseOverRadius() {
+		return pointMouseOverRadius;
+	}
+
+	/**
+	 * @param pointMouseOverRadius -1 if you want to use the default
+	 */
+	public void setPointMouseOverRadius(int pointMouseOverRadius) {
+		this.pointMouseOverRadius = pointMouseOverRadius;
+	}
+
+	/**
+	 * @return the selectPoint
+	 */
+	public PointSelectionMode getPointSelectionMode() {
+		return pointSelectionMode;
+	}
+
+	/**
+	 * @param selectPoint the selectPoint to set
+	 */
+	public void setPointSelectionMode(PointSelectionMode selectPoint) {
+		this.pointSelectionMode = selectPoint;
+	}
+
+	@Override
+	protected void onMove(ViewportChangeEvent event, double dx, double dy) {
+		// TODO Auto-generated method stub
+		
+	}
+
+	@Override
+	protected void onMoveAlongX(ViewportChangeEvent event, double dx) {
+		// TODO Auto-generated method stub
+		
+	}
+
+	@Override
+	protected void onMoveAlongY(ViewportChangeEvent event, double dy) {
+		// TODO Auto-generated method stub
+		
+	}
+
+	@Override
+	protected void onSet(ViewportChangeEvent event, double xMin, double yMin,
+			double xMax, double yMax) {
+		// TODO Auto-generated method stub
+		
+	}
+
+	@Override
+	protected void onSetX(ViewportChangeEvent event, double xMin, double xMax) {
+		// TODO Auto-generated method stub
+		
+	}
+
+	@Override
+	protected void onSetY(ViewportChangeEvent event, double yMin, double yMax) {
+		// TODO Auto-generated method stub
+		
+	}
+
+	
+	@Override
+	public void onSelect(PointSelectionEvent event) {
+		// TODO Auto-generated method stub
+		
+	}
+
+	
+	@Override
+	public void onDeselect(PointSelectionEvent event) {
+		// TODO Auto-generated method stub
+		
 	}
 
 }

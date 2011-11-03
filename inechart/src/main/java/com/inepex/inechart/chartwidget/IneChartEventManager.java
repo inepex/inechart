@@ -27,12 +27,10 @@ import com.inepex.inechart.chartwidget.event.DataEntrySelectionHandler;
 import com.inepex.inechart.chartwidget.event.DataSetChangeEvent;
 import com.inepex.inechart.chartwidget.event.DataSetChangeHandler;
 import com.inepex.inechart.chartwidget.event.IneChartEvent;
-import com.inepex.inechart.chartwidget.event.PointSelectionEvent;
-import com.inepex.inechart.chartwidget.event.PointSelectionHandler;
 import com.inepex.inechart.chartwidget.event.ViewportChangeEvent;
 import com.inepex.inechart.chartwidget.event.ViewportChangeHandler;
 
-public class IneChartEventManager implements HasAllMouseHandlers, ViewportChangeHandler, PointSelectionHandler,
+public class IneChartEventManager implements HasAllMouseHandlers, ViewportChangeHandler,
 MouseDownHandler, MouseOutHandler, MouseMoveHandler, MouseOverHandler, MouseUpHandler, ClickHandler, HasClickHandlers, HasHandlers {
 	protected EventBus eventBus = null;
 	protected HandlerManager handlerManager;
@@ -54,7 +52,6 @@ MouseDownHandler, MouseOutHandler, MouseMoveHandler, MouseOverHandler, MouseUpHa
 	public void setEventBus(EventBus eventBus) {
 		this.eventBus = eventBus;
 		eventBus.addHandler(ViewportChangeEvent.TYPE, this);
-		eventBus.addHandler(PointSelectionEvent.TYPE, this);
 	}
 
 
@@ -77,11 +74,6 @@ MouseDownHandler, MouseOutHandler, MouseMoveHandler, MouseOverHandler, MouseUpHa
 
 	public void addViewportChangeHandler(ViewportChangeHandler handler){
 		handlerManager.addHandler(ViewportChangeEvent.TYPE, handler);
-	}
-
-
-	public void addPointSelectionHandler(PointSelectionHandler handler){
-		handlerManager.addHandler(PointSelectionEvent.TYPE, handler);
 	}
 
 
@@ -243,19 +235,6 @@ MouseDownHandler, MouseOutHandler, MouseMoveHandler, MouseOverHandler, MouseUpHa
 		}
 	}
 
-
-	@Override
-	public void onSelect(PointSelectionEvent event) {
-		fireInnerEvent(event);
-
-	}
-
-
-	@Override
-	public void onDeselect(PointSelectionEvent event) {
-		fireInnerEvent(event);
-
-	}
 
 	public void blindAllModules(){
 		parent.setCanHandleEventsForAllModule(false);

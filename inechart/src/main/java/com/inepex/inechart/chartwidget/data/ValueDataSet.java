@@ -121,5 +121,10 @@ public class ValueDataSet extends AbstractDataSet {
 	public ArrayList<ValueDataEntry> getEntries() {
 		return entries;
 	}
+
+	@Override
+	public void clear() {
+		entries.clear();
+	}
 	
 }

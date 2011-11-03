@@ -27,13 +27,13 @@ public class PointFilter {
 	}
 
 	public ArrayList<DataPoint> filterDataPoints(ArrayList<DataPoint> unfiltered){
-		
+
 		if(horizontalFilter <= 0 && verticalFilter <= 0 || unfiltered.size() < 2){
 			return unfiltered;
 		}
 		else{
 			ArrayList<DataPoint> filtered = new ArrayList<DataPoint>();
-			ArrayList<DataPoint> newDp = null;
+			ArrayList<DataPoint> overlapping = null;
 			DataPoint last = null;
 			for(DataPoint actual : unfiltered){
 				if(last == null){
@@ -41,26 +41,25 @@ public class PointFilter {
 					continue;
 				}
 				if(areOverlappingPoints(last, actual)){
-					if(newDp == null){
-						newDp = new ArrayList<DataPoint>();
-						newDp.add(last);
+					if(overlapping == null){
+						overlapping = new ArrayList<DataPoint>();
+						overlapping.add(last);
 					}
-					newDp.add(actual);
+					overlapping.add(actual);
 				}
 				else{
-					if(newDp == null) {
+					if(overlapping == null) {
 						filtered.add(last);
-						last = actual;
 					}
 					else{
-						filtered.add(applyFilterPolicy(newDp));
-						newDp = null;
-						last = null;
+						filtered.add(applyFilterPolicy(overlapping));
+						overlapping = null;
 					}
+					last = actual;
 				}
 			}
-			if(newDp != null) {
-				filtered.add(applyFilterPolicy(newDp));
+			if(overlapping != null) {
+				filtered.add(applyFilterPolicy(overlapping));
 			}
 			else if(last != null){
 				filtered.add(last);
@@ -71,42 +70,45 @@ public class PointFilter {
 
 	protected DataPoint applyFilterPolicy(ArrayList<DataPoint> dps){
 		double minX = Double.MAX_VALUE, minY = Double.MAX_VALUE, maxX = - Double.MAX_VALUE, maxY = - Double.MAX_VALUE;
-		DataPoint ret = new DataPoint();
+
 		for(DataPoint dp : dps){
-			if(minX > dp.canvasX){
-				minX = dp.canvasX;
+			if(minX > dp.data.getX()){
+				minX = dp.data.getX();
 			}
-			if(maxX < dp.canvasX){
-				maxX = dp.canvasX;
+			if(maxX < dp.data.getX()){
+				maxX = dp.data.getX();
 			}
-			if(minY > dp.canvasY){
-				minY = dp.canvasY;
+			if(minY > dp.data.getY()){
+				minY = dp.data.getY();
 			}
-			if(maxY < dp.canvasY){
-				maxY = dp.canvasY;
+			if(maxY < dp.data.getY()){
+				maxY = dp.data.getY();
 			}
-			ret.addFilteredPoint(dp);
+
 		}
+		DataPoint ret;
 		switch (policy) {
 		case average:
-			ret.canvasX = minX + (maxX - minX) / 2;
-			ret.canvasY = minY + (maxY - minY) / 2;
+			ret = new DataPoint(minX + (maxX - minX) / 2, minY + (maxY - minY) / 2);
 			break;
 		case lower:
-			ret.canvasX = maxX;
-			ret.canvasY = maxY;
+			ret = new DataPoint(minX + (maxX - minX) / 2, minY);
 			break;
 		case higher:
-			ret.canvasX = minX;
-			ret.canvasY = minY;
+		default:
+			ret = new DataPoint(minX + (maxX - minX) / 2, maxY);
 			break;
 		}	
-		ret.isInViewport = lineChart.isInsideModul(ret.canvasX, ret.canvasY);
+		lineChart.setDataPoint(ret);
+		ret.setFilteredPoints(dps);
 		return ret;
 	}
 
 	protected boolean areOverlappingPoints(DataPoint first, DataPoint second){
-		if(Math.abs(first.canvasX - second.canvasX) <= horizontalFilter || Math.abs(first.canvasY - second.canvasY) <= verticalFilter){
+		if(first.unfilterable || second.unfilterable){
+			return false;
+		}
+		else if(Math.abs(first.canvasX - second.canvasX) <= horizontalFilter || Math.abs(first.canvasY - second.canvasY) <= verticalFilter){
 			return true;
 		}
 		else return false;
@@ -115,7 +117,7 @@ public class PointFilter {
 	protected void setLineChart(LineChart lineChart){
 		this.lineChart = lineChart;
 	}
-	
+
 	public int getHorizontalFilter() {
 		return horizontalFilter;
 	}

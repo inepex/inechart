@@ -105,5 +105,10 @@ public class IntervalDataSet extends AbstractDataSet{
 	public void setRoundedCornerRadius(double roundedCornerRadius) {
 		this.roundedCornerRadius = roundedCornerRadius;
 	}
+
+	@Override
+	public void clear() {
+		intervals.clear();
+	}
 	
 }

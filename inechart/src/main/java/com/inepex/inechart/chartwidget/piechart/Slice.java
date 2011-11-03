@@ -1,6 +1,5 @@
 package com.inepex.inechart.chartwidget.piechart;
 
-import com.inepex.inechart.chartwidget.DataSet;
 import com.inepex.inechart.chartwidget.Defaults;
 import com.inepex.inechart.chartwidget.misc.ColorSet;
 import com.inepex.inechart.chartwidget.properties.Color;
@@ -28,9 +27,9 @@ public class Slice {
 	double data;
 	double percentage;
 	
-	public Slice(DataSet dataSet){
-		this(dataSet.getName(), dataSet.getColor(), dataSet.getValues().get(0));
-	}
+//	public Slice(DataSet dataSet){
+//		this(dataSet.getName(), dataSet.getColor(), dataSet.getValues().get(0));
+//	}
 		
 	public Slice(double data) {
 		this("Slice No.: "+ ++autoNameNo,data);

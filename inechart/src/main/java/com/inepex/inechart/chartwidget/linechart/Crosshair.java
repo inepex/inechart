@@ -275,4 +275,76 @@ public class Crosshair extends LineChartInteractiveModule{
 		return true;
 	}
 
+	public SelectionRange getSelectionRange() {
+		return selectionRange;
+	}
+
+	public void setSelectionRange(SelectionRange selectionRange) {
+		this.selectionRange = selectionRange;
+	}
+
+	public TextContainer getValueBox() {
+		return valueBox;
+	}
+
+	public void setValueBox(TextContainer valueBox) {
+		this.valueBox = valueBox;
+	}
+
+	public LineProperties getLineProperties() {
+		return lineProperties;
+	}
+
+	public void setLineProperties(LineProperties lineProperties) {
+		this.lineProperties = lineProperties;
+	}
+
+	public String getxFormat() {
+		return xFormat;
+	}
+
+	public void setxFormat(String xFormat) {
+		this.xFormat = xFormat;
+	}
+
+	public String getyFormat() {
+		return yFormat;
+	}
+
+	public void setyFormat(String yFormat) {
+		this.yFormat = yFormat;
+	}
+
+	public TextProperties getTextProperties() {
+		return textProperties;
+	}
+
+	public void setTextProperties(TextProperties textProperties) {
+		this.textProperties = textProperties;
+	}
+
+	public Curve getCurve() {
+		return curve;
+	}
+
+	public void setCurve(Curve curve) {
+		this.curve = curve;
+	}
+
+	public boolean isContinuousTracking() {
+		return continuousTracking;
+	}
+
+	public void setContinuousTracking(boolean continuousTracking) {
+		this.continuousTracking = continuousTracking;
+	}
+
+	public int getSnapToValueRange() {
+		return snapToValueRange;
+	}
+
+	public void setSnapToValueRange(int snapToValueRange) {
+		this.snapToValueRange = snapToValueRange;
+	}
+
 }

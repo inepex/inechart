@@ -7,6 +7,7 @@ import com.inepex.inechart.chartwidget.Defaults;
 import com.inepex.inechart.chartwidget.axes.Tick;
 import com.inepex.inechart.chartwidget.data.AbstractDataEntry;
 import com.inepex.inechart.chartwidget.data.AbstractXYDataSet;
+import com.inepex.inechart.chartwidget.data.KeyValueDataSet;
 import com.inepex.inechart.chartwidget.data.XYDataEntry;
 import com.inepex.inechart.chartwidget.misc.HasShadow;
 import com.inepex.inechart.chartwidget.misc.HasZIndex;
@@ -36,6 +37,8 @@ public class Curve implements HasZIndex, HasShadow, Comparable<Curve>{
 	 * {@link DataPoint}s created from {@link AbstractDataEntry}s
 	 */
 	ArrayList<DataPoint> dataPoints;
+	TreeMap<XYDataEntry, DataPoint> entryPointMap;
+	ArrayList<XYDataEntry> unfilterableEntries;
 	
 	
 	// Fills
@@ -52,7 +55,7 @@ public class Curve implements HasZIndex, HasShadow, Comparable<Curve>{
 	// points
 	boolean hasPoint = false;
 	Shape pointShape;
-	ArrayList<DataPoint> selectedPoints;
+	ArrayList<XYDataEntry> selectedEntries;
 
 	// shadow
 	Color shadowColor;
@@ -61,18 +64,20 @@ public class Curve implements HasZIndex, HasShadow, Comparable<Curve>{
 	int zIndex = Integer.MIN_VALUE;
 
 	public Curve(){
-		comparableNo = highestComparableNo++;
-		dataPoints = new ArrayList<DataPoint>();
-		selectedPoints = new ArrayList<DataPoint>();
-		discontinuities = new ArrayList<XYDataEntry>();
-		discontinuitiesAsPoint = new ArrayList<DataPoint>();
-		setShadowOffsetY(Defaults.shadowOffsetX);
-		setShadowOffsetX(Defaults.shadowOffsetY);
-		setShadowColor(Defaults.shadowColor());
+		this(new KeyValueDataSet());
 	}
 	
 	public Curve(AbstractXYDataSet dataSet){
-		this();
+		comparableNo = highestComparableNo++;
+		dataPoints = new ArrayList<DataPoint>();
+		selectedEntries = new ArrayList<XYDataEntry>();
+		unfilterableEntries = new ArrayList<XYDataEntry>();
+		discontinuities = new ArrayList<XYDataEntry>();
+		discontinuitiesAsPoint = new ArrayList<DataPoint>();
+		entryPointMap = new TreeMap<XYDataEntry, DataPoint>();
+		setShadowOffsetY(Defaults.shadowOffsetX);
+		setShadowOffsetX(Defaults.shadowOffsetY);
+		setShadowColor(Defaults.shadowColor());
 		this.dataSet = dataSet;
 	}
 	
@@ -264,35 +269,82 @@ public class Curve implements HasZIndex, HasShadow, Comparable<Curve>{
 		}
 	}
 	
-	public boolean isPointSelected(DataPoint dp){
-		for(DataPoint selected : selectedPoints){
-			if(selected.compareTo(dp) == 0){
-				return true;
+	protected void select(DataPoint dp){
+		if(dp.containsHiddenData()){
+			for(DataPoint dp2 : dp.filteredPoints){
+				select(dp2);
+			}
+		}
+		else{
+			select(dp.data);
+		}
+	}
+	
+	protected ArrayList<DataPoint> singleSelect(DataPoint dp){
+		ArrayList<DataPoint> deselected = getSelectedPoints();
+		selectedEntries.clear();
+		if(dp.containsHiddenData()){
+			select(dp.filteredPoints.get(0).data);
+		}
+		else{
+			select(dp.data);
+		}
+		return deselected;
+	}
+	
+	protected void deselect(DataPoint dp){
+		if(dp.containsHiddenData()){
+			for(DataPoint dp2 : dp.filteredPoints){
+				deselect(dp2);
+			}
+		}
+		else{
+			deselect(dp.data);
+		}
+	}
+	
+	protected void select(XYDataEntry entry){
+		if(!selectedEntries.contains(entry)){
+			selectedEntries.add(entry);
+		}
+//		if(dataSet.containsXYDataEntry(entry)){
+//			dataSet.fireDataEntrySelectionEvent((AbstractDataEntry) entry, true);
+//		}
+	}
+	
+	protected void deselect(XYDataEntry entry){
+		selectedEntries.remove(entry);
+//		if(dataSet.containsXYDataEntry(entry)){
+//			dataSet.fireDataEntrySelectionEvent((AbstractDataEntry) entry, true);
+//		}
+	}
+	
+	protected boolean isPointSelected(DataPoint dataPoint){
+		if(dataPoint.containsHiddenData()){
+			for(DataPoint dp : dataPoint.filteredPoints){
+				if(isPointSelected(dp)){
+					return true;
+				}
+			}
+		}
+		else{
+			for(XYDataEntry entry:selectedEntries){
+				if(entry.compareTo(dataPoint.data) == 0){
+					return true;
+				}
 			}
 		}
 		return false;
 	}
 	
-	protected void selectPoint(DataPoint dp){
-		for(DataPoint selected : selectedPoints){
-			if(selected.compareTo(dp) == 0){
-				return;
-			}
-		}
-		selectedPoints.add(dp);
-	}
-	
-	protected void deselectPoint(DataPoint dp){
-		DataPoint toRemove = null;
-		for(DataPoint selected : selectedPoints){
-			if(selected.compareTo(dp) == 0){
-				toRemove = selected;
-				break;
-			}
-		}
-		if(toRemove != null){
-			selectedPoints.remove(toRemove);
-		}
+	public ArrayList<DataPoint> getSelectedPoints(){
+		 ArrayList<DataPoint> selectedPoints = new ArrayList<DataPoint>();
+		 for(XYDataEntry e : selectedEntries){
+			 if(entryPointMap.containsKey(e) && !selectedPoints.contains(entryPointMap.get(e))){
+				 selectedPoints.add(entryPointMap.get(e));
+			 }
+		 }
+		 return selectedPoints;
 	}
 	
 	public DataPoint getPointBeforeX(double x){
@@ -313,5 +365,14 @@ public class Curve implements HasZIndex, HasShadow, Comparable<Curve>{
 			}
 		}
 		return null;
+	}
+		
+	public void addUnfilterableEntry(XYDataEntry entry){
+		if(dataSet.containsXYDataEntry(entry)){
+			unfilterableEntries.add(entry);
+		}
+		else if(dataSet.getEntry(entry.getX(), entry.getY()) != null){
+			discontinuities.add(dataSet.getEntry(entry.getX(), entry.getY()));
+		}
 	}
 }

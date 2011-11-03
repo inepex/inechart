@@ -2,6 +2,7 @@ package com.inepex.inechart.chartwidget.data;
 
 import com.inepex.inechart.chartwidget.Defaults;
 import com.inepex.inechart.chartwidget.IneChartEventManager;
+import com.inepex.inechart.chartwidget.event.DataEntrySelectionEvent;
 import com.inepex.inechart.chartwidget.event.DataSetChangeEvent;
 import com.inepex.inechart.chartwidget.misc.ColorSet;
 import com.inepex.inechart.chartwidget.misc.HasTitle;
@@ -70,6 +71,12 @@ public abstract class AbstractDataSet implements HasTitle{
 			eventManager.fireEvent(new DataSetChangeEvent(this));
 		}
 	}
+	
+	public void fireDataEntrySelectionEvent(AbstractDataEntry entry, boolean selected){
+		if (attached && eventManager != null) {
+			eventManager.fireEvent(new DataEntrySelectionEvent(entry, selected));
+		}
+	}
 
 	public boolean isAttached() {
 		return attached;
@@ -83,4 +90,5 @@ public abstract class AbstractDataSet implements HasTitle{
 		this.eventManager = eventManager;
 	}
 	
+	public abstract void clear();
 }

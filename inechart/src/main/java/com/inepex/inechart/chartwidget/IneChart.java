@@ -91,15 +91,6 @@ public class IneChart extends Composite{
 		}
 	}
 
-//	public boolean isRedrawNeeded(){
-//		for(IneChartModule m : modules){
-//			if(m.isRedrawNeeded()){
-//				return true;
-//			}
-//		}
-//		return false;
-//	}
-
 	public void update() {
 		// pre-update modules
 		if (autoScaleModules){
@@ -150,6 +141,10 @@ public class IneChart extends Composite{
 
 	}
 
+	public void updateAxes(){
+		axes.update();
+	}
+	
 	/*
 	 * Moduls
 	 */
@@ -191,7 +186,6 @@ public class IneChart extends Composite{
 		eventManager.addViewportChangeHandler(ic.innerEventHandler);
 		return ic;
 	}
-
 
 	public RectangularSelection getRectangularSelection(){
 		if(selection == null){
@@ -313,13 +307,13 @@ public class IneChart extends Composite{
 				break;
 			}
 			else if(module instanceof BarChart){
-				BarChart vpBarChart = viewportSelectorChart.createBarChart();
-				for(DataSet d : ((BarChart) module).getDataSets()){
-					vpBarChart.addDataSet(d,((BarChart) module).getLookout(d));
-				}
-				vpBarChart.setDisplayLegendEntries(false);
-				rs.setModulToSelectFrom(vpBarChart);
-				rs.getAddressedModuls().add((IneChartModule2D) module);
+//				BarChart vpBarChart = viewportSelectorChart.createBarChart();
+//				for(DataSet d : ((BarChart) module).getDataSets()){
+//					vpBarChart.addDataSet(d,((BarChart) module).getLookout(d));
+//				}
+//				vpBarChart.setDisplayLegendEntries(false);
+//				rs.setModulToSelectFrom(vpBarChart);
+//				rs.getAddressedModuls().add((IneChartModule2D) module);
 				break;
 			}
 		}
