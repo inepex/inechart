@@ -10,7 +10,7 @@ public abstract class AbstractXYDataSet extends AbstractDataSet {
 
 	protected Color color;
 	
-	protected boolean allowXDuplicates = false;
+	protected boolean allowXDuplicates = true;
 	protected boolean sortable = true;
 		
 	protected AbstractXYDataSet() {
