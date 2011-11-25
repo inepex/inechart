@@ -63,8 +63,8 @@ public class IntervalSelection extends AbstractInteractiveModule implements Fire
 		if(spinners != null){
 			moduleAssist.getChartMainPanel().remove(spinners);
 		}
-		minSpinnerPos = relatedIneChartModule2D.getXAxis().getMin();
-		maxSpinnerPos = relatedIneChartModule2D.getXAxis().getMax();
+		minSpinnerPos = 0;
+		maxSpinnerPos = relatedIneChartModule2D.getXAxis().getMax() - relatedIneChartModule2D.getXAxis().getMin();
 		spinners = new IntervalSelectionWidget(relatedIneChartModule2D.getWidth(), false, true, new ResizableInterval() {
 
 			@Override
@@ -91,7 +91,7 @@ public class IntervalSelection extends AbstractInteractiveModule implements Fire
 
 			@Override
 			public void dragEnd() {
-				ViewportChangeEvent event = new ViewportChangeEvent(minSpinnerPos, maxSpinnerPos, true);
+				ViewportChangeEvent event = new ViewportChangeEvent(minSpinnerPos + relatedIneChartModule2D.getXAxis().getMin() , maxSpinnerPos + relatedIneChartModule2D.getXAxis().getMin(), true);
 				event.setAddressedCharts(addressedCharts);
 				event.setAddressedModules(addressedModuls);
 				moduleAssist.getEventManager().fireViewportChangedEvent(event);
@@ -108,8 +108,8 @@ public class IntervalSelection extends AbstractInteractiveModule implements Fire
 
 	protected void drawRectangles(){
 		layer.getCanvas().removeAllGraphicalObjects();
-		double leftSpinnerX = relatedIneChartModule2D.getCanvasX(minSpinnerPos);
-		double rightSpinnerX = relatedIneChartModule2D.getCanvasX(maxSpinnerPos);
+		double leftSpinnerX = relatedIneChartModule2D.getCanvasX(minSpinnerPos + relatedIneChartModule2D.getXAxis().getMin());
+		double rightSpinnerX = relatedIneChartModule2D.getCanvasX(maxSpinnerPos + relatedIneChartModule2D.getXAxis().getMin());
 		if(unselectedLookout != null){
 			Rectangle rectangle = new Rectangle(leftSpinnerX - relatedIneChartModule2D.getLeftPadding(), relatedIneChartModule2D.getHeight(), unselectedLookout);
 			for(GraphicalObject go : rectangle.toGraphicalObjects()){
@@ -175,14 +175,18 @@ public class IntervalSelection extends AbstractInteractiveModule implements Fire
 		moduleAssist.getChartMainPanel().setWidgetPosition(spinners, 
 				relatedIneChartModule2D.getLeftPadding() - spinners.getSpinnerWidgetWidth() / 2, 
 				relatedIneChartModule2D.getBottomEnd());
+		minSpinnerPos = 0;
+		maxSpinnerPos = relatedIneChartModule2D.getXAxis().getMax() - relatedIneChartModule2D.getXAxis().getMin();
 		spinners.setWidth(relatedIneChartModule2D.getWidth(), false);
-		spinners.setInterval(minSpinnerPos - relatedIneChartModule2D.getXAxis().getMin(), maxSpinnerPos - relatedIneChartModule2D.getXAxis().getMin());
+		spinners.setInterval(minSpinnerPos, maxSpinnerPos);
 		drawRectangles();
 	}
 
-
 	@Override
 	public List<IneChart> getAddressedCharts() {
+		if(addressedCharts == null){
+			addressedCharts = new ArrayList<IneChart>();
+		}
 		return addressedCharts;
 	}
 
@@ -193,6 +197,9 @@ public class IntervalSelection extends AbstractInteractiveModule implements Fire
 
 	@Override
 	public List<IneChartModule2D> getAddressedModules() {
+		if(addressedModuls == null){
+			addressedModuls = new ArrayList<IneChartModule2D>();
+		}
 		return addressedModuls;
 	}
 
@@ -211,8 +218,8 @@ public class IntervalSelection extends AbstractInteractiveModule implements Fire
 
 	@Override
 	public void preUpdate() {
-		minSpinnerPos = relatedIneChartModule2D.getXAxis().getMin();
-		maxSpinnerPos = relatedIneChartModule2D.getXAxis().getMax();
+//		minSpinnerPos = 0;		
+//		maxSpinnerPos = relatedIneChartModule2D.getXAxis().getMax() - relatedIneChartModule2D.getXAxis().getMin();
 		relatedIneChartModule2D.setMinBottomPadding(spinners.getTotalHeight());
 		relatedIneChartModule2D.setMinLeftPadding(spinners.getSpinnerWidgetWidth() / 2);
 		relatedIneChartModule2D.setMinRightPadding(spinners.getSpinnerWidgetWidth() / 2);

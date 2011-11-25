@@ -2,6 +2,8 @@ package com.inepex.inechart.misc;
 
 import java.util.ArrayList;
 
+import com.google.gwt.event.dom.client.ScrollEvent;
+import com.google.gwt.event.dom.client.ScrollHandler;
 import com.google.gwt.event.logical.shared.ResizeEvent;
 import com.google.gwt.event.logical.shared.ResizeHandler;
 import com.google.gwt.event.shared.HandlerRegistration;
@@ -14,7 +16,7 @@ public class IneScrollPanelFPImpl extends Composite {
 	
 	private final static int DEFAULT_SCROLL_STEP = 30;
 	
-	protected class HorizontalScrollBarListener implements Scrollable{
+	protected class HorizontalScrollBarListener implements Scrollable, ScrollHandler{
 		protected int initialIntervalMin = 0;
 		protected int initialIntervalMax;
 		protected int intervalStep;
@@ -61,9 +63,14 @@ public class IneScrollPanelFPImpl extends Composite {
 			// TODO Auto-generated method stub
 			
 		}
+
+		@Override
+		public void onScroll(ScrollEvent event) {
+			
+		}
 	}
 
-	protected class VerticalScrollBarListener implements Scrollable{
+	protected class VerticalScrollBarListener implements Scrollable, ScrollHandler{
 		protected int initialIntervalMin = 0;
 		protected int initialIntervalMax;
 		protected int intervalStep;
@@ -107,6 +114,12 @@ public class IneScrollPanelFPImpl extends Composite {
 
 		@Override
 		public void dragEnd() {
+			// TODO Auto-generated method stub
+			
+		}
+
+		@Override
+		public void onScroll(ScrollEvent event) {
 			// TODO Auto-generated method stub
 			
 		}
@@ -166,6 +179,7 @@ public class IneScrollPanelFPImpl extends Composite {
 
 	protected void registerHandlers(Widget w){
 		handlerRegistrations = new ArrayList<HandlerRegistration>();
+		handlerRegistrations.add(contentWidget.addDomHandler(horizontalScrollBarListener, ScrollEvent.getType()));
 		handlerRegistrations.add(w.addHandler(new ResizeHandler() {
 			@Override
 			public void onResize(ResizeEvent event) {

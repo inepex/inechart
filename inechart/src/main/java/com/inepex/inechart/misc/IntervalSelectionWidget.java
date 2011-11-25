@@ -65,7 +65,7 @@ public class IntervalSelectionWidget extends Composite {
 			else{
 				max += distance;
 			}
-			scrollBarPresenter.setSlider(min, max);
+			scrollBarPresenter.setSlider(Math.min(min, max), Math.max(min, max));
 			resizableInterval.intervalSet(Math.min(min, max), Math.max(min, max));
 		}
 
@@ -101,7 +101,7 @@ public class IntervalSelectionWidget extends Composite {
 		public void scrollBarMoved(double distance) {
 			min += distance;
 			max += distance;
-			resizableInterval.intervalSet(min, max);
+			resizableInterval.intervalSet(Math.min(min, max), Math.max(min, max));
 			spinnerPresenter1.setSpinnerPosition(min);
 			spinnerPresenter2.setSpinnerPosition(max);
 		}
