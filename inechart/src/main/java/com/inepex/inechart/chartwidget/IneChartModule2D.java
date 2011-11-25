@@ -24,6 +24,7 @@ import com.inepex.inechart.chartwidget.event.DataSetChangeEvent;
 import com.inepex.inechart.chartwidget.event.DataSetChangeHandler;
 import com.inepex.inechart.chartwidget.event.ViewportChangeEvent;
 import com.inepex.inechart.chartwidget.event.ViewportChangeHandler;
+import com.inepex.inechart.chartwidget.interactivity.AbstractInteractiveModule;
 import com.inepex.inechart.chartwidget.label.HasLegendEntries;
 import com.inepex.inechart.chartwidget.label.LabelFactory;
 import com.inepex.inechart.chartwidget.properties.Color;
@@ -33,6 +34,8 @@ import com.inepex.inegraphics.shared.Context;
 import com.inepex.inegraphics.shared.gobjects.Rectangle;
 
 /**
+ *
+ * 
  * A base class for modules with axes and legend.
  * Contains model-to-canvas calculation helper methods.
  * Also supports auto padding calculation.
@@ -49,7 +52,7 @@ public abstract class IneChartModule2D extends IneChartModule implements HasCoor
 		boolean isMouseOverModul = false;
 		
 		public boolean isAddressed(ViewportChangeEvent event){
-			if(event.getAddressedModuls() == null || event.getAddressedModuls().contains(IneChartModule2D.this)){
+			if(event.getAddressedModules() == null || event.getAddressedModules().contains(IneChartModule2D.this)){
 				return true;
 			}
 			else{
@@ -257,6 +260,7 @@ public abstract class IneChartModule2D extends IneChartModule implements HasCoor
 	protected boolean displayLegendEntries = true;
 	protected TreeMap<String, Color> legendEntries;
 	
+	protected ArrayList<AbstractInteractiveModule> interactiveModules;
 	protected LinkedLayers moduleLayer;
 	
 	protected IneChartModule2D(ModuleAssist moduleAssist) {
@@ -290,6 +294,7 @@ public abstract class IneChartModule2D extends IneChartModule implements HasCoor
 			moduleAssist.eventManager.addDataEntrySelectionHandler(innerEventHandler);
 			moduleAssist.eventManager.addDataSetChangeHandler(innerEventHandler);
 		}
+		interactiveModules = new ArrayList<AbstractInteractiveModule>();
 	}
 	
 	protected abstract void onClick(ClickEvent event);
@@ -327,6 +332,9 @@ public abstract class IneChartModule2D extends IneChartModule implements HasCoor
 	 */
 	public void preUpdateModule(){
 		alignExtraAxes();
+		for(AbstractInteractiveModule im : interactiveModules){
+			im.preUpdate();
+		}
 	}
 	
 	public void update(){
@@ -361,7 +369,10 @@ public abstract class IneChartModule2D extends IneChartModule implements HasCoor
 									Defaults.colorString),
 									false, true));
 		}
-//		super.update();
+
+		for(AbstractInteractiveModule im : interactiveModules){
+			im.update();
+		}
 	}
 
 	public void setPadding(double[] padding){
@@ -819,5 +830,15 @@ public abstract class IneChartModule2D extends IneChartModule implements HasCoor
 	@Override
 	public void setLegendEntries(TreeMap<String, Color> legendEntries) {
 		this.legendEntries = legendEntries;
+	}
+
+	public void addInteractiveModule(AbstractInteractiveModule interactiveModule){
+		interactiveModules.add(interactiveModule);
+		interactiveModule.attach(moduleAssist, this);
+	}
+	
+	public void removeInteractiveModule(AbstractInteractiveModule interactiveModule){
+		interactiveModules.remove(interactiveModule);
+		interactiveModule.detach();
 	}
 }

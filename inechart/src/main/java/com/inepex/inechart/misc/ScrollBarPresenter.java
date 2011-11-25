@@ -253,6 +253,7 @@ public class ScrollBarPresenter implements MouseDownHandler,
 		if(x > 0 && y > 0 && y < height && x < width)
 			isOverSlider = true;
 		view.setSliderBeingDragged(false, isOverSlider);
+		scrollable.dragEnd();
 	}
 
 	@Override
@@ -269,6 +270,7 @@ public class ScrollBarPresenter implements MouseDownHandler,
 		else if(event.getSource() == view.getSliderButton().asWidget()){
 			mouseDown = true;
 			view.setSliderBeingDragged(true, true);
+			scrollable.dragStart();
 			if(view.isHorizontal()){
 				lastMouseMoveCoordinate = mouseDownCoordinate_Client = event.getClientX();
 				mouseDownCoordinate_Slider = event.getRelativeX(view.getSliderButton().asWidget().getElement());

@@ -15,7 +15,7 @@ public class ViewportChangeEvent extends IneChartEvent<ViewportChangeHandler> {
 	protected double yMin;
 	protected double xMax;
 	protected double yMax;
-	protected List<IneChartModule2D> addressedModuls;
+	protected List<IneChartModule2D> addressedModules;
 	protected boolean isXChange;
 	protected boolean isYChange;
 	
@@ -55,14 +55,14 @@ public class ViewportChangeEvent extends IneChartEvent<ViewportChangeHandler> {
 
 	public ViewportChangeEvent(IneChart sourceChart, double xMin,
 			double yMin, double xMax, double yMax,
-			List<IneChartModule2D> addressedModuls) {
+			List<IneChartModule2D> addressedModules) {
 		super(sourceChart);
 		this.xMin = xMin;
 		this.yMin = yMin;
 		this.xMax = xMax;
 		this.yMax = yMax;
 		this.isXChange = isYChange = true;
-		setAddressedModuls(addressedModuls);
+		setAddressedModules(addressedModules);
 	}
 	
 	public ViewportChangeEvent(double dx, double dy){
@@ -70,25 +70,25 @@ public class ViewportChangeEvent extends IneChartEvent<ViewportChangeHandler> {
 	}
 
 	public ViewportChangeEvent(IneChart sourceChart, double dx, double dy,
-			List<IneChartModule2D> addressedModuls) {
+			List<IneChartModule2D> addressedModules) {
 		super(sourceChart);
 		this.dx = dx;
 		this.dy = dy;
 		this.isXChange = isYChange = true;
-		setAddressedModuls(addressedModuls);
+		setAddressedModules(addressedModules);
 	}
 	
-	public void setAddressedModuls(List<IneChartModule2D> addressedModuls){
-		if(addressedModuls == null || addressedModuls.size() == 0)
+	public void setAddressedModules(List<IneChartModule2D> addressedModules){
+		if(addressedModules == null || addressedModules.size() == 0)
 			return;
-		this.addressedModuls = addressedModuls;
+		this.addressedModules = addressedModules;
 	}
 	
-	public void addAddressedModul(IneChartModule2D addressedModul){
-		if(addressedModuls == null){
-			addressedModuls = new ArrayList<IneChartModule2D>();
+	public void addAddressedModule(IneChartModule2D addressedModule){
+		if(addressedModules == null){
+			addressedModules = new ArrayList<IneChartModule2D>();
 		}
-		addressedModuls.add(addressedModul);
+		addressedModules.add(addressedModule);
 	}
 	
 	@Override
@@ -123,8 +123,8 @@ public class ViewportChangeEvent extends IneChartEvent<ViewportChangeHandler> {
 	}
 
 	
-	public List<IneChartModule2D> getAddressedModuls(){
-		return addressedModuls;
+	public List<IneChartModule2D> getAddressedModules(){
+		return addressedModules;
 	}
 	
 	public boolean isXChange() {

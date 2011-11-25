@@ -54,6 +54,7 @@ public class IneChart extends Composite{
 		moduleAssist = new ModuleAssist(this);
 		//dimensions, layout
 		mainPanel = new AbsolutePanel();
+		moduleAssist.setChartMainPanel(mainPanel);
 		initWidget(mainPanel);
 		drawingArea = new DrawingAreaGWT(width, height);
 		moduleAssist.setMainCanvas(drawingArea);
@@ -64,7 +65,7 @@ public class IneChart extends Composite{
 		drawingArea.setSize(width, height);
 
 		modules = new ArrayList<IneChartModule>();
-		labelFactory = new GWTLabelFactory(moduleAssist, mainPanel);
+		labelFactory = new GWTLabelFactory(moduleAssist);
 		moduleAssist.setLabelFactory(labelFactory);
 		axes = new Axes(moduleAssist, new TickFactoryGWT());
 		moduleAssist.setAxes(axes);
@@ -144,21 +145,8 @@ public class IneChart extends Composite{
 	public void updateAxes(){
 		axes.update();
 	}
-	
-	/*
-	 * Moduls
-	 */
 
 	public LineChart createLineChart() {
-		DrawingAreaGWT overlay = new DrawingAreaGWT(canvasWidth, canvasHeight);
-		mainPanel.add(overlay.getWidget(),0,0);
-		LineChart chart = new LineChart(moduleAssist);
-		modules.add(chart);
-		eventManager.addViewportChangeHandler(chart.innerEventHandler);
-		return chart;
-	}
-	
-	public LineChart createLineChart2() {
 		DrawingAreaGWT overlay = new DrawingAreaGWT(canvasWidth, canvasHeight);
 		mainPanel.add(overlay.getWidget(),0,0);
 		LineChart chart = new LineChart(moduleAssist);
@@ -303,7 +291,7 @@ public class IneChart extends Composite{
 				}
 				vpLineChart.setDisplayLegendEntries(false);
 				rs.setModulToSelectFrom(vpLineChart);
-				rs.getAddressedModuls().add((IneChartModule2D) module);
+				rs.getAddressedModules().add((IneChartModule2D) module);
 				break;
 			}
 			else if(module instanceof BarChart){
@@ -343,5 +331,9 @@ public class IneChart extends Composite{
 		for(DrawingAreaGWT layer:layers){
 			DOM.setElementAttribute(layer.getWidget().getElement(), "zIndex", zIndex++ +"");
 		}
+	}
+	
+	public boolean containsModule(IneChartModule module){
+		return modules.contains(module);
 	}
 }

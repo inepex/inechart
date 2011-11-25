@@ -82,10 +82,5 @@ public abstract class IneChartModule implements Comparable<IneChartModule> {
 		this.isVisible = isVisible;
 	}
 
-//	/**
-//	 * @return the redrawNeeded
-//	 */
-//	public boolean isRedrawNeeded() {
-//		return redrawNeeded;
-//	}
+
 }

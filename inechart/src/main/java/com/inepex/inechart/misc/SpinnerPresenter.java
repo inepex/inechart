@@ -2,7 +2,6 @@ package com.inepex.inechart.misc;
 
 import java.util.ArrayList;
 
-import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.MouseDownEvent;
 import com.google.gwt.event.dom.client.MouseDownHandler;
 import com.google.gwt.event.dom.client.MouseMoveEvent;
@@ -42,9 +41,7 @@ public class SpinnerPresenter implements MouseDownHandler, MouseMoveHandler, Mou
 		if(view != null)
 			setView(view);
 	}
-	
-	
-	
+		
 	/**
 	 * @return the view
 	 */
@@ -96,6 +93,7 @@ public class SpinnerPresenter implements MouseDownHandler, MouseMoveHandler, Mou
 			DOM.releaseCapture(view.getSpinner().asWidget().getElement());
 			view.setSpinnerBeingDragged(false);
 			mouseDown = false;
+			spinnable.dragEnd();
 		}
 	}
 
@@ -131,6 +129,7 @@ public class SpinnerPresenter implements MouseDownHandler, MouseMoveHandler, Mou
 		mouseDownOnSpinner = event.getX();
 		DOM.setCapture(view.getSpinner().asWidget().getElement());
 		view.setSpinnerBeingDragged(true);
+		spinnable.dragStart();
 	}
 	
 	protected boolean move(int distance){
@@ -155,5 +154,10 @@ public class SpinnerPresenter implements MouseDownHandler, MouseMoveHandler, Mou
 	protected void setSpinner(){
 		int spinnerPos = (int) (position * view.getSpinnableAreaLength() / spinnable.getSpinnableDomainLength()); 
 		view.setSpinnerPosition(spinnerPos);
+	}
+	
+	public void setSpinnerPosition(double position){
+		this.position = position;
+		setSpinner();
 	}
 }

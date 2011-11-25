@@ -22,7 +22,6 @@ import com.inepex.inechart.chartwidget.data.XYDataEntry;
 import com.inepex.inechart.chartwidget.event.DataEntrySelectionEvent;
 import com.inepex.inechart.chartwidget.event.DataSetChangeEvent;
 import com.inepex.inechart.chartwidget.event.PointSelectionEvent;
-import com.inepex.inechart.chartwidget.event.PointSelectionHandler;
 import com.inepex.inechart.chartwidget.event.ViewportChangeEvent;
 import com.inepex.inechart.chartwidget.properties.Color;
 import com.inepex.inechart.chartwidget.properties.LineProperties.LineStyle;
@@ -38,7 +37,7 @@ import com.inepex.inegraphics.shared.gobjects.GraphicalObject;
 import com.inepex.inegraphics.shared.gobjects.Path;
 import com.inepex.inegraphics.shared.gobjects.PathElement;
 
-public class LineChart extends IneChartModule2D implements PointSelectionHandler{
+public class LineChart extends IneChartModule2D {
 
 	// model fields
 	ArrayList<Curve> curves;
@@ -114,10 +113,13 @@ public class LineChart extends IneChartModule2D implements PointSelectionHandler
 			layerGroup.addLayer(layer);
 			moduleLayer.addLayer(layerGroup);
 			moduleAssist.updateLayerOrder();
-
 			curve.dataSet.setAttached(true);
 			curve.dataSet.setEventManager(moduleAssist.getEventManager());
 		}
+	}
+	
+	protected ModuleAssist getModuleAssist(){
+		return moduleAssist;
 	}
 
 	protected DrawingArea getCanvas(Curve curve){
@@ -966,6 +968,7 @@ public class LineChart extends IneChartModule2D implements PointSelectionHandler
 		}
 		return closest;		
 	}
+	
 	/**
 	 * Updates selected points in curves, fires events and updates interactive modules
 	 * @param interactedPoints
@@ -1178,20 +1181,6 @@ public class LineChart extends IneChartModule2D implements PointSelectionHandler
 
 	@Override
 	protected void onSetY(ViewportChangeEvent event, double yMin, double yMax) {
-		// TODO Auto-generated method stub
-		
-	}
-
-	
-	@Override
-	public void onSelect(PointSelectionEvent event) {
-		// TODO Auto-generated method stub
-		
-	}
-
-	
-	@Override
-	public void onDeselect(PointSelectionEvent event) {
 		// TODO Auto-generated method stub
 		
 	}

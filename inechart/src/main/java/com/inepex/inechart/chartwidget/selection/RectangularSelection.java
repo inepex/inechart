@@ -1,6 +1,8 @@
 package com.inepex.inechart.chartwidget.selection;
 
 
+import java.util.ArrayList;
+
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;
 import com.google.gwt.event.dom.client.MouseDownEvent;
@@ -13,6 +15,7 @@ import com.google.gwt.event.dom.client.MouseUpHandler;
 import com.google.gwt.user.client.DOM;
 import com.inepex.inechart.chartwidget.Defaults;
 import com.inepex.inechart.chartwidget.IneChartEventManager;
+import com.inepex.inechart.chartwidget.IneChartModule2D;
 import com.inepex.inechart.chartwidget.event.ViewportChangeEvent;
 import com.inepex.inechart.chartwidget.misc.SelectionRange;
 import com.inepex.inechart.chartwidget.shape.Rectangle;
@@ -130,7 +133,8 @@ public class RectangularSelection extends RangeSelectionBase{
 	 * @param canvas
 	 */
 	public RectangularSelection(DrawingAreaGWT canvas, IneChartEventManager eventManager) {
-		super(eventManager, canvas);
+//		super(eventManager, canvas);
+		super(null);
 		selectionMode = SelectionRange.Both;
 		selectionLookOut = Defaults.selectionLookout();
 		minSelectionSize = Defaults.minSelectionSize;
@@ -181,7 +185,7 @@ public class RectangularSelection extends RangeSelectionBase{
 			break;
 		}
 		event.setAddressedCharts(addressedCharts);
-		event.setAddressedModuls(addressedModuls);
+		event.setAddressedModules(addressedModules);
 		eventManager.fireViewportChangedEvent(event);
 	}
 
@@ -266,6 +270,14 @@ public class RectangularSelection extends RangeSelectionBase{
 
 	public void setInvertSelection(boolean invertSelection) {
 		this.invertSelection = invertSelection;
+	}
+
+	@Override
+	public void addAddressedModule(IneChartModule2D addressedModule) {
+		if(addressedModules == null){
+			addressedModules = new ArrayList<IneChartModule2D>();
+		}
+		addressedModules.add(addressedModule);
 	}
 	
 	

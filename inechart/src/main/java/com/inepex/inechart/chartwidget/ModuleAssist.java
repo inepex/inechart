@@ -3,6 +3,7 @@ package com.inepex.inechart.chartwidget;
 import java.util.ArrayList;
 import java.util.Collections;
 
+import com.google.gwt.user.client.ui.AbsolutePanel;
 import com.inepex.inechart.chartwidget.axes.Axes;
 import com.inepex.inechart.chartwidget.label.LabelFactory;
 import com.inepex.inegraphics.impl.client.DrawingAreaGWT;
@@ -16,6 +17,7 @@ public class ModuleAssist {
 	protected DrawingArea mainCanvas;
 	protected final IneChart clientSideChart;
 	protected ArrayList<Layer> layers;
+	protected AbsolutePanel chartMainPanel;
 
 	public ModuleAssist(){
 		clientSideChart = null;
@@ -134,6 +136,14 @@ public class ModuleAssist {
 		else{
 			layers.add(layer.getCanvas());
 		}
+	}
+
+	public AbsolutePanel getChartMainPanel() {
+		return chartMainPanel;
+	}
+
+	public void setChartMainPanel(AbsolutePanel chartMainPanel) {
+		this.chartMainPanel = chartMainPanel;
 	}
 
 }

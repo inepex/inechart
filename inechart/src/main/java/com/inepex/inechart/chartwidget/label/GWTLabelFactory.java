@@ -28,7 +28,6 @@ import com.inepex.inechart.chartwidget.properties.TextProperties;
  * @author Miklós Süveges / Inepex Ltd.
  */
 public class GWTLabelFactory extends LabelFactory{
-	AbsolutePanel chartMainPanel;
 	FlowPanel mainPanel;
 	TreeMap<TextContainer, Widget> textContainerWidgetMap;
 	TreeMap<TextContainer, Widget> detachedWidgetMap;
@@ -41,9 +40,8 @@ public class GWTLabelFactory extends LabelFactory{
 	FlowPanel leftWrapper;
 	
 
-	public GWTLabelFactory(ModuleAssist moduleAssist, AbsolutePanel chartMainPanel) {
+	public GWTLabelFactory(ModuleAssist moduleAssist) {
 		super(moduleAssist);
-		this.chartMainPanel = chartMainPanel;
 		textContainerWidgetMap = new TreeMap<TextContainer, Widget>();
 		detachedWidgetMap = new TreeMap<TextContainer, Widget>();
 		initLayout();
@@ -51,7 +49,7 @@ public class GWTLabelFactory extends LabelFactory{
 
 	private void initLayout(){
 		mainPanel = new FlowPanel();
-		chartMainPanel.add(mainPanel, 0, 0);
+		moduleAssist.getChartMainPanel().add(mainPanel, 0, 0);
 		mainPanel.setPixelSize(canvas.getWidth(), canvas.getHeight());
 		DOM.setStyleAttribute(mainPanel.getElement(), "position", "relative");
 		topPanel = new FlowPanel();
@@ -282,7 +280,7 @@ public class GWTLabelFactory extends LabelFactory{
 		int right = rightPanel.getElement().getOffsetWidth();
 		if(!attached){
 			RootPanel.get().remove(mainPanel.getParent());
-			chartMainPanel.add(mainPanel, 0, 0);
+			moduleAssist.getChartMainPanel().add(mainPanel, 0, 0);
 		}
 		this.paddingNeeded =  new double[]{top,right,bottom,left};
 	}

@@ -19,5 +19,9 @@ public interface Scrollable {
 	double getInitialIntervalMax();
 	
 	double getIntervalStep();
+	
+	void dragStart();
+	
+	void dragEnd();
 
 }

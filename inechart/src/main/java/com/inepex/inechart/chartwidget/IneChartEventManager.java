@@ -54,14 +54,18 @@ MouseDownHandler, MouseOutHandler, MouseMoveHandler, MouseOverHandler, MouseUpHa
 		eventBus.addHandler(ViewportChangeEvent.TYPE, this);
 	}
 
-
-	@Override
+	/**
+	 * fires the given event via {@link IneChart}'s eventBus (outgoing events)
+	 */
 	public void fireEvent(GwtEvent<?> event){
 		if(eventBus != null)
 			eventBus.fireEvent(event);
 	}
 
-
+	/**
+	 * fires the given event only inside this chart 
+	 * @param event
+	 */
 	protected void fireInnerEvent(GwtEvent<?> event){
 		handlerManager.fireEvent(event);
 	}
@@ -70,7 +74,26 @@ MouseDownHandler, MouseOutHandler, MouseMoveHandler, MouseOverHandler, MouseUpHa
 	protected void eventFinished(){
 		parent.update();
 	}
-
+	
+	protected boolean isRelatedEvent(IneChartEvent<?> event){
+		if(event.getAddressedCharts() != null && !event.getAddressedCharts().contains(parent)){
+			return false;
+		}
+		return true;
+	}
+	
+	protected boolean isRelatedVPEvent(ViewportChangeEvent event){
+		boolean related = isRelatedEvent(event);
+		if(event.getAddressedModules() != null){
+			for(IneChartModule m : event.getAddressedModules()){
+				if(parent.containsModule(m)){
+					return true;
+				}
+			}
+			return false;
+		}
+		return related;
+	}
 
 	public void addViewportChangeHandler(ViewportChangeHandler handler){
 		handlerManager.addHandler(ViewportChangeEvent.TYPE, handler);
@@ -118,14 +141,17 @@ MouseDownHandler, MouseOutHandler, MouseMoveHandler, MouseOverHandler, MouseUpHa
 		return handlerManager.addHandler(ClickEvent.getType(), handler);
 	}
 
+
 	public HandlerRegistration addDataEntrySelectionHandler(DataEntrySelectionHandler handler){
 		return handlerManager.addHandler(DataEntrySelectionEvent.TYPE, handler);
 	}
+	
 	
 	public HandlerRegistration addDataSetChangeHandler(DataSetChangeHandler handler){
 		return handlerManager.addHandler(DataSetChangeEvent.TYPE, handler);
 	}
 
+	
 	@Override
 	public void onMouseUp(MouseUpEvent event) {
 		event.preventDefault();
@@ -170,7 +196,9 @@ MouseDownHandler, MouseOutHandler, MouseMoveHandler, MouseOverHandler, MouseUpHa
 
 	public void fireViewportChangedEvent(ViewportChangeEvent event){
 		setSourceChart(event);
-		viewportChangeEventStack.pushEvent(event);
+		if(isRelatedVPEvent(event)){
+			viewportChangeEventStack.pushEvent(event);
+		}
 		fireEvent(event);
 	}
 

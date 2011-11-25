@@ -8,4 +8,8 @@ public interface Spinnable {
 	
 	double getInitialPosition();
 	
+	void dragStart();
+	
+	void dragEnd();
+	
 }

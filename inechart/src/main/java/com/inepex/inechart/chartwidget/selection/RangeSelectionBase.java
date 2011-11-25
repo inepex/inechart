@@ -7,24 +7,26 @@ import com.google.gwt.event.dom.client.MouseEvent;
 import com.inepex.inechart.chartwidget.IneChart;
 import com.inepex.inechart.chartwidget.IneChartEventManager;
 import com.inepex.inechart.chartwidget.IneChartModule2D;
+import com.inepex.inechart.chartwidget.Layer;
+import com.inepex.inechart.chartwidget.ModuleAssist;
+import com.inepex.inechart.chartwidget.event.FiresViewportChangeEvent;
 import com.inepex.inechart.chartwidget.properties.ShapeProperties;
 import com.inepex.inegraphics.impl.client.DrawingAreaGWT;
 
-public abstract class RangeSelectionBase {
+public abstract class RangeSelectionBase implements FiresViewportChangeEvent{
 
 	protected ShapeProperties selectionLookOut;
 	protected IneChartEventManager eventManager;
 	protected IneChartModule2D modulToSelectFrom;
 	protected DrawingAreaGWT canvas;
 	protected List<IneChart> addressedCharts;
-	protected List<IneChartModule2D> addressedModuls;
+	protected List<IneChartModule2D> addressedModules;
 
-	protected RangeSelectionBase(IneChartEventManager eventManager,
-			DrawingAreaGWT canvas) {
-		this.eventManager = eventManager;
-		this.canvas = canvas;
+	protected RangeSelectionBase(ModuleAssist moduleAssist) {
+		this.eventManager = moduleAssist.getEventManager();
+		this.canvas = moduleAssist.createAndAttachLayer(Layer.ALWAYS_TOP).getCanvas();
 		addressedCharts = new ArrayList<IneChart>();
-		addressedModuls = new ArrayList<IneChartModule2D>();
+		addressedModules = new ArrayList<IneChartModule2D>();
 	}
 	
 	protected int[] normalizeCoords(int[] coords){
@@ -105,15 +107,15 @@ public abstract class RangeSelectionBase {
 	/**
 	 * @return the addressedModuls
 	 */
-	public List<IneChartModule2D> getAddressedModuls() {
-		return addressedModuls;
+	public List<IneChartModule2D> getAddressedModules() {
+		return addressedModules;
 	}
 
 	/**
 	 * @param addressedModuls the addressedModuls to set
 	 */
-	public void setAddressedModuls(List<IneChartModule2D> addressedModuls) {
-		this.addressedModuls = addressedModuls;
+	public void setAddressedModules(List<IneChartModule2D> addressedModuls) {
+		this.addressedModules = addressedModuls;
 	}
 
 	

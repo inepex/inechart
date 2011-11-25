@@ -8,5 +8,9 @@ public interface ResizableInterval {
 	double getInitialMax();
 	
 	void intervalSet(double min, double max);
+	
+	void dragEnd();
+	
+	void dragStart();
 
 }

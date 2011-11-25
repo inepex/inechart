@@ -66,7 +66,7 @@ public class ViewportChangeEventStack {
 		TreeMap<Long, ViewportChangeEvent> addressedToAll = new TreeMap<Long, ViewportChangeEvent>();
 		for(long time : events.keySet()){
 			ViewportChangeEvent actualEvent = events.get(time);
-			ArrayList<IneChartModule2D> addressedModuls = (ArrayList<IneChartModule2D>) actualEvent.getAddressedModuls();
+			ArrayList<IneChartModule2D> addressedModuls = (ArrayList<IneChartModule2D>) actualEvent.getAddressedModules();
 			if(addressedModuls == null || addressedModuls.size() == 0){
 				addressedToAll.put(time, actualEvent);
 			}
@@ -145,13 +145,13 @@ public class ViewportChangeEventStack {
 				event = new ViewportChangeEvent(xMin, yMin, xMax, yMax);
 			}
 		}
-		event.addAddressedModul(addressedModul);
+		event.addAddressedModule(addressedModul);
 
 		//remove merged events
 		for(Long time : eventsToMerge.keySet()){
 			ViewportChangeEvent ev = events.get(time);
-			if(addressedModul != null && ev.getAddressedModuls() != null && ev.getAddressedModuls().size() > 1){
-				ev.getAddressedModuls().remove(addressedModul);
+			if(addressedModul != null && ev.getAddressedModules() != null && ev.getAddressedModules().size() > 1){
+				ev.getAddressedModules().remove(addressedModul);
 			}
 			else{
 				events.remove(time);

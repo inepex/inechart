@@ -1,7 +1,6 @@
 package com.inepex.inechart.misc;
 
 import java.util.ArrayList;
-import java.util.Iterator;
 
 import com.google.gwt.event.logical.shared.ResizeEvent;
 import com.google.gwt.event.logical.shared.ResizeHandler;
@@ -9,11 +8,6 @@ import com.google.gwt.event.shared.HandlerRegistration;
 import com.google.gwt.user.client.DOM;
 import com.google.gwt.user.client.ui.Composite;
 import com.google.gwt.user.client.ui.FlowPanel;
-import com.google.gwt.user.client.ui.HasOneWidget;
-import com.google.gwt.user.client.ui.IsWidget;
-import com.google.gwt.user.client.ui.Panel;
-import com.google.gwt.user.client.ui.RootPanel;
-
 import com.google.gwt.user.client.ui.Widget;
 
 public class IneScrollPanelFPImpl extends Composite {
@@ -55,6 +49,18 @@ public class IneScrollPanelFPImpl extends Composite {
 		public double getIntervalStep() {
 			return intervalStep;
 		}
+
+		@Override
+		public void dragStart() {
+			// TODO Auto-generated method stub
+			
+		}
+
+		@Override
+		public void dragEnd() {
+			// TODO Auto-generated method stub
+			
+		}
 	}
 
 	protected class VerticalScrollBarListener implements Scrollable{
@@ -91,6 +97,18 @@ public class IneScrollPanelFPImpl extends Composite {
 		@Override
 		public double getIntervalStep() {
 			return intervalStep;
+		}
+
+		@Override
+		public void dragStart() {
+			// TODO Auto-generated method stub
+			
+		}
+
+		@Override
+		public void dragEnd() {
+			// TODO Auto-generated method stub
+			
 		}
 	}
 

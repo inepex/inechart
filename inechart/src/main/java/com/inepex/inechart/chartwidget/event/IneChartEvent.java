@@ -62,7 +62,7 @@ public abstract class IneChartEvent<H extends EventHandler> extends GwtEvent<H> 
 	}
 	
 	public void setAddressedCharts(IneChart... addressedCharts){
-		if(addressedCharts.length > 0){
+		if(addressedCharts != null && addressedCharts.length > 0){
 			this.addressedCharts = new ArrayList<IneChart>();
 			for(IneChart addressed:addressedCharts){
 				this.addressedCharts.add(addressed);

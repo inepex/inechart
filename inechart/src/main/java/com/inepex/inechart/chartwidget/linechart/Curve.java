@@ -28,6 +28,7 @@ public class Curve implements HasZIndex, HasShadow, Comparable<Curve>{
 	private static int highestComparableNo = 0;
 	private int comparableNo;
 
+	private LineChart parent;
 	/**
 	 * Underlying data, curve must not change it
 	 */
@@ -79,6 +80,14 @@ public class Curve implements HasZIndex, HasShadow, Comparable<Curve>{
 		setShadowOffsetX(Defaults.shadowOffsetY);
 		setShadowColor(Defaults.shadowColor());
 		this.dataSet = dataSet;
+	}
+	
+	public void setDataSet(AbstractXYDataSet dataSet){
+		this.dataSet = dataSet;
+		if(parent != null && parent.getModuleAssist().isClientSide()){
+			dataSet.setAttached(true);
+			dataSet.setEventManager(parent.getModuleAssist().getEventManager());
+		}
 	}
 	
 	/**
