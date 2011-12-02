@@ -14,9 +14,12 @@ import com.google.gwt.event.dom.client.MouseOutEvent;
 import com.google.gwt.event.dom.client.MouseOutHandler;
 import com.google.gwt.event.dom.client.MouseUpEvent;
 import com.google.gwt.event.dom.client.MouseUpHandler;
+import com.google.gwt.event.dom.client.MouseWheelEvent;
+import com.google.gwt.event.dom.client.MouseWheelHandler;
 import com.google.gwt.event.shared.HandlerRegistration;
 import com.google.gwt.user.client.DOM;
 import com.google.gwt.user.client.ui.IsWidget;
+import com.google.gwt.user.client.ui.Panel;
 
 /**
  * Presenter of a scrollbar widget, contains event handling and logic.
@@ -25,13 +28,14 @@ import com.google.gwt.user.client.ui.IsWidget;
  *
  */
 public class ScrollBarPresenter implements MouseDownHandler, 
-	MouseUpHandler, MouseMoveHandler, ClickHandler, MouseOutHandler{
+	MouseUpHandler, MouseMoveHandler, ClickHandler, MouseOutHandler, MouseWheelHandler{
 
 	public interface View{
 		//for handlerregistrations
 		IsWidget getDecreaseButton();
 		IsWidget getIncreaseButton();
 		IsWidget getSliderButton();
+		
 		//for updating the view
 		boolean isHorizontal();
 		int getSlideableAreaLength();
@@ -44,6 +48,8 @@ public class ScrollBarPresenter implements MouseDownHandler,
 	
 	protected RepeatingCommand increaseCommand;
 	protected RepeatingCommand decreaseCommand;
+	protected MouseWheelCommand wheelCommand;
+	
 	protected final int DELAY = 250;
 	protected Scrollable scrollable;
 	protected View view;
@@ -62,21 +68,36 @@ public class ScrollBarPresenter implements MouseDownHandler,
 	protected boolean sliderStop;
 	
 	protected boolean enabled = true;
+	protected Panel mouseWheelArea;
 	
 	protected ArrayList<HandlerRegistration> handlerRegistrations;
 	
-	public ScrollBarPresenter(Scrollable scrollable){
-		this(scrollable,null);
+	/**
+	 * 
+	 * @param scrollable
+	 * 
+	 * @param mouseWheelArea - a panel which mouse wheel events can roll the scroll
+	 * 						- add null to disable this functionality (like by horizontal scrolls)   
+	 */
+	public ScrollBarPresenter(Scrollable scrollable, Panel mouseWheelArea){
+		this(scrollable, null, mouseWheelArea);
 	}
 	
 	/**
 	 * Creates a scrollbar from the given parameters
+	 * 
 	 * @param scrollable the object to scroll
+	 * 
 	 * @param view the {@link View} to bind
+	 * 
+	 * @param mouseWheelArea - a panel which mouse wheel events can roll the scroll
+	 * 						- add null to disable this functionality (like by horizontal scrolls)
 	 */
-	public ScrollBarPresenter(Scrollable scrollable, View view) {
+	public ScrollBarPresenter(Scrollable scrollable, View view, Panel mouseWheelArea) {
+		this.mouseWheelArea=mouseWheelArea;
 		this.scrollable = scrollable;
 		this.view = view;
+		
 		visibleMin = scrollable.getInitialIntervalMin();
 		visibleMax = scrollable.getInitialIntervalMax();
 		if(view != null){
@@ -99,6 +120,8 @@ public class ScrollBarPresenter implements MouseDownHandler,
 				return mouseDown && decrease();
 			}
 		};
+		
+		wheelCommand= new MouseWheelCommand();
 	}
 	
 	protected void registerHandlers(){
@@ -117,6 +140,9 @@ public class ScrollBarPresenter implements MouseDownHandler,
 			handlerRegistrations.add(view.getSliderButton().asWidget().addDomHandler(this, MouseDownEvent.getType()));
 			handlerRegistrations.add(view.getSliderButton().asWidget().addDomHandler(this, MouseUpEvent.getType()));
 			handlerRegistrations.add(view.getSliderButton().asWidget().addDomHandler(this, MouseMoveEvent.getType()));
+			
+			if(mouseWheelArea != null)
+				handlerRegistrations.add(mouseWheelArea.addDomHandler(this, MouseWheelEvent.getType()));
 		}
 	}
 	
@@ -282,6 +308,12 @@ public class ScrollBarPresenter implements MouseDownHandler,
 			DOM.setCapture(view.getSliderButton().asWidget().getElement());
 		}
 	}
+	
+	@Override
+	public void onMouseWheel(MouseWheelEvent event) {
+		wheelCommand.incDeltaY(event.getDeltaY());
+		Scheduler.get().scheduleIncremental(wheelCommand);
+	}
 
 	@Override
 	public void onMouseOut(MouseOutEvent event) {
@@ -327,5 +359,25 @@ public class ScrollBarPresenter implements MouseDownHandler,
 			registerHandlers();
 		}
 	}
+	
+	private class MouseWheelCommand implements RepeatingCommand{
 
+		private final int step = 20;
+		
+		int deltaY=0;
+		
+		public void incDeltaY(int additional) {
+			deltaY+=additional;
+		}
+		
+		@Override
+		public boolean execute() {
+			int i = deltaY > step ? step : deltaY;
+			deltaY-=i;
+			move(i);
+			
+			return deltaY>0;
+		}
+	
+	}
 }

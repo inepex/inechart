@@ -201,7 +201,8 @@ public class IntervalSelectionWidget extends Composite {
 		
 		spinnerPresenter1 = new SpinnerPresenter(spinnerView1, new SpinnableImpl(true));
 		spinnerPresenter2 = new SpinnerPresenter(spinnerView2, new SpinnableImpl(false));
-		scrollBarPresenter = new ScrollBarPresenter(new ScrollableImpl(), scrollBarView);
+		
+		scrollBarPresenter = new ScrollBarPresenter(new ScrollableImpl(), scrollBarView, null);
 	}
 
 	public int getSpinnerWidgetWidth() {

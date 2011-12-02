@@ -153,7 +153,7 @@ public class IneScrollPanelFPImpl extends Composite {
 		this(null, false);
 	}
 
-	public IneScrollPanelFPImpl(Widget contentPanel, boolean alwaysShowScrollbars) {
+	public IneScrollPanelFPImpl(Widget contentWidget, boolean alwaysShowScrollbars) {
 		this.alwaysShowScrollbars = alwaysShowScrollbars;
 		mainPanel = new FlowPanel();
 		DOM.setStyleAttribute(mainPanel.getElement(), "overflow", "hidden");
@@ -172,9 +172,11 @@ public class IneScrollPanelFPImpl extends Composite {
 		mainPanel.add(verticalScrollBarView);
 		horizontalScrollBarView = new ScrollBarView(true);
 		mainPanel.add(horizontalScrollBarView);
-		verticalScrollBarPresenter = new ScrollBarPresenter(verticalScrollBarListener, verticalScrollBarView);
-		horizontalScrollBarPresenter = new ScrollBarPresenter(horizontalScrollBarListener, horizontalScrollBarView);
+		verticalScrollBarPresenter = new ScrollBarPresenter(verticalScrollBarListener, verticalScrollBarView, mainPanel);
+		horizontalScrollBarPresenter = new ScrollBarPresenter(horizontalScrollBarListener, horizontalScrollBarView, null);
 		setScrollStep(DEFAULT_SCROLL_STEP);
+		
+		setContentWidget(contentWidget);
 	}
 
 	protected void registerHandlers(Widget w){
