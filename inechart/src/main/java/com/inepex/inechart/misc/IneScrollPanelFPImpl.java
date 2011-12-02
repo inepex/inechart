@@ -176,7 +176,8 @@ public class IneScrollPanelFPImpl extends Composite {
 		horizontalScrollBarPresenter = new ScrollBarPresenter(horizontalScrollBarListener, horizontalScrollBarView, null);
 		setScrollStep(DEFAULT_SCROLL_STEP);
 		
-		setContentWidget(contentWidget);
+		if(contentWidget!=null)
+			setContentWidget(contentWidget);
 	}
 
 	protected void registerHandlers(Widget w){
