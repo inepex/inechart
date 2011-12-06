@@ -1,4 +1,4 @@
-package com.inepex.inechart.misc;
+package com.inepex.inechart.misc.scroll;
 
 public interface Spinnable {
 	

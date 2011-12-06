@@ -19,8 +19,9 @@ import com.inepex.inechart.chartwidget.properties.ShapeProperties;
 import com.inepex.inechart.chartwidget.shape.Rectangle;
 import com.inepex.inechart.misc.IntervalSelectionWidget;
 import com.inepex.inechart.misc.ResizableInterval;
-import com.inepex.inechart.misc.SpinnerPresenter;
-import com.inepex.inechart.misc.SpinnerView;
+import com.inepex.inechart.misc.scroll.SpinnerPresenter;
+import com.inepex.inechart.misc.scroll.defaultviews.DefaultScrollViewFactory;
+import com.inepex.inechart.misc.scroll.defaultviews.SpinnerView;
 import com.inepex.inegraphics.shared.gobjects.GraphicalObject;
 
 
@@ -101,7 +102,7 @@ public class IntervalSelection extends AbstractInteractiveModule implements Fire
 			public void dragStart() {
 				
 			}
-		});
+		}, new DefaultScrollViewFactory());
 		moduleAssist.getChartMainPanel().add(spinners, relatedIneChartModule2D.getLeftPadding() - spinners.getSpinnerWidgetWidth() / 2, relatedIneChartModule2D.getBottomEnd());
 		super.init();
 	}

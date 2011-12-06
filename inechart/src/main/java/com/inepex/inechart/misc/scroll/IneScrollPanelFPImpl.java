@@ -1,4 +1,4 @@
-package com.inepex.inechart.misc;
+package com.inepex.inechart.misc.scroll;
 
 import java.util.ArrayList;
 
@@ -11,6 +11,7 @@ import com.google.gwt.user.client.DOM;
 import com.google.gwt.user.client.ui.Composite;
 import com.google.gwt.user.client.ui.FlowPanel;
 import com.google.gwt.user.client.ui.Widget;
+import com.inepex.inechart.misc.scroll.defaultviews.ScrollBarView;
 
 public class IneScrollPanelFPImpl extends Composite {
 	
@@ -125,7 +126,23 @@ public class IneScrollPanelFPImpl extends Composite {
 		}
 	}
 
+	/**
+	 * 
+	 *  show even if it unnecessary
+	 */
 	protected boolean alwaysShowScrollbars = false;
+	
+	/**
+	 * 
+	 * don't show even if it is necessary (it's STRONGER than {@link IneScrollPanelFPImpl#alwaysShowScrollbars} 
+	 */
+	protected boolean neverShowScrollbars = false;
+	
+	/**
+	 * see {@link IneScrollPanelFPImpl#updateScrollbars()} method for details
+	 */
+	protected boolean needScrollMeasure = true;
+	
 	protected ScrollBarPresenter verticalScrollBarPresenter;
 	protected ScrollBarView verticalScrollBarView;
 	protected ScrollBarView horizontalScrollBarView;
@@ -149,11 +166,11 @@ public class IneScrollPanelFPImpl extends Composite {
 	protected double scrollTop;
 	protected double scrollLeft;
 	
-	public IneScrollPanelFPImpl(){
-		this(null, false);
+	public IneScrollPanelFPImpl(ScrollViewFactory scrollViewFactory){
+		this(null, false, scrollViewFactory);
 	}
 
-	public IneScrollPanelFPImpl(Widget contentWidget, boolean alwaysShowScrollbars) {
+	public IneScrollPanelFPImpl(Widget contentWidget, boolean alwaysShowScrollbars, ScrollViewFactory scrollViewFactory) {
 		this.alwaysShowScrollbars = alwaysShowScrollbars;
 		mainPanel = new FlowPanel();
 		DOM.setStyleAttribute(mainPanel.getElement(), "overflow", "hidden");
@@ -168,9 +185,9 @@ public class IneScrollPanelFPImpl extends Composite {
 		initWidget(mainPanel);
 		verticalScrollBarListener = new VerticalScrollBarListener();
 		horizontalScrollBarListener = new HorizontalScrollBarListener();
-		verticalScrollBarView = new ScrollBarView(false);
+		verticalScrollBarView = scrollViewFactory.createScrollBarView(false);
 		mainPanel.add(verticalScrollBarView);
-		horizontalScrollBarView = new ScrollBarView(true);
+		horizontalScrollBarView = scrollViewFactory.createScrollBarView(true);
 		mainPanel.add(horizontalScrollBarView);
 		verticalScrollBarPresenter = new ScrollBarPresenter(verticalScrollBarListener, verticalScrollBarView, mainPanel);
 		horizontalScrollBarPresenter = new ScrollBarPresenter(horizontalScrollBarListener, horizontalScrollBarView, null);
@@ -208,8 +225,17 @@ public class IneScrollPanelFPImpl extends Composite {
 		return alwaysShowScrollbars;
 	}
 
-	public void setAlwaysShowScrollbars(boolean alwaysShowScrollbars) {
+	public void setAlwaysShowScrollbarsUpdateScrolls(boolean alwaysShowScrollbars) {
 		this.alwaysShowScrollbars = alwaysShowScrollbars;
+		updateScrollbars();
+	}
+	
+	public boolean isNeverShowScrollbars() {
+		return neverShowScrollbars;
+	}
+	
+	public void setNeverShowScrollbarsUpdateScrolls(boolean neverShowScrollbasrs) {
+		this.neverShowScrollbars = neverShowScrollbasrs;
 		updateScrollbars();
 	}
 
@@ -221,41 +247,48 @@ public class IneScrollPanelFPImpl extends Composite {
 	protected void updateScrollbars(){
 		if(!isAttached())
 			return;
-		measureAndSetSizes();
-		boolean verticalNeeded = alwaysShowScrollbars || contentHeight > height;
-		boolean horizontalNeeded = alwaysShowScrollbars || contentWidth > width;
 		
-		if(verticalNeeded && !horizontalNeeded && contentWidth > width - vBarWidth){
-			horizontalNeeded = true;
+		//need to do it 3 times
+		for(int i=0; i<3; i++) {
+			measureAndSetSizes();
+			boolean verticalNeeded = !neverShowScrollbars && (alwaysShowScrollbars || contentHeight > height);
+			boolean horizontalNeeded = !neverShowScrollbars && (alwaysShowScrollbars || contentWidth > width);
+			
+			if(!neverShowScrollbars && verticalNeeded && !horizontalNeeded 
+					&& needScrollMeasure && contentWidth > width - vBarWidth){
+				horizontalNeeded = true;
+			}
+			
+			if(!neverShowScrollbars && horizontalNeeded && !verticalNeeded && 
+					needScrollMeasure && contentHeight > height - hBarHeight){
+				verticalNeeded = true;
+			}
+			
+			innerHeight = horizontalNeeded ? height - hBarHeight : height;
+			innerWidth = verticalNeeded ? width - vBarWidth : width;
+			
+			if(verticalScrollBarListener.initialIntervalMax == 0)
+				verticalScrollBarListener.initialIntervalMax = verticalScrollBarListener.initialIntervalMin + innerHeight;
+			if(horizontalScrollBarListener.initialIntervalMax == 0)
+				horizontalScrollBarListener.initialIntervalMax = horizontalScrollBarListener.initialIntervalMin + innerWidth;
+			
+			horizontalScrollBarView.setWidth(innerWidth);
+			verticalScrollBarView.setHeight(innerHeight);
+			
+			DOM.setStyleAttribute(verticalScrollBarView.getElement(), "position", "absolute");
+			DOM.setStyleAttribute(verticalScrollBarView.getElement(), "left", width - vBarWidth + "px");
+			DOM.setStyleAttribute(verticalScrollBarView.getElement(), "top", "0px");
+			DOM.setStyleAttribute(horizontalScrollBarView.getElement(), "position", "absolute");
+			DOM.setStyleAttribute(horizontalScrollBarView.getElement(), "left", "0px");
+			DOM.setStyleAttribute(horizontalScrollBarView.getElement(), "top", height - hBarHeight + "px");
+					
+			verticalScrollBarView.setVisible(verticalNeeded);
+			horizontalScrollBarView.setVisible(horizontalNeeded);
+			verticalScrollBarPresenter.setSlider(scrollTop, innerHeight);
+			horizontalScrollBarPresenter.setSlider(scrollLeft, innerWidth);
+			
+			setContentWidgetPosition();
 		}
-		if(horizontalNeeded && !verticalNeeded && contentHeight > height - hBarHeight){
-			verticalNeeded = true;
-		}
-		
-		innerHeight = horizontalNeeded ? height - hBarHeight : height;
-		innerWidth = verticalNeeded ? width - vBarWidth : width;
-		
-		if(verticalScrollBarListener.initialIntervalMax == 0)
-			verticalScrollBarListener.initialIntervalMax = verticalScrollBarListener.initialIntervalMin + innerHeight;
-		if(horizontalScrollBarListener.initialIntervalMax == 0)
-			horizontalScrollBarListener.initialIntervalMax = horizontalScrollBarListener.initialIntervalMin + innerWidth;
-		
-		horizontalScrollBarView.setWidth(innerWidth);
-		verticalScrollBarView.setHeight(innerHeight);
-		
-		DOM.setStyleAttribute(verticalScrollBarView.getElement(), "position", "absolute");
-		DOM.setStyleAttribute(verticalScrollBarView.getElement(), "left", width - vBarWidth + "px");
-		DOM.setStyleAttribute(verticalScrollBarView.getElement(), "top", "0px");
-		DOM.setStyleAttribute(horizontalScrollBarView.getElement(), "position", "absolute");
-		DOM.setStyleAttribute(horizontalScrollBarView.getElement(), "left", "0px");
-		DOM.setStyleAttribute(horizontalScrollBarView.getElement(), "top", height - hBarHeight + "px");
-				
-		verticalScrollBarView.setVisible(verticalNeeded);
-		horizontalScrollBarView.setVisible(horizontalNeeded);
-		verticalScrollBarPresenter.setSlider(scrollTop, innerHeight);
-		horizontalScrollBarPresenter.setSlider(scrollLeft, innerWidth);
-		
-		setContentWidgetPosition();
 	}
 
 	public int getScrollTop(){

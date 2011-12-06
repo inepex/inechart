@@ -6,7 +6,7 @@ import com.google.gwt.user.client.ui.Image;
 
 public class ResourceHelper {
 	
-	static IneChartResources ifResources = null;
+	static IneChartResources icResources = null;
 	
 	public static String getImageAsString(ImageResource resource) {
 		Image img = new Image();
@@ -15,10 +15,11 @@ public class ResourceHelper {
 	}
 	
 	public static IneChartResources getRes() {
-		if (ifResources == null) {
-			ifResources = GWT.create(IneChartResources.class);
-			ifResources.style().ensureInjected();
+		if (icResources == null) {
+			icResources = GWT.create(IneChartResources.class);
+			icResources.style().ensureInjected();
+			icResources.scrollStyle().ensureInjected();
 		}
-		return  ifResources;
+		return  icResources;
 	}
 }

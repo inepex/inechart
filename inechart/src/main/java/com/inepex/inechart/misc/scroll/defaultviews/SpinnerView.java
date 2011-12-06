@@ -1,11 +1,11 @@
-package com.inepex.inechart.misc;
+package com.inepex.inechart.misc.scroll.defaultviews;
 
 import com.google.gwt.user.client.ui.AbsolutePanel;
 import com.google.gwt.user.client.ui.Composite;
 import com.google.gwt.user.client.ui.IsWidget;
 import com.google.gwt.user.client.ui.Label;
-import com.inepex.inechart.chartwidget.resources.ResourceHelper;
-import com.inepex.inechart.misc.SpinnerPresenter.View;
+import com.inepex.inechart.chartwidget.resources.ScrollStyle;
+import com.inepex.inechart.misc.scroll.SpinnerPresenter.View;
 
 public class SpinnerView extends Composite implements View {
 	
@@ -13,15 +13,17 @@ public class SpinnerView extends Composite implements View {
 	protected Label spinner;
 	protected int spinnerWidth;
 	protected int width;
+	protected ScrollStyle scrollStyle;
 	
-	public SpinnerView(int width, int spinnerWidth, int spinnerHeight) {
+	SpinnerView(int width, int spinnerWidth, int spinnerHeight, ScrollStyle scrollStyle) {
+		this.scrollStyle=scrollStyle;
 		this.spinnerWidth = spinnerWidth;
 		this.width = width;
 		mainPanel = new AbsolutePanel();
-		mainPanel.setStyleName(ResourceHelper.getRes().style().spinnerView());
+		mainPanel.setStyleName(scrollStyle.spinnerView());
 		mainPanel.setPixelSize(width, spinnerHeight);
 		spinner = new Label();
-		spinner.setStyleName(ResourceHelper.getRes().style().normal());
+		spinner.setStyleName(scrollStyle.normal());
 		mainPanel.add(spinner);
 		initWidget(mainPanel);
 	}
@@ -45,10 +47,10 @@ public class SpinnerView extends Composite implements View {
 	@Override
 	public void setSpinnerBeingDragged(boolean spinnerBeingDragged) {
 		if(spinnerBeingDragged){
-			spinner.setStyleName(ResourceHelper.getRes().style().active());
+			spinner.setStyleName(scrollStyle.active());
 		}
 		else{
-			spinner.setStyleName(ResourceHelper.getRes().style().normal());
+			spinner.setStyleName(scrollStyle.normal());
 		}
 	}
 

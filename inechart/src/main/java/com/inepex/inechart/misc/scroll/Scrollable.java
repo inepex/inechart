@@ -1,4 +1,4 @@
-package com.inepex.inechart.misc;
+package com.inepex.inechart.misc.scroll;
 
 /**
  * An object using {@link ScrollBarPresenter} must implement this interface.

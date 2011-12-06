@@ -1,4 +1,4 @@
-package com.inepex.inechart.misc;
+package com.inepex.inechart.misc.scroll.defaultviews;
 
 import java.util.ArrayList;
 
@@ -12,8 +12,8 @@ import com.google.gwt.user.client.ui.Composite;
 import com.google.gwt.user.client.ui.IsWidget;
 import com.google.gwt.user.client.ui.Label;
 import com.google.gwt.user.client.ui.Widget;
-import com.inepex.inechart.chartwidget.resources.ResourceHelper;
-import com.inepex.inechart.misc.ScrollBarPresenter.View;
+import com.inepex.inechart.chartwidget.resources.ScrollStyle;
+import com.inepex.inechart.misc.scroll.ScrollBarPresenter.View;
 
 /**
  * 
@@ -33,14 +33,16 @@ public class ScrollBarView extends Composite implements View {
 	boolean hasBorder;
 	protected boolean sliderBeingDragged = false;
 	protected boolean enabled = true;
+	protected ScrollStyle scrollStyle;
 	
 	protected ArrayList<HandlerRegistration> handlerRegistrations;
 	
-	public ScrollBarView(boolean isHorizontal){
-		this(isHorizontal, isHorizontal ? 0 : DEFAULT_SIZE, isHorizontal ? DEFAULT_SIZE : 0, DEFAULT_PADDING, true);
+	protected ScrollBarView(boolean isHorizontal, ScrollStyle scrollStyle){
+		this(isHorizontal, isHorizontal ? 0 : DEFAULT_SIZE, isHorizontal ? DEFAULT_SIZE : 0, DEFAULT_PADDING, true, scrollStyle);
 	}
 	
-	public ScrollBarView(boolean isHorizontal, int width, int height, int padding, boolean hasBorder) {
+	protected ScrollBarView(boolean isHorizontal, int width, int height, int padding, boolean hasBorder, ScrollStyle scrollStyle) {
+		this.scrollStyle=scrollStyle;
 		this.isHorizontal = isHorizontal;
 		this.height = height;
 		this.width = width;
@@ -53,12 +55,12 @@ public class ScrollBarView extends Composite implements View {
 	protected void initLayout(){
 		panel = new AbsolutePanel();
 		initWidget(panel);
-		panel.setStyleName(ResourceHelper.getRes().style().scrollBar());
+		panel.setStyleName(scrollStyle.scrollBar());
 		if(hasBorder){
-			panel.addStyleName(ResourceHelper.getRes().style().border());
+			panel.addStyleName(scrollStyle.border());
 		}
 		slider = new Label();
-		slider.setStyleName(ResourceHelper.getRes().style().slider());
+		slider.setStyleName(scrollStyle.slider());
 		panel.add(slider);
 		resize(width, height, padding);
 	}
@@ -148,7 +150,7 @@ public class ScrollBarView extends Composite implements View {
 	public void setSliderBeingDragged(boolean sliderBeingDragged, boolean isMouseOverSlider) {
 		this.sliderBeingDragged = sliderBeingDragged;
 		if(!sliderBeingDragged && !isMouseOverSlider){
-			slider.setStyleName(ResourceHelper.getRes().style().slider());
+			slider.setStyleName(scrollStyle.slider());
 		}
 	}
 
@@ -170,7 +172,7 @@ public class ScrollBarView extends Composite implements View {
 			@Override
 			public void onMouseOver(MouseOverEvent event) {
 				if(!sliderBeingDragged){
-					slider.setStyleName(ResourceHelper.getRes().style().sliderMouseOver());
+					slider.setStyleName(scrollStyle.sliderMouseOver());
 				}
 			}
 		}, MouseOverEvent.getType()));
@@ -179,7 +181,7 @@ public class ScrollBarView extends Composite implements View {
 			@Override
 			public void onMouseOut(MouseOutEvent event) {
 				if(!sliderBeingDragged){
-					slider.setStyleName(ResourceHelper.getRes().style().slider());
+					slider.setStyleName(scrollStyle.slider());
 				}
 			}
 		}, MouseOutEvent.getType()));

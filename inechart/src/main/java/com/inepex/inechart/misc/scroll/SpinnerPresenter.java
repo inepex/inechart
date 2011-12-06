@@ -1,4 +1,4 @@
-package com.inepex.inechart.misc;
+package com.inepex.inechart.misc.scroll;
 
 import java.util.ArrayList;
 
