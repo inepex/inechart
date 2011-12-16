@@ -5,7 +5,7 @@ package com.inepex.inechart.chartwidget.linechart;
  * An enum which defines the select/deselect mode of Points in {@link LineChart}
  * 
  */
-public enum PointSelectionMode {
+public enum InteractionMode {
 	/**
 	 * The closest point to the cursor
 	 *  (if mouse is over modul a point will be selected always)
@@ -18,9 +18,5 @@ public enum PointSelectionMode {
 	/**
 	 * The mouse overed point
 	 */
-	On_Over,
-	/**
-	 * The right clicked point
-	 */
-	On_Right_Click
+	On_Over
 }

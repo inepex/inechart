@@ -4,8 +4,9 @@ import com.google.gwt.event.shared.EventHandler;
 
 public interface PointSelectionHandler extends EventHandler {
 	
-	void onSelect(PointSelectionEvent event);
+	void onSelect(PointInteractionEvent event);
 	
-	void onDeselect(PointSelectionEvent event);
+	void onDeselect(PointInteractionEvent event);
 
+	void onTouch(PointInteractionEvent event);
 }

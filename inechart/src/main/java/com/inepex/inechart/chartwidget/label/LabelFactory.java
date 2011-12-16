@@ -88,7 +88,7 @@ public abstract class LabelFactory extends IneChartModule{
  	public abstract void updateStyledLabel(StyledLabel label);
  	
  	protected abstract void removeDisplayedStyledLabel(StyledLabel label);
- 	
+ 	 	
  	protected abstract void measurePadding();
  	
  	public void setChartTitle(ChartTitle chartTitle) {

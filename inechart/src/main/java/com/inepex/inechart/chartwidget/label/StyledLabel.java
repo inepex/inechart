@@ -1,13 +1,18 @@
 package com.inepex.inechart.chartwidget.label;
 
+import com.inepex.inechart.chartwidget.Defaults;
 import com.inepex.inechart.chartwidget.misc.HorizontalPosition;
 import com.inepex.inechart.chartwidget.misc.VerticalPosition;
 import com.inepex.inechart.chartwidget.properties.ShapeProperties;
 
 public class StyledLabel extends TextContainer {
 
-	Text text;
+	protected Text text;
 
+	public StyledLabel(String text){
+		this(new Text(text, Defaults.textContainerText));
+	}
+	
 	public StyledLabel(Text text) {
 		super();
 		this.text = text;

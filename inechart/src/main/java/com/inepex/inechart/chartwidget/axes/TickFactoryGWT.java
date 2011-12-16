@@ -34,13 +34,13 @@ public class TickFactoryGWT extends TickFactory {
 		return formatted;
 	}
 	
-	public static String formatValue(Axis axis, double value, String format){
+	public static String formatValue(AxisDataType axisDataType, double value, String format){
 		if(format.length() == 0){
 			return ((Double)value).toString();
 		}
 		String formatted = "";
 		try{
-			switch (axis.axisDataType) {
+			switch (axisDataType) {
 			case Number:
 				NumberFormat nf = NumberFormat.getFormat(format);
 				formatted = nf.format(value);

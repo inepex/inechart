@@ -21,6 +21,7 @@ public class TextContainer implements Comparable<TextContainer>{
 	protected VerticalPosition verticalPosition;
 	protected HorizontalPosition horizontalPosition;
 	protected ShapeProperties background;
+	protected int roundedCornerRadius;
 	
 	protected int topPadding = Defaults.textContainerPadding_V;
 	protected int leftPadding =  Defaults.textContainerPadding_H;
@@ -134,6 +135,17 @@ public class TextContainer implements Comparable<TextContainer>{
 		this.leftPadding = other.leftPadding;
 		this.rightPadding = other.rightPadding;
 		this.topPadding = other.topPadding;
+		this.roundedCornerRadius = other.roundedCornerRadius;
 	}
+
+	public int getRoundedCornerRadius() {
+		return roundedCornerRadius;
+	}
+
+	public void setRoundedCornerRadius(int roundedCornerRadius) {
+		this.roundedCornerRadius = roundedCornerRadius;
+	}
+	
+	
 	
 }

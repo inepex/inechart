@@ -1,8 +1,5 @@
 package com.inepex.inechart.chartwidget.linechart;
 
-import java.util.ArrayList;
-import java.util.TreeMap;
-
 import com.google.gwt.event.dom.client.ClickHandler;
 import com.google.gwt.event.dom.client.MouseDownHandler;
 import com.google.gwt.event.dom.client.MouseEvent;
@@ -39,8 +36,5 @@ public abstract class LineChartInteractiveModule implements MouseMoveHandler, Mo
 	public abstract void onMouseOver(MouseEvent<?> event);
 	
 	protected abstract void update();
-
-	protected abstract void pointSelection(TreeMap<Curve, ArrayList<DataPoint>> selectedPoints, TreeMap<Curve, ArrayList<DataPoint>> deselectedPoints);
-	
 
 }

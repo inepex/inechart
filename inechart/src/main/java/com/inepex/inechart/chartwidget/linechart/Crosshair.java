@@ -1,7 +1,6 @@
 package com.inepex.inechart.chartwidget.linechart;
 
 import java.util.ArrayList;
-import java.util.TreeMap;
 
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.MouseDownEvent;
@@ -92,7 +91,7 @@ public class Crosshair extends LineChartInteractiveModule{
 					formatString = Defaults.dateFormat;
 				}
 			}
-			Text t = new Text(TickFactoryGWT.formatValue(lineChart.getXAxis(), dp.getData().getX(), formatString), textProperties);
+			Text t = new Text(TickFactoryGWT.formatValue(lineChart.getXAxis().getAxisDataType(), dp.getData().getX(), formatString), textProperties);
 			StyledLabel sl = new StyledLabel(t);
 			sl.setBackground(this.valueBox.getBackground());
 			int[] dim = moduleAssist.getLabelFactory().measureStyledLabel(sl);
@@ -121,7 +120,7 @@ public class Crosshair extends LineChartInteractiveModule{
 					formatString = Defaults.dateFormat;
 				}
 			}
-			Text t = new Text(TickFactoryGWT.formatValue(lineChart.getYAxis(), dp.getData().getY(), formatString), textProperties);
+			Text t = new Text(TickFactoryGWT.formatValue(lineChart.getYAxis().getAxisDataType(), dp.getData().getY(), formatString), textProperties);
 			StyledLabel sl = new StyledLabel(t);
 			sl.setBackground(this.valueBox.getBackground());
 			int[] dim = moduleAssist.getLabelFactory().measureStyledLabel(sl);
@@ -244,14 +243,6 @@ public class Crosshair extends LineChartInteractiveModule{
 		else{
 			selectPoint(dp);
 		}
-	}
-
-	@Override
-	protected void pointSelection(
-			TreeMap<Curve, ArrayList<DataPoint>> selectedPoints,
-			TreeMap<Curve, ArrayList<DataPoint>> deselectedPoints) {
-		// TODO Auto-generated method stub
-
 	}
 
 	@Override

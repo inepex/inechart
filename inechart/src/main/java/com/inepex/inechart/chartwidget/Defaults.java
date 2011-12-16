@@ -1,11 +1,14 @@
 package com.inepex.inechart.chartwidget;
 
+import com.inepex.inechart.chartwidget.label.AnnotationHelper;
+import com.inepex.inechart.chartwidget.label.BubbleBox;
 import com.inepex.inechart.chartwidget.label.StyledLabel;
 import com.inepex.inechart.chartwidget.label.Text;
 import com.inepex.inechart.chartwidget.label.TextContainer;
 import com.inepex.inechart.chartwidget.linechart.PointFilter.Policy;
-import com.inepex.inechart.chartwidget.linechart.PointSelectionMode;
+import com.inepex.inechart.chartwidget.linechart.InteractionMode;
 import com.inepex.inechart.chartwidget.misc.HorizontalPosition;
+import com.inepex.inechart.chartwidget.misc.Position;
 import com.inepex.inechart.chartwidget.misc.VerticalPosition;
 import com.inepex.inechart.chartwidget.properties.Color;
 import com.inepex.inechart.chartwidget.properties.LineProperties;
@@ -28,7 +31,7 @@ public class Defaults {
 		return new Color();
 	}
 	public static Color colorWhite(){
-		return new Color("#FFFFFF");
+		return new Color("#ffffff");
 	}
 	
 	//lineproperty
@@ -92,11 +95,21 @@ public class Defaults {
 		return new Circle(3.5, new ShapeProperties(new LineProperties(lineWidth),colorWhite()));
 	}
 	public static Shape selectedPoint(){
-		return new Circle(7, new ShapeProperties(new LineProperties(5, new Color("black", 0.6))));
+		return new Circle(8, new ShapeProperties(new LineProperties(5, new Color("black", 1)), colorWhite()));
 	}
+	public static Shape touchedPoint(){
+		return new Circle(5, new ShapeProperties(new LineProperties(5, new Color("black", 1)), colorWhite()));
+	}
+	public static BubbleBox touchedAnnotation(){
+		BubbleBox bb = new BubbleBox(AnnotationHelper.xValue + ", " + AnnotationHelper.yValue);
+		bb.setTailPosition(Position.Bottom);
+		bb.setTailHorizontalPosition(HorizontalPosition.Middle);
+		return bb;		
+	}
+	public static InteractionMode touchInteractionMode = InteractionMode.On_Over;
+	public static InteractionMode selectInteractionMode = InteractionMode.On_Click;
 	public static final double fillOpacity = 0.4;
 	public static final double lineWidth = 2.1;
-	public static final com.inepex.inechart.chartwidget.linechart.PointSelectionMode selectPoint = PointSelectionMode.On_Click;
 	public static final int pointMouseOverRadius = 10;
 	public static final int verticalFilter = 0;
 	public static final int hotizontalFilter = 10;
@@ -124,6 +137,19 @@ public class Defaults {
 	public static final ShapeProperties textContainerBackground = new ShapeProperties(new LineProperties(0, new Color("gray")), new Color("#ffffff", 0.8));
 	public static final int textContainerPadding_H = 4;
 	public static final int textContainerPadding_V = 2;
+	//BubbleBox
+	public static final HorizontalPosition tailHorizontalPosition = HorizontalPosition.Left;
+	public static final VerticalPosition tailVerticalPosition = VerticalPosition.Top;
+	public static final Position tailPosition = Position.Bottom;
+	public static final int tailSize = 10;
+	public static final int distanceFromPoint = 0;
+	public static TextProperties bb_TextProperties(){
+		return new TextProperties("Verdana, Arial, sans-serif", 13, "normal", "normal", colorWhite());
+	}
+	public static final ShapeProperties bb_BackGround(){
+		return new ShapeProperties(new LineProperties(0, new Color("gray")), new Color("gray", 0.8));
+	}
+	public static final int bb_RoundedCornerRadius = 4;
 	//legend
 	public static final Rectangle legendSymbol = new Rectangle(28, 9,new ShapeProperties(new LineProperties(0), color()));
 	//intervalchart

@@ -3,27 +3,27 @@ package com.inepex.inechart.chartwidget.event;
 import com.inepex.inechart.chartwidget.linechart.Curve;
 import com.inepex.inechart.chartwidget.linechart.DataPoint;
 
-public class PointSelectionEvent extends IneChartEvent<PointSelectionHandler> {
+public class PointInteractionEvent extends IneChartEvent<PointSelectionHandler> {
 	
 	public static final Type<PointSelectionHandler> TYPE = new Type<PointSelectionHandler>();
 	
-	boolean selected;
+	InteractionType interactionType;
 	DataPoint point;
 	Curve curve;
 	
-	public PointSelectionEvent() {
-		this(false, null, null);
+	public PointInteractionEvent() {
+		this(InteractionType.Selected, null, null);
 	}
 	
-	public PointSelectionEvent(boolean selected,
+	public PointInteractionEvent(InteractionType interactionType,
 			DataPoint point){
-		this(selected, point, null);
+		this(interactionType, point, null);
 	}
 	
-	public PointSelectionEvent(boolean selected,
+	public PointInteractionEvent(InteractionType interactionType,
 			DataPoint point, Curve curve) {
 		super(null);
-		this.selected = selected;
+		this.interactionType = interactionType;
 		this.point = point;
 		this.curve = curve;
 	}
@@ -35,27 +35,19 @@ public class PointSelectionEvent extends IneChartEvent<PointSelectionHandler> {
 
 	@Override
 	protected void dispatch(PointSelectionHandler handler) {
-		if(selected){
-			handler.onSelect(this);
-		}
-		else{
+		switch (interactionType) {
+		case Deselected:
 			handler.onDeselect(this);
+			break;
+		case Selected:
+			handler.onSelect(this);
+			break;
+		default:
+			handler.onTouch(this);
+			break;
 		}
 	}
 
-	/**
-	 * @return the selected
-	 */
-	public boolean isSelected() {
-		return selected;
-	}
-
-	/**
-	 * @param selected the selected to set
-	 */
-	public void setSelected(boolean selected) {
-		this.selected = selected;
-	}
 
 	/**
 	 * @return the point
@@ -83,6 +75,14 @@ public class PointSelectionEvent extends IneChartEvent<PointSelectionHandler> {
 	 */
 	public void setCurve(Curve curve) {
 		this.curve = curve;
+	}
+
+	public InteractionType getInteractionType() {
+		return interactionType;
+	}
+
+	public void setInteractionType(InteractionType interactionType) {
+		this.interactionType = interactionType;
 	}
 
 }
