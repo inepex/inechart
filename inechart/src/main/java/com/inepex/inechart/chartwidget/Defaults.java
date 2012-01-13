@@ -110,7 +110,7 @@ public class Defaults {
 	public static InteractionMode selectInteractionMode = InteractionMode.On_Click;
 	public static final double fillOpacity = 0.4;
 	public static final double lineWidth = 2.1;
-	public static final int pointMouseOverRadius = 10;
+	public static final int pointMouseOverRadius = 4;
 	public static final int verticalFilter = 0;
 	public static final int hotizontalFilter = 10;
 	public static final Policy filterPolicy = Policy.average;

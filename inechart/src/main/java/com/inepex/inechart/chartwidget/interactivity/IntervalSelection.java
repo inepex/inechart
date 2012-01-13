@@ -16,6 +16,7 @@ import com.inepex.inechart.chartwidget.Layer;
 import com.inepex.inechart.chartwidget.event.FiresViewportChangeEvent;
 import com.inepex.inechart.chartwidget.event.ViewportChangeEvent;
 import com.inepex.inechart.chartwidget.properties.ShapeProperties;
+import com.inepex.inechart.chartwidget.resources.ResourceHelper;
 import com.inepex.inechart.chartwidget.shape.Rectangle;
 import com.inepex.inechart.misc.IntervalSelectionWidget;
 import com.inepex.inechart.misc.ResizableInterval;
@@ -33,13 +34,12 @@ import com.inepex.inegraphics.shared.gobjects.GraphicalObject;
  *
  */
 public class IntervalSelection extends AbstractInteractiveModule implements FiresViewportChangeEvent{
-	
+
 	protected List<IneChart> addressedCharts;
 	protected List<IneChartModule2D> addressedModuls;
 
 	protected double minSpinnerPos;
 	protected double maxSpinnerPos;
-	protected InnerEventHandler innerEventHandler;
 	protected SpinnerPresenter spinner1Presenter;
 	protected SpinnerPresenter spinner2Presenter;
 	protected SpinnerView spinner1View;
@@ -51,6 +51,7 @@ public class IntervalSelection extends AbstractInteractiveModule implements Fire
 	IntervalSelectionWidget spinners;
 	ResizableInterval resizableInterval;
 
+	boolean positionOverModule = true;
 
 	public IntervalSelection() {
 		innerEventHandler = new InnerEventHandler();
@@ -60,13 +61,15 @@ public class IntervalSelection extends AbstractInteractiveModule implements Fire
 	@Override
 	protected void init(){
 		layer = createLayer(Layer.ALWAYS_TOP);
-					
+
 		if(spinners != null){
 			moduleAssist.getChartMainPanel().remove(spinners);
 		}
 		minSpinnerPos = 0;
 		maxSpinnerPos = relatedIneChartModule2D.getXAxis().getMax() - relatedIneChartModule2D.getXAxis().getMin();
-		spinners = new IntervalSelectionWidget(relatedIneChartModule2D.getWidth(), false, true, new ResizableInterval() {
+		spinners = new IntervalSelectionWidget(
+				relatedIneChartModule2D.getWidth(), false, relatedIneChartModule2D.getHeight(),
+				true, new ResizableInterval() {
 
 			@Override
 			public void intervalSet(double min, double max) {
@@ -100,9 +103,9 @@ public class IntervalSelection extends AbstractInteractiveModule implements Fire
 
 			@Override
 			public void dragStart() {
-				
+
 			}
-		}, new DefaultScrollViewFactory());
+		}, new DefaultScrollViewFactory(ResourceHelper.getRes().scrollStyle2()));
 		moduleAssist.getChartMainPanel().add(spinners, relatedIneChartModule2D.getLeftPadding() - spinners.getSpinnerWidgetWidth() / 2, relatedIneChartModule2D.getBottomEnd());
 		super.init();
 	}
@@ -175,10 +178,11 @@ public class IntervalSelection extends AbstractInteractiveModule implements Fire
 	public void update() {
 		moduleAssist.getChartMainPanel().setWidgetPosition(spinners, 
 				relatedIneChartModule2D.getLeftPadding() - spinners.getSpinnerWidgetWidth() / 2, 
-				relatedIneChartModule2D.getBottomEnd());
+				positionOverModule ? relatedIneChartModule2D.getTopPadding() : relatedIneChartModule2D.getBottomEnd());
 		minSpinnerPos = 0;
 		maxSpinnerPos = relatedIneChartModule2D.getXAxis().getMax() - relatedIneChartModule2D.getXAxis().getMin();
 		spinners.setWidth(relatedIneChartModule2D.getWidth(), false);
+		spinners.setHeight(relatedIneChartModule2D.getHeight());
 		spinners.setInterval(minSpinnerPos, maxSpinnerPos);
 		drawRectangles();
 	}
@@ -219,9 +223,9 @@ public class IntervalSelection extends AbstractInteractiveModule implements Fire
 
 	@Override
 	public void preUpdate() {
-//		minSpinnerPos = 0;		
-//		maxSpinnerPos = relatedIneChartModule2D.getXAxis().getMax() - relatedIneChartModule2D.getXAxis().getMin();
-		relatedIneChartModule2D.setMinBottomPadding(spinners.getTotalHeight());
+		if(!positionOverModule){
+			relatedIneChartModule2D.setMinBottomPadding(spinners.getTotalHeight());
+		}
 		relatedIneChartModule2D.setMinLeftPadding(spinners.getSpinnerWidgetWidth() / 2);
 		relatedIneChartModule2D.setMinRightPadding(spinners.getSpinnerWidgetWidth() / 2);
 	}

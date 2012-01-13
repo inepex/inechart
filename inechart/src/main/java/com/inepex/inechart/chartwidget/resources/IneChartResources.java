@@ -11,9 +11,18 @@ public interface IneChartResources extends ClientBundle {
 	@Source("ScrollStyle.css")
 	ScrollStyle scrollStyle();
 	
+	@Source("ScrollStyle2.css")
+	ScrollStyle scrollStyle2();
+	
 	@Source("bullet.png")
 	ImageResource bullet();
 	
 	@Source("bullet_active.png")
 	ImageResource bullet_active();
+	
+	@Source("timeline.png")
+	ImageResource timeline();
+	
+	@Source("timeline_hover.png")
+	ImageResource timeline_hover();
 }

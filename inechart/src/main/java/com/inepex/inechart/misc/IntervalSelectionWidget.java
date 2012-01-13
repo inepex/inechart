@@ -5,7 +5,7 @@ import com.google.gwt.user.client.ui.AbsolutePanel;
 import com.google.gwt.user.client.ui.Composite;
 import com.google.gwt.user.client.ui.IsWidget;
 import com.google.gwt.user.client.ui.Label;
-import com.inepex.inechart.chartwidget.resources.ResourceHelper;
+import com.inepex.inechart.chartwidget.resources.ScrollStyle;
 import com.inepex.inechart.misc.scroll.ScrollBarPresenter;
 import com.inepex.inechart.misc.scroll.ScrollViewFactory;
 import com.inepex.inechart.misc.scroll.Scrollable;
@@ -17,12 +17,13 @@ import com.inepex.inechart.misc.scroll.defaultviews.ScrollBarView;
 public class IntervalSelectionWidget extends Composite {
 	
 	protected class SpinnerView implements View{
-
 		Label spinner;
+		ScrollStyle scrollStyle;
 		
-		public SpinnerView() {
+		public SpinnerView(ScrollStyle scrollStyle) {
+			this.scrollStyle = scrollStyle;
 			spinner = new Label();
-			spinner.setStyleName(ResourceHelper.getRes().scrollStyle().normal());
+			spinner.setStyleName(scrollStyle.normal());
 		}
 		
 		@Override
@@ -37,18 +38,18 @@ public class IntervalSelectionWidget extends Composite {
 
 		@Override
 		public void setSpinnerPosition(int position) {
-			mainPanel.setWidgetPosition(spinner, position, showScrollBar ? scrollBarView.getHeight() : 0);
+			mainPanel.setWidgetPosition(spinner, position, spinnerViewTop);
 		}
 
 		@Override
 		public void setSpinnerBeingDragged(boolean spinnerBeingDragged) {
 			if(spinnerBeingDragged){
-				spinner.setStyleName(ResourceHelper.getRes().scrollStyle().active());
+				spinner.setStyleName(scrollStyle.active());
 				DOM.setStyleAttribute(spinner.getElement(), "zIndex", DOM.getElementPropertyInt(mainPanel.getElement(), "zIndex")+1+"");
 				
 			}
 			else{
-				spinner.setStyleName(ResourceHelper.getRes().scrollStyle().normal());
+				spinner.setStyleName(scrollStyle.normal());
 				DOM.setStyleAttribute(spinner.getElement(), "zIndex", DOM.getElementPropertyInt(mainPanel.getElement(), "zIndex")+"");
 			}
 		}
@@ -154,9 +155,11 @@ public class IntervalSelectionWidget extends Composite {
 	
 	protected AbsolutePanel mainPanel;
 	
+	protected int height;
 	protected int spinnableWidth; 
-	protected int spinnerWidgetWidth = 20;
-	protected int spinnerWidgetHeight = 32;
+	protected int spinnerWidgetWidth = 10;
+	protected int spinnerWidgetHeight = 25;
+	protected int spinnerViewTop = 0;
 	
 	protected ResizableInterval resizableInterval;
 	
@@ -171,10 +174,10 @@ public class IntervalSelectionWidget extends Composite {
 	
 	protected double min, max;
 	
-	public IntervalSelectionWidget(int width, boolean spinnersIncludedInWidth, boolean showScrollBar,
+	public IntervalSelectionWidget(int width, boolean spinnersIncludedInWidth, int height, boolean showScrollBar,
 			ResizableInterval resizableInterval, ScrollViewFactory viewFactory) {
-		this.viewFactory=viewFactory;
-		
+		this.viewFactory = viewFactory;
+		this.height = height;
 		if(spinnersIncludedInWidth){
 			spinnableWidth = width - spinnerWidgetWidth;
 		}
@@ -196,23 +199,32 @@ public class IntervalSelectionWidget extends Composite {
 		else{
 			mainPanel = new AbsolutePanel();
 		}
-		spinnerView1 = new SpinnerView();
-		spinnerView2 = new SpinnerView();
+		spinnerView1 = new SpinnerView(viewFactory.getScrollStyle());
+		spinnerView2 = new SpinnerView(viewFactory.getScrollStyle());
+
+		scrollBarView = viewFactory.createScrollBarView(true, spinnableWidth, height, 2, false);
 				
-		scrollBarView = viewFactory.createScrollBarView(true, spinnableWidth, 10, 2, false);
-				
-		mainPanel.add(spinnerView1.spinner, 0, showScrollBar ? scrollBarView.getHeight() : 0);
-		mainPanel.add(spinnerView2.spinner, 0, showScrollBar ? scrollBarView.getHeight() : 0);
-		mainPanel.setPixelSize(spinnableWidth + spinnerWidgetWidth,
-				spinnerWidgetHeight + (showScrollBar ? scrollBarView.getHeight() : 0));
 		if(showScrollBar){
 			mainPanel.add(scrollBarView, spinnerWidgetWidth / 2, 0);
 		}
+		
+		mainPanel.add(spinnerView1.spinner, 0,
+//				showScrollBar ? scrollBarView.getHeight() :
+					0);
+		mainPanel.add(spinnerView2.spinner, 0,
+//				showScrollBar ? scrollBarView.getHeight() : 
+					0);
+		mainPanel.setPixelSize(spinnableWidth + spinnerWidgetWidth,
+				height > 0 ? height : spinnerWidgetHeight 
+//						+(showScrollBar ? scrollBarView.getHeight() : 0)
+						);
+		
 		
 		spinnerPresenter1 = new SpinnerPresenter(spinnerView1, new SpinnableImpl(true));
 		spinnerPresenter2 = new SpinnerPresenter(spinnerView2, new SpinnableImpl(false));
 		
 		scrollBarPresenter = new ScrollBarPresenter(new ScrollableImpl(), scrollBarView, null);
+//		spinnerViewTop = showScrollBar ? scrollBarView.getHeight() : 0;
 	}
 
 	public int getSpinnerWidgetWidth() {
@@ -223,8 +235,10 @@ public class IntervalSelectionWidget extends Composite {
 		return spinnerWidgetHeight;
 	}	
 	
-	public int getTotalHeight(){
-		return spinnerWidgetHeight + (showScrollBar ? scrollBarView.getHeight() : 0);
+	public int getTotalHeight() {
+		return spinnerWidgetHeight
+//				+ (showScrollBar ? scrollBarView.getHeight() : 0)
+				;
 	}
 	
 	public void setInterval(double min, double max){
@@ -243,5 +257,14 @@ public class IntervalSelectionWidget extends Composite {
 			spinnableWidth = width;
 		}
 		init();
+	}
+	
+	public void setHeight(int height){
+		if(height > 0){
+			spinnerViewTop = (height - spinnerWidgetHeight 
+//					+(showScrollBar ? scrollBarView.getHeight() : 0)
+					) / 2;
+		}
+		this.height = height;
 	}
 }

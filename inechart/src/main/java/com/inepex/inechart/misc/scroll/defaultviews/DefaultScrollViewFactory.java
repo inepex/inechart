@@ -31,6 +31,11 @@ public class DefaultScrollViewFactory implements ScrollViewFactory{
 	public SpinnerView createSpinnerView(int width, int spinnerWidth, int spinnerHeight) {
 		return new SpinnerView(width, spinnerWidth, spinnerHeight, scrollStyle);
 	}
+
+	@Override
+	public ScrollStyle getScrollStyle() {
+		return scrollStyle;
+	}
 	
 	
 }

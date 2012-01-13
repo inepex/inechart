@@ -7,6 +7,12 @@ import com.google.gwt.user.client.ui.Label;
 import com.inepex.inechart.chartwidget.resources.ScrollStyle;
 import com.inepex.inechart.misc.scroll.SpinnerPresenter.View;
 
+/**
+ * A horizontal spinner widget
+ * 
+ * @author Miklós Süveges, Sebestyén Csorba / Inepex Ltd.
+ *
+ */
 public class SpinnerView extends Composite implements View {
 	
 	protected AbsolutePanel mainPanel;
@@ -15,8 +21,15 @@ public class SpinnerView extends Composite implements View {
 	protected int width;
 	protected ScrollStyle scrollStyle;
 	
+	/**
+	 * 
+	 * @param width the total width of the widget
+	 * @param spinnerWidth
+	 * @param spinnerHeight
+	 * @param scrollStyle
+	 */
 	SpinnerView(int width, int spinnerWidth, int spinnerHeight, ScrollStyle scrollStyle) {
-		this.scrollStyle=scrollStyle;
+		this.scrollStyle = scrollStyle;
 		this.spinnerWidth = spinnerWidth;
 		this.width = width;
 		mainPanel = new AbsolutePanel();

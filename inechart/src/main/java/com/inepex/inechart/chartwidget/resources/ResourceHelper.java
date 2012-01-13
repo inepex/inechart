@@ -19,6 +19,7 @@ public class ResourceHelper {
 			icResources = GWT.create(IneChartResources.class);
 			icResources.style().ensureInjected();
 			icResources.scrollStyle().ensureInjected();
+			icResources.scrollStyle2().ensureInjected();
 		}
 		return  icResources;
 	}

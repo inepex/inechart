@@ -1,0 +1,52 @@
+.scrollBar{
+	background-color: white;
+	opacity:0;
+	filter:alpha(opacity=0);
+}
+
+.border{
+	border: 0px;
+}
+
+.scrollBar .slider{
+	background-color: white;
+	opacity:0;
+	filter:alpha(opacity=0);
+	cursor: move;
+}
+
+.scrollBar .sliderMouseOver{
+	background-color: white;
+	opacity:0;
+	filter:alpha(opacity=0);
+	cursor: move;
+}
+
+.scrollBar .increase{
+	
+}
+
+.scrollBar .decrease{
+	
+}
+
+.spinnerView{
+	height: 25 px;
+}
+
+
+.spinner {
+	width: 10px;
+	height: 25px;
+}
+
+@sprite .active{
+	gwt-image: 'timeline_hover';
+	cursor: e-resize;
+}
+
+@sprite .normal{
+	gwt-image: 'timeline';
+	cursor: e-resize;
+}
+

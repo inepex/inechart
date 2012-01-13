@@ -26,6 +26,7 @@
 	height: 32 px;
 }
 
+
 .spinner {
 	
 	width: 20px;
@@ -39,3 +40,4 @@
 @sprite .normal{
 	gwt-image: 'bullet';
 }
+
