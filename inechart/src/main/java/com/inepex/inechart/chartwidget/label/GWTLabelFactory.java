@@ -420,11 +420,13 @@ public class GWTLabelFactory extends LabelFactory{
 			left -= tailX; 
 			break;
 		}
+		panel.getElement().getStyle().setProperty("opacity", "1");
 		DOM.setStyleAttribute(panel.getElement(), "overflow", "visible");
 		DOM.setStyleAttribute(panel.getElement(), "position", "absolute");
 		DOM.setStyleAttribute(panel.getElement(), "left", left +"px");
 		DOM.setStyleAttribute(panel.getElement(), "top", top +"px");
-		DOM.setStyleAttribute(panel.getElement(), "zIndex", ""+(zIndexStart));
+//		DOM.setStyleAttribute(panel.getElement(), "zIndex", ""+(zIndexStart));
+		DOM.setStyleAttribute(panel.getElement(), "zIndex", "111111");		
 		return panel;
 
 	}

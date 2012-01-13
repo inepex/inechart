@@ -137,6 +137,9 @@ public class IntervalSelection extends AbstractInteractiveModule implements Fire
 			}
 		}
 		layer.getCanvas().update();
+//		layer.getCanvas().getCanvasWidget().setStrokeStyle("red");
+//		layer.getCanvas().getCanvasWidget().setLineWidth(3);
+//		layer.getCanvas().getCanvasWidget().strokeRect(10, 10, 51, 18);
 	}
 
 	@Override
@@ -229,6 +232,24 @@ public class IntervalSelection extends AbstractInteractiveModule implements Fire
 		relatedIneChartModule2D.setMinLeftPadding(spinners.getSpinnerWidgetWidth() / 2);
 		relatedIneChartModule2D.setMinRightPadding(spinners.getSpinnerWidgetWidth() / 2);
 	}
+
+	public ShapeProperties getSelectedLookout() {
+		return selectedLookout;
+	}
+
+	public void setSelectedLookout(ShapeProperties selectedLookout) {
+		this.selectedLookout = selectedLookout;
+	}
+
+	public ShapeProperties getUnselectedLookout() {
+		return unselectedLookout;
+	}
+
+	public void setUnselectedLookout(ShapeProperties unselectedLookout) {
+		this.unselectedLookout = unselectedLookout;
+	}
+	
+	
 
 }
 
