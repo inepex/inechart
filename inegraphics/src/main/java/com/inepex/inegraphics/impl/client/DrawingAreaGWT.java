@@ -118,7 +118,7 @@ public class DrawingAreaGWT extends DrawingArea implements HasHandlers, ClickHan
 	protected Canvas canvasGWT;
 	protected AbsolutePanel panel;
 	protected TextPositioner textPositioner;
-	protected Context context; 
+
 
 	protected InnerEventHandler innerEventHandler;
 	protected HandlerManager handlerManager;
@@ -154,7 +154,7 @@ public class DrawingAreaGWT extends DrawingArea implements HasHandlers, ClickHan
 
 		panel.add(canvas, 0, 0);
 		clear();
-		context = null;
+		actualContext = null;
 		//		initEventHandling();
 	}
 
@@ -351,30 +351,30 @@ public class DrawingAreaGWT extends DrawingArea implements HasHandlers, ClickHan
 	 */
 	protected void applyContext(Context context){
 		if(canvas != null){
-			if(this.context == null){
+			if(actualContext == null){
 				canvas.setLineJoin("round");
 				canvas.setLineCap("butt");
 			}
-			if(this.context == null || context.getAlpha() != this.context.getAlpha()){
+			if(actualContext == null || context.getAlpha() != actualContext.getAlpha()){
 				canvas.setGlobalAlpha(context.getAlpha());
 			}
-			if(this.context == null || !context.getFillColor().equals(this.context.getFillColor())){
+			if(actualContext == null || !context.getFillColor().equals(actualContext.getFillColor())){
 				canvas.setFillStyle(context.getFillColor());
 			}
-			if(this.context == null || !context.getStrokeColor().equals(this.context.getStrokeColor())){
+			if(actualContext == null || !context.getStrokeColor().equals(actualContext.getStrokeColor())){
 				canvas.setStrokeStyle(context.getStrokeColor());
 			}
-			if(this.context == null || context.getStrokeWidth() != this.context.getStrokeWidth()){
+			if(actualContext == null || context.getStrokeWidth() != actualContext.getStrokeWidth()){
 				canvas.setLineWidth(context.getStrokeWidth());
 			}
 			if(!createShadows){
-				if(this.context == null || this.context.getShadowOffsetX() != context.getShadowOffsetX()){
+				if(actualContext == null || actualContext.getShadowOffsetX() != context.getShadowOffsetX()){
 					canvas.setShadowOffsetX(context.getShadowOffsetX());
 				}
-				if(this.context == null || this.context.getShadowOffsetY() != context.getShadowOffsetY()){
+				if(actualContext == null || actualContext.getShadowOffsetY() != context.getShadowOffsetY()){
 					canvas.setShadowOffsetX(context.getShadowOffsetX());
 				}
-				if(this.context == null || !this.context.getShadowColor().equals(context.getShadowColor())){
+				if(actualContext == null || !actualContext.getShadowColor().equals(context.getShadowColor())){
 					canvas.setShadowColor(context.getShadowColor());
 				}
 			}
@@ -387,7 +387,7 @@ public class DrawingAreaGWT extends DrawingArea implements HasHandlers, ClickHan
 			canvasGWT.getContext2d().setStrokeStyle(context.getStrokeColor());
 			canvasGWT.getContext2d().setLineWidth(context.getStrokeWidth());
 		}
-		this.context = context;
+		actualContext = context;
 	}
 
 	@Override

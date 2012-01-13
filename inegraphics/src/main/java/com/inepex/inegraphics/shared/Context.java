@@ -160,4 +160,16 @@ public class Context {
 		this.shadowColor = shadowColor;
 	}
 	
+	public double[] getTransformation() {
+		return transformation;
+	}
+	
+	public void setTransformation(double a, double b, double c, double d, double e, double f){
+		transformation = new double[]{a,b,c,d,e,f};
+	}
+	
+	public void scale(double x, double y){
+		transformation = new double[]{x,0,0,y,0,0};
+	}
+	
 }

@@ -54,7 +54,8 @@ public class PathDrawingAnimation extends DrawingAreaGWTAnimation {
 //		int to = (int) (progress * canvas.getWidth());
 //		drawPath(lastEnd, to);
 //		lastEnd = to;
-		movePath((int) (-canvas.getWidth() + progress*canvas.getWidth()));
+//		movePath((int) (-canvas.getWidth() + progress*canvas.getWidth()));
+		scalePath(progress);
 		if(listener != null){
 			long actual = System.currentTimeMillis();
 			listener.onFPSReport((int) (1000 / (actual - last)));
@@ -122,7 +123,20 @@ public class PathDrawingAnimation extends DrawingAreaGWTAnimation {
 		}
 	}
 
-	
+	public void scalePath(double progress){
+		canvas.save();
+		canvas.clearRect(0, 0, canvas.getWidth(), canvas.getHeight());
+//		CanvasAssist.applyContext(canvas, path.getContext(), false);
+//		canvas.moveTo(path.getBasePointX(), path.getBasePointY());
+//		canvas.scale(1, 0.0000000000001 + progress);
+//		CanvasAssist.drawPathElemnts(canvas, path.getPathElements());
+//		canvas.fill();
+//		canvas.stroke();
+		canvas.translate(0, path.getBasePointY() - progress*path.getBasePointY());
+		canvas.scale(1, 0.0001 + progress);
+		CanvasAssist.drawPath(canvas, path);
+		canvas.restore();
+	}
 	
 	public void movePath(int dx){
 		canvas.save();

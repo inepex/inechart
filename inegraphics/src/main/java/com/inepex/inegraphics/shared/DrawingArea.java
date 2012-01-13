@@ -36,10 +36,6 @@ public abstract class DrawingArea extends GraphicalObjectContainer{
 	 */
 	protected boolean createShadows = true;
 	
-	/**
-	 * 
-	 * the newly added {@link GraphicalObject}s stored with this context's No.
-	 */
 	protected Context actualContext;
 	protected int actualzIndex; 
 		

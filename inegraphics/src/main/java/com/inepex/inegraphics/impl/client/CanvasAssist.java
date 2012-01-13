@@ -20,6 +20,16 @@ public class CanvasAssist {
 		canvas.setFillStyle(context.getFillColor());
 		canvas.setStrokeStyle(context.getStrokeColor());
 		canvas.setLineWidth(context.getStrokeWidth());
+		if(context.getTransformation() != null){
+			canvas.setTransform(
+					context.getTransformation()[0], 
+					context.getTransformation()[1],
+					context.getTransformation()[2], 
+					context.getTransformation()[3], 
+					context.getTransformation()[4], 
+					context.getTransformation()[5]
+			);
+		}
 		if(applyShadow){
 			canvas.setShadowOffsetX(context.getShadowOffsetX());
 			canvas.setShadowOffsetX(context.getShadowOffsetX());
@@ -33,12 +43,13 @@ public class CanvasAssist {
 	}
 
 	public static void drawPath(CanvasWidget canvas, Path path) {
-		applyContext(canvas, path.getContext(), false);
+
 		ArrayList<PathElement> pathElements = path.getPathElements();
 		if((path.hasFill() == false && path.hasStroke() == false )||
 				pathElements.size() < 1){
 			return;
 		}
+		applyContext(canvas, path.getContext(), false);
 		canvas.beginPath();
 		canvas.moveTo(path.getBasePointX(), path.getBasePointY());
 		for(PathElement pe : pathElements){
@@ -60,6 +71,23 @@ public class CanvasAssist {
 		}
 		if(path.hasFill()){
 			canvas.fill();
+		}
+	}
+	
+	public static void drawPathElemnts(CanvasWidget canvas, ArrayList<PathElement> pathElements){
+		for(PathElement pe : pathElements){
+			if(pe instanceof QuadraticCurveTo){
+				QuadraticCurveTo qTo = (QuadraticCurveTo) pe;
+				canvas.quadraticCurveTo(qTo.getControlPointX(), qTo.getControlPointY(), qTo.getEndPointX(), qTo.getEndPointY());
+			}
+			else if(pe instanceof LineTo){
+				LineTo lTo = (LineTo) pe;
+				canvas.lineTo(lTo.getEndPointX(), lTo.getEndPointY());
+			}
+			else if(pe instanceof MoveTo){
+				MoveTo mTo = (MoveTo) pe;
+				canvas.moveTo(mTo.getEndPointX(), mTo.getEndPointY());
+			}
 		}
 	}
 
