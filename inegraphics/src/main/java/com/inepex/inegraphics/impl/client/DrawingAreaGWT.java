@@ -250,6 +250,7 @@ public class DrawingAreaGWT extends DrawingArea implements HasHandlers, ClickHan
 		canvas.setFillStyle("white");
 		canvas.clearRect(0, 0, width, height);
 		textPositioner.removeAllText();
+		actualContext = null;
 	}
 
 	@Override
