@@ -16,8 +16,8 @@ import com.google.gwt.user.client.ui.RootPanel;
 import com.google.gwt.user.client.ui.VerticalPanel;
 import com.google.gwt.user.client.ui.Widget;
 import com.inepex.inechart.chartwidget.ModuleAssist;
+import com.inepex.inechart.chartwidget.label.gwt.WidgetFactory;
 import com.inepex.inechart.chartwidget.misc.HorizontalPosition;
-import com.inepex.inechart.chartwidget.misc.Position;
 import com.inepex.inechart.chartwidget.properties.Color;
 import com.inepex.inechart.chartwidget.properties.TextProperties;
 
@@ -41,12 +41,14 @@ public class GWTLabelFactory extends LabelFactory{
 	FlowPanel leftWrapper;
 	
 	final int zIndexStart = 100;
+	WidgetFactory widgetFactory;
 
 
 	public GWTLabelFactory(ModuleAssist moduleAssist) {
 		super(moduleAssist);
 		textContainerWidgetMap = new TreeMap<TextContainer, Widget>();
 		detachedWidgetMap = new TreeMap<TextContainer, Widget>();
+		widgetFactory = new WidgetFactory(moduleAssist);
 		initLayout();
 	}
 
@@ -319,118 +321,35 @@ public class GWTLabelFactory extends LabelFactory{
 			positionTextContainerWidget(label, labelW);
 		}
 	}
-
-	protected Widget createBubbleBoxWidget(BubbleBox bb){
-		AbsolutePanel panel = new AbsolutePanel();
-		HTML bubble = createHTMLFromText(bb.getText());
-		setTextContainerStyleForWidget(bb, bubble);
-		FlowPanel tail = null;
-		if(bb.displayTail){
-			tail = new FlowPanel();
-			tail.setPixelSize(bb.tailSize, bb.tailSize);
-			tail.getElement().getStyle().setProperty("transform", "rotate(-45deg)");
-			tail.getElement().getStyle().setProperty("MozTransform", "rotate(-45deg)");
-			tail.getElement().getStyle().setProperty("webkitTransform", "rotate(-45deg)");
-			tail.getElement().getStyle().setProperty("MSTransform", "rotate(-45deg)");
-			tail.getElement().getStyle().setProperty("filter", "'progid:DXImageTransform.Microsoft.Alpha(Opacity="+bb.getBackground().getFillColor().getAlpha()+")'");
-			tail.getElement().getStyle().setProperty("opacity", ""+bb.getBackground().getFillColor().getAlpha());
-			tail.getElement().getStyle().setBackgroundColor(bb.getBackground().getFillColor().getColor());
-			tail.getElement().getStyle().setBorderColor(bb.getBackground().getLineProperties().getLineColor().getColor());
-			tail.getElement().getStyle().setBorderStyle(bb.getBackground().getLineProperties().getDashDistance() > 0 ? BorderStyle.DASHED : BorderStyle.SOLID);
-			tail.getElement().getStyle().setBorderWidth(bb.getBackground().getLineProperties().getLineWidth(), Unit.PX);
-		}			
-		int tailX=0, tailY=0;
-		int bubbleX=0, bubbleY=0;
-		int height, width;
-		int[] dimensions = measureStyledLabel(bb); 
-		if(bb.tailPosition == Position.Top || bb.tailPosition == Position.Bottom){
-			switch (bb.horizontalPosition) {
-			case Left:
-				tailX = (int) (bb.roundedCornerRadius + Math.sqrt(2) / 2 * bb.tailSize);
-				break;
-			case Right:
-				tailX = (int) (dimensions[0] - bb.roundedCornerRadius - Math.sqrt(2) / 2 * bb.tailSize);
-				break;
-			default:
-				tailX = (int) (dimensions[0] / 2 - (Math.sqrt(2) / 2) * bb.tailSize);
-				break;
-			}
-			if(bb.tailPosition == Position.Top){
-				bubbleY = bb.displayTail ? (int) (Math.sqrt(2) / 2 * bb.tailSize) : 0;
-			}
-			else{
-				tailY = dimensions[1] - (int) (((Math.sqrt(2) / 2) * bb.tailSize));
-			}
-			height = (int) (dimensions[1] + (bb.displayTail ? (Math.sqrt(2) / 2 * bb.tailSize) : 0));
-			width = dimensions[0];
+	
+	@Override
+	protected void createStyledLabel(StyledLabel label, int x, int y,
+			int width, int height) {
+		if(label == null){
+			return;
+		}
+		if(label instanceof BubbleBox){
+			Widget w  = widgetFactory.createBubbleBoxWidget((BubbleBox) label, x, y, width, height);
+			mainPanel.add(w);
+			textContainerWidgetMap.put(label, w);
 		}
 		else{
-			switch (bb.verticalPosition) {
-			case Top:
-				tailY = bb.roundedCornerRadius;
-				break;
-			case Bottom:
-				tailY = (int) (dimensions[1] - bb.roundedCornerRadius - (Math.sqrt(2) / 2 * bb.tailSize));
-				break;
-			default:
-				tailY = (int) (dimensions[1] / 2 - Math.sqrt(2) / 2 * bb.tailSize);
-				break;
-			}
-			if(bb.tailPosition == Position.Left){
-				bubbleX = bb.displayTail ? (int) (Math.sqrt(2) / 2 * bb.tailSize) : 0;
-			}
-			else{
-				tailX = dimensions[0] - (int) (Math.sqrt(2) / 2 * bb.tailSize);
-			}
-			height = dimensions[1];
-			width = (int) (dimensions[0] + (bb.displayTail ? (Math.sqrt(2) / 2 * bb.tailSize) : 0));
+			Widget labelW = createHTMLFromText(label.getText());
+			setTextContainerStyleForWidget(label, labelW);
+			textContainerWidgetMap.put(label, labelW);
+			positionTextContainerWidget(label, labelW);
 		}
-		panel.setPixelSize(width, height);
-		if(bb.displayTail){
-			panel.add(tail, tailX, tailY);
-		}
-		FlowPanel hidingPanel = new FlowPanel();
-		hidingPanel.setPixelSize(dimensions[0], dimensions[1]);
-		hidingPanel.getElement().getStyle().setProperty("opacity", "1");
-		hidingPanel.getElement().getStyle().setBackgroundColor("white");
-		hidingPanel.getElement().getStyle().setBorderColor("white");
-		if(bb.roundedCornerRadius > 0){
-			hidingPanel.getElement().getStyle().setProperty("borderRadius", bb.roundedCornerRadius+"px");
-		}
-		hidingPanel.getElement().getStyle().setBorderStyle(bb.getBackground().getLineProperties().getDashDistance() > 0 ? BorderStyle.DASHED : BorderStyle.SOLID);
-		hidingPanel.getElement().getStyle().setBorderWidth(bb.getBackground().getLineProperties().getLineWidth(), Unit.PX);
-		panel.add(hidingPanel, bubbleX, bubbleY);
-		panel.add(bubble, bubbleX, bubbleY);
-		int left = bb.left, top = bb.top;
-		switch(bb.tailPosition){
-		case Bottom:
-			top -= bb.distanceFromPoint + height;
-			left -= width / 2 - (Math.sqrt(2) / 4) * bb.tailSize;
-			break;
-		case Left:
-			top -= tailY;
-			left += bb.distanceFromPoint; 
-			break;
-		case Right:
-			top -= tailY;
-			left -= width + bb.distanceFromPoint;
-			break;
-		default:
-			top += bb.distanceFromPoint;
-			left -= tailX; 
-			break;
-		}
-		panel.getElement().getStyle().setProperty("opacity", "1");
-		DOM.setStyleAttribute(panel.getElement(), "overflow", "visible");
-		DOM.setStyleAttribute(panel.getElement(), "position", "absolute");
-		DOM.setStyleAttribute(panel.getElement(), "left", left +"px");
-		DOM.setStyleAttribute(panel.getElement(), "top", top +"px");
-//		DOM.setStyleAttribute(panel.getElement(), "zIndex", ""+(zIndexStart));
-		DOM.setStyleAttribute(panel.getElement(), "zIndex", "111111");		
-		return panel;
-
 	}
 
+	protected Widget createBubbleBoxWidget(BubbleBox bb){
+		int x = 0, y = 0, width = 0, height = 0;
+		if(bb.isAutoFit()){
+			width = moduleAssist.getMainCanvas().getWidth();
+			height = moduleAssist.getMainCanvas().getHeight();
+		}
+		return widgetFactory.createBubbleBoxWidget(bb, x, y, width, height);
+	}
+	
 	@Override
 	public void updateStyledLabel(StyledLabel label) {
 		if(isFixedPosition(label) && textContainerWidgetMap.containsKey(label)){
@@ -496,4 +415,6 @@ public class GWTLabelFactory extends LabelFactory{
 		canvas.measureText(text);
 		return new int[]{text.getWidth() + label.leftPadding + label.rightPadding, text.getHeight() + label.bottomPadding + label.topPadding};
 	}
+
+	
 }

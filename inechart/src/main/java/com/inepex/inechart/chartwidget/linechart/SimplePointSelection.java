@@ -515,12 +515,12 @@ public class SimplePointSelection extends LineChartInteractiveModule {
 						lineChart.getXAxis().getAxisDataType(), lineChart.getYAxis().getAxisDataType()));
 		toDisplay.setLeft((int) dp.getCanvasX());
 		toDisplay.setTop((int) dp.getCanvasY());
-		int distance = 0;
+		int distance = (int) (shape.getProperties().getLineProperties().getLineWidth() / 2);
 		if(shape instanceof Circle){
-			distance = (int) ((Circle) shape).getRadius();
+			distance += (int) ((Circle) shape).getRadius();
 		}
 		else{
-			distance = (int) ((Rectangle) shape).getHeight();
+			distance += (int) ((Rectangle) shape).getHeight();
 		}
 		toDisplay.setDistanceFromPoint(distance);
 		moduleAssist.getLabelFactory().addAndDisplayStyledLabel(toDisplay);

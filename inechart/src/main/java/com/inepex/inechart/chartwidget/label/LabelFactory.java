@@ -80,6 +80,8 @@ public abstract class LabelFactory extends IneChartModule{
  	
  	protected abstract void createStyledLabel(StyledLabel label); 
  	
+ 	protected abstract void createStyledLabel(StyledLabel label, int x, int y, int width, int height);
+ 	
  	/**
  	 * Updates the given {@link StyledLabel}, without recalculating the padding.
  	 * Use this method when you want to (re)position a label.
@@ -120,6 +122,11 @@ public abstract class LabelFactory extends IneChartModule{
 		addStyledLabel(label);
 		createStyledLabel(label);
 	}
+	
+	public void addAndDisplayStyledLabel(StyledLabel label, int x, int y, int width, int height){
+		addStyledLabel(label);
+		createStyledLabel(label, x, y, width, height);
+	};
 
 	/**
 	 * @return the legend

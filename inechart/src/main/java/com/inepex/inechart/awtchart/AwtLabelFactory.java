@@ -241,5 +241,12 @@ public class AwtLabelFactory extends LabelFactory {
 	protected void removeDisplayedStyledLabel(StyledLabel label) {
 		// TODO Auto-generated method stub
 		
+	}
+
+	@Override
+	protected void createStyledLabel(StyledLabel label, int x, int y,
+			int width, int height) {
+		// TODO Auto-generated method stub
+		
 	}	
 }
