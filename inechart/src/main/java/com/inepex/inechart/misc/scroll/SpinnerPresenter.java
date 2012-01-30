@@ -32,14 +32,14 @@ public class SpinnerPresenter implements MouseDownHandler, MouseMoveHandler, Mou
 	protected boolean spinnerStopAtMax = false;
 	protected boolean spinnerStop = false;
 	
-
 	protected ArrayList<HandlerRegistration> handlerRegistrations;
 	
 	public SpinnerPresenter(View view, Spinnable spinnable) {
 		this.view = view;
 		this.spinnable = spinnable;
-		if(view != null)
+		if(view != null){
 			setView(view);
+		}
 	}
 		
 	/**

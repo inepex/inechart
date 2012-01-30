@@ -63,7 +63,8 @@ public class Curve implements HasZIndex, HasShadow, Comparable<Curve>{
 	double shadowOffsetX, shadowOffsetY;
 	boolean hasShadow = true;
 	int zIndex = Integer.MIN_VALUE;
-
+	boolean visible = true;
+	
 	public Curve(){
 		this(new KeyValueDataSet());
 	}
@@ -383,5 +384,13 @@ public class Curve implements HasZIndex, HasShadow, Comparable<Curve>{
 		else if(dataSet.getEntry(entry.getX(), entry.getY()) != null){
 			discontinuities.add(dataSet.getEntry(entry.getX(), entry.getY()));
 		}
+	}
+
+	public boolean isVisible() {
+		return visible;
+	}
+
+	public void setVisible(boolean visible) {
+		this.visible = visible;
 	}
 }

@@ -149,7 +149,7 @@ public class Defaults {
 	public static final ShapeProperties bb_BackGround(){
 		return new ShapeProperties(new LineProperties(0, new Color("gray")), new Color("gray", 0.8));
 	}
-	public static final int bb_RoundedCornerRadius = 4;
+	public static final int bb_RoundedCornerRadius = 0;
 	//legend
 	public static final Rectangle legendSymbol = new Rectangle(28, 9,new ShapeProperties(new LineProperties(0), color()));
 	//intervalchart

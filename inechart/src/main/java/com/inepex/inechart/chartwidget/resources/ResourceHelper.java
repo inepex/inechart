@@ -20,6 +20,7 @@ public class ResourceHelper {
 			icResources.style().ensureInjected();
 			icResources.scrollStyle().ensureInjected();
 			icResources.scrollStyle2().ensureInjected();
+			icResources.spinnerWidgetStyle().ensureInjected();
 		}
 		return  icResources;
 	}

@@ -812,6 +812,7 @@ public class Axes extends IneChartModule {
 				t.setTickPosition(axis.defaultTick.tickPosition);
 				//				}
 				t.setTickLength(axis.defaultTick.tickLength);
+				t.getText().setTextProperties(axis.defaultTick.getText().getTextProperties());
 			}
 			// use default defaults :)
 			else{

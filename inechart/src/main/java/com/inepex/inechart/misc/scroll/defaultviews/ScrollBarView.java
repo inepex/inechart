@@ -37,7 +37,7 @@ public class ScrollBarView extends Composite implements View {
 	
 	protected ArrayList<HandlerRegistration> handlerRegistrations;
 	
-	protected ScrollBarView(boolean isHorizontal, ScrollStyle scrollStyle){
+	public ScrollBarView(boolean isHorizontal, ScrollStyle scrollStyle){
 		this(isHorizontal, isHorizontal ? 0 : DEFAULT_SIZE, isHorizontal ? DEFAULT_SIZE : 0, DEFAULT_PADDING, true, scrollStyle);
 	}
 	

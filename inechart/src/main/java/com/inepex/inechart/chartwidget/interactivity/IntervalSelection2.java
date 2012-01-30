@@ -16,10 +16,12 @@ import com.inepex.inechart.chartwidget.Layer;
 import com.inepex.inechart.chartwidget.event.FiresViewportChangeEvent;
 import com.inepex.inechart.chartwidget.event.ViewportChangeEvent;
 import com.inepex.inechart.chartwidget.properties.ShapeProperties;
+import com.inepex.inechart.chartwidget.resources.ResourceHelper;
 import com.inepex.inechart.chartwidget.shape.Rectangle;
-import com.inepex.inechart.misc.HorizontalSpinnersWidget;
+import com.inepex.inechart.misc.IntervalSelectionWidget;
 import com.inepex.inechart.misc.ResizableInterval;
 import com.inepex.inechart.misc.scroll.SpinnerPresenter;
+import com.inepex.inechart.misc.scroll.defaultviews.DefaultScrollViewFactory;
 import com.inepex.inechart.misc.scroll.defaultviews.SpinnerView;
 import com.inepex.inegraphics.shared.gobjects.GraphicalObject;
 
@@ -31,7 +33,7 @@ import com.inepex.inegraphics.shared.gobjects.GraphicalObject;
  * @author Miklós Süveges / Inepex Ltd.
  *
  */
-public class IntervalSelection extends AbstractInteractiveModule implements FiresViewportChangeEvent{
+public class IntervalSelection2 extends AbstractInteractiveModule implements FiresViewportChangeEvent{
 
 	protected List<IneChart> addressedCharts;
 	protected List<IneChartModule2D> addressedModuls;
@@ -46,12 +48,12 @@ public class IntervalSelection extends AbstractInteractiveModule implements Fire
 	protected ShapeProperties unselectedLookout;
 	protected Layer layer;
 
-	HorizontalSpinnersWidget spinners;
+	IntervalSelectionWidget spinners;
 	ResizableInterval resizableInterval;
 
 	boolean positionOverModule = true;
 
-	public IntervalSelection() {
+	public IntervalSelection2() {
 		innerEventHandler = new InnerEventHandler();
 		unselectedLookout = Defaults.selectionLookout();
 	}
@@ -65,8 +67,9 @@ public class IntervalSelection extends AbstractInteractiveModule implements Fire
 		}
 		minSpinnerPos = 0;
 		maxSpinnerPos = relatedIneChartModule2D.getXAxis().getMax() - relatedIneChartModule2D.getXAxis().getMin();
-		spinners = new HorizontalSpinnersWidget(relatedIneChartModule2D.getWidth(), false, relatedIneChartModule2D.getHeight(),
-				new ResizableInterval() {
+		spinners = new IntervalSelectionWidget(
+				relatedIneChartModule2D.getWidth(), false, relatedIneChartModule2D.getHeight(),
+				true, new ResizableInterval() {
 
 			@Override
 			public void intervalSet(double min, double max) {
@@ -102,7 +105,7 @@ public class IntervalSelection extends AbstractInteractiveModule implements Fire
 			public void dragStart() {
 
 			}
-		});
+		}, new DefaultScrollViewFactory(ResourceHelper.getRes().scrollStyle2()));
 		moduleAssist.getChartMainPanel().add(spinners, relatedIneChartModule2D.getLeftPadding() - spinners.getSpinnerWidgetWidth() / 2, relatedIneChartModule2D.getBottomEnd());
 		super.init();
 	}
@@ -178,8 +181,7 @@ public class IntervalSelection extends AbstractInteractiveModule implements Fire
 	public void update() {
 		moduleAssist.getChartMainPanel().setWidgetPosition(spinners, 
 				relatedIneChartModule2D.getLeftPadding() - spinners.getSpinnerWidgetWidth() / 2, 
-//				positionOverModule ? relatedIneChartModule2D.getTopPadding() : relatedIneChartModule2D.getBottomEnd()
-				relatedIneChartModule2D.getTopPadding());
+				positionOverModule ? relatedIneChartModule2D.getTopPadding() : relatedIneChartModule2D.getBottomEnd());
 		minSpinnerPos = 0;
 		maxSpinnerPos = relatedIneChartModule2D.getXAxis().getMax() - relatedIneChartModule2D.getXAxis().getMin();
 		spinners.setWidth(relatedIneChartModule2D.getWidth(), false);
@@ -225,10 +227,10 @@ public class IntervalSelection extends AbstractInteractiveModule implements Fire
 	@Override
 	public void preUpdate() {
 		if(!positionOverModule){
-			relatedIneChartModule2D.setMinBottomPadding(Math.max(relatedIneChartModule2D.getMinBottomPadding(),spinners.getHeight()));
+			relatedIneChartModule2D.setMinBottomPadding(spinners.getTotalHeight());
 		}
-		relatedIneChartModule2D.setMinLeftPadding(Math.max(relatedIneChartModule2D.getMinLeftPadding(),spinners.getSpinnerWidgetWidth() / 2));
-		relatedIneChartModule2D.setMinRightPadding(Math.max(relatedIneChartModule2D.getMinRightPadding(),spinners.getSpinnerWidgetWidth() / 2));
+		relatedIneChartModule2D.setMinLeftPadding(spinners.getSpinnerWidgetWidth() / 2);
+		relatedIneChartModule2D.setMinRightPadding(spinners.getSpinnerWidgetWidth() / 2);
 	}
 
 	public ShapeProperties getSelectedLookout() {

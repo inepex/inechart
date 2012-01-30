@@ -14,6 +14,9 @@ public interface IneChartResources extends ClientBundle {
 	@Source("ScrollStyle2.css")
 	ScrollStyle scrollStyle2();
 	
+	@Source("SpinnerWidget.css")
+	SpinnerWidgetStyle spinnerWidgetStyle();
+	
 	@Source("bullet.png")
 	ImageResource bullet();
 	

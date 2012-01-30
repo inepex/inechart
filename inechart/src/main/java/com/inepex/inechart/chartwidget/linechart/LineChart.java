@@ -19,7 +19,6 @@ import com.inepex.inechart.chartwidget.data.XYDataEntry;
 import com.inepex.inechart.chartwidget.event.DataEntrySelectionEvent;
 import com.inepex.inechart.chartwidget.event.DataSetChangeEvent;
 import com.inepex.inechart.chartwidget.event.ViewportChangeEvent;
-import com.inepex.inechart.chartwidget.label.BubbleBox;
 import com.inepex.inechart.chartwidget.properties.Color;
 import com.inepex.inechart.chartwidget.properties.LineProperties.LineStyle;
 import com.inepex.inechart.chartwidget.shape.Circle;
@@ -165,12 +164,20 @@ public class LineChart extends IneChartModule2D {
 		graphicalObjectContainer.removeAllGraphicalObjects();
 		//do model to canvas calculations
 		for (Curve curve : curves) {
-			updateCurveModel(curve);
+			if(curve.isVisible()){
+				updateCurveModel(curve);
+			}
 		}
 		//remove previous and create new GOs
 		for (Curve curve : curves) {
-			removeAndCreateCurveGOs(curve);
-			drawGOsAndUpdateCanvasIfClient(curve);
+			if(curve.isVisible()){
+				removeAndCreateCurveGOs(curve);
+				drawGOsAndUpdateCanvasIfClient(curve);
+			}
+			else{
+				getCanvas(curve).removeAllGraphicalObjects();
+				getCanvas(curve).update();
+			}
 		}
 		for(LineChartInteractiveModule im : interactiveModules){
 			im.update();
