@@ -14,6 +14,7 @@ import com.google.gwt.event.shared.SimpleEventBus;
 import com.google.gwt.user.client.DOM;
 import com.google.gwt.user.client.ui.AbsolutePanel;
 import com.google.gwt.user.client.ui.Composite;
+import com.google.gwt.user.client.ui.Widget;
 import com.inepex.inechart.chartwidget.axes.Axes;
 import com.inepex.inechart.chartwidget.axes.TickFactoryGWT;
 import com.inepex.inechart.chartwidget.barchart.BarChart;
@@ -324,6 +325,19 @@ public class IneChart extends Composite{
 	
 	protected void removeLayer(DrawingAreaGWT layer){
 		mainPanel.remove(layer.getWidget());
+	}
+	
+	protected void addLayer(DrawingAreaGWT layer){
+		mainPanel.add(layer.getWidget(), 0, 0);
+	}
+	
+	protected boolean containsLayer(DrawingAreaGWT layer){
+		for(Widget w : mainPanel){
+			if(w == layer.getWidget()){
+				return true;
+			}
+		}
+		return false;
 	}
 	
 	protected void setLayerOrder(ArrayList<DrawingAreaGWT> layers){

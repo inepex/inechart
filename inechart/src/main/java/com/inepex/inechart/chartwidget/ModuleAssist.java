@@ -146,4 +146,43 @@ public class ModuleAssist {
 		this.chartMainPanel = chartMainPanel;
 	}
 
+	public void removeLayer(Layer layer){
+		if(layer instanceof LinkedLayers){
+			for(Layer lyr : ((LinkedLayers) layer).getLayers()){
+				removeLayer(lyr);
+			}
+		}
+		else{
+			clientSideChart.removeLayer(layer.getCanvas());
+		}
+	}
+	
+	public void addLayer(Layer layer){
+		if(layer instanceof LinkedLayers){
+			for(Layer lyr : ((LinkedLayers) layer).getLayers()){
+				addLayer(lyr);
+			}
+		}
+		else{
+			clientSideChart.addLayer(layer.getCanvas());
+		}
+	}
+	
+	public boolean isLayerAttached(Layer layer){
+		boolean ret = true;
+		if(layer instanceof LinkedLayers){
+			for(Layer lyr : ((LinkedLayers) layer).getLayers()){
+				if(!isLayerAttached(lyr)){
+					ret = false;
+					break;
+				}
+			}
+		}
+		else{
+			if(!clientSideChart.containsLayer(layer.getCanvas())){
+				ret = false;
+			}
+		}
+		return ret;
+	}
 }

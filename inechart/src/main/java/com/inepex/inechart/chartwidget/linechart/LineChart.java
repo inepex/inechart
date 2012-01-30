@@ -171,12 +171,14 @@ public class LineChart extends IneChartModule2D {
 		//remove previous and create new GOs
 		for (Curve curve : curves) {
 			if(curve.isVisible()){
+				if(!moduleAssist.isLayerAttached(this.linkedLayersPerCurve.get(curve))){
+					moduleAssist.addLayer(linkedLayersPerCurve.get(curve));
+				}
 				removeAndCreateCurveGOs(curve);
 				drawGOsAndUpdateCanvasIfClient(curve);
 			}
 			else{
-				getCanvas(curve).removeAllGraphicalObjects();
-				getCanvas(curve).update();
+				moduleAssist.removeLayer(linkedLayersPerCurve.get(curve));
 			}
 		}
 		for(LineChartInteractiveModule im : interactiveModules){

@@ -62,5 +62,12 @@ public class LinkedLayers extends Layer {
 		Collections.sort(layers);
 		return layers.get(layers.size() - 1);
 	}
+	
+	@Override
+	public void setOpacity(double alpha) {
+		for(Layer layer : layers){
+			layer.setOpacity(alpha);
+		}
+	}
 
 }

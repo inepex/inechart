@@ -39,7 +39,7 @@ public class SimplePointSelection extends LineChartInteractiveModule {
 	protected TreeMap<Curve, Shape> touchedPointShapes;
 	protected Shape defaultTouchedPointShape;
 	protected TreeMap<Curve, Layer> canvasPerCurve;
-//	protected TreeMap<Curve, ArrayList<GraphicalObject>> registeredInteractivePoints;
+	//	protected TreeMap<Curve, ArrayList<GraphicalObject>> registeredInteractivePoints;
 
 	/**
 	 * a circle representing the interactive face of the point
@@ -72,14 +72,14 @@ public class SimplePointSelection extends LineChartInteractiveModule {
 	 * the selected points are stored in {@link Curve}
 	 */
 	TreeMap<Curve, ArrayList<DataPoint>> touchedPoints;
-	
+
 	boolean displayAnnotation;
 	protected TreeMap<Curve, BubbleBox> annotationPerCurve;
 	protected BubbleBox defaultAnnotation;
 	protected TreeMap<Curve, ArrayList<BubbleBox>> displayedAnnotationPerCurve;
 	protected TreeMap<Curve, String> xFormats;
 	protected TreeMap<Curve, String> yFormats;
-	
+
 
 
 	public SimplePointSelection() {
@@ -226,7 +226,7 @@ public class SimplePointSelection extends LineChartInteractiveModule {
 		//check if we need mouse position and interactive GO related points
 		if( pointSelectionMode == InteractionMode.On_Click || pointSelectionMode == InteractionMode.On_Over || pointTouchMode == InteractionMode.On_Click || pointTouchMode == InteractionMode.On_Over){
 			for(Curve c : interactiveGOsPerCurve.keySet()){
-				if(!c.hasPoint && pointMouseOverRadius <= 0){
+				if(!c.visible || !c.hasPoint && pointMouseOverRadius <= 0){
 					continue;
 				}
 				mouseOverPointsPerCurve.put(c, getMouseOverPoints(c, coords));
@@ -235,9 +235,9 @@ public class SimplePointSelection extends LineChartInteractiveModule {
 		//check if we need the closest to cursor points
 		if( pointSelectionMode == InteractionMode.Closest_To_Cursor || pointTouchMode == InteractionMode.Closest_To_Cursor){
 			for(Curve c : interactiveGOsPerCurve.keySet()){
-//				if(!c.hasPoint){
-//					continue;
-//				}
+				if(!c.visible){
+					continue;
+				}
 				closestToCursorPointsPerCurve.put(c, new ArrayList<DataPoint>());
 				closestToCursorPointsPerCurve.get(c).add(lineChart.getClosestDataToPoint(coords, c));
 			}
@@ -365,7 +365,7 @@ public class SimplePointSelection extends LineChartInteractiveModule {
 
 		for(Curve c : lineChart.curves){
 			if((c.hasPoint || pointMouseOverRadius > 0 )
-//					|| pointSelectionMode == InteractionMode.Closest_To_Cursor || pointTouchMode == InteractionMode.Closest_To_Cursor)
+					//					|| pointSelectionMode == InteractionMode.Closest_To_Cursor || pointTouchMode == InteractionMode.Closest_To_Cursor)
 					&& (justDeselected.containsKey(c) || justSelected.containsKey(c) || touchChange.containsKey(c))
 					){
 				updateLayer(c);
@@ -421,9 +421,35 @@ public class SimplePointSelection extends LineChartInteractiveModule {
 	@Override
 	protected void update() {
 		for(Curve c : lineChart.curves){
-			if(c.hasPoint || pointMouseOverRadius > 0){
-				updateLayer(c);
+			if(c.visible){
+				if(c.hasPoint || pointMouseOverRadius > 0){
+					updateLayer(c);
+				}
 			}
+			else{
+				clearLayer(c);
+			}
+		}
+	}
+
+	protected void clearLayer(Curve curve){
+		if(canvasPerCurve.containsKey(curve)){
+			canvasPerCurve.get(curve).getCanvas().removeAllGraphicalObjects();
+			canvasPerCurve.get(curve).getCanvas().update();
+		}
+		if(displayedAnnotationPerCurve.containsKey(curve)){
+			for(BubbleBox bb : displayedAnnotationPerCurve.get(curve)){
+				moduleAssist.getLabelFactory().removeStyledLabel(bb);
+			}
+			displayedAnnotationPerCurve.get(curve).clear();
+		}
+		if(interactiveGOsPerCurve.containsKey(curve)){
+			for(GraphicalObject go : interactiveGOsPerCurve.get(curve).getGraphicalObjects()){
+				if(interactivePoints.containsKey(go)){
+					interactivePoints.remove(go);
+				}
+			}
+			interactiveGOsPerCurve.get(curve).removeAllGraphicalObjects();
 		}
 	}
 
@@ -433,29 +459,22 @@ public class SimplePointSelection extends LineChartInteractiveModule {
 	 * @param curve
 	 */
 	protected void updateLayer(Curve curve){
+		if(!curve.visible){
+			return;
+		}
 		checkLayer(curve);
 		DrawingAreaGWT canvas = canvasPerCurve.get(curve).getCanvas();
-		canvas.removeAllGraphicalObjects();
-		if(displayedAnnotationPerCurve.containsKey(curve)){
-			for(BubbleBox bb : displayedAnnotationPerCurve.get(curve)){
-				moduleAssist.getLabelFactory().removeStyledLabel(bb);
-			}
-		}
+
+		clearLayer(curve);
+		
 		if(!interactiveGOsPerCurve.containsKey(curve)){
 			interactiveGOsPerCurve.put(curve, new GraphicalObjectContainer());
 		}
-		else{
-			for(GraphicalObject go : interactiveGOsPerCurve.get(curve).getGraphicalObjects()){
-				if(interactivePoints.containsKey(go)){
-					interactivePoints.remove(go);
-				}
-			}
-			interactiveGOsPerCurve.get(curve).removeAllGraphicalObjects();
-		}
+	
 		ArrayList<DataPoint> selectedPoints = curve.getSelectedPoints();
 		Shape selected = getSelectedShape(curve);
 		Shape touched = getTouchedShape(curve);
-		
+
 		for(DataPoint dp : curve.dataPoints){
 			if(dp.isInViewport){
 				Shape shape;
@@ -531,8 +550,8 @@ public class SimplePointSelection extends LineChartInteractiveModule {
 		}
 		displayed.add(toDisplay);
 	}
-	
-	
+
+
 	public Shape getDefaultSelectedPointShape() {
 		return defaultSelectedPointShape;
 	}

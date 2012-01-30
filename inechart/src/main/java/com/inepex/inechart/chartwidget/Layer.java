@@ -73,4 +73,8 @@ public class Layer implements Comparable<Layer>{
 	public int compareTo(Layer o) {
 		return ((Integer)zIndex).compareTo(o.zIndex);
 	}
+		
+	public void setOpacity(double alpha){
+		canvas.getWidget().getElement().getStyle().setOpacity(0);
+	}
 }
