@@ -165,7 +165,7 @@ public class Defaults {
 	
 	//crosshair
 	public static final LineProperties crosshair(){
-		return new LineProperties(2, new Color("red", 0.8));
+		return new LineProperties(2.2, new Color("gray", 1));
 	}
 	
 	public static final TextContainer crosshairTextBox(){
@@ -175,9 +175,21 @@ public class Defaults {
 		return tc;
 	}
 	public static final TextProperties crosshairTextProperties(){
-		return new TextProperties("Calibri, Verdana, Arial, sans-serif", 12, "normal", "normal", new Color("red"));
+		return new TextProperties("Calibri, Verdana, Arial, sans-serif", 11, "normal", "normal", new Color("white"));
 	}
 	public static final int snapToValueRange = 5;
+	public static BubbleBox crosshairXBubbleBox (){
+		BubbleBox bb =  new BubbleBox("");
+		bb.setTailHorizontalPosition(HorizontalPosition.Middle);
+		bb.setTailPosition(Position.Top);
+		return bb;
+	}
+	public static BubbleBox crosshairYBubbleBox (){
+		BubbleBox bb =  new BubbleBox("");
+		bb.setTailVerticalPosition(VerticalPosition.Middle);
+		bb.setTailPosition(Position.Right);
+		return bb;
+	}
 	
 	//value format
 	public static final String dateFormat = "MMM d. H:mm";

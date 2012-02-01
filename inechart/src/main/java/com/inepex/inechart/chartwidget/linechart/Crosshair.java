@@ -12,6 +12,7 @@ import com.inepex.inechart.chartwidget.Layer;
 import com.inepex.inechart.chartwidget.ModuleAssist;
 import com.inepex.inechart.chartwidget.axes.Axis.AxisDataType;
 import com.inepex.inechart.chartwidget.axes.TickFactoryGWT;
+import com.inepex.inechart.chartwidget.label.BubbleBox;
 import com.inepex.inechart.chartwidget.label.StyledLabel;
 import com.inepex.inechart.chartwidget.label.Text;
 import com.inepex.inechart.chartwidget.label.TextContainer;
@@ -36,7 +37,10 @@ public class Crosshair extends LineChartInteractiveModule{
 	String xFormat = "";
 	String yFormat = "";
 	TextProperties textProperties;
-
+	
+	BubbleBox xBubbleBox;
+	BubbleBox yBubbleBox;
+	
 	Curve curve;
 
 	Layer layer;
@@ -51,11 +55,13 @@ public class Crosshair extends LineChartInteractiveModule{
 		selectionRange = SelectionRange.Both;
 		valueBox = Defaults.crosshairTextBox();
 		lineProperties = Defaults.crosshair();	
-		textProperties = Defaults.tickTextProperties();
+		textProperties = Defaults.crosshairTextProperties();
 		styledLabels = new ArrayList<StyledLabel>();
 		gos = new GraphicalObjectContainer();
 		snapToValueRange = Defaults.snapToValueRange;
 		continuousTracking = true;
+		xBubbleBox = Defaults.crosshairXBubbleBox();
+		yBubbleBox = Defaults.crosshairYBubbleBox();
 	}
 
 	public Crosshair(Curve curve) {
@@ -92,12 +98,16 @@ public class Crosshair extends LineChartInteractiveModule{
 				}
 			}
 			Text t = new Text(TickFactoryGWT.formatValue(lineChart.getXAxis().getAxisDataType(), dp.getData().getX(), formatString), textProperties);
-			StyledLabel sl = new StyledLabel(t);
-			sl.setBackground(this.valueBox.getBackground());
-			int[] dim = moduleAssist.getLabelFactory().measureStyledLabel(sl);
-			sl.setLeft((int) (dp.canvasX - dim[0] / 2));
-			sl.setTop((int) (lineChart.getTopPadding() + lineChart.getHeight()));
-			styledLabels.add(sl);
+			xBubbleBox.setText(t);
+			xBubbleBox.setLeft((int) dp.canvasX);
+			xBubbleBox.setTop(lineChart.getBottomEnd());
+			styledLabels.add(xBubbleBox);
+//			StyledLabel sl = new StyledLabel(t);
+//			sl.setBackground(this.valueBox.getBackground());
+//			int[] dim = moduleAssist.getLabelFactory().measureStyledLabel(sl);
+//			sl.setLeft((int) (dp.canvasX - dim[0] / 2));
+//			sl.setTop((int) (lineChart.getTopPadding() + lineChart.getHeight()));
+//			styledLabels.add(sl);
 		}
 		if(selectionRange == SelectionRange.Both || selectionRange == SelectionRange.Horizontal){
 			formatString = yFormat;
@@ -121,12 +131,16 @@ public class Crosshair extends LineChartInteractiveModule{
 				}
 			}
 			Text t = new Text(TickFactoryGWT.formatValue(lineChart.getYAxis().getAxisDataType(), dp.getData().getY(), formatString), textProperties);
-			StyledLabel sl = new StyledLabel(t);
-			sl.setBackground(this.valueBox.getBackground());
-			int[] dim = moduleAssist.getLabelFactory().measureStyledLabel(sl);
-			sl.setLeft(lineChart.getLeftPadding() - dim[0]);
-			sl.setTop((int) (dp.canvasY - dim[1] / 2));
-			styledLabels.add(sl);
+			yBubbleBox.setText(t);
+			yBubbleBox.setLeft(lineChart.getLeftPadding());
+			yBubbleBox.setTop((int) dp.canvasY);
+			styledLabels.add(yBubbleBox);
+//			StyledLabel sl = new StyledLabel(t);
+//			sl.setBackground(this.valueBox.getBackground());
+//			int[] dim = moduleAssist.getLabelFactory().measureStyledLabel(sl);
+//			sl.setLeft(lineChart.getLeftPadding() - dim[0]);
+//			sl.setTop((int) (dp.canvasY - dim[1] / 2));
+//			styledLabels.add(sl);
 
 		}
 

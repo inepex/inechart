@@ -15,21 +15,21 @@ import com.google.gwt.user.client.ui.AbsolutePanel;
 import com.google.gwt.user.client.ui.IsWidget;
 
 public class SpinnerPairPresenter{
-	
+
 	private enum SpinnerStopCause{
 		MAX,
 		MIN,
 		OTHER_SPINNER
 	}
-	
+
 	protected class EventHandler implements MouseDownHandler, MouseMoveHandler, MouseUpHandler{
-		
+
 		private final boolean first;
-		
+
 		public EventHandler(boolean first) {
 			this.first = first;
 		}
-		
+
 
 		@Override
 		public void onMouseUp(MouseUpEvent event) {
@@ -39,15 +39,16 @@ public class SpinnerPairPresenter{
 		@Override
 		public void onMouseMove(MouseMoveEvent event) {
 			SpinnerPairPresenter.this.onMouseMove(event, first);
+			
 		}
 
 		@Override
 		public void onMouseDown(MouseDownEvent event) {
 			SpinnerPairPresenter.this.onMouseDown(event, first);
 		}
-		
+
 	}
-	
+
 	public interface View{
 		IsWidget getSpinner1();
 		IsWidget getSpinner2();
@@ -55,26 +56,27 @@ public class SpinnerPairPresenter{
 		void setSpinnerPosition1(int position);
 		void setSpinnerPosition2(int position);
 		int getMinDistanceBetweenSpinners();
-//		void setSpinnerBeingDragged(boolean spinnerBeingDragged);
+		boolean canSpinnersSwapPosition();
+		void setSpinnerBeingDragged(boolean spinnerBeingDragged, boolean first);
 	}
-	
+
 	protected View view;
-	
+
 	protected SpinnablePair spinnable;
 	protected boolean mouseDown = false;
 	protected int lastMouseCoord;
-	protected int mouseDownOnSpinner;
+	protected int startMouseCoordRelativeToSpinner;
 	protected AbsolutePanel mainPanel;
-	protected double position1;
-	protected double position2;
-	protected int viewPosition1;
-	protected int viewPosition2;
+	protected double positionDomain1;
+	protected double positionDomain2;
+	protected int positionView1;
+	protected int positionView2;
 	protected SpinnerStopCause spinnerStopCause;
 	protected boolean spinnerStop = false;
 	protected ArrayList<HandlerRegistration> handlerRegistrations;
-	
+
 	private boolean actualSpinnerIsFirst; 
-	
+
 	public SpinnerPairPresenter(View view, SpinnablePair spinnable) {
 		this.view = view;
 		this.spinnable = spinnable;
@@ -82,7 +84,7 @@ public class SpinnerPairPresenter{
 			setView(view);
 		}
 	}
-		
+
 	/**
 	 * @return the view
 	 */
@@ -96,11 +98,11 @@ public class SpinnerPairPresenter{
 		this.view = view;
 		deregisterHandlers();
 		registerHandlers();
-		position1 = spinnable.getInitialPosition1();
-		position2 = spinnable.getInitialPosition1();
+		positionDomain1 = spinnable.getInitialPosition1();
+		positionDomain2 = spinnable.getInitialPosition1();
 		setSpinner();
 	}
-	
+
 	protected void deregisterHandlers() {
 		if(handlerRegistrations != null){
 			for(HandlerRegistration h : handlerRegistrations){
@@ -108,7 +110,7 @@ public class SpinnerPairPresenter{
 			}
 		}
 	}
-	
+
 	protected void registerHandlers(){
 		handlerRegistrations = new ArrayList<HandlerRegistration>();
 		EventHandler eh1 = new EventHandler(true);
@@ -120,7 +122,7 @@ public class SpinnerPairPresenter{
 		handlerRegistrations.add(view.getSpinner2().asWidget().addDomHandler(eh2, MouseUpEvent.getType()));
 		handlerRegistrations.add(view.getSpinner2().asWidget().addDomHandler(eh2, MouseMoveEvent.getType()));
 	}
-	
+
 	/**
 	 * @return the spinnable
 	 */
@@ -134,55 +136,30 @@ public class SpinnerPairPresenter{
 		this.spinnable = spinnable;
 	}
 
-	
+
 	public void onMouseUp(MouseUpEvent event, boolean first) {
 		if(mouseDown){
-			Element focus;
-			if(first){
-				focus = view.getSpinner1().asWidget().getElement();
-			}
-			else{
-				focus = view.getSpinner2().asWidget().getElement();
-			}
-			DOM.releaseCapture(focus);
-//			view.setSpinnerBeingDragged(false);
+			setDOMFocus(false);
+			view.setSpinnerBeingDragged(false, first);
 			mouseDown = false;
 			spinnable.dragEnd();
+			spinnerStop = false;
 		}
 	}
 
-	public void onMouseMove(MouseMoveEvent event, boolean first) {
-		if(mouseDown){
-			int actual = event.getClientX();
-			if(actual == lastMouseCoord){
-				return;
-			}
-			int actualRel = event.getX();
-			if(spinnerStop){
-				if(spinnerStopCause == SpinnerStopCause.MAX && actualRel > mouseDownOnSpinner ||
-					spinnerStopCause == SpinnerStopCause.MIN && actualRel < mouseDownOnSpinner){
-					return;
-				}
-				else if(spinnerStopCause != SpinnerStopCause.OTHER_SPINNER){
-					spinnerStop = false;
-				}
-				switch(spinnerStopCause){
-				case MAX:
-					lastMouseCoord = actual + mouseDownOnSpinner - actualRel;
-					break;
-				case MIN:
-					lastMouseCoord = actual - (actualRel - mouseDownOnSpinner); 
-					break;
-				case OTHER_SPINNER:
-				
-					break;
-				}
-			}
-			spinnerStop = !move(actual);
-			if(spinnerStop && spinnerStopCause == SpinnerStopCause.OTHER_SPINNER){
-				return;
-			}
-			lastMouseCoord = actual;
+	protected void setDOMFocus(boolean capture){
+		Element focus;
+		if(actualSpinnerIsFirst){
+			focus = view.getSpinner1().asWidget().getElement();
+		}
+		else{
+			focus = view.getSpinner2().asWidget().getElement();
+		}
+		if(capture){
+			DOM.setCapture(focus);
+		}
+		else{
+			DOM.releaseCapture(focus);
 		}
 	}
 
@@ -191,124 +168,167 @@ public class SpinnerPairPresenter{
 		event.preventDefault();
 		mouseDown = true;
 		lastMouseCoord = event.getClientX();
-		mouseDownOnSpinner = event.getX();
-		Element focus;
-		if(first){
-			focus = view.getSpinner1().asWidget().getElement();
-		}
-		else{
-			focus = view.getSpinner2().asWidget().getElement();
-		}
-		DOM.setCapture(focus);
-//		view.setSpinnerBeingDragged(true);
+		startMouseCoordRelativeToSpinner = event.getX();
+		setDOMFocus(true);
+		view.setSpinnerBeingDragged(true, first);
 		spinnable.dragStart();
 	}
+
+	public void onMouseMove(MouseMoveEvent event, boolean first) {
+		if(!mouseDown){
+			return;
+		}
+		int actualMouseCoord = event.getClientX();
+		//if last mousePos isn't differ from actual, we can exit
+		if(actualMouseCoord == lastMouseCoord){
+			return;
+		}
+		int actualMouseCoordRelativeToSpinner = event.getX();
+		if(spinnerStop){
+			switch(spinnerStopCause){
+			//if the spinner stopped at an extreme and it still should not move, we can exit 
+			case MAX:
+				if(actualMouseCoordRelativeToSpinner > startMouseCoordRelativeToSpinner){
+					return;
+				}
+				break;
+			case MIN:
+				if(actualMouseCoordRelativeToSpinner < startMouseCoordRelativeToSpinner){
+					return;
+				}
+				break;
+			case OTHER_SPINNER:
+				if(!view.canSpinnersSwapPosition()){
+					//if the spinner stopped at its extreme pos and it still should not move, we can exit 
+					if(actualSpinnerIsFirst && actualMouseCoordRelativeToSpinner > startMouseCoordRelativeToSpinner ||
+						!actualSpinnerIsFirst && actualMouseCoordRelativeToSpinner < startMouseCoordRelativeToSpinner){
+						return;
+					}
+				}
+				else{
+					int spinnerViewPositionActual, spinnerViewPositionOther;
+					if(actualSpinnerIsFirst){
+						spinnerViewPositionActual = positionView1;
+						spinnerViewPositionOther = positionView2;
+					}
+					else{
+						spinnerViewPositionActual = positionView2;
+						spinnerViewPositionOther = positionView1;
+					}
+					int diffFromStop = actualMouseCoord - lastMouseCoord;
+					//lastmousecoord should be the pos where spinner stopped
+					if(spinnerViewPositionActual < spinnerViewPositionOther){
+						//spinner 
+						if(diffFromStop > 0 && 
+							( diffFromStop < view.getMinDistanceBetweenSpinners() * 2 /* + view.getSpinnerWidth() */ ||
+							  spinnerViewPositionOther + view.getMinDistanceBetweenSpinners() > view.getSpinnableAreaLength()
+							)){
+							return;
+						}
+					}
+					else{
+						//spinner 
+						if(diffFromStop < 0 && 
+							( Math.abs(diffFromStop) < view.getMinDistanceBetweenSpinners() * 2 /* + view.getSpinnerWidth() */ ||
+							  spinnerViewPositionOther - view.getMinDistanceBetweenSpinners() < 0
+							)){
+							return;
+						}
+					}
+				}
+				break;
+			}
+			spinnerStop = false;
+		}
+		move(actualMouseCoord);
+	}
 	
-	protected boolean move(int actual){
-		double distancePX = actual - lastMouseCoord;
-		double position;
+	protected int domainToView(double domain){
+		return (int) (view.getSpinnableAreaLength() / (double)spinnable.getSpinnableDomainLength()  * domain);
+	}
+	
+	protected double viewToDomain(int view){
+		return spinnable.getSpinnableDomainLength() / (double)this.view.getSpinnableAreaLength() * view; 
+	}
+
+	protected void move(int actualMouseCoord){
+		int distanceInView = actualMouseCoord - lastMouseCoord;
+		
+		//check if we should 'cut' the distance
+		int spinnerViewPositionActual, spinnerViewPositionOther;
 		if(actualSpinnerIsFirst){
-			position = position1;
+			spinnerViewPositionActual = positionView1;
+			spinnerViewPositionOther = positionView2;
 		}
 		else{
-			position = position2;
+			spinnerViewPositionActual = positionView2;
+			spinnerViewPositionOther = positionView1;
 		}
-		//check if the spinner is at max or min so can't be moved more
-		if(distancePX > 0 && position == spinnable.getSpinnableDomainLength()){
+		if(spinnerViewPositionActual + distanceInView > view.getSpinnableAreaLength()){
+			distanceInView = view.getSpinnableAreaLength() - spinnerViewPositionActual;
+			spinnerStop = true;
 			spinnerStopCause = SpinnerStopCause.MAX;
-			return false;
 		}
-		if(position == 0 && distancePX < 0){
+		if(spinnerViewPositionActual + distanceInView < 0){
+			distanceInView = -spinnerViewPositionActual;
+			spinnerStop = true;
 			spinnerStopCause = SpinnerStopCause.MIN;
-			return false;
 		}
-		//the domain distance
-		double distanceDom = spinnable.getSpinnableDomainLength() / (double)view.getSpinnableAreaLength() * distancePX;
-		int actualVP, otherVP;
-		if(actualSpinnerIsFirst){
-			actualVP = viewPosition1;
-			otherVP = viewPosition2;
-		}
-		else{
-			actualVP = viewPosition2;
-			otherVP = viewPosition1;
-		}
-//		if(dist > 0){
-//			if(actualVP + dist > otherVP - view.getMinDistanceBetweenSpinners() && actualVP + dist < otherVP + view.getMinDistanceBetweenSpinners()){
-//				spinnerStopCause = SpinnerStopCause.OTHER_SPINNER;
-//				return false;
-//			}
-//		}
-//		else{
-//			if(actualVP + dist < otherVP + view.getMinDistanceBetweenSpinners() && actualVP + dist > otherVP - view.getMinDistanceBetweenSpinners()){
-//				spinnerStopCause = SpinnerStopCause.OTHER_SPINNER;
-//				return false;
-//			}
-//		}
-		//'cut' the distance to min and max
-		if(position + distanceDom> spinnable.getSpinnableDomainLength()){
-			distanceDom = spinnable.getSpinnableDomainLength() - position;
-		}
-		else if(position + distanceDom < 0){
-			distanceDom = -position;
+		if(spinnerViewPositionActual < spinnerViewPositionOther){
+			if(spinnerViewPositionActual + distanceInView > spinnerViewPositionOther - view.getMinDistanceBetweenSpinners() &&
+					spinnerViewPositionActual + distanceInView < spinnerViewPositionOther + view.getMinDistanceBetweenSpinners() ){
+				distanceInView = spinnerViewPositionOther - view.getMinDistanceBetweenSpinners() - spinnerViewPositionActual;
+				spinnerStop = true;
+				spinnerStopCause = SpinnerStopCause.OTHER_SPINNER;
+			}
 		}
 		else{
-//			if(distanceDom > 0){
-//				if(actualVP + distancePX > otherVP - view.getMinDistanceBetweenSpinners() && actualVP + distancePX < otherVP + view.getMinDistanceBetweenSpinners()){
-//					double cutDistInPx = actualVP + distancePX - (otherVP - view.getMinDistanceBetweenSpinners());
-//					double cutDistInDomain = spinnable.getSpinnableDomainLength() / (double)view.getSpinnableAreaLength() * cutDistInPx;
-//					distanceDom -= cutDistInDomain;
-//					lastMouseCoord = (int) (actual + distancePX - cutDistInPx);
-//					spinnerStop = true;
-//				}
-//			}
-//			else{
-//				if(actualVP + distancePX < otherVP + view.getMinDistanceBetweenSpinners() && actualVP + distancePX > otherVP - view.getMinDistanceBetweenSpinners()){
-//					double cutDistInPx = otherVP + view.getMinDistanceBetweenSpinners() - (actual + distancePX);
-//					double cutDistInDomain = spinnable.getSpinnableDomainLength() / (double)view.getSpinnableAreaLength() * cutDistInPx;
-//					distanceDom -= cutDistInDomain;
-//					lastMouseCoord = (int) (actual + (distancePX + cutDistInPx)); 
-//					spinnerStop = true;
-//				}
-//			}
-		}
-		if(actualSpinnerIsFirst){
-			position1 += distanceDom;
-		}
-		else{
-			position2 += distanceDom;
+			if(spinnerViewPositionActual + distanceInView < spinnerViewPositionOther + view.getMinDistanceBetweenSpinners() &&
+					spinnerViewPositionActual + distanceInView > spinnerViewPositionOther - view.getMinDistanceBetweenSpinners() ){
+				distanceInView = spinnerViewPositionOther + view.getMinDistanceBetweenSpinners() - spinnerViewPositionActual;
+				spinnerStop = true;
+				spinnerStopCause = SpinnerStopCause.OTHER_SPINNER;
+			}
 		}
 		
+		lastMouseCoord += distanceInView;
+		double distanceInDomain = viewToDomain(distanceInView);
 		if(actualSpinnerIsFirst){
-			spinnable.spinnerMoved1(distanceDom);
+			positionDomain1 += distanceInDomain;
 		}
 		else{
-			spinnable.spinnerMoved2(distanceDom);
+			positionDomain2 += distanceInDomain;
+		}
+
+		if(actualSpinnerIsFirst){
+			spinnable.spinnerMoved1(distanceInDomain);
+		}
+		else{
+			spinnable.spinnerMoved2(distanceInDomain);
 		}
 		setSpinner();
-		return true;
 	}
-	
+
 	protected void setSpinner(){
 		if(actualSpinnerIsFirst){
-			viewPosition1 = (int) (position1 * view.getSpinnableAreaLength() / spinnable.getSpinnableDomainLength()); 
-			view.setSpinnerPosition1(viewPosition1);
+			positionView1 = domainToView(positionDomain1); 
+			view.setSpinnerPosition1(positionView1);
 		}
 		else{
-			viewPosition2 = (int) (position2 * view.getSpinnableAreaLength() / spinnable.getSpinnableDomainLength()); 
-			view.setSpinnerPosition2(viewPosition2);
+			positionView2 = domainToView(positionDomain2);
+			view.setSpinnerPosition2(positionView2);
 		} 
-		
+
 	}
-	
+
 	public void setSpinnerPosition1(double position){
-		this.position1 = position;
+		this.positionDomain1 = position;
 		actualSpinnerIsFirst = true;
 		setSpinner();
 	}
-	
+
 	public void setSpinnerPosition2(double position){
-		this.position2 = position;
+		this.positionDomain2 = position;
 		actualSpinnerIsFirst = false;
 		setSpinner();
 	}

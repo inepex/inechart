@@ -146,8 +146,8 @@ public class WidgetFactory {
 		int left = bb.getLeft(), top = bb.getTop();
 		tailX = getTailX(bb, labelDimensions, tailDiffFromOrig, tailSize);
 		tailY = getTailY(bb, labelDimensions, tailDiffFromOrig, tailSize);
-		int leftFromLabel = getTailX(bb, labelDimensions, tailDiffFromOrig, tailSize) + tailDiffFromOrig + tailSize / 2;
-		int topFromLabel = getTailY(bb, labelDimensions, tailDiffFromOrig, tailSize) + tailDiffFromOrig + tailSize / 2;
+		int leftFromLabel = tailX + tailDiffFromOrig + tailSize / 2;
+		int topFromLabel = tailY + tailDiffFromOrig + tailSize / 2;
 		int bubbleX = getBubbleX(bb, tailSize);
 		int bubbleY = getBubbleY(bb, tailSize);
 		switch(bb.getTailPosition()){
@@ -257,16 +257,17 @@ public class WidgetFactory {
 	private int getTailY(BubbleBox bb, int[] labelDimensions, int tailDiffFromOrig, int tailSize){
 		int tailY = 0;
 		if(bb.getTailPosition() == Position.Left || bb.getTailPosition() == Position.Right){
+			tailY -= tailDiffFromOrig * 1.5; //hack
 			switch (bb.getTailVerticalPosition()) {
 			case Auto:
 			case Middle:
-				tailY = labelDimensions[1] / 2 - tailSize / 2;
+				tailY += labelDimensions[1] / 2 - tailSize / 2;
 				break;
 			case Bottom:
-				tailY = labelDimensions[1] - bb.getRoundedCornerRadius() - tailSize * 2;
+				tailY += labelDimensions[1] - bb.getRoundedCornerRadius() - tailSize * 2;
 				break;
 			case Top:
-				tailY = bb.getRoundedCornerRadius();
+				tailY += bb.getRoundedCornerRadius();
 				break;
 			}
 		}

@@ -34,7 +34,7 @@ import com.inepex.inegraphics.shared.gobjects.GraphicalObject;
 public class IntervalSelection extends AbstractInteractiveModule implements FiresViewportChangeEvent{
 
 	protected List<IneChart> addressedCharts;
-	protected List<IneChartModule2D> addressedModuls;
+	protected List<IneChartModule2D> addressedModules;
 
 	protected double minSpinnerPos;
 	protected double maxSpinnerPos;
@@ -94,7 +94,7 @@ public class IntervalSelection extends AbstractInteractiveModule implements Fire
 			public void dragEnd() {
 				ViewportChangeEvent event = new ViewportChangeEvent(minSpinnerPos + relatedIneChartModule2D.getXAxis().getMin() , maxSpinnerPos + relatedIneChartModule2D.getXAxis().getMin(), true);
 				event.setAddressedCharts(addressedCharts);
-				event.setAddressedModules(addressedModuls);
+				event.setAddressedModules(addressedModules);
 				moduleAssist.getEventManager().fireViewportChangedEvent(event);
 			}
 
@@ -203,23 +203,23 @@ public class IntervalSelection extends AbstractInteractiveModule implements Fire
 
 	@Override
 	public List<IneChartModule2D> getAddressedModules() {
-		if(addressedModuls == null){
-			addressedModuls = new ArrayList<IneChartModule2D>();
+		if(addressedModules == null){
+			addressedModules = new ArrayList<IneChartModule2D>();
 		}
-		return addressedModuls;
+		return addressedModules;
 	}
 
 	@Override
-	public void setAddressedModules(List<IneChartModule2D> addressedModuls) {
-		this.addressedModuls = addressedModuls;
+	public void setAddressedModules(List<IneChartModule2D> addressedModules) {
+		this.addressedModules = addressedModules;
 	}
 
 	@Override
 	public void addAddressedModule(IneChartModule2D addressedModule) {
-		if(addressedModuls == null){
-			addressedModuls = new ArrayList<IneChartModule2D>();
+		if(addressedModules == null){
+			addressedModules = new ArrayList<IneChartModule2D>();
 		}
-		addressedModuls.add(addressedModule);
+		addressedModules.add(addressedModule);
 	}
 
 	@Override

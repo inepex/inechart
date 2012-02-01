@@ -1,8 +1,11 @@
 package com.inepex.inechart.misc;
 
+import com.google.gwt.dom.client.Style.Cursor;
+import com.google.gwt.user.client.DOM;
 import com.google.gwt.user.client.ui.AbsolutePanel;
 import com.google.gwt.user.client.ui.Composite;
 import com.google.gwt.user.client.ui.IsWidget;
+import com.google.gwt.user.client.ui.RootPanel;
 import com.inepex.inechart.chartwidget.resources.ResourceHelper;
 import com.inepex.inechart.misc.scroll.ScrollBarPresenter;
 import com.inepex.inechart.misc.scroll.ScrollViewFactory;
@@ -19,10 +22,14 @@ public class HorizontalSpinnersWidget extends Composite {
 		
 		SpinnerWidget spinnerWidget1;
 		SpinnerWidget spinnerWidget2;
+		int pos1, pos2;
+		String defaultCursor;
 		
 		public SpinnerView() {
 			spinnerWidget1 = new SpinnerWidget();
+			spinnerWidget1.setLeft();
 			spinnerWidget2 = new SpinnerWidget();
+			spinnerWidget2.setRight();
 		}
 		
 		@Override
@@ -43,17 +50,49 @@ public class HorizontalSpinnersWidget extends Composite {
 
 		@Override
 		public void setSpinnerPosition1(int position) {
+			pos1 = position;
+			updateSideDependentStyles();
 			mainPanel.setWidgetPosition(spinnerWidget1, position, 0);
 		}
 
 		@Override
 		public void setSpinnerPosition2(int position) {
+			pos2 = position;
+			updateSideDependentStyles();
 			mainPanel.setWidgetPosition(spinnerWidget2, position, 0);
 		}
 
 		@Override
 		public int getMinDistanceBetweenSpinners() {
 			return 25;
+		}
+
+		@Override
+		public boolean canSpinnersSwapPosition() {
+			return true;
+		}
+
+		@Override
+		public void setSpinnerBeingDragged(boolean spinnerBeingDragged,
+				boolean first) {
+			if(spinnerBeingDragged){
+				defaultCursor = RootPanel.get().getElement().getStyle().getCursor();
+				RootPanel.get().getElement().getStyle().setProperty("cursor", "e-resize");
+			}
+			else{
+				RootPanel.get().getElement().getStyle().setProperty("cursor", defaultCursor);
+			}
+		}
+		
+		private void updateSideDependentStyles(){
+			if(pos1 > pos2){
+				spinnerWidget1.setRight();
+				spinnerWidget2.setLeft();
+			}
+			else{
+				spinnerWidget2.setRight();
+				spinnerWidget1.setLeft();
+			}
 		}
 	}
 	

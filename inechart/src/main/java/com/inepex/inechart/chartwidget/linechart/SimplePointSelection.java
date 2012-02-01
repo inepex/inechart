@@ -263,6 +263,8 @@ public class SimplePointSelection extends LineChartInteractiveModule {
 
 	}
 
+//	protected void 
+	
 	/**
 	 * Updates selection / touched point models, fires events and redraws layer
 	 * @param selectInteractionPoints
