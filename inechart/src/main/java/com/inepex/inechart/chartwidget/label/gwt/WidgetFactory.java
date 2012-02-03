@@ -7,6 +7,7 @@ import com.google.gwt.user.client.ui.AbsolutePanel;
 import com.google.gwt.user.client.ui.FlowPanel;
 import com.google.gwt.user.client.ui.HTML;
 import com.google.gwt.user.client.ui.InlineHTML;
+import com.google.gwt.user.client.ui.PopupPanel;
 import com.google.gwt.user.client.ui.Widget;
 import com.inepex.inechart.chartwidget.ModuleAssist;
 import com.inepex.inechart.chartwidget.label.BubbleBox;
@@ -83,6 +84,7 @@ public class WidgetFactory {
 	 * @return
 	 */
 	public Widget createBubbleBoxWidget(BubbleBox bb, int x, int y, int width, int height){
+		PopupPanel popupPanel = new PopupPanel(false, false);
 		AbsolutePanel panel = new AbsolutePanel();
 		HTML bubble = createHTMLFromText(bb.getText());
 		setTextContainerStyleForWidget(bb, bubble);
@@ -212,8 +214,9 @@ public class WidgetFactory {
 		DOM.setStyleAttribute(panel.getElement(), "left", left +"px");
 		DOM.setStyleAttribute(panel.getElement(), "top", top +"px");
 		DOM.setStyleAttribute(panel.getElement(), "zIndex", ""+(100));	
-		return panel;
-
+//		return panel;
+		popupPanel.add(panel);
+		return popupPanel;
 	}
 	
 	private int getBubbleX(BubbleBox bb, int tailSize){

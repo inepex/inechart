@@ -102,12 +102,6 @@ public class Crosshair extends LineChartInteractiveModule{
 			xBubbleBox.setLeft((int) dp.canvasX);
 			xBubbleBox.setTop(lineChart.getBottomEnd());
 			styledLabels.add(xBubbleBox);
-//			StyledLabel sl = new StyledLabel(t);
-//			sl.setBackground(this.valueBox.getBackground());
-//			int[] dim = moduleAssist.getLabelFactory().measureStyledLabel(sl);
-//			sl.setLeft((int) (dp.canvasX - dim[0] / 2));
-//			sl.setTop((int) (lineChart.getTopPadding() + lineChart.getHeight()));
-//			styledLabels.add(sl);
 		}
 		if(selectionRange == SelectionRange.Both || selectionRange == SelectionRange.Horizontal){
 			formatString = yFormat;
@@ -135,13 +129,6 @@ public class Crosshair extends LineChartInteractiveModule{
 			yBubbleBox.setLeft(lineChart.getLeftPadding());
 			yBubbleBox.setTop((int) dp.canvasY);
 			styledLabels.add(yBubbleBox);
-//			StyledLabel sl = new StyledLabel(t);
-//			sl.setBackground(this.valueBox.getBackground());
-//			int[] dim = moduleAssist.getLabelFactory().measureStyledLabel(sl);
-//			sl.setLeft(lineChart.getLeftPadding() - dim[0]);
-//			sl.setTop((int) (dp.canvasY - dim[1] / 2));
-//			styledLabels.add(sl);
-
 		}
 
 		layer.getCanvas().addAllGraphicalObject(gos);

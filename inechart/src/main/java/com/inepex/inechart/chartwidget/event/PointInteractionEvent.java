@@ -3,9 +3,9 @@ package com.inepex.inechart.chartwidget.event;
 import com.inepex.inechart.chartwidget.linechart.Curve;
 import com.inepex.inechart.chartwidget.linechart.DataPoint;
 
-public class PointInteractionEvent extends IneChartEvent<PointSelectionHandler> {
+public class PointInteractionEvent extends IneChartEvent<PointInteractionHandler> {
 	
-	public static final Type<PointSelectionHandler> TYPE = new Type<PointSelectionHandler>();
+	public static final Type<PointInteractionHandler> TYPE = new Type<PointInteractionHandler>();
 	
 	InteractionType interactionType;
 	DataPoint point;
@@ -29,12 +29,12 @@ public class PointInteractionEvent extends IneChartEvent<PointSelectionHandler> 
 	}
 
 	@Override
-	public Type<PointSelectionHandler> getAssociatedType() {
+	public Type<PointInteractionHandler> getAssociatedType() {
 		return TYPE;
 	}
 
 	@Override
-	protected void dispatch(PointSelectionHandler handler) {
+	protected void dispatch(PointInteractionHandler handler) {
 		switch (interactionType) {
 		case Deselected:
 			handler.onDeselect(this);

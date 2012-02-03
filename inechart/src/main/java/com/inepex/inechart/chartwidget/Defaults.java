@@ -182,12 +182,14 @@ public class Defaults {
 		BubbleBox bb =  new BubbleBox("");
 		bb.setTailHorizontalPosition(HorizontalPosition.Middle);
 		bb.setTailPosition(Position.Top);
+		bb.setAutoFit(false);
 		return bb;
 	}
 	public static BubbleBox crosshairYBubbleBox (){
 		BubbleBox bb =  new BubbleBox("");
 		bb.setTailVerticalPosition(VerticalPosition.Middle);
 		bb.setTailPosition(Position.Right);
+		bb.setAutoFit(false);
 		return bb;
 	}
 	

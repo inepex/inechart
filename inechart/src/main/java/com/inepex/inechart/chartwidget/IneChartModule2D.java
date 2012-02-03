@@ -239,7 +239,8 @@ public abstract class IneChartModule2D extends IneChartModule implements HasCoor
 	protected Axis yAxis;
 	protected ArrayList<Axis> extraAxes;
 	
-	protected boolean autoScaleViewport;
+	protected boolean autoScaleViewportHorizontal;
+	protected boolean autoScaleViewportVertical;
 	protected boolean autoCalcPadding = true;
 	
 	//padding
@@ -267,7 +268,8 @@ public abstract class IneChartModule2D extends IneChartModule implements HasCoor
 		super(moduleAssist);
 		this.moduleAssist = moduleAssist;
 		moduleAssist.labelFactory.addLegendOwner(this);
-		autoScaleViewport = true;
+		autoScaleViewportHorizontal = true;
+		autoScaleViewportVertical = true;
 		if(moduleAssist.isClientSide()){
 			moduleLayer = new LinkedLayers();
 			moduleAssist.addLinkedLayers(moduleLayer);
@@ -704,17 +706,11 @@ public abstract class IneChartModule2D extends IneChartModule implements HasCoor
 	}
 
 	/**
-	 * @return the autoScaleViewport
-	 */
-	public boolean isAutoScaleViewport() {
-		return autoScaleViewport;
-	}
-
-	/**
 	 * @param autoScaleViewport the autoScaleViewport to set
 	 */
 	public void setAutoScaleViewport(boolean autoScaleViewport) {
-		this.autoScaleViewport = autoScaleViewport;
+		this.autoScaleViewportHorizontal = autoScaleViewport;
+		this.autoScaleViewportVertical = autoScaleViewport;
 	}
 	
 	public void setLeftPadding(int leftPadding) {
@@ -841,4 +837,26 @@ public abstract class IneChartModule2D extends IneChartModule implements HasCoor
 		interactiveModules.remove(interactiveModule);
 		interactiveModule.detach();
 	}
+
+	
+	public boolean isAutoScaleViewportHorizontal() {
+		return autoScaleViewportHorizontal;
+	}
+
+	
+	public void setAutoScaleViewportHorizontal(boolean autoScaleViewportHorizontal) {
+		this.autoScaleViewportHorizontal = autoScaleViewportHorizontal;
+	}
+
+	
+	public boolean isAutoScaleViewportVertical() {
+		return autoScaleViewportVertical;
+	}
+
+	
+	public void setAutoScaleViewportVertical(boolean autoScaleViewportVertical) {
+		this.autoScaleViewportVertical = autoScaleViewportVertical;
+	}
+
+
 }

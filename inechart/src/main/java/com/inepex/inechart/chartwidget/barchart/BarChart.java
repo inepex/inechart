@@ -112,7 +112,7 @@ public class BarChart extends IneChartModule2D implements HasShadow, HasZIndex {
 		this.barChartType = BarChartType.Simple;
 		this.barSequencePosition = BarSequencePosition.Over;
 		this.hasXValues = true;
-		autoScaleViewport = true;
+		autoScaleViewportHorizontal = true;
 		
 		this.baseY = 0;
 		this.barSpacing = Defaults.barSpacing;
@@ -864,10 +864,10 @@ public class BarChart extends IneChartModule2D implements HasShadow, HasZIndex {
 	public void preUpdateModule() {
 		if (dataSets.size() == 0)
 			return;
-		if (autoScaleViewport) {
+		if (autoScaleViewportHorizontal) {
 			normalizeData();
 			scaleViewportToFitAllBars();
-			autoScaleViewport = false;
+			autoScaleViewportHorizontal = false;
 		}
 
 		// update axes and viewport

@@ -70,7 +70,7 @@ public class LineChart extends IneChartModule2D {
 		interactiveModules = new ArrayList<LineChartInteractiveModule>();
 
 		// defaults
-		autoScaleViewport = true;
+		autoScaleViewportHorizontal = true;
 		setPointFilter(new PointFilter());
 	}
 
@@ -131,7 +131,7 @@ public class LineChart extends IneChartModule2D {
 	public void preUpdateModule() {
 		if (curves == null || curves.size() == 0)
 			return;
-		if (autoScaleViewport) {
+		if (autoScaleViewportHorizontal || autoScaleViewportVertical) {
 			double yMin = Double.MAX_VALUE;
 			double yMax = -Double.MAX_VALUE;
 			double xMin = Double.MAX_VALUE;
@@ -147,18 +147,23 @@ public class LineChart extends IneChartModule2D {
 				if (c.dataSet.getyMin() < yMin)
 					yMin = c.dataSet.getyMin();
 			}
-			autoScaleViewport = false;
-			xAxis.setMax(xMax);
-			yAxis.setMax(yMax);
-			xAxis.setMin(xMin);
-			yAxis.setMin(yMin);
+			if(autoScaleViewportHorizontal){
+				xAxis.setMax(xMax);
+				xAxis.setMin(xMin);
+			}
+			if(autoScaleViewportVertical){
+				yAxis.setMax(yMax);
+				yAxis.setMin(yMin);	
+			}
+			autoScaleViewportHorizontal = false;
+			autoScaleViewportVertical = false;
 		}
 		super.preUpdateModule();
 	}
 
 	@Override
 	public void update() {
-		
+
 		if (curves == null || curves.size() == 0)
 			return;
 		graphicalObjectContainer.removeAllGraphicalObjects();

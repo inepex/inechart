@@ -78,7 +78,7 @@ public class IntervalChart extends IneChartModule2D {
 
 	@Override
 	public void preUpdateModule() {
-		if(autoScaleViewport){
+		if(autoScaleViewportHorizontal){
 			double yMin = 0;
 			double yMax = -Double.MAX_VALUE;
 			double xMin = Double.MAX_VALUE;
@@ -97,7 +97,7 @@ public class IntervalChart extends IneChartModule2D {
 			yAxis.setMax(yMax);
 			xAxis.setMin(xMin);
 			yAxis.setMin(yMin);
-			autoScaleViewport = false;
+			autoScaleViewportHorizontal = false;
 		}
 		super.preUpdateModule();
 	}

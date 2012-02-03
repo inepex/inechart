@@ -1,6 +1,7 @@
 package com.inepex.inechart.chartwidget.linechart;
 
 import java.util.ArrayList;
+import java.util.Iterator;
 import java.util.TreeMap;
 
 import com.google.gwt.event.dom.client.ClickEvent;
@@ -39,7 +40,6 @@ public class SimplePointSelection extends LineChartInteractiveModule {
 	protected TreeMap<Curve, Shape> touchedPointShapes;
 	protected Shape defaultTouchedPointShape;
 	protected TreeMap<Curve, Layer> canvasPerCurve;
-	//	protected TreeMap<Curve, ArrayList<GraphicalObject>> registeredInteractivePoints;
 
 	/**
 	 * a circle representing the interactive face of the point
@@ -73,14 +73,15 @@ public class SimplePointSelection extends LineChartInteractiveModule {
 	 */
 	TreeMap<Curve, ArrayList<DataPoint>> touchedPoints;
 
-	boolean displayAnnotation;
+	protected boolean displayAnnotationTouch;
+	protected boolean displayAnnotationSelect;
 	protected TreeMap<Curve, BubbleBox> annotationPerCurve;
 	protected BubbleBox defaultAnnotation;
 	protected TreeMap<Curve, ArrayList<BubbleBox>> displayedAnnotationPerCurve;
 	protected TreeMap<Curve, String> xFormats;
 	protected TreeMap<Curve, String> yFormats;
 
-
+	protected boolean canSelectOnlyTouchedPoint; //TODO
 
 	public SimplePointSelection() {
 		selectedPointShapes = new TreeMap<Curve, Shape>();
@@ -89,13 +90,15 @@ public class SimplePointSelection extends LineChartInteractiveModule {
 		canvasPerCurve = new TreeMap<Curve, Layer>();
 		interactiveGOsPerCurve = new TreeMap<Curve, GraphicalObjectContainer>();
 		interactivePoints = new TreeMap<GraphicalObject, DataPoint>();
-		displayAnnotation = true;
+		displayAnnotationTouch = true;
+		displayAnnotationSelect = true;
+		canSelectOnlyTouchedPoint = true;
 		displayedAnnotationPerCurve = new TreeMap<Curve, ArrayList<BubbleBox>>();
 		annotationPerCurve = new TreeMap<Curve, BubbleBox>();
 		pointSelectionMode = Defaults.selectInteractionMode;
 		pointTouchMode = Defaults.touchInteractionMode;
 		pointMouseOverRadius = Defaults.pointMouseOverRadius;
-		singlePointSelection = false;
+		singlePointSelection = true;
 		xFormats = new TreeMap<Curve, String>();
 		yFormats = new TreeMap<Curve, String>();
 	}
@@ -147,45 +150,7 @@ public class SimplePointSelection extends LineChartInteractiveModule {
 		gos.addGraphicalObject(go);
 	}
 
-	/**
-	 * Determines the state of the given interacted points
-	 * @param curve
-	 * @param interactedPoints
-	 * @param selected 
-	 * @param deselected
-	 */
-	private void determinePointSelectionState(Curve curve, ArrayList<DataPoint> interactedPoints, ArrayList<DataPoint> selected, ArrayList<DataPoint> deselected){
-		if(interactedPoints == null && pointSelectionMode == InteractionMode.Closest_To_Cursor && curve.getSelectedPoints().size() > 0){
-			deselected.addAll(curve.getSelectedPoints());
-			return;
-		}
-		//if a point was selected and still selected: no state change, any other way: state change
-		if(pointSelectionMode == InteractionMode.Closest_To_Cursor || pointSelectionMode == InteractionMode.On_Over){
-			for(DataPoint dp : interactedPoints){
-				if(!curve.isPointSelected(dp)){
-					selected.add(dp);					
-				}
-			}
-			for(DataPoint dp : curve.getSelectedPoints()){
-				if(!interactedPoints.contains(dp)){
-					deselected.add(dp);
-				}
-			}
-		}
-		//if interacted -> state change
-		else{
-			for(DataPoint dp : interactedPoints){
-				if(curve.isPointSelected(dp)){
-					deselected.add(dp);
-				}
-				else{
-					selected.add(dp);
-				}
-			}
-		}
-	}
-
-
+	
 	@Override
 	public void onClick(ClickEvent event) {
 		handleMouseEvents(event);
@@ -259,18 +224,43 @@ public class SimplePointSelection extends LineChartInteractiveModule {
 		else{
 			touchedPointsPerCurve = new TreeMap<Curve, ArrayList<DataPoint>>();
 		}
-		updatePointStates(selectInteractedPointsPerCurve, touchedPointsPerCurve);
+		updatePointStates(coords, selectInteractedPointsPerCurve, touchedPointsPerCurve);
 
 	}
 
-//	protected void 
+	protected void singleSelectClosestToCoords(int[] coords, Curve curve, ArrayList<DataPoint> selectedPoints, ArrayList<DataPoint> deselectedPoints){
+		if(selectedPoints.size() == 0){
+			return;
+		}
+		//determine closest
+		DataPoint selected = null;
+		double dist = Double.MAX_VALUE;
+		for(DataPoint dp : selectedPoints){
+			double actD = getDistance(coords, dp);
+			if(actD < dist){
+				dist = actD;
+				selected = dp;
+			}
+		}
+		deselectedPoints.addAll(curve.singleSelect(selected));
+		Iterator<DataPoint> it = selectedPoints.iterator();
+		while(it.hasNext()){
+			if(it.next() != selected){
+				it.remove();
+			}
+		}
+	}
+	
+	protected double getDistance(int[] coords, DataPoint dp){
+		return Math.sqrt(Math.pow(coords[0] - dp.canvasX, 2) + Math.pow(coords[1] - dp.canvasY, 2));
+	}
 	
 	/**
 	 * Updates selection / touched point models, fires events and redraws layer
 	 * @param selectInteractionPoints
 	 * @param touchInteractionPoints
 	 */
-	protected void updatePointStates(TreeMap<Curve, ArrayList<DataPoint>> selectInteractionPoints, TreeMap<Curve, ArrayList<DataPoint>> touchInteractionPoints){
+	protected void updatePointStates(int[] coords, TreeMap<Curve, ArrayList<DataPoint>> selectInteractionPoints, TreeMap<Curve, ArrayList<DataPoint>> touchInteractionPoints){
 		/* point selection */
 		TreeMap<Curve, ArrayList<DataPoint>> justSelected = new TreeMap<Curve, ArrayList<DataPoint>>();
 		TreeMap<Curve, ArrayList<DataPoint>> justDeselected = new TreeMap<Curve, ArrayList<DataPoint>>();
@@ -289,10 +279,7 @@ public class SimplePointSelection extends LineChartInteractiveModule {
 				if(justDeselected.get(c) == null){
 					justDeselected.put(c, new ArrayList<DataPoint>());
 				}
-				justDeselected.get(c).addAll(c.singleSelect(selected.get(0)));
-				for(int i = selected.size() - 1; i > 0; i--){
-					selected.remove(i);
-				}
+				singleSelectClosestToCoords(coords, c, selected, justDeselected.get(c));
 			}
 			else{
 				for(DataPoint dp : selected){
@@ -376,6 +363,45 @@ public class SimplePointSelection extends LineChartInteractiveModule {
 		moduleAssist.updateLayerOrder();
 	}
 
+	/**
+	 * Determines the state of the given (selection) interacted points
+	 * @param curve
+	 * @param interactedPoints
+	 * @param selected 
+	 * @param deselected
+	 */
+	private void determinePointSelectionState(Curve curve, ArrayList<DataPoint> interactedPoints, ArrayList<DataPoint> selected, ArrayList<DataPoint> deselected){
+		if(interactedPoints == null && pointSelectionMode == InteractionMode.Closest_To_Cursor && curve.getSelectedPoints().size() > 0){
+			deselected.addAll(curve.getSelectedPoints());
+			return;
+		}
+		//if a point was selected and still selected: no state change, any other way: state change
+		if(pointSelectionMode == InteractionMode.Closest_To_Cursor || pointSelectionMode == InteractionMode.On_Over){
+			for(DataPoint dp : interactedPoints){
+				if(!curve.isPointSelected(dp) && 
+					( !canSelectOnlyTouchedPoint || touchedPoints.get(curve).contains(dp) )){
+					selected.add(dp);					
+				}
+			}
+			for(DataPoint dp : curve.getSelectedPoints()){
+				if(!interactedPoints.contains(dp)){
+					deselected.add(dp);
+				}
+			}
+		}
+		//if interacted -> state change
+		else{
+			for(DataPoint dp : interactedPoints){
+				if(curve.isPointSelected(dp)){
+					deselected.add(dp);
+				}
+				else if(!canSelectOnlyTouchedPoint || touchedPoints.get(curve).contains(dp)){
+					selected.add(dp);
+				}
+			}
+		}
+	}
+	
 	protected Shape getTouchedShape(Curve curve){
 		Shape shape = touchedPointShapes.get(curve);
 		if(shape == null){
@@ -476,24 +502,29 @@ public class SimplePointSelection extends LineChartInteractiveModule {
 		ArrayList<DataPoint> selectedPoints = curve.getSelectedPoints();
 		Shape selected = getSelectedShape(curve);
 		Shape touched = getTouchedShape(curve);
-
+				
 		for(DataPoint dp : curve.dataPoints){
 			if(dp.isInViewport){
+				boolean displayBB = false;
 				Shape shape;
 				//a selected state point found
 				if(selectedPoints.contains(dp)){
 					shape =  selected;
+					displayBB = displayAnnotationSelect;
 				}
 				//a touched point found
 				else if(touchedPoints.containsKey(curve) && touchedPoints.get(curve).contains(dp)){
 					shape = touched;
+					displayBB = displayAnnotationTouch;
 				}
 				else{
 					shape = null;
 				}
 				if(shape != null){
 					canvas.addAllGraphicalObject(lineChart.createPoint(curve, dp, shape));
-					createAnnotationForPoint(curve, dp, shape);
+					if(displayBB){
+						createAnnotationForPoint(curve, dp, shape);
+					}
 				}
 				createInteractivePoint(curve, dp, selected);
 			}
@@ -553,7 +584,6 @@ public class SimplePointSelection extends LineChartInteractiveModule {
 		displayed.add(toDisplay);
 	}
 
-
 	public Shape getDefaultSelectedPointShape() {
 		return defaultSelectedPointShape;
 	}
@@ -592,14 +622,6 @@ public class SimplePointSelection extends LineChartInteractiveModule {
 
 	public void setSinglePointSelection(boolean singlePointSelection) {
 		this.singlePointSelection = singlePointSelection;
-	}
-
-	public boolean isDisplayAnnotation() {
-		return displayAnnotation;
-	}
-
-	public void setDisplayAnnotation(boolean displayAnnotation) {
-		this.displayAnnotation = displayAnnotation;
 	}
 
 	public TreeMap<Curve, BubbleBox> getAnnotationPerCurve() {
@@ -643,5 +665,28 @@ public class SimplePointSelection extends LineChartInteractiveModule {
 		this.pointTouchMode = pointTouchMode;
 	}
 
+	public boolean isDisplayAnnotationTouch() {
+		return displayAnnotationTouch;
+	}
+	
+	public void setDisplayAnnotationTouch(boolean displayAnnotationTouch) {
+		this.displayAnnotationTouch = displayAnnotationTouch;
+	}
+	
+	public boolean isDisplayAnnotationSelect() {
+		return displayAnnotationSelect;
+	}
+	
+	public void setDisplayAnnotationSelect(boolean displayAnnotationSelect) {
+		this.displayAnnotationSelect = displayAnnotationSelect;
+	}
+	
+	public boolean isCanSelectOnlyTouchedPoint() {
+		return canSelectOnlyTouchedPoint;
+	}
+	
+	public void setCanSelectOnlyTouchedPoint(boolean canSelectOnlyTouchedPoint) {
+		this.canSelectOnlyTouchedPoint = canSelectOnlyTouchedPoint;
+	}
 
 }
