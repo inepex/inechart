@@ -509,7 +509,7 @@ public class SimplePointSelection extends LineChartInteractiveModule {
 				Shape shape;
 				//a selected state point found
 				if(selectedPoints.contains(dp)){
-					shape =  selected;
+					shape = selected;
 					displayBB = displayAnnotationSelect;
 				}
 				//a touched point found

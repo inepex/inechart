@@ -147,11 +147,11 @@ public class LineChart extends IneChartModule2D {
 				if (c.dataSet.getyMin() < yMin)
 					yMin = c.dataSet.getyMin();
 			}
-			if(autoScaleViewportHorizontal){
+			if(autoScaleViewportHorizontal && xAxis.getModulToAlign() == this){
 				xAxis.setMax(xMax);
 				xAxis.setMin(xMin);
 			}
-			if(autoScaleViewportVertical){
+			if(autoScaleViewportVertical && yAxis.getModulToAlign() == this){
 				yAxis.setMax(yMax);
 				yAxis.setMin(yMin);	
 			}

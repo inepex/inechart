@@ -9,12 +9,12 @@ public class SpinnerWidget extends Composite {
 	final private Button button;
 	
 	public SpinnerWidget() {
-		this(true, 51);
+		this(true);
 	}
 	
-	public SpinnerWidget(boolean left, int height) {
+	public SpinnerWidget(boolean left) {
 		button = new Button(
-				"<div style=\"padding-top: 5px;\">.</div> " +
+				"<div style=\"padding-top: 1px;\">.</div> " +
 				"<div style=\"margin-top: -10px;\">.</div>" +
 				"<div style=\"margin-top: -10px; padding-bottom: 10px;\">.</div>");
 		if(left){
@@ -23,7 +23,6 @@ public class SpinnerWidget extends Composite {
 		else{
 			button.setStyleName(ResourceHelper.getRes().spinnerWidgetStyle().MapControlBarRight());
 		}
-//		button.getElement().getStyle().setHeight(height, Unit.PX);
 		initWidget(button);
 	}
 	
@@ -34,5 +33,6 @@ public class SpinnerWidget extends Composite {
 	public void setRight(){
 		button.setStyleName(ResourceHelper.getRes().spinnerWidgetStyle().MapControlBarRight());
 	}
+	
 }
 

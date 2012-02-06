@@ -108,7 +108,7 @@ public class PointFilter {
 		if(first.unfilterable || second.unfilterable){
 			return false;
 		}
-		else if(Math.abs(first.canvasX - second.canvasX) <= horizontalFilter || Math.abs(first.canvasY - second.canvasY) <= verticalFilter){
+		else if( horizontalFilter > 0 && Math.abs(first.canvasX - second.canvasX) <= horizontalFilter || verticalFilter > 0 && Math.abs(first.canvasY - second.canvasY) <= verticalFilter ){
 			return true;
 		}
 		else return false;

@@ -1,11 +1,8 @@
 package com.inepex.inechart.misc;
 
-import com.google.gwt.dom.client.Style.Cursor;
-import com.google.gwt.user.client.DOM;
 import com.google.gwt.user.client.ui.AbsolutePanel;
 import com.google.gwt.user.client.ui.Composite;
 import com.google.gwt.user.client.ui.IsWidget;
-import com.google.gwt.user.client.ui.RootPanel;
 import com.inepex.inechart.chartwidget.resources.ResourceHelper;
 import com.inepex.inechart.misc.scroll.ScrollBarPresenter;
 import com.inepex.inechart.misc.scroll.ScrollViewFactory;
@@ -37,6 +34,10 @@ public class HorizontalSpinnersWidget extends Composite {
 			return spinnableWidth;
 		}
 
+		protected void setHeight(int height){
+			spinnerWidget1.setHeight(height + "px");
+			spinnerWidget2.setHeight(height + "px");
+		}
 
 		@Override
 		public IsWidget getSpinner1() {
@@ -75,13 +76,13 @@ public class HorizontalSpinnersWidget extends Composite {
 		@Override
 		public void setSpinnerBeingDragged(boolean spinnerBeingDragged,
 				boolean first) {
-			if(spinnerBeingDragged){
-				defaultCursor = RootPanel.get().getElement().getStyle().getCursor();
-				RootPanel.get().getElement().getStyle().setProperty("cursor", "e-resize");
-			}
-			else{
-				RootPanel.get().getElement().getStyle().setProperty("cursor", defaultCursor);
-			}
+//			if(spinnerBeingDragged){
+//				defaultCursor = RootPanel.get().getElement().getStyle().getCursor();
+//				RootPanel.get().getElement().getStyle().setProperty("cursor", "e-resize");
+//			}
+//			else{
+//				RootPanel.get().getElement().getStyle().setProperty("cursor", defaultCursor);
+//			}
 		}
 		
 		private void updateSideDependentStyles(){
@@ -232,7 +233,7 @@ public class HorizontalSpinnersWidget extends Composite {
 		spinnerView = new SpinnerView();
 		ScrollViewFactory sc = new DefaultScrollViewFactory(ResourceHelper.getRes().scrollStyle2());
 		scrollBarView = sc.createScrollBarView(true, spinnableWidth, height, 0, false);
-		
+		spinnerView.setHeight(height);
 		mainPanel.add(scrollBarView, spinnerWidgetWidth / 2, 0);
 		mainPanel.add(spinnerView.spinnerWidget1, 0, 0);
 		mainPanel.add(spinnerView.spinnerWidget2, 0, 0);

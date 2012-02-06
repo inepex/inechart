@@ -95,10 +95,10 @@ public class Defaults {
 		return new Circle(3.5, new ShapeProperties(new LineProperties(lineWidth),colorWhite()));
 	}
 	public static Shape selectedPoint(){
-		return new Circle(8, new ShapeProperties(new LineProperties(5, new Color("black", 1)), colorWhite()));
+		return new Circle(8, new ShapeProperties(new LineProperties(3, new Color("black", 1)), colorWhite()));
 	}
 	public static Shape touchedPoint(){
-		return new Circle(5, new ShapeProperties(new LineProperties(5, new Color("black", 1)), colorWhite()));
+		return new Circle(5, new ShapeProperties(new LineProperties(3, new Color("black", 1)), colorWhite()));
 	}
 	public static BubbleBox touchedAnnotation(){
 		BubbleBox bb = new BubbleBox(AnnotationHelper.xValue + ", " + AnnotationHelper.yValue);

@@ -19,8 +19,6 @@ import com.inepex.inechart.chartwidget.properties.ShapeProperties;
 import com.inepex.inechart.chartwidget.shape.Rectangle;
 import com.inepex.inechart.misc.HorizontalSpinnersWidget;
 import com.inepex.inechart.misc.ResizableInterval;
-import com.inepex.inechart.misc.scroll.SpinnerPresenter;
-import com.inepex.inechart.misc.scroll.defaultviews.SpinnerView;
 import com.inepex.inegraphics.shared.gobjects.GraphicalObject;
 
 
@@ -38,10 +36,6 @@ public class IntervalSelection extends AbstractInteractiveModule implements Fire
 
 	protected double minSpinnerPos;
 	protected double maxSpinnerPos;
-	protected SpinnerPresenter spinner1Presenter;
-	protected SpinnerPresenter spinner2Presenter;
-	protected SpinnerView spinner1View;
-	protected SpinnerView spinner2View;
 	protected ShapeProperties selectedLookout;
 	protected ShapeProperties unselectedLookout;
 	protected Layer layer;
@@ -50,6 +44,8 @@ public class IntervalSelection extends AbstractInteractiveModule implements Fire
 	ResizableInterval resizableInterval;
 
 	boolean positionOverModule = true;
+	
+	protected double spinnerHeightRatio = 1.0;
 
 	public IntervalSelection() {
 		innerEventHandler = new InnerEventHandler();
@@ -59,7 +55,11 @@ public class IntervalSelection extends AbstractInteractiveModule implements Fire
 	@Override
 	protected void init(){
 		layer = createLayer(Layer.ALWAYS_TOP);
-
+		setPositions();
+		super.init();
+	}
+	
+	protected void setPositions(){
 		if(spinners != null){
 			moduleAssist.getChartMainPanel().remove(spinners);
 		}
@@ -103,8 +103,11 @@ public class IntervalSelection extends AbstractInteractiveModule implements Fire
 
 			}
 		});
-		moduleAssist.getChartMainPanel().add(spinners, relatedIneChartModule2D.getLeftPadding() - spinners.getSpinnerWidgetWidth() / 2, relatedIneChartModule2D.getBottomEnd());
-		super.init();
+		spinners.setHeight((int) (this.relatedIneChartModule2D.getHeight() * spinnerHeightRatio));
+		moduleAssist.getChartMainPanel().add(spinners, relatedIneChartModule2D.getLeftPadding() - spinners.getSpinnerWidgetWidth() / 2, 
+//				relatedIneChartModule2D.getBottomEnd()
+				relatedIneChartModule2D.getTopPadding() - ((spinners.getHeight() - relatedIneChartModule2D.getHeight()) / 2)
+				);
 	}
 
 	protected void drawRectangles(){
@@ -134,9 +137,6 @@ public class IntervalSelection extends AbstractInteractiveModule implements Fire
 			}
 		}
 		layer.getCanvas().update();
-//		layer.getCanvas().getCanvasWidget().setStrokeStyle("red");
-//		layer.getCanvas().getCanvasWidget().setLineWidth(3);
-//		layer.getCanvas().getCanvasWidget().strokeRect(10, 10, 51, 18);
 	}
 
 	@Override
@@ -176,14 +176,14 @@ public class IntervalSelection extends AbstractInteractiveModule implements Fire
 
 	@Override
 	public void update() {
-		moduleAssist.getChartMainPanel().setWidgetPosition(spinners, 
-				relatedIneChartModule2D.getLeftPadding() - spinners.getSpinnerWidgetWidth() / 2, 
-//				positionOverModule ? relatedIneChartModule2D.getTopPadding() : relatedIneChartModule2D.getBottomEnd()
-				relatedIneChartModule2D.getTopPadding());
+		spinners.setHeight((int) (this.relatedIneChartModule2D.getHeight() * spinnerHeightRatio));
+		moduleAssist.getChartMainPanel().setWidgetPosition(spinners, relatedIneChartModule2D.getLeftPadding() - spinners.getSpinnerWidgetWidth() / 2, 
+//				relatedIneChartModule2D.getBottomEnd()
+				relatedIneChartModule2D.getTopPadding() - ((spinners.getHeight() - relatedIneChartModule2D.getHeight()) / 2)
+				);
 		minSpinnerPos = 0;
 		maxSpinnerPos = relatedIneChartModule2D.getXAxis().getMax() - relatedIneChartModule2D.getXAxis().getMin();
 		spinners.setWidth(relatedIneChartModule2D.getWidth(), false);
-		spinners.setHeight(relatedIneChartModule2D.getHeight());
 		spinners.setInterval(minSpinnerPos, maxSpinnerPos);
 		drawRectangles();
 	}
@@ -247,7 +247,14 @@ public class IntervalSelection extends AbstractInteractiveModule implements Fire
 		this.unselectedLookout = unselectedLookout;
 	}
 	
+	public void setSpinnerHeightRatio(double spinnerHeightRatio) {
+		this.spinnerHeightRatio = spinnerHeightRatio;
+		setPositions();
+	}
 	
+	public double getSpinnerHeightRatio() {
+		return spinnerHeightRatio;
+	}
 
 }
 
