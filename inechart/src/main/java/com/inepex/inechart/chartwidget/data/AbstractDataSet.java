@@ -91,4 +91,8 @@ public abstract class AbstractDataSet implements HasTitle{
 	}
 	
 	public abstract void clear();
+	
+	public boolean contains(AbstractDataEntry dataEntry){
+		return dataEntry.container == this;
+	}
 }

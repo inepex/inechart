@@ -1,6 +1,6 @@
 package com.inepex.inechart.chartwidget.data;
 
-import java.util.ArrayList;
+import java.util.List;
 
 import com.inepex.inechart.chartwidget.Defaults;
 import com.inepex.inechart.chartwidget.properties.Color;
@@ -56,11 +56,20 @@ public abstract class AbstractXYDataSet extends AbstractDataSet {
 	
 	public abstract XYDataEntry getEntry(double x);
 	
+	public abstract XYDataEntry getClosestEntry(double x);
+	
 	public abstract XYDataEntry getEntry(double x, double y);
 	
-	public abstract ArrayList<XYDataEntry> getXYDataEntries();
+	public abstract List<? extends XYDataEntry> getXYDataEntries();
 	
-	public abstract ArrayList<XYDataEntry> getXYDataEntries(double fromX, double toX);
+	public abstract List<? extends XYDataEntry> getXYDataEntries(double fromX, double toX);
+	
+	/**
+	 * Returns the {@link AbstractDataEntry} related to the given {@link XYDataEntry}
+	 * @param xyDataEntry
+	 * @return null if theres no such element
+	 */
+	public abstract AbstractDataEntry getAbstractDataEntry(XYDataEntry xyDataEntry);
 	
 	public boolean isAllowXDuplicates() {
 		return allowXDuplicates;

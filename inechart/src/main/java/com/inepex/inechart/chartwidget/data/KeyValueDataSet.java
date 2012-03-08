@@ -218,7 +218,7 @@ public class KeyValueDataSet extends AbstractXYDataSet{
 		return list;
 	}
 
-	public final ArrayList<KeyValueDataEntry> getEntries() {
+	public ArrayList<KeyValueDataEntry> getEntries() {
 		sortIf();
 		return entries;
 	}
@@ -228,13 +228,9 @@ public class KeyValueDataSet extends AbstractXYDataSet{
 	}
 
 	@Override
-	public ArrayList<XYDataEntry> getXYDataEntries() {
-		ArrayList<XYDataEntry> map = new ArrayList<XYDataEntry>();
+	public List<? extends XYDataEntry> getXYDataEntries() {
 		sortIf();
-		for(KeyValueDataEntry e : entries){
-			map.add(e);
-		}
-		return map;
+		return entries;
 	}
 
 	@Override
@@ -251,44 +247,103 @@ public class KeyValueDataSet extends AbstractXYDataSet{
 	}
 
 	@Override
-	public ArrayList<XYDataEntry> getXYDataEntries(double fromX, double toX) {
-		ArrayList<XYDataEntry> map = new ArrayList<XYDataEntry>();
-		sortIf();
-		for(KeyValueDataEntry e : entries){
-			if(sortable && e.key > toX){
-				break;
-			}
-			if(e.key >= fromX && e.key <= toX){
-				map.add(e);
-			}
+	public List<? extends XYDataEntry> getXYDataEntries(double fromX, double toX) {
+		int fromI = searchIndexByX(fromX, false);
+		if(fromI > 0 && fromI < entries.size() - 2 && entries.get(fromI).getX() < fromX){
+			fromI++;
 		}
-		return map;
+		int toI = searchIndexByX(toX, false);
+		if(toI > 1 && toI - 1 > fromI && entries.get(toI).getX() > toX){
+			toX--;
+		}
+		return entries.subList(fromI, toI);
 	}
 
 	@Override
 	public XYDataEntry getEntry(double x, double y) {
-		for(KeyValueDataEntry e : entries){
-			if(Double.compare(x, e.key) == 0 && Double.compare(y, e.value) == 0){
-				return e;
-			}
+		KeyValueDataEntry e = searchByX(x, true);
+		if(e != null && y == e.getY()){
+			return e;
 		}
 		return null;
 	}
 
-	
 	@Override
 	public XYDataEntry getEntry(double x) {
-		for(KeyValueDataEntry e : entries){
-			if(Double.compare(x, e.key) == 0){
-				return e;
-			}
-		}
-		return null;
+		KeyValueDataEntry e = searchByX(x, true);
+		return e;
 	}
 
+	@Override
+	public XYDataEntry getClosestEntry(double x) {
+		KeyValueDataEntry e = searchByX(x, false);
+		return e;
+	}
+	
 	@Override
 	public void clear() {
 		entries.clear();		
+	}
+
+	@Override
+	public AbstractDataEntry getAbstractDataEntry(XYDataEntry xyDataEntry) {
+		KeyValueDataEntry e = searchByX(xyDataEntry.getX(), true);
+		if(e != null && xyDataEntry.getY() == e.getY()){
+			return e;
+		}
+		return null;
+	}
+	
+	protected KeyValueDataEntry searchByX(double x, boolean exact){
+		sortIf();
+		int intervalStart = 0;
+		int intervalEnd = entries.size() - 1;
+		if(entries.size() == 1){
+			return entries.get(0);
+		}
+		while(intervalEnd - intervalStart != 1){
+			int intervalMiddle = (int) Math.floor(((intervalEnd - intervalStart) / 2d) + intervalStart);
+			if(x > entries.get(intervalMiddle).key){
+				intervalStart = intervalMiddle;
+			}
+			else if(x == entries.get(intervalMiddle).key){
+				return entries.get(intervalMiddle);
+			}
+			else{
+				intervalEnd = intervalMiddle;
+			}
+		}
+		if(exact){
+			return null;
+		}
+		return Math.abs(entries.get(intervalEnd).key - x) > Math.abs(entries.get(intervalStart).key - x) ?
+			entries.get(intervalStart) : entries.get(intervalEnd);
+	}
+	
+	protected int searchIndexByX(double x, boolean exact){
+		sortIf();
+		int intervalStart = 0;
+		int intervalEnd = entries.size() - 1;
+		if(entries.size() == 1){
+			return 0;
+		}
+		while(intervalEnd - intervalStart != 1){
+			int intervalMiddle = (int) Math.floor(((intervalEnd - intervalStart) / 2d) + intervalStart);
+			if(x > entries.get(intervalMiddle).key){
+				intervalStart = intervalMiddle;
+			}
+			else if(x == entries.get(intervalMiddle).key){
+				return intervalMiddle;
+			}
+			else{
+				intervalEnd = intervalMiddle;
+			}
+		}
+		if(exact){
+			return -1;
+		}
+		return Math.abs(entries.get(intervalEnd).key - x) > Math.abs(entries.get(intervalStart).key - x) ?
+			intervalStart : intervalEnd;
 	}
 	
 }

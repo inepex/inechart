@@ -21,6 +21,7 @@ import com.inepex.inechart.chartwidget.properties.Color;
  * @author Miklós Süveges / Inepex Ltd.
  *
  */
+@Deprecated
 public class DataSet {
 	private static ColorSet colorSet = new ColorSet();
 	/**

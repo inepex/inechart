@@ -191,7 +191,7 @@ public class Axes extends IneChartModule {
 						tickEndY = tickStartY + tick.tickLength;
 					}
 					break;
-				case To_Upper_Values:
+				case To_Higher_Values:
 					tickStartY = startY;
 					if (perpAxis.axisDirection == AxisDirection.Vertical_Ascending_To_Bottom) {
 						tickEndY = tickStartY + tick.tickLength;
@@ -218,7 +218,7 @@ public class Axes extends IneChartModule {
 						tickEndX = tickStartX - tick.tickLength;
 					}
 					break;
-				case To_Upper_Values:
+				case To_Higher_Values:
 					tickStartX = startX;
 					if (perpAxis.axisDirection == AxisDirection.Horizontal_Ascending_To_Left) {
 						tickEndX = tickStartX - tick.tickLength;

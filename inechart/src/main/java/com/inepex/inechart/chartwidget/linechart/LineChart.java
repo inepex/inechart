@@ -248,7 +248,7 @@ public class LineChart extends IneChartModule2D {
 	 * @param includeTo
 	 */
 	protected void calculatePointsForSortedCurve(Curve curve, double from, double to, boolean includeFrom, boolean includeTo){
-		List<XYDataEntry> dataPairs = curve.dataSet.getXYDataEntries(from, to);
+		List<? extends XYDataEntry> dataPairs = curve.dataSet.getXYDataEntries(from, to);
 		ArrayList<DataPoint> points = new ArrayList<DataPoint>();
 		for(XYDataEntry xyEntry : dataPairs){
 			if(xyEntry.getX() > to || (!includeTo && xyEntry.getX() == to)){
@@ -269,7 +269,7 @@ public class LineChart extends IneChartModule2D {
 	}
 
 	protected void calculatePointsForCurve(Curve curve){
-		List<XYDataEntry> dataPairs = curve.dataSet.getXYDataEntries();
+		List<? extends XYDataEntry> dataPairs = curve.dataSet.getXYDataEntries();
 		curve.discontinuitiesAsPoint.clear();
 		curve.dataPoints.clear();
 		curve.entryPointMap.clear();
@@ -750,7 +750,7 @@ public class LineChart extends IneChartModule2D {
 				DataPoint dp = createDataPoint((XYDataEntry) event.getDataEntry());
 				selectedList.add(dp);
 				selected.put(c, selectedList);
-				//TODO				interactPointEvent(selected, !event.isSelect(), event.isSelect());
+//	TODO		interactPointEvent(selected, !event.isSelect(), event.isSelect());
 				break;
 			}
 		}

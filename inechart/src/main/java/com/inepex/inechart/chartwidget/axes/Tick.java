@@ -13,7 +13,7 @@ import com.inepex.inechart.chartwidget.properties.LineProperties;
 public class Tick implements Comparable<Tick> {
 
 	public static enum TickPosition {
-		Cross, To_Upper_Values, To_Lower_Values;
+		Cross, To_Higher_Values, To_Lower_Values;
 	}
 
 	TickPosition tickPosition;
