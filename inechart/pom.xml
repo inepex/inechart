@@ -8,6 +8,10 @@
 	<version>1.0.25</version>
 	<name>inechart</name>
 	<url>http://maven.apache.org</url>
+	<scm>
+		<connection>scm:svn:https://inechart.googlecode.com/svn/trunk/inechart</connection>
+	</scm>
+
 	<repositories>
 		<repository>
 			<id>JBoss Repo</id>

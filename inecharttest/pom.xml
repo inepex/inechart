@@ -7,6 +7,9 @@
 	<version>1.0-SNAPSHOT</version>
 	<name>inecharttest</name>
 	<url>http://maven.apache.org</url>
+	<scm>
+		<connection>scm:svn:https://inechart.googlecode.com/svn/trunk/inecharttest</connection>
+	</scm>
 	<properties>
 		<gwtVersion>2.3.0</gwtVersion>
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
@@ -39,12 +42,12 @@
 		<dependency>
 			<groupId>com.inepex</groupId>
 			<artifactId>inechart</artifactId>
-			<version>1.0.24</version>
+			<version>1.0.25</version>
 		</dependency>
 		<dependency>
 			<groupId>com.inepex</groupId>
 			<artifactId>inegraphics</artifactId>
-			<version>1.2.11</version>
+			<version>1.2.12</version>
 		</dependency>
 	</dependencies>
 	<build>

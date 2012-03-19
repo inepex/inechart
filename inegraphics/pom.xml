@@ -9,6 +9,9 @@
 	<version>1.2.12</version>
 	<name>inegraphics</name>
 	<url>http://maven.apache.org</url>
+	<scm>
+		<connection>scm:svn:https://inechart.googlecode.com/svn/trunk/inegraphics</connection>
+	</scm>
 	<properties>
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
 	</properties>
