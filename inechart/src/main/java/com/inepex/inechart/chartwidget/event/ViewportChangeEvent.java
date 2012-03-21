@@ -79,8 +79,8 @@ public class ViewportChangeEvent extends IneChartEvent<ViewportChangeHandler> {
 	}
 	
 	public void setAddressedModules(List<IneChartModule2D> addressedModules){
-		if(addressedModules == null || addressedModules.size() == 0)
-			return;
+//		if(addressedModules == null || addressedModules.size() == 0)
+//			return;
 		this.addressedModules = addressedModules;
 	}
 	

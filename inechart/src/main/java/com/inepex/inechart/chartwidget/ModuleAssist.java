@@ -114,7 +114,7 @@ public class ModuleAssist {
 		layers.remove(layer);
 	}
 		
-	public ArrayList<DrawingAreaGWT> getLayers(){
+	public ArrayList<DrawingAreaGWT> getLayerCanvases(){
 		Collections.sort(layers);
 		ArrayList<DrawingAreaGWT> ordered = new ArrayList<DrawingAreaGWT>();
 		for(Layer lyr:layers){
@@ -123,8 +123,14 @@ public class ModuleAssist {
 		return ordered;
 	}
 	
+	public ArrayList<Layer> getLayers(){
+		Collections.sort(layers);
+		return layers;
+	}
+	
+
 	public void updateLayerOrder(){
-		clientSideChart.setLayerOrder(getLayers());
+		clientSideChart.setLayerOrder(getLayerCanvases());
 	}
 	
 	private void findCanvases(ArrayList<DrawingAreaGWT> layers, Layer layer){

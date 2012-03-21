@@ -104,4 +104,10 @@ public class DataPoint implements Comparable<DataPoint>{
 	public int compareTo(DataPoint o) {
 		return data.compareTo(o.data);
 	}
+	
+	public XYDataEntry getFirstUnderlyingData(){
+		return containsHiddenData() ? 
+			getFilteredPoints().get(0).getData() :
+			getData();
+	}
 }

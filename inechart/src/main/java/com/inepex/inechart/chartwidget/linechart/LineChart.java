@@ -91,9 +91,11 @@ public class LineChart extends IneChartModule2D {
 		}
 		if(moduleAssist.isClientSide()){
 			Layer layer = moduleAssist.createAndAttachLayer(Layer.ALWAYS_BOT);
+			layer.setRelatedModule(this);
 			LinkedLayers layerGroup = new LinkedLayers(highestZIndex);
 			linkedLayersPerCurve.put(curve, layerGroup);
 			layerGroup.addLayer(layer);
+			layerGroup.setRelatedModule(this);
 			moduleLayer.addLayer(layerGroup);
 			moduleAssist.updateLayerOrder();
 			curve.dataSet.setAttached(true);

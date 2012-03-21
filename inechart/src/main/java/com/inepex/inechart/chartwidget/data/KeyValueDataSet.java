@@ -313,7 +313,7 @@ public class KeyValueDataSet extends AbstractXYDataSet{
 				intervalEnd = intervalMiddle;
 			}
 		}
-		if(exact){
+		if(exact && x != entries.get(intervalStart).key &&  x != entries.get(intervalEnd).key){
 			return null;
 		}
 		return Math.abs(entries.get(intervalEnd).key - x) > Math.abs(entries.get(intervalStart).key - x) ?

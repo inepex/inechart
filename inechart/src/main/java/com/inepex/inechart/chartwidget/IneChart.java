@@ -1,3 +1,4 @@
+
 package com.inepex.inechart.chartwidget;
 
 import java.util.ArrayList;
@@ -88,7 +89,7 @@ public class IneChart extends Composite{
 		canvasWidth = width;
 		mainPanel.setPixelSize(width, height);
 		drawingArea.setSize(width, height);
-		for(DrawingAreaGWT da:moduleAssist.getLayers()){
+		for(DrawingAreaGWT da:moduleAssist.getLayerCanvases()){
 			da.setSize(width, height);
 		}
 	}
@@ -313,7 +314,6 @@ public class IneChart extends Composite{
 			eventManager.setEventBus(new SimpleEventBus());
 		}
 		viewportSelectorChart.setEventBus(eventManager.getEventBus());
-
 		return viewportSelectorChart;
 	}
 
@@ -345,9 +345,22 @@ public class IneChart extends Composite{
 		for(DrawingAreaGWT layer:layers){
 			DOM.setElementAttribute(layer.getWidget().getElement(), "zIndex", zIndex++ +"");
 		}
+		
 	}
 	
 	public boolean containsModule(IneChartModule module){
 		return modules.contains(module);
+	}
+	
+	public IneChartModule2D getVisibleTopModule(){
+		ArrayList<Layer> layers = moduleAssist.getLayers();
+		for(int i = layers.size() - 1; i >= 0; i--){
+			Layer lyr = layers.get(i);
+			IneChartModule2D m = lyr.getRelatedModule();
+			if(m!= null && m.isVisible()){
+				return m;
+			}
+		}
+		return null;
 	}
 }

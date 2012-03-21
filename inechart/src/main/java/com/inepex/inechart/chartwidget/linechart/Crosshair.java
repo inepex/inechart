@@ -15,7 +15,6 @@ import com.inepex.inechart.chartwidget.axes.TickFactoryGWT;
 import com.inepex.inechart.chartwidget.label.BubbleBox;
 import com.inepex.inechart.chartwidget.label.StyledLabel;
 import com.inepex.inechart.chartwidget.label.Text;
-import com.inepex.inechart.chartwidget.label.TextContainer;
 import com.inepex.inechart.chartwidget.misc.SelectionRange;
 import com.inepex.inechart.chartwidget.properties.LineProperties;
 import com.inepex.inechart.chartwidget.properties.TextProperties;
@@ -28,7 +27,6 @@ import com.inepex.inegraphics.shared.gobjects.Line;
 public class Crosshair extends LineChartInteractiveModule{
 
 	SelectionRange selectionRange;
-	TextContainer valueBox;
 	LineProperties lineProperties;
 
 	ArrayList<StyledLabel> styledLabels;
@@ -53,7 +51,6 @@ public class Crosshair extends LineChartInteractiveModule{
 	public Crosshair() {
 		super();
 		selectionRange = SelectionRange.Both;
-		valueBox = Defaults.crosshairTextBox();
 		lineProperties = Defaults.crosshair();	
 		textProperties = Defaults.crosshairTextProperties();
 		styledLabels = new ArrayList<StyledLabel>();
@@ -260,6 +257,7 @@ public class Crosshair extends LineChartInteractiveModule{
 		}
 		if(layer == null){
 			layer = new Layer(Layer.TO_TOP);
+			layer.setRelatedModule(lineChart);
 			moduleAssist.addCanvasToLayer(layer);
 			lineChart.getModuleLayer().addLayer(layer);
 			moduleAssist.updateLayerOrder();
@@ -273,14 +271,6 @@ public class Crosshair extends LineChartInteractiveModule{
 
 	public void setSelectionRange(SelectionRange selectionRange) {
 		this.selectionRange = selectionRange;
-	}
-
-	public TextContainer getValueBox() {
-		return valueBox;
-	}
-
-	public void setValueBox(TextContainer valueBox) {
-		this.valueBox = valueBox;
 	}
 
 	public LineProperties getLineProperties() {

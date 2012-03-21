@@ -14,6 +14,8 @@ public class Layer implements Comparable<Layer>{
 	
 	private DrawingAreaGWT canvas;
 	private int zIndex;
+	
+	private IneChartModule2D relatedModule;
 
 	public Layer(int zIndex) {
 		this(null, zIndex);
@@ -76,5 +78,13 @@ public class Layer implements Comparable<Layer>{
 		
 	public void setOpacity(double alpha){
 		canvas.getWidget().getElement().getStyle().setOpacity(0);
+	}
+
+	public IneChartModule2D getRelatedModule() {
+		return relatedModule;
+	}
+
+	public void setRelatedModule(IneChartModule2D relatedModule) {
+		this.relatedModule = relatedModule;
 	}
 }

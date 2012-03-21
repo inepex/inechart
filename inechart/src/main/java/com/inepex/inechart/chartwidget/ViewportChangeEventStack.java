@@ -145,8 +145,9 @@ public class ViewportChangeEventStack {
 				event = new ViewportChangeEvent(xMin, yMin, xMax, yMax);
 			}
 		}
-		event.addAddressedModule(addressedModul);
-
+		if(addressedModul != null){
+			event.addAddressedModule(addressedModul);
+		}
 		//remove merged events
 		for(Long time : eventsToMerge.keySet()){
 			ViewportChangeEvent ev = events.get(time);

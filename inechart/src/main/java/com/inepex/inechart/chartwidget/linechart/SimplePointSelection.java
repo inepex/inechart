@@ -324,7 +324,7 @@ public class SimplePointSelection extends LineChartInteractiveModule {
 		}
 		for(Curve c : actualTouched.keySet()){
 			for(DataPoint dp : actualTouched.get(c)){
-				if(!touchedPoints.containsKey(c) || !touchedPoints.get(c).contains(dp)){
+				if(dp != null && (!touchedPoints.containsKey(c) || !touchedPoints.get(c).contains(dp))){
 					moduleAssist.getEventManager().fireEvent(new PointInteractionEvent(InteractionType.Touched, dp, c));
 					ArrayList<DataPoint> changed = touchChange.get(c);
 					if(changed == null){
@@ -439,6 +439,7 @@ public class SimplePointSelection extends LineChartInteractiveModule {
 	protected void checkLayer(Curve c){
 		if(!canvasPerCurve.containsKey(c)){
 			Layer lyr = new Layer(Layer.TO_TOP);
+			lyr.setRelatedModule(lineChart);
 			moduleAssist.addCanvasToLayer(lyr);
 			lineChart.linkedLayersPerCurve.get(c).addLayer(lyr);
 			canvasPerCurve.put(c, lyr);

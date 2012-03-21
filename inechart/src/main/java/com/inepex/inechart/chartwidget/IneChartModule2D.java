@@ -272,6 +272,7 @@ public abstract class IneChartModule2D extends IneChartModule implements HasCoor
 		autoScaleViewportVertical = true;
 		if(moduleAssist.isClientSide()){
 			moduleLayer = new LinkedLayers();
+			moduleLayer.setRelatedModule(this);
 			moduleAssist.addLinkedLayers(moduleLayer);
 		}
 		// default axes
@@ -403,7 +404,6 @@ public abstract class IneChartModule2D extends IneChartModule implements HasCoor
 	public void setXAxis(Axis xAxis) {
 		moduleAssist.axes.removeAxis(this.xAxis);
 		this.xAxis = xAxis;
-		moduleAssist.axes.addAxis(xAxis);
 		if (xAxis.getModulToAlign() == null) {
 			xAxis.setModulToAlign(this);
 		} else {// scale this modul as the other
@@ -415,6 +415,7 @@ public abstract class IneChartModule2D extends IneChartModule implements HasCoor
 				topPadding = xAxis.getModulToAlign().topPadding;
 			}
 		}
+		moduleAssist.axes.addAxis(xAxis);
 	}
 
 	@Override
@@ -426,7 +427,6 @@ public abstract class IneChartModule2D extends IneChartModule implements HasCoor
 	public void setYAxis(Axis yAxis) {
 		moduleAssist.axes.removeAxis(this.yAxis);
 		this.yAxis = yAxis;
-		moduleAssist.axes.addAxis(yAxis);
 		if (yAxis.getModulToAlign() == null) {
 			yAxis.setModulToAlign(this);
 		} else {// scale this modul as the other
@@ -438,6 +438,7 @@ public abstract class IneChartModule2D extends IneChartModule implements HasCoor
 				bottomPadding = yAxis.getModulToAlign().bottomPadding;
 			}
 		}
+		moduleAssist.axes.addAxis(yAxis);
 	}
 
 	@Override
@@ -835,7 +836,6 @@ public abstract class IneChartModule2D extends IneChartModule implements HasCoor
 	
 	public void removeInteractiveModule(AbstractInteractiveModule interactiveModule){
 		interactiveModules.remove(interactiveModule);
-		interactiveModule.detach();
 	}
 
 	
