@@ -165,7 +165,9 @@ public class LineChart extends IneChartModule2D {
 
 	@Override
 	public void update() {
-
+		if (autoScaleViewportHorizontal || autoScaleViewportVertical) {
+			preUpdateModule();
+		}
 		if (curves == null || curves.size() == 0)
 			return;
 		graphicalObjectContainer.removeAllGraphicalObjects();

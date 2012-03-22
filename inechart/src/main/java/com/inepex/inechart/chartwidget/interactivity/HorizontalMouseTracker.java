@@ -73,6 +73,10 @@ public class HorizontalMouseTracker extends AbstractInteractiveModule {
 			moduleAssist.getLabelFactory().removeStyledLabel(label);
 		}
 		int[] coords = relatedIneChartModule2D.getCoords(event);
+		if(!relatedIneChartModule2D.isInsideModul(coords[0], coords[1])) {
+			layer.getCanvas().update();
+			return;
+		}
 		tracker = new Line(coords[0], relatedIneChartModule2D.getTopPadding(), coords[0], relatedIneChartModule2D.getBottomEnd(), 0, createContext(lineProperties));
 		String formatString = format;
 		if(formatString == null || formatString.length() == 0){
