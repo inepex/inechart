@@ -379,7 +379,7 @@ public class SimplePointSelection extends LineChartInteractiveModule {
 		if(pointSelectionMode == InteractionMode.Closest_To_Cursor || pointSelectionMode == InteractionMode.On_Over){
 			for(DataPoint dp : interactedPoints){
 				if(!curve.isPointSelected(dp) && 
-					( !canSelectOnlyTouchedPoint || touchedPoints.get(curve).contains(dp) )){
+					( !canSelectOnlyTouchedPoint ||  (touchedPoints.containsKey(curve) && touchedPoints.get(curve).contains(dp)) )){
 					selected.add(dp);					
 				}
 			}
@@ -395,7 +395,7 @@ public class SimplePointSelection extends LineChartInteractiveModule {
 				if(curve.isPointSelected(dp)){
 					deselected.add(dp);
 				}
-				else if(!canSelectOnlyTouchedPoint || touchedPoints.get(curve).contains(dp)){
+				else if(!canSelectOnlyTouchedPoint || (touchedPoints.containsKey(curve) && touchedPoints.get(curve).contains(dp))){
 					selected.add(dp);
 				}
 			}
