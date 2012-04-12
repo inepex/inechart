@@ -174,6 +174,22 @@ public class ModuleAssist {
 		}
 	}
 	
+//	public void hideLayer(Layer layer){
+//		if(layer instanceof LinkedLayers){
+//			for(Layer lyr : ((LinkedLayers) layer).getLayers()){
+//				if(!isLayerAttached(lyr)){
+//					ret = false;
+//					break;
+//				}
+//			}
+//		}
+//		else{
+//			if(!clientSideChart.containsLayer(layer.getCanvas())){
+//				ret = false;
+//			}
+//		}
+//	}
+	
 	public boolean isLayerAttached(Layer layer){
 		boolean ret = true;
 		if(layer instanceof LinkedLayers){

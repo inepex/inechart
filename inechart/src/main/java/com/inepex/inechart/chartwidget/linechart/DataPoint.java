@@ -45,6 +45,7 @@ public class DataPoint implements Comparable<DataPoint>{
 		
 	protected XYDataEntry data;
 	protected ArrayList<DataPoint> filteredPoints;
+	protected DataPoint bestMatchingFilteredPoint;
 	protected double canvasX, canvasY;
 	protected boolean isInViewport;
 	protected boolean unfilterable = false;
@@ -68,9 +69,6 @@ public class DataPoint implements Comparable<DataPoint>{
 		filteredPoints.add(dp);
 	}
 
-//	public void setData(XYDataEntry e){
-//		this.data = e;
-//	}
 
 	public XYDataEntry getData(){
 		return data;
@@ -84,10 +82,7 @@ public class DataPoint implements Comparable<DataPoint>{
 		return filteredPoints;
 	}
 	
-	public void setFilteredPoints(ArrayList<DataPoint> filteredPoints) {
-		this.filteredPoints = filteredPoints;
-	}
-
+	
 	public boolean isInViewport() {
 		return isInViewport;
 	}
@@ -110,4 +105,10 @@ public class DataPoint implements Comparable<DataPoint>{
 			getFilteredPoints().get(0).getData() :
 			getData();
 	}
+
+	public DataPoint getBestMatchingFilteredPoint() {
+		return bestMatchingFilteredPoint;
+	}
+
+	
 }

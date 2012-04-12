@@ -19,6 +19,7 @@ import com.inepex.inechart.chartwidget.data.XYDataEntry;
 import com.inepex.inechart.chartwidget.event.DataEntrySelectionEvent;
 import com.inepex.inechart.chartwidget.event.DataSetChangeEvent;
 import com.inepex.inechart.chartwidget.event.ViewportChangeEvent;
+import com.inepex.inechart.chartwidget.linechart.PointFilter.Policy;
 import com.inepex.inechart.chartwidget.properties.Color;
 import com.inepex.inechart.chartwidget.properties.LineProperties.LineStyle;
 import com.inepex.inechart.chartwidget.shape.Circle;
@@ -149,6 +150,14 @@ public class LineChart extends IneChartModule2D {
 				if (c.dataSet.getyMin() < yMin)
 					yMin = c.dataSet.getyMin();
 			}
+			if(yMin == yMax){
+				yMax++;
+				yMin--;
+			}
+			if(xMin == xMax){
+				xMax++;
+				xMin--;
+			}
 			if(autoScaleViewportHorizontal && xAxis.getModulToAlign() == this){
 				xAxis.setMax(xMax);
 				xAxis.setMin(xMin);
@@ -165,6 +174,13 @@ public class LineChart extends IneChartModule2D {
 
 	@Override
 	public void update() {
+		if(!isVisible){
+			moduleAssist.removeLayer(moduleLayer);
+		}
+		else if(!moduleAssist.isLayerAttached(moduleLayer)){
+			moduleAssist.addLayer(moduleLayer);
+			moduleAssist.updateLayerOrder();
+		}
 		if (autoScaleViewportHorizontal || autoScaleViewportVertical) {
 			preUpdateModule();
 		}
@@ -276,6 +292,7 @@ public class LineChart extends IneChartModule2D {
 		List<? extends XYDataEntry> dataPairs = curve.dataSet.getXYDataEntries();
 		curve.discontinuitiesAsPoint.clear();
 		curve.dataPoints.clear();
+		curve.visibleDataPoints.clear();
 		curve.entryPointMap.clear();
 		ArrayList<DataPoint> points = new ArrayList<DataPoint>();
 		if(curve.dataSet.isSortable()){
@@ -348,7 +365,7 @@ public class LineChart extends IneChartModule2D {
 				}
 				last = xyEntry;
 			}
-			points = pointFilter.filterDataPoints(points);
+			curve.visibleDataPoints = points = pointFilter.filterDataPoints(points);
 			if(beforeVPMin != null){
 				DataPoint dp = createDataPoint(beforeVPMin);
 				if(points.size() == 0 || DataPoint.canvasXComparator.compare(dp, points.get(0)) != 0){
@@ -839,6 +856,7 @@ public class LineChart extends IneChartModule2D {
 	 * @return null if the curve has no point inside viewport
 	 */
 	public DataPoint getClosestDataToPoint(int[] point, Curve curve){
+		//TODO improve search!
 		DataPoint closest = null;
 		double minDiff = Double.MAX_VALUE;
 		for(DataPoint dp : curve.dataPoints){
@@ -851,6 +869,10 @@ public class LineChart extends IneChartModule2D {
 			}
 		}
 		return closest;		
+	}
+	
+	public DataPoint getClosestDataToCanvas(int x, Curve curve){
+		return curve.getPointClosestToX(getValueForCanvasX(x));
 	}
 
 	protected void setDataPoint(DataPoint dataPoint) {
@@ -922,6 +944,9 @@ public class LineChart extends IneChartModule2D {
 	protected void fireDataEntrySelectedEvent(Curve curve, DataPoint dataPoint){
 		AbstractDataEntry entry = null;
 		if(dataPoint.containsHiddenData()){
+			if(pointFilter.policy == Policy.average){
+				
+			}
 			entry = (AbstractDataEntry) dataPoint.getFilteredPoints().get(0).getData();
 		}
 		else{

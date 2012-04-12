@@ -12,7 +12,7 @@ public class PointFilter {
 		average
 	}
 
-	protected int horizontalFilter, verticalFilter;
+	protected double horizontalFilter, verticalFilter;
 	protected Policy policy;
 	protected LineChart lineChart;
 
@@ -20,7 +20,7 @@ public class PointFilter {
 		this(Defaults.hotizontalFilter, Defaults.verticalFilter, Defaults.filterPolicy);
 	}
 
-	public PointFilter(int horizontalFilter, int verticalFilter, Policy policy) {
+	public PointFilter(double horizontalFilter, double verticalFilter, Policy policy) {
 		this.horizontalFilter = horizontalFilter;
 		this.verticalFilter = verticalFilter;
 		this.policy = policy;
@@ -69,20 +69,22 @@ public class PointFilter {
 	}
 
 	protected DataPoint applyFilterPolicy(ArrayList<DataPoint> dps){
-		double minX = Double.MAX_VALUE, minY = Double.MAX_VALUE, maxX = - Double.MAX_VALUE, maxY = - Double.MAX_VALUE;
-
+		double minX = dps.get(0).data.getX(), minY = Double.MAX_VALUE, maxX = dps.get(dps.size()-1).data.getX(), maxY = - Double.MAX_VALUE;
+		DataPoint minYdp = null, maxYdp = null;
 		for(DataPoint dp : dps){
-			if(minX > dp.data.getX()){
-				minX = dp.data.getX();
-			}
-			if(maxX < dp.data.getX()){
-				maxX = dp.data.getX();
-			}
+//			if(minX > dp.data.getX()){
+//				minX = dp.data.getX();
+//			}
+//			if(maxX < dp.data.getX()){
+//				maxX = dp.data.getX();
+//			}
 			if(minY > dp.data.getY()){
 				minY = dp.data.getY();
+				minYdp = dp;
 			}
 			if(maxY < dp.data.getY()){
 				maxY = dp.data.getY();
+				maxYdp = dp;
 			}
 
 		}
@@ -90,17 +92,20 @@ public class PointFilter {
 		switch (policy) {
 		case average:
 			ret = new DataPoint(minX + (maxX - minX) / 2, minY + (maxY - minY) / 2);
+			ret.bestMatchingFilteredPoint = dps.get(0);
 			break;
 		case lower:
 			ret = new DataPoint(minX + (maxX - minX) / 2, minY);
+			ret.bestMatchingFilteredPoint = minYdp;
 			break;
 		case higher:
 		default:
 			ret = new DataPoint(minX + (maxX - minX) / 2, maxY);
+			ret.bestMatchingFilteredPoint = maxYdp;
 			break;
 		}	
 		lineChart.setDataPoint(ret);
-		ret.setFilteredPoints(dps);
+		ret.filteredPoints = dps;
 		return ret;
 	}
 
@@ -118,19 +123,19 @@ public class PointFilter {
 		this.lineChart = lineChart;
 	}
 
-	public int getHorizontalFilter() {
+	public double getHorizontalFilter() {
 		return horizontalFilter;
 	}
 
-	public void setHorizontalFilter(int horizontalFilter) {
+	public void setHorizontalFilter(double horizontalFilter) {
 		this.horizontalFilter = horizontalFilter;
 	}
 
-	public int getVerticalFilter() {
+	public double getVerticalFilter() {
 		return verticalFilter;
 	}
 
-	public void setVerticalFilter(int verticalFilter) {
+	public void setVerticalFilter(double verticalFilter) {
 		this.verticalFilter = verticalFilter;
 	}
 

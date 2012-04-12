@@ -111,13 +111,13 @@ public class IneChart extends Composite{
 			axes.updateForPaddingCalculation();
 			double[] modulePadding = new double[]{0,0,0,0};
 			for (IneChartModule modul : modules) {
-				if(modul instanceof IneChartModule2D && ((IneChartModule2D) modul).autoCalcPadding){
+				if(modul instanceof IneChartModule2D && modul.isVisible && ((IneChartModule2D) modul).autoCalcPadding){
 					modulePadding = LabelFactory.mergePaddings(modulePadding, ((IneChartModule2D) modul).getPaddingForAxes());
 				}
 			}
 			modulePadding = LabelFactory.addPaddings(labelFactory.getPaddingNeeded(), modulePadding);
 			for (IneChartModule modul : modules) {
-				if(modul instanceof IneChartModule2D && ((IneChartModule2D) modul).autoCalcPadding){
+				if(modul instanceof IneChartModule2D && modul.isVisible && ((IneChartModule2D) modul).autoCalcPadding){
 					((IneChartModule2D) modul).setPadding(modulePadding);
 				}
 			}

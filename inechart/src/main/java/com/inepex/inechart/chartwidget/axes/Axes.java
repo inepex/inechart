@@ -49,9 +49,9 @@ public class Axes extends IneChartModule {
 	private TreeMap<Axis, double[]> boundingBoxes;
 	private static final int tickFillZIndex = Integer.MIN_VALUE;
 	private static final int gridLineZIndex = tickFillZIndex + 1;	
-	private static final int axisLineZIndex = gridLineZIndex + 1;	
-	private static final int tickLineZIndex = axisLineZIndex + 1;
 
+	private static final int tickLineZIndex = gridLineZIndex + 1;
+	private static final int axisLineZIndex = tickLineZIndex + 1;
 
 	public Axes(ModuleAssist moduleAssist, TickFactory tickFactory) {
 		super(moduleAssist);
@@ -98,7 +98,7 @@ public class Axes extends IneChartModule {
 		labelsPerAxis.remove(axis);
 		axes.remove(axis);
 	}
-	
+
 	private void updateCanvases(){
 		if(moduleAssist.isClientSide()){
 			ArrayList<DrawingArea> updated = new ArrayList<DrawingArea>();
@@ -114,16 +114,16 @@ public class Axes extends IneChartModule {
 	@Override
 	public void update() {
 		for (Axis axis : axes) {
+			removeAllGOAndLabelRelatedToAxis(axis);
 			if (!axis.isVisible){
 				continue;
 			}
 			setTicksIf(axis);
-			removeAllGOAndLabelRelatedToAxis(axis);
 			createGOsAndLabelsForAxis(axis);
 		}
 		updateCanvases();
 	}
-	
+
 	private void setTicksIf(Axis axis){
 		if (axis.autoCreateTicks){
 			// auto calc tick's positions and apply defaults
@@ -135,7 +135,7 @@ public class Axes extends IneChartModule {
 			createDefaultTickAndLabelForAxis(axis);
 		}
 	}
-	
+
 	public void updateForPaddingCalculation(){
 		for (Axis axis : axes) {
 			if (!axis.isVisible){
@@ -148,10 +148,10 @@ public class Axes extends IneChartModule {
 
 	public void updateWithOutAutoTickCreation(){
 		for (Axis axis : axes) {
+			removeAllGOAndLabelRelatedToAxis(axis);
 			if (!axis.isVisible){
 				continue;
 			}
-			removeAllGOAndLabelRelatedToAxis(axis);
 			createGOsAndLabelsForAxis(axis);
 		}
 		updateCanvases();
@@ -183,7 +183,7 @@ public class Axes extends IneChartModule {
 					tickStartY = startY - tick.tickLength / 2;
 					tickEndY = tickStartY + tick.tickLength;
 					break;
-				case To_Lower_Values:
+				case To_Higher_Values:
 					tickStartY = startY;
 					if (perpAxis.axisDirection == AxisDirection.Vertical_Ascending_To_Bottom) {
 						tickEndY = tickStartY - tick.tickLength;
@@ -191,7 +191,7 @@ public class Axes extends IneChartModule {
 						tickEndY = tickStartY + tick.tickLength;
 					}
 					break;
-				case To_Higher_Values:
+				case To_Lower_Values:
 					tickStartY = startY;
 					if (perpAxis.axisDirection == AxisDirection.Vertical_Ascending_To_Bottom) {
 						tickEndY = tickStartY + tick.tickLength;
@@ -406,7 +406,7 @@ public class Axes extends IneChartModule {
 					startY = endY = axis.modulToAlign.getCanvasY(axis.fixedPosition);
 				}
 			} else
-				isVisible = false;
+				axis.isVisible = false;
 			break;
 		case Fixed_Dock_If_Not_Visible:
 			double pos = axis.fixedPosition;
@@ -686,13 +686,12 @@ public class Axes extends IneChartModule {
 	}
 
 	private void removeAllGOAndLabelRelatedToAxis(Axis axis) {
-		if (gosPerAxis.get(axis) == null) {
-			return;
+		if (gosPerAxis.get(axis) != null) {
+			for(GraphicalObject go : gosPerAxis.get(axis).getGraphicalObjects()){
+				canvasPerAxis.get(axis).removeGraphicalObject(go);
+			}
+			gosPerAxis.get(axis).removeAllGraphicalObjects();
 		}
-		for(GraphicalObject go : gosPerAxis.get(axis).getGraphicalObjects()){
-			canvasPerAxis.get(axis).removeGraphicalObject(go);
-		}
-		gosPerAxis.get(axis).removeAllGraphicalObjects();
 		if(labelsPerAxis.get(axis) == null) {
 			return;
 		}

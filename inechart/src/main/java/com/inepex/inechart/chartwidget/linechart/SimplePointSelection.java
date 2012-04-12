@@ -150,7 +150,6 @@ public class SimplePointSelection extends LineChartInteractiveModule {
 		gos.addGraphicalObject(go);
 	}
 
-	
 	@Override
 	public void onClick(ClickEvent event) {
 		handleMouseEvents(event);
@@ -189,7 +188,10 @@ public class SimplePointSelection extends LineChartInteractiveModule {
 		TreeMap<Curve,  ArrayList<DataPoint>> closestToCursorPointsPerCurve = new TreeMap<Curve, ArrayList<DataPoint>>();
 		int[] coords = lineChart.getCoords(event);
 		//check if we need mouse position and interactive GO related points
-		if( pointSelectionMode == InteractionMode.On_Click || pointSelectionMode == InteractionMode.On_Over || pointTouchMode == InteractionMode.On_Click || pointTouchMode == InteractionMode.On_Over){
+		if( (pointSelectionMode == InteractionMode.On_Click && event instanceof ClickEvent) ||
+				pointSelectionMode == InteractionMode.On_Over  || 
+				(pointTouchMode == InteractionMode.On_Click  && event instanceof ClickEvent) || 
+				pointTouchMode == InteractionMode.On_Over){
 			for(Curve c : interactiveGOsPerCurve.keySet()){
 				if(!c.visible || !c.hasPoint && pointMouseOverRadius <= 0){
 					continue;
@@ -204,7 +206,7 @@ public class SimplePointSelection extends LineChartInteractiveModule {
 					continue;
 				}
 				closestToCursorPointsPerCurve.put(c, new ArrayList<DataPoint>());
-				closestToCursorPointsPerCurve.get(c).add(lineChart.getClosestDataToPoint(coords, c));
+				closestToCursorPointsPerCurve.get(c).add(lineChart.getClosestDataToCanvas(coords[0], c));
 			}
 		}	
 		TreeMap<Curve, ArrayList<DataPoint>> selectInteractedPointsPerCurve = null;
@@ -250,11 +252,11 @@ public class SimplePointSelection extends LineChartInteractiveModule {
 			}
 		}
 	}
-	
+
 	protected double getDistance(int[] coords, DataPoint dp){
 		return Math.sqrt(Math.pow(coords[0] - dp.canvasX, 2) + Math.pow(coords[1] - dp.canvasY, 2));
 	}
-	
+
 	/**
 	 * Updates selection / touched point models, fires events and redraws layer
 	 * @param selectInteractionPoints
@@ -379,7 +381,7 @@ public class SimplePointSelection extends LineChartInteractiveModule {
 		if(pointSelectionMode == InteractionMode.Closest_To_Cursor || pointSelectionMode == InteractionMode.On_Over){
 			for(DataPoint dp : interactedPoints){
 				if(!curve.isPointSelected(dp) && 
-					( !canSelectOnlyTouchedPoint ||  (touchedPoints.containsKey(curve) && touchedPoints.get(curve).contains(dp)) )){
+						( !canSelectOnlyTouchedPoint ||  (touchedPoints.containsKey(curve) && touchedPoints.get(curve).contains(dp)) )){
 					selected.add(dp);					
 				}
 			}
@@ -401,7 +403,7 @@ public class SimplePointSelection extends LineChartInteractiveModule {
 			}
 		}
 	}
-	
+
 	protected Shape getTouchedShape(Curve curve){
 		Shape shape = touchedPointShapes.get(curve);
 		if(shape == null){
@@ -428,8 +430,8 @@ public class SimplePointSelection extends LineChartInteractiveModule {
 
 	protected ArrayList<DataPoint> getMouseOverPoints(Curve curve, int[] coords){
 		ArrayList<DataPoint> list = new ArrayList<DataPoint>();
-		for(GraphicalObject go : interactiveGOsPerCurve.get(curve).getGraphicalObjects()){
-			if(MouseAssist.isMouseOver(coords, go) && interactivePoints.containsKey(go)){
+		if(interactiveGOsPerCurve.containsKey(curve)){
+			for(GraphicalObject go : MouseAssist.getMouseOverGOs(coords, interactiveGOsPerCurve.get(curve).getGraphicalObjects())){
 				list.add(interactivePoints.get(go));
 			}
 		}
@@ -495,15 +497,15 @@ public class SimplePointSelection extends LineChartInteractiveModule {
 		DrawingAreaGWT canvas = canvasPerCurve.get(curve).getCanvas();
 
 		clearLayer(curve);
-		
+
 		if(!interactiveGOsPerCurve.containsKey(curve)){
 			interactiveGOsPerCurve.put(curve, new GraphicalObjectContainer());
 		}
-	
+
 		ArrayList<DataPoint> selectedPoints = curve.getSelectedPoints();
 		Shape selected = getSelectedShape(curve);
 		Shape touched = getTouchedShape(curve);
-				
+
 		for(DataPoint dp : curve.dataPoints){
 			if(dp.isInViewport){
 				boolean displayBB = false;
@@ -669,23 +671,23 @@ public class SimplePointSelection extends LineChartInteractiveModule {
 	public boolean isDisplayAnnotationTouch() {
 		return displayAnnotationTouch;
 	}
-	
+
 	public void setDisplayAnnotationTouch(boolean displayAnnotationTouch) {
 		this.displayAnnotationTouch = displayAnnotationTouch;
 	}
-	
+
 	public boolean isDisplayAnnotationSelect() {
 		return displayAnnotationSelect;
 	}
-	
+
 	public void setDisplayAnnotationSelect(boolean displayAnnotationSelect) {
 		this.displayAnnotationSelect = displayAnnotationSelect;
 	}
-	
+
 	public boolean isCanSelectOnlyTouchedPoint() {
 		return canSelectOnlyTouchedPoint;
 	}
-	
+
 	public void setCanSelectOnlyTouchedPoint(boolean canSelectOnlyTouchedPoint) {
 		this.canSelectOnlyTouchedPoint = canSelectOnlyTouchedPoint;
 	}

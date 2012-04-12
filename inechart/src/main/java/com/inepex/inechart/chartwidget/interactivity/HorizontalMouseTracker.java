@@ -103,6 +103,7 @@ public class HorizontalMouseTracker extends AbstractInteractiveModule {
 		moduleAssist.getLabelFactory().addAndDisplayStyledLabel(label);
 		layer.getCanvas().addGraphicalObject(tracker);
 		layer.getCanvas().update();
+		moduleAssist.updateLayerOrder();
 	}
 	
 	Context createContext(LineProperties lp ){
