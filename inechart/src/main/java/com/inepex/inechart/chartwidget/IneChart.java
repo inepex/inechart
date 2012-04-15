@@ -141,7 +141,7 @@ public class IneChart extends Composite{
 		drawingArea.addAllGraphicalObject(axes.graphicalObjectContainer);
 		drawingArea.addAllGraphicalObject(labelFactory.graphicalObjectContainer);
 		drawingArea.update();
-
+		moduleAssist.updateLayerOrder();
 	}
 
 	public void updateAxes(){
@@ -149,8 +149,8 @@ public class IneChart extends Composite{
 	}
 
 	public LineChart createLineChart() {
-		DrawingAreaGWT overlay = new DrawingAreaGWT(canvasWidth, canvasHeight);
-		mainPanel.add(overlay.getWidget(),0,0);
+//		DrawingAreaGWT overlay = new DrawingAreaGWT(canvasWidth, canvasHeight);
+//		mainPanel.add(overlay.getWidget(),0,0);
 		LineChart chart = new LineChart(moduleAssist);
 		modules.add(chart);
 		eventManager.addViewportChangeHandler(chart.innerEventHandler);

@@ -792,26 +792,25 @@ public class Axes extends IneChartModule {
 	 * @param axis
 	 */
 	private void createDefaultTickAndLabelForAxis(Axis axis) {
+		boolean first = true;
 		for(Tick t : axis.getTicks()){
+			
 			//use given defaults
 			if(axis.defaultTick != null) {
-				//				if( axis.defaultTick.gridLine != null){
-				t.setGridLine(axis.defaultTick.gridLine);
-				//				}
 				if(axis.defaultTick.formatString != null){
 					t.setFormatString(axis.defaultTick.formatString);
 				}
-				//				if(axis.defaultTick.textContainer != null){
 				t.setTextContainer(axis.defaultTick.textContainer);
-				//				}
-				//				if(axis.defaultTick.tickLine != null){
-				t.setTickLine(axis.defaultTick.tickLine);
-				//				}
-				//				if(axis.defaultTick.tickPosition != null){
-				t.setTickPosition(axis.defaultTick.tickPosition);
-				//				}
-				t.setTickLength(axis.defaultTick.tickLength);
 				t.getText().setTextProperties(axis.defaultTick.getText().getTextProperties());
+				if(first && !axis.displayFirstTick){
+					t.setTickLine(null);
+					first = false;
+					continue;
+				}
+				t.setGridLine(axis.defaultTick.gridLine);
+				t.setTickLine(axis.defaultTick.tickLine);
+				t.setTickPosition(axis.defaultTick.tickPosition);
+				t.setTickLength(axis.defaultTick.tickLength);				
 			}
 			// use default defaults :)
 			else{

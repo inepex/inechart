@@ -406,6 +406,7 @@ public abstract class IneChartModule2D extends IneChartModule implements HasCoor
 		this.xAxis = xAxis;
 		if (xAxis.getModulToAlign() == null) {
 			xAxis.setModulToAlign(this);
+			moduleAssist.axes.addAxis(xAxis);
 		} else {// scale this modul as the other
 			if (xAxis.isHorizontal()) {
 				rightPadding = xAxis.getModulToAlign().rightPadding;
@@ -415,7 +416,7 @@ public abstract class IneChartModule2D extends IneChartModule implements HasCoor
 				topPadding = xAxis.getModulToAlign().topPadding;
 			}
 		}
-		moduleAssist.axes.addAxis(xAxis);
+		
 	}
 
 	@Override
