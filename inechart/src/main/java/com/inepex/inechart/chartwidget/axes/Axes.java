@@ -333,14 +333,16 @@ public class Axes extends IneChartModule {
 				continue;
 			double tick1,tick2;
 			if (axis.isHorizontal()) {
-				tick1 = axis.getModulToAlign().getCanvasX(((Tick) tickPair[0]).position);
-				tick2 = axis.getModulToAlign().getCanvasX(((Tick) tickPair[1]).position);
-				x = Math.max(axis.modulToAlign.getLeftPadding(), Math.min(tick1, tick2));
+				tick1 = Math.max(axis.getModulToAlign().getCanvasX(((Tick) tickPair[0]).position), axis.modulToAlign.getLeftPadding());
+				tick2 = Math.min(axis.getModulToAlign().getCanvasX(((Tick) tickPair[1]).position), axis.modulToAlign.getRightEnd());
+//				x = Math.max(axis.modulToAlign.getLeftPadding(), Math.min(tick1, tick2));
+				x = tick1;
 				y = axis.getModulToAlign().getTopPadding();
 				height = axis.getModulToAlign().getHeight();
-				width = Math.min(Math.abs(tick1 - tick2), canvas.getWidth() - axis.modulToAlign.getRightPadding() - x);
+				width = tick2 - tick1;
+//				width = Math.min(Math.abs(tick2 - tick1), canvas.getWidth() - axis.modulToAlign.getRightPadding() - x);
 			}
-			else {
+			else { //TODO
 				tick1 = axis.getModulToAlign().getCanvasY(((Tick) tickPair[0]).position);
 				tick2 = axis.getModulToAlign().getCanvasY(((Tick) tickPair[1]).position);
 				x = axis.modulToAlign.getLeftPadding();
