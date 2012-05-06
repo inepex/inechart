@@ -21,7 +21,7 @@ public class MouseAssist {
 	 */
 	public static List<GraphicalObject> getMouseOverGOs(int[] coords, List<GraphicalObject> gos) {
 		if(gos.size() == 0){
-			return null;
+			return new ArrayList<GraphicalObject>();
 		}
 		double from, to;
 		GraphicalObject first = gos.get(0);
@@ -34,7 +34,7 @@ public class MouseAssist {
 			to = coords[0] + ((Rectangle)first).getWidth() + first.getContext().getStrokeWidth() / 2;
 		}
 		else{
-			return null;
+			return new ArrayList<GraphicalObject>();
 		}
 		List<GraphicalObject> subList = getSublist(gos, from, to);
 		List<GraphicalObject> over = new ArrayList<GraphicalObject>();
@@ -54,6 +54,9 @@ public class MouseAssist {
 		}
 		if(j == -1){
 			j = gos.size() - 1;
+		}
+		if(i > j){
+			return new ArrayList<GraphicalObject>();
 		}
 		return gos.subList(i, j);
 	}
