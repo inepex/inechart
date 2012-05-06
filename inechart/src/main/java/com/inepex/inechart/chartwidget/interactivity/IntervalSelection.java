@@ -187,6 +187,13 @@ public class IntervalSelection extends AbstractInteractiveModule implements Fire
 		spinners.setInterval(minSpinnerPos, maxSpinnerPos);
 		drawRectangles();
 	}
+	
+	public void setSpinnerPositions(double min, double max){
+		minSpinnerPos = min - relatedIneChartModule2D.getXAxis().getMin();
+		maxSpinnerPos = max - relatedIneChartModule2D.getXAxis().getMin();
+		spinners.setInterval(minSpinnerPos, maxSpinnerPos);
+		drawRectangles();
+	}
 
 	@Override
 	public List<IneChart> getAddressedCharts() {
