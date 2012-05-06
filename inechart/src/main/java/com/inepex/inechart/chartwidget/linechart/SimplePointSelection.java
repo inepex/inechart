@@ -430,7 +430,7 @@ public class SimplePointSelection extends LineChartInteractiveModule {
 
 	protected ArrayList<DataPoint> getMouseOverPoints(Curve curve, int[] coords){
 		ArrayList<DataPoint> list = new ArrayList<DataPoint>();
-		if(interactiveGOsPerCurve.containsKey(curve)){
+		if(interactiveGOsPerCurve.containsKey(curve) && interactiveGOsPerCurve.get(curve) != null){
 			for(GraphicalObject go : MouseAssist.getMouseOverGOs(coords, interactiveGOsPerCurve.get(curve).getGraphicalObjects())){
 				list.add(interactivePoints.get(go));
 			}
