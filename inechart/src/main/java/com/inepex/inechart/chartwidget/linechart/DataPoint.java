@@ -106,8 +106,8 @@ public class DataPoint implements Comparable<DataPoint>{
 			getData();
 	}
 
-	public DataPoint getBestMatchingFilteredPoint() {
-		return bestMatchingFilteredPoint;
+	public DataPoint getBestMatchingFilteredPointOrThis() {
+		return bestMatchingFilteredPoint == null ? this : bestMatchingFilteredPoint;
 	}
 
 	

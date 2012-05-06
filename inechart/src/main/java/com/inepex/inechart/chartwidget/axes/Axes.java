@@ -248,7 +248,7 @@ public class Axes extends IneChartModule {
 	}
 
 	private void createTickText(Axis axis, Axis perpAxis, Tick tick, double tickStartX, double tickStartY){
-		if(tick.formatString != null){
+		if(tick.formatString != null && (axis.tickCustomizer == null || tick.text == null || tick.text.getText() == null)){
 			tick.text.setText( tickFactory.formatTickText(tick, axis.axisDataType));
 		}
 		if (tick.text != null && tick.text.getText().length() > 0) {
@@ -823,6 +823,10 @@ public class Axes extends IneChartModule {
 				}
 				t.setText(new com.inepex.inechart.chartwidget.label.Text(t.position + ""));
 				t.setTickLength(Defaults.tickLength);
+			}
+			
+			if(axis.tickCustomizer != null){
+				axis.tickCustomizer.setTick(t, axis);
 			}
 		}
 	}

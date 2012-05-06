@@ -132,6 +132,7 @@ public class Axis implements Comparable<Axis>, HasZIndex{
 	protected boolean displayFirstTick = true;
 	
 	protected StyledLabel axisLabel;
+	protected TickCustomizer tickCustomizer;
 	
 	public Axis() {
 		this(null);
@@ -524,5 +525,13 @@ public class Axis implements Comparable<Axis>, HasZIndex{
 
 	public void setDisplayFirstTick(boolean displayFirstTick) {
 		this.displayFirstTick = displayFirstTick;
+	}
+
+	public TickCustomizer getTickCustomizer() {
+		return tickCustomizer;
+	}
+
+	public void setTickCustomizer(TickCustomizer tickCustomizer) {
+		this.tickCustomizer = tickCustomizer;
 	}
 }
