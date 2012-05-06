@@ -63,6 +63,14 @@ MouseDownHandler, MouseOutHandler, MouseMoveHandler, MouseOverHandler, MouseUpHa
 	}
 
 	/**
+	 * fires the given event via {@link IneChart}'s eventBus (outgoing events) with the spec. source
+	 */
+	public void fireEvent(GwtEvent<?> event, Object source){
+		if(eventBus != null)
+			eventBus.fireEventFromSource(event, source);
+	}
+	
+	/**
 	 * fires the given event only inside this chart 
 	 * @param event
 	 */

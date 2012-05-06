@@ -77,6 +77,12 @@ public abstract class AbstractDataSet implements HasTitle{
 			eventManager.fireEvent(new DataEntrySelectionEvent(entry, selected));
 		}
 	}
+	
+	public void fireDataEntrySelectionEventFromSource(AbstractDataEntry entry, boolean selected, Object source){
+		if (attached && eventManager != null) {
+			eventManager.fireEvent(new DataEntrySelectionEvent(entry, selected), source);
+		}
+	}
 
 	public boolean isAttached() {
 		return attached;
