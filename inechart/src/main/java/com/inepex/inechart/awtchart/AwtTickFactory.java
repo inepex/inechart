@@ -6,7 +6,6 @@ import java.text.NumberFormat;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 
-
 import com.inepex.inechart.chartwidget.axes.Axis.AxisDataType;
 import com.inepex.inechart.chartwidget.axes.Tick;
 import com.inepex.inechart.chartwidget.axes.TickFactory;

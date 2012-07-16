@@ -3,11 +3,9 @@ package com.inepex.inegraphics.impl.client;
 
 import java.util.TreeMap;
 
-import com.google.gwt.dom.client.Style.BorderStyle;
 import com.google.gwt.dom.client.Style.Unit;
 import com.google.gwt.user.client.ui.AbsolutePanel;
 import com.google.gwt.user.client.ui.InlineHTML;
-import com.google.gwt.user.client.ui.InlineLabel;
 import com.google.gwt.user.client.ui.RootPanel;
 import com.inepex.inegraphics.shared.gobjects.Text;
 import com.inepex.inegraphics.shared.gobjects.Text.BasePointXPosition;

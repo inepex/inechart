@@ -10,15 +10,11 @@ import com.google.gwt.event.dom.client.MouseUpEvent;
 import com.inepex.inechart.chartwidget.Defaults;
 import com.inepex.inechart.chartwidget.IneChartModule2D;
 import com.inepex.inechart.chartwidget.ModuleAssist;
-import com.inepex.inechart.chartwidget.axes.Axes;
 import com.inepex.inechart.chartwidget.event.DataEntrySelectionEvent;
 import com.inepex.inechart.chartwidget.event.DataSetChangeEvent;
 import com.inepex.inechart.chartwidget.event.ViewportChangeEvent;
-import com.inepex.inechart.chartwidget.label.LabelFactory;
-import com.inepex.inechart.chartwidget.label.Legend;
 import com.inepex.inechart.chartwidget.properties.Color;
 import com.inepex.inegraphics.shared.Context;
-import com.inepex.inegraphics.shared.DrawingArea;
 import com.inepex.inegraphics.shared.gobjects.Arc;
 
 public class PieChart extends IneChartModule2D{

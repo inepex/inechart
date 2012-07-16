@@ -1,8 +1,8 @@
 package com.inepex.inechart.misc.scroll;
 
+import com.inepex.inechart.chartwidget.resources.ScrollStyle;
 import com.inepex.inechart.misc.scroll.defaultviews.ScrollBarView;
 import com.inepex.inechart.misc.scroll.defaultviews.SpinnerView;
-import com.inepex.inechart.chartwidget.resources.ScrollStyle;
 
 public interface ScrollViewFactory {
 
