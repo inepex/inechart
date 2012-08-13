@@ -1,12 +1,19 @@
 package com.inepex.inegraphics.impl.client.canvas;
 
+import com.google.gwt.canvas.dom.client.CanvasGradient;
+import com.google.gwt.canvas.dom.client.CanvasPattern;
+import com.google.gwt.canvas.dom.client.FillStrokeStyle;
 import com.google.gwt.core.client.GWT;
+import com.google.gwt.dom.client.CanvasElement;
+import com.google.gwt.dom.client.Element;
+import com.google.gwt.dom.client.ImageElement;
 import com.google.gwt.user.client.ui.Widget;
 
 public class CanvasWidget extends Widget {
-	
+
 	private Canvas impl = GWT.create(Canvas.class);
 	private boolean isUsingExCanvas = false; 
+
 	public CanvasWidget(int width, int height) {
 		if(impl instanceof CanvasImplIE)
 			isUsingExCanvas = true;
@@ -16,15 +23,22 @@ public class CanvasWidget extends Widget {
 			impl = new CanvasImplDefault();
 		setElement(impl.createElement());
 		impl.setWidth(width);
-		impl.setHeight(height);
-		
+		impl.setHeight(height);	
 	}
-	
+
+	public boolean isUsingExCanvas() {
+		return isUsingExCanvas;
+	}
+
+	public CanvasElement asCanvasElement() {
+		return (CanvasElement) Element.as(this.getElement());
+	}
+
 	public void setWidth(int width) { impl.setWidth(width); }
 	public int getWidth() { return impl.getWidth(); }
 	public void setHeight(int height) { impl.setHeight(height); }
 	public int getHeight() { return impl.getHeight(); }
-	
+
 	public void save() { impl.save(); } // push state on state stack
 	public void restore() { impl.restore(); } // pop state stack and restore state
 
@@ -42,23 +56,25 @@ public class CanvasWidget extends Widget {
 	public void setGlobalCompositeOperation(String globalCompositeOperation) { impl.setGlobalCompositeOperation(globalCompositeOperation); }
 
 	// colors and styles
-	public String getStrokeStyle() { return impl.getStrokeStyle();  }// (default black)
+	public FillStrokeStyle getStrokeStyle() { return impl.getStrokeStyle();  }// (default black)
+	public void setStrokeStyle(FillStrokeStyle strokeStyle) { impl.setStrokeStyle(strokeStyle); }
 	public void setStrokeStyle(String strokeStyle) { impl.setStrokeStyle(strokeStyle); }
-	public String getFillStyle() { return impl.getFillStyle (); }// (default black)
+	public FillStrokeStyle getFillStyle() { return impl.getFillStyle (); }// (default black)
 	public void setFillStyle(String fillStyle) { impl.setFillStyle(fillStyle); }
-	
+	public void setFillStyle(FillStrokeStyle fillStyle) { impl.setFillStyle(fillStyle); }
+
 	// line caps/joins
 	public  double getLineWidth() { return impl.getLineWidth (); }// (default 1)
-    public void setLineWidth(double lineWidth) { impl.setLineWidth(lineWidth); }
-    public String getLineCap() { return impl.getLineCap(); } // "butt", "round", "square" (default "butt")
-    public void setLineCap(String lineCap) { impl.setLineCap(lineCap); }
-    public  String getLineJoin() { return impl.getLineJoin(); } // "round", "bevel", "miter" (default "miter")
-    public void setLineJoin(String lineJoin) { impl.setLineJoin(lineJoin); }
-    public  double getMiterLimit() { return impl.getMiterLimit (); }// (default 10)
-    public void setMiterLimit(double miterLimit) { impl.setMiterLimit(miterLimit); }
+	public void setLineWidth(double lineWidth) { impl.setLineWidth(lineWidth); }
+	public String getLineCap() { return impl.getLineCap(); } // "butt", "round", "square" (default "butt")
+	public void setLineCap(String lineCap) { impl.setLineCap(lineCap); }
+	public  String getLineJoin() { return impl.getLineJoin(); } // "round", "bevel", "miter" (default "miter")
+	public void setLineJoin(String lineJoin) { impl.setLineJoin(lineJoin); }
+	public  double getMiterLimit() { return impl.getMiterLimit (); }// (default 10)
+	public void setMiterLimit(double miterLimit) { impl.setMiterLimit(miterLimit); }
 
 	// shadows
-    public double getShadowOffsetX() { return impl.getShadowOffsetX(); } // (default 0)
+	public double getShadowOffsetX() { return impl.getShadowOffsetX(); } // (default 0)
 	public void setShadowOffsetX(double shadowOffsetX) { impl.setShadowOffsetX(shadowOffsetX); }
 	public double getShadowOffsetY() { return impl.getShadowOffsetY (); }// (default 0)
 	public void setShadowOffsetY(double shadowOffsetY) { impl.setShadowOffsetY(shadowOffsetY); }
@@ -66,7 +82,7 @@ public class CanvasWidget extends Widget {
 	public void setShadowBlur(double shadowBlur) { impl.setShadowBlur(shadowBlur); }
 	public String getShadowColor() { return impl.getShadowColor (); }// (default transparent black)
 	public void setShadowColor(String shadowColor) { impl.setShadowColor(shadowColor); }
-	
+
 	// rects
 	public void clearRect(double x, double y, double w, double h) { impl.clearRect(x,y, w,h);}
 	public void fillRect(double x, double y, double w, double h) { impl.fillRect(x,y, w,h);}
@@ -87,7 +103,18 @@ public class CanvasWidget extends Widget {
 	public void clip() { impl.clip(); }
 	public boolean isPointInPath(double x, double y) {return impl.isPointInPath(x,y);}
 
-	public boolean isUsingExCanvas() {
-		return isUsingExCanvas;
-	}
+	//gradients and patterns
+	public CanvasGradient createLinearGradient(double x0, double y0, double x1, double y1){ return impl.createLinearGradient(x0, y0, x1, y1); }
+	public CanvasGradient createRadialGradient(double x0, double y0, double r0, double x1, double y1, double r1){ return impl.createRadialGradient(x0, y0, r0, x1, y1, r1); }
+	public CanvasPattern createPattern(ImageElement image, String repetition){ return impl.createPattern(image, repetition); }
+	public CanvasPattern createPattern(CanvasElement image, String repetition){ return impl.createPattern(image, repetition); }
+
+	//img
+	public void drawImage(CanvasElement image, double dx, double dy){ impl.drawImage(image, dx, dy); }
+	public void drawImage(CanvasElement image, double dx, double dy, double dw,double dh){ impl.drawImage(image, dx, dy, dw, dh); }
+	public void drawImage(CanvasElement image, double sx, double sy, double sw, double sh, double dx, double dy, double dw, double dh){ impl.drawImage(image, sx, sy, sw, sh, dx, dy, dw, dh); }
+	public void drawImage(ImageElement image, double dx, double dy){ impl.drawImage(image, dx, dy); }
+	public void drawImage(ImageElement image, double dx, double dy, double dw, double dh){ impl.drawImage(image, dx, dy, dw, dh); }
+	public void drawImage(ImageElement image, double sx, double sy, double sw, double sh, double dx, double dy, double dw, double dh){ impl.drawImage(image, sx, sy, sw, sh, dx, dy, dw, dh); }
+
 }

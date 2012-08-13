@@ -1,6 +1,11 @@
 package com.inepex.inegraphics.impl.client.canvas;
 
+import com.google.gwt.canvas.dom.client.CanvasGradient;
+import com.google.gwt.canvas.dom.client.CanvasPattern;
+import com.google.gwt.canvas.dom.client.FillStrokeStyle;
 import com.google.gwt.core.client.JavaScriptObject;
+import com.google.gwt.dom.client.CanvasElement;
+import com.google.gwt.dom.client.ImageElement;
 import com.google.gwt.user.client.Element;
 
 public class CanvasImplIE implements Canvas {
@@ -85,7 +90,7 @@ public class CanvasImplIE implements Canvas {
 		(this.@com.inepex.inegraphics.impl.client.canvas.CanvasImplIE::context).globalCompositeOperation = globalCompositeOperation;
 	}-*/;
 	@Override
-	public native String getStrokeStyle() /*-{
+	public native FillStrokeStyle getStrokeStyle() /*-{
 		return (this.@com.inepex.inegraphics.impl.client.canvas.CanvasImplIE::context).strokeStyle;
 	}-*/;
 	@Override
@@ -93,7 +98,7 @@ public class CanvasImplIE implements Canvas {
 		(this.@com.inepex.inegraphics.impl.client.canvas.CanvasImplIE::context).strokeStyle = strokeStyle;
 	}-*/;
 	@Override
-	public native String getFillStyle() /*-{
+	public native FillStrokeStyle getFillStyle() /*-{
 		return (this.@com.inepex.inegraphics.impl.client.canvas.CanvasImplIE::context).fillStyle;
 	}-*/;
 	@Override
@@ -231,6 +236,75 @@ public class CanvasImplIE implements Canvas {
 	public native boolean isPointInPath(double x, double y) /*-{
 		return (this.@com.inepex.inegraphics.impl.client.canvas.CanvasImplIE::context).isPointInPath(x,y);
 	}-*/;
+
+
+	@Override
+	public native void setStrokeStyle(FillStrokeStyle strokeStyle)/*-{
+		(this.@com.inepex.inegraphics.impl.client.canvas.CanvasImplIE::context).strokeStyle = strokeStyle;
+	}-*/;
+
+	@Override
+	public native void setFillStyle(FillStrokeStyle fillStyle)/*-{
+		(this.@com.inepex.inegraphics.impl.client.canvas.CanvasImplIE::context).fillStyle = fillStyle;
+	}-*/;
+
+	@Override
+	public native CanvasGradient createLinearGradient(double x0, double y0, double x1,
+			double y1) /*-{
+		return (this.@com.inepex.inegraphics.impl.client.canvas.CanvasImplIE::context).createLinearGradient(x0, y0, x1, y1);
+	}-*/;
+
+	@Override
+	public native CanvasGradient createRadialGradient(double x0, double y0, double r0,
+			double x1, double y1, double r1) /*-{
+		return (this.@com.inepex.inegraphics.impl.client.canvas.CanvasImplIE::context).createRadialGradient(x0, y0, r0, x1, y1, r1);
+	}-*/;
+
+
+	@Override
+	public native CanvasPattern createPattern(ImageElement image, String repetition) /*-{
+		return (this.@com.inepex.inegraphics.impl.client.canvas.CanvasImplIE::context).createPattern(image, repetition);
+	}-*/;
+
+	@Override
+	public native CanvasPattern createPattern(CanvasElement image, String repetition) /*-{
+		return (this.@com.inepex.inegraphics.impl.client.canvas.CanvasImplIE::context).createPattern(image, repetition);
+	}-*/;
+
+	@Override
+	public final native void drawImage(CanvasElement image, double dx, double dy) /*-{
+	     (this.@com.inepex.inegraphics.impl.client.canvas.CanvasImplIE::context).drawImage(image, dx, dy);
+	  }-*/;
+
+	@Override
+	public final native void drawImage(CanvasElement image, double dx, double dy, double dw,
+			double dh) /*-{
+	     (this.@com.inepex.inegraphics.impl.client.canvas.CanvasImplIE::context).drawImage(image, dx, dy, dw, dh);
+	  }-*/;
+
+	@Override
+	public final native void drawImage(CanvasElement image, double sx, double sy, double sw, double sh,
+			double dx, double dy, double dw, double dh) /*-{
+	    (this.@com.inepex.inegraphics.impl.client.canvas.CanvasImplIE::context).drawImage(image, sx, sy, sw, sh, dx, dy, dw, dh);
+	  }-*/;
+	
+	@Override
+	public final native void drawImage(ImageElement image, double dx, double dy) /*-{
+	     (this.@com.inepex.inegraphics.impl.client.canvas.CanvasImplIE::context).drawImage(image, dx, dy);
+	  }-*/;
+
+	@Override
+	public final native void drawImage(ImageElement image, double dx, double dy, double dw,
+			double dh) /*-{
+	     (this.@com.inepex.inegraphics.impl.client.canvas.CanvasImplIE::context).drawImage(image, dx, dy, dw, dh);
+	  }-*/;
+
+	@Override
+	public final native void drawImage(ImageElement image, double sx, double sy, double sw, double sh,
+			double dx, double dy, double dw, double dh) /*-{
+	     (this.@com.inepex.inegraphics.impl.client.canvas.CanvasImplIE::context).drawImage(image, sx, sy, sw, sh, dx, dy, dw, dh);
+	  }-*/;
+
 
 
 }

@@ -1,16 +1,21 @@
 package com.inepex.inegraphics.impl.client.canvas;
 
+import com.google.gwt.canvas.dom.client.CanvasGradient;
+import com.google.gwt.canvas.dom.client.CanvasPattern;
+import com.google.gwt.canvas.dom.client.FillStrokeStyle;
+import com.google.gwt.dom.client.CanvasElement;
+import com.google.gwt.dom.client.ImageElement;
 import com.google.gwt.user.client.Element;
 
 public interface Canvas {
-	
+
 	Element createElement();
-	
+
 	void setWidth(int width);
 	int getWidth();
 	void setHeight(int height);
 	int getHeight();
-	
+
 	void save(); // push state on state stack
 	void restore(); // pop state stack and restore state
 
@@ -28,20 +33,22 @@ public interface Canvas {
 	void setGlobalCompositeOperation(String globalCompositeOperation);
 
 	// colors and styles
-	String getStrokeStyle(); // (default black)
+	FillStrokeStyle getStrokeStyle(); // (default black)
 	void setStrokeStyle(String strokeStyle);
-	String getFillStyle(); // (default black)
+	void setStrokeStyle(FillStrokeStyle strokeStyle);
+	FillStrokeStyle getFillStyle(); // (default black)
 	void setFillStyle(String fillStyle);
-	
+	void setFillStyle(FillStrokeStyle fillStyle);
+
 	// line caps/joins
-    double getLineWidth(); // (default 1)
-    void setLineWidth(double lineWidth);
-    String getLineCap(); // "butt", "round", "square" (default "butt")
-    void setLineCap(String lineCap);
-    String getLineJoin(); // "round", "bevel", "miter" (default "miter")
-    void setLineJoin(String lineJoin);
-    double getMiterLimit(); // (default 10)
-    void setMiterLimit(double miterLimit);
+	double getLineWidth(); // (default 1)
+	void setLineWidth(double lineWidth);
+	String getLineCap(); // "butt", "round", "square" (default "butt")
+	void setLineCap(String lineCap);
+	String getLineJoin(); // "round", "bevel", "miter" (default "miter")
+	void setLineJoin(String lineJoin);
+	double getMiterLimit(); // (default 10)
+	void setMiterLimit(double miterLimit);
 
 	// shadows
 	double getShadowOffsetX(); // (default 0)
@@ -52,7 +59,7 @@ public interface Canvas {
 	void setShadowBlur(double shadowBlur);
 	String getShadowColor(); // (default transparent black)
 	void setShadowColor(String shadowColor);
-	
+
 	// rects
 	void clearRect(double x, double y, double w, double h);
 	void fillRect(double x, double y, double w, double h);
@@ -73,4 +80,17 @@ public interface Canvas {
 	void clip();
 	boolean isPointInPath(double x, double y);
 
+	//gradients and patterns
+	CanvasGradient createLinearGradient(double x0, double y0, double x1, double y1);
+	CanvasGradient createRadialGradient(double x0, double y0, double r0, double x1, double y1, double r1);
+	CanvasPattern createPattern(ImageElement image, String repetition);
+	CanvasPattern createPattern(CanvasElement image, String repetition);
+	
+	//img
+	void drawImage(CanvasElement image, double dx, double dy);
+	void drawImage(CanvasElement image, double dx, double dy, double dw,double dh);
+	void drawImage(CanvasElement image, double sx, double sy, double sw, double sh, double dx, double dy, double dw, double dh);
+	void drawImage(ImageElement image, double dx, double dy);
+	void drawImage(ImageElement image, double dx, double dy, double dw, double dh);
+	void drawImage(ImageElement image, double sx, double sy, double sw, double sh, double dx, double dy, double dw, double dh);
 }
