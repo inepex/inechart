@@ -1,7 +1,7 @@
 .scrollBar{
 	background-color: white;
-	opacity:0;
-	filter:alpha(opacity=0);
+	opacity: 0;
+	filter: 'alpha(opacity=0)';
 }
 
 .border{
@@ -11,14 +11,14 @@
 .scrollBar .slider{
 	background-color: white;
 	opacity:0;
-	filter:alpha(opacity=0);
+	filter: 'alpha(opacity=0)';
 	cursor: move;
 }
 
 .scrollBar .sliderMouseOver{
 	background-color: white;
 	opacity:0;
-	filter:alpha(opacity=0);
+	filter:'alpha(opacity=0)';
 	cursor: move;
 }
 
@@ -42,11 +42,11 @@
 
 @sprite .active{
 	gwt-image: 'timeline_hover';
-	cursor: e-resize;
+	cursor: 'e-resize';
 }
 
 @sprite .normal{
 	gwt-image: 'timeline';
-	cursor: e-resize;
+	cursor: 'e-resize';
 }
 
