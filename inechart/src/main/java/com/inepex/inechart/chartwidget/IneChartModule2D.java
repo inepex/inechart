@@ -340,6 +340,7 @@ public abstract class IneChartModule2D extends IneChartModule implements HasCoor
 		}
 	}
 	
+	@Override
 	public void update(){
 		//border
 		if(border != null){

@@ -20,7 +20,6 @@ import com.google.gwt.event.shared.EventBus;
 import com.google.gwt.event.shared.GwtEvent;
 import com.google.gwt.event.shared.HandlerManager;
 import com.google.gwt.event.shared.HandlerRegistration;
-import com.google.gwt.event.shared.HasHandlers;
 import com.google.gwt.user.client.Element;
 import com.inepex.inechart.chartwidget.event.DataEntrySelectionEvent;
 import com.inepex.inechart.chartwidget.event.DataEntrySelectionHandler;
@@ -31,7 +30,7 @@ import com.inepex.inechart.chartwidget.event.ViewportChangeEvent;
 import com.inepex.inechart.chartwidget.event.ViewportChangeHandler;
 
 public class IneChartEventManager implements HasAllMouseHandlers, ViewportChangeHandler,
-MouseDownHandler, MouseOutHandler, MouseMoveHandler, MouseOverHandler, MouseUpHandler, ClickHandler, HasClickHandlers, HasHandlers {
+MouseDownHandler, MouseOutHandler, MouseMoveHandler, MouseOverHandler, MouseUpHandler, ClickHandler, HasClickHandlers {
 	protected EventBus eventBus = null;
 	protected HandlerManager handlerManager;
 	protected IneChart parent;
@@ -57,6 +56,7 @@ MouseDownHandler, MouseOutHandler, MouseMoveHandler, MouseOverHandler, MouseUpHa
 	/**
 	 * fires the given event via {@link IneChart}'s eventBus (outgoing events)
 	 */
+	@Override
 	public void fireEvent(GwtEvent<?> event){
 		if(eventBus != null)
 			eventBus.fireEvent(event);

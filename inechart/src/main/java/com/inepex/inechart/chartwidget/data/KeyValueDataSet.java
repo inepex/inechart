@@ -175,18 +175,22 @@ public class KeyValueDataSet extends AbstractXYDataSet{
 		}
 	}
 	
+	@Override
 	public double getxMax() {
 		return xMax;
 	}
 
+	@Override
 	public double getyMax() {
 		return yMax;
 	}
 	
+	@Override
 	public double getxMin() {
 		return xMin;
 	}
 	
+	@Override
 	public double getyMin() {
 		return yMin;
 	}

@@ -93,6 +93,7 @@ public abstract class RangeSelectionBase implements FiresViewportChangeEvent{
 	/**
 	 * @return the addressedCharts
 	 */
+	@Override
 	public List<IneChart> getAddressedCharts() {
 		return addressedCharts;
 	}
@@ -100,6 +101,7 @@ public abstract class RangeSelectionBase implements FiresViewportChangeEvent{
 	/**
 	 * @param addressedCharts the addressedCharts to set
 	 */
+	@Override
 	public void setAddressedCharts(List<IneChart> addressedCharts) {
 		this.addressedCharts = addressedCharts;
 	}
@@ -107,6 +109,7 @@ public abstract class RangeSelectionBase implements FiresViewportChangeEvent{
 	/**
 	 * @return the addressedModuls
 	 */
+	@Override
 	public List<IneChartModule2D> getAddressedModules() {
 		return addressedModules;
 	}
@@ -114,6 +117,7 @@ public abstract class RangeSelectionBase implements FiresViewportChangeEvent{
 	/**
 	 * @param addressedModuls the addressedModuls to set
 	 */
+	@Override
 	public void setAddressedModules(List<IneChartModule2D> addressedModuls) {
 		this.addressedModules = addressedModuls;
 	}

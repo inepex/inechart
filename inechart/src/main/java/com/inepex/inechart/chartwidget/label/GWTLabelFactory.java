@@ -273,6 +273,7 @@ public class GWTLabelFactory extends LabelFactory{
 		widget.getElement().getStyle().setProperty("fontWeight", tp.getFontWeight());
 	}
 
+	@Override
 	protected void measurePadding(){
 		boolean attached = mainPanel.isAttached();
 		if(!attached){
@@ -405,6 +406,7 @@ public class GWTLabelFactory extends LabelFactory{
 		}
 	}
 
+	@Override
 	public int[] measureStyledLabel(StyledLabel label){
 		com.inepex.inegraphics.shared.gobjects.Text text = new com.inepex.inegraphics.shared.gobjects.Text(label.text.getText(), 1, 1);
 		text.setFontFamily(label.text.getTextProperties().getFontFamily());

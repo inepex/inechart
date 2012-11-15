@@ -111,6 +111,7 @@ public class AwtLabelFactory extends LabelFactory {
 		}
 	}
 	
+	@Override
 	protected void createChartTitle(){
 		if(chartTitle == null){
 			return;
@@ -129,6 +130,7 @@ public class AwtLabelFactory extends LabelFactory {
 		positionTextContainerWidget(chartTitle, panel);
 	}
 	
+	@Override
 	protected void createLegend(){
 		if(legend == null){
 			return;
