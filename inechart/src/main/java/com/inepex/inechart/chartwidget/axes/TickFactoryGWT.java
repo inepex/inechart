@@ -7,23 +7,18 @@ import com.google.gwt.i18n.client.NumberFormat;
 import com.inepex.inechart.chartwidget.axes.Axis.AxisDataType;
 
 public class TickFactoryGWT extends TickFactory {
-	DateTimeFormat dtf;
-	NumberFormat nf;
 
 	@Override
 	public String formatTickText(Tick tick, AxisDataType dataType) {
-//		if(format.length() == 0){
-//			return ((Double)value).toString();
-//		}
 		String formatted = "";
 		try{
 			switch (dataType) {
 			case Number:
-				nf = NumberFormat.getFormat(tick.formatString);
+				NumberFormat nf = NumberFormat.getFormat(tick.formatString);
 				formatted = nf.format(tick.position);
 				break;
 			case Time:
-				dtf = DateTimeFormat.getFormat(tick.formatString);
+				DateTimeFormat dtf = DateTimeFormat.getFormat(tick.formatString);
 				formatted = dtf.format(new Date((long) tick.position));
 				break;
 			}
@@ -34,7 +29,8 @@ public class TickFactoryGWT extends TickFactory {
 		return formatted;
 	}
 	
-	public static String formatValue(AxisDataType axisDataType, double value, String format){
+	@Override
+	public String formatValue(AxisDataType axisDataType, double value, String format){
 		if(format.length() == 0){
 			return ((Double)value).toString();
 		}

@@ -10,7 +10,7 @@ import com.google.gwt.event.dom.client.MouseUpEvent;
 import com.inepex.inechart.chartwidget.Defaults;
 import com.inepex.inechart.chartwidget.Layer;
 import com.inepex.inechart.chartwidget.axes.Axis.AxisDataType;
-import com.inepex.inechart.chartwidget.axes.TickFactoryGWT;
+import com.inepex.inechart.chartwidget.axes.IneChartProperties;
 import com.inepex.inechart.chartwidget.label.BubbleBox;
 import com.inepex.inechart.chartwidget.label.Text;
 import com.inepex.inechart.chartwidget.properties.LineProperties;
@@ -96,7 +96,7 @@ public class HorizontalMouseTracker extends AbstractInteractiveModule {
 			}
 		}
 		double value = relatedIneChartModule2D.getValueForCanvasX(coords[0]);
-		Text t = new Text(TickFactoryGWT.formatValue(relatedIneChartModule2D.getXAxis().getAxisDataType(), value, formatString), textProperties);
+		Text t = new Text(IneChartProperties.tickFactory.formatValue(relatedIneChartModule2D.getXAxis().getAxisDataType(), value, formatString), textProperties);
 		label.setText(t);
 		label.setLeft(coords[0]);
 		label.setTop(relatedIneChartModule2D.getBottomEnd());

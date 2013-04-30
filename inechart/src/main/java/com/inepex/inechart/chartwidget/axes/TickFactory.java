@@ -93,6 +93,7 @@ public abstract class TickFactory {
 	}
 
 	public abstract String formatTickText(Tick tick, AxisDataType dataType); 
+	public abstract String formatValue(AxisDataType axisDataType, double value, String format);
 
 	public ArrayList<Tick> filterFequentTicks(Axis axis, ArrayList<Tick> visibleTicks) {
 		if (visibleTicks.size() <= 1) return visibleTicks;

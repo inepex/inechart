@@ -11,7 +11,7 @@ import com.inepex.inechart.chartwidget.Defaults;
 import com.inepex.inechart.chartwidget.Layer;
 import com.inepex.inechart.chartwidget.ModuleAssist;
 import com.inepex.inechart.chartwidget.axes.Axis.AxisDataType;
-import com.inepex.inechart.chartwidget.axes.TickFactoryGWT;
+import com.inepex.inechart.chartwidget.axes.IneChartProperties;
 import com.inepex.inechart.chartwidget.label.BubbleBox;
 import com.inepex.inechart.chartwidget.label.StyledLabel;
 import com.inepex.inechart.chartwidget.label.Text;
@@ -94,7 +94,7 @@ public class Crosshair extends LineChartInteractiveModule{
 					formatString = Defaults.dateFormat;
 				}
 			}
-			Text t = new Text(TickFactoryGWT.formatValue(lineChart.getXAxis().getAxisDataType(), dp.getData().getX(), formatString), textProperties);
+			Text t = new Text(IneChartProperties.tickFactory.formatValue(lineChart.getXAxis().getAxisDataType(), dp.getData().getX(), formatString), textProperties);
 			xBubbleBox.setText(t);
 			xBubbleBox.setLeft((int) dp.canvasX);
 			xBubbleBox.setTop(lineChart.getBottomEnd());
@@ -121,7 +121,7 @@ public class Crosshair extends LineChartInteractiveModule{
 					formatString = Defaults.dateFormat;
 				}
 			}
-			Text t = new Text(TickFactoryGWT.formatValue(lineChart.getYAxis().getAxisDataType(), dp.getData().getY(), formatString), textProperties);
+			Text t = new Text(IneChartProperties.tickFactory.formatValue(lineChart.getYAxis().getAxisDataType(), dp.getData().getY(), formatString), textProperties);
 			yBubbleBox.setText(t);
 			yBubbleBox.setLeft(lineChart.getLeftPadding());
 			yBubbleBox.setTop((int) dp.canvasY);

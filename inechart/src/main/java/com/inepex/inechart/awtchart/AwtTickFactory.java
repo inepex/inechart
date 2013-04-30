@@ -11,8 +11,6 @@ import com.inepex.inechart.chartwidget.axes.Tick;
 import com.inepex.inechart.chartwidget.axes.TickFactory;
 
 public class AwtTickFactory extends TickFactory {
-	DateFormat sdf;
-	NumberFormat df;
 
 	@Override
 	public String formatTickText(Tick tick, AxisDataType dataType) {
@@ -20,11 +18,11 @@ public class AwtTickFactory extends TickFactory {
 		try{
 			switch (dataType) {
 			case Number:
-				df = new DecimalFormat(tick.getFormatString());
+				NumberFormat df = new DecimalFormat(tick.getFormatString());
 				formatted = df.format(tick.getPosition());
 				break;
 			case Time:
-				sdf = new SimpleDateFormat(tick.getFormatString());
+				DateFormat sdf = new SimpleDateFormat(tick.getFormatString());
 				formatted = sdf.format(new Date((long) tick.getPosition()));
 				break;
 			}
@@ -33,6 +31,11 @@ public class AwtTickFactory extends TickFactory {
 			formatted = ((Double)tick.getPosition()).toString();
 		}
 		return formatted;
+	}
+
+	@Override
+	public String formatValue(AxisDataType axisDataType, double value, String format) {
+		throw new UnsupportedOperationException("not implemented yet");
 	}
 
 }

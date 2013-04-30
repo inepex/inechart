@@ -1,7 +1,7 @@
 package com.inepex.inechart.chartwidget.label;
 
 import com.inepex.inechart.chartwidget.axes.Axis.AxisDataType;
-import com.inepex.inechart.chartwidget.axes.TickFactoryGWT;
+import com.inepex.inechart.chartwidget.axes.IneChartProperties;
 
 public class AnnotationHelper {
 
@@ -13,11 +13,11 @@ public class AnnotationHelper {
 		String ret = annotation.toString();
 
 		if(ret.contains(xValue)){
-			String formatted = TickFactoryGWT.formatValue(xAxisDataType, x, xFormat);
+			String formatted = IneChartProperties.tickFactory.formatValue(xAxisDataType, x, xFormat);
 			ret = ret.replace(xValue, formatted);
 		}
 		if(ret.contains(yValue)){
-			String formatted = TickFactoryGWT.formatValue(yAxisDataType, y, yFormat);
+			String formatted = IneChartProperties.tickFactory.formatValue(yAxisDataType, y, yFormat);
 			ret = ret.replace(yValue, formatted);
 		}
 		return ret;

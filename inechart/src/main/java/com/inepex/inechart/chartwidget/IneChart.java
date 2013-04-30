@@ -17,7 +17,7 @@ import com.google.gwt.user.client.ui.AbsolutePanel;
 import com.google.gwt.user.client.ui.Composite;
 import com.google.gwt.user.client.ui.Widget;
 import com.inepex.inechart.chartwidget.axes.Axes;
-import com.inepex.inechart.chartwidget.axes.TickFactoryGWT;
+import com.inepex.inechart.chartwidget.axes.IneChartProperties;
 import com.inepex.inechart.chartwidget.barchart.BarChart;
 import com.inepex.inechart.chartwidget.intervalchart.IntervalChart;
 import com.inepex.inechart.chartwidget.label.ChartTitle;
@@ -69,7 +69,7 @@ public class IneChart extends Composite{
 		modules = new ArrayList<IneChartModule>();
 		labelFactory = new GWTLabelFactory(moduleAssist);
 		moduleAssist.setLabelFactory(labelFactory);
-		axes = new Axes(moduleAssist, new TickFactoryGWT());
+		axes = new Axes(moduleAssist, IneChartProperties.tickFactory);
 		moduleAssist.setAxes(axes);
 		
 		//event
