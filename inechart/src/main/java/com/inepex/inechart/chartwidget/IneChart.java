@@ -2,7 +2,6 @@
 package com.inepex.inechart.chartwidget;
 
 import java.util.ArrayList;
-import java.util.Iterator;
 import java.util.List;
 
 import com.google.gwt.event.dom.client.ClickEvent;
@@ -12,7 +11,6 @@ import com.google.gwt.event.dom.client.MouseOutEvent;
 import com.google.gwt.event.dom.client.MouseOverEvent;
 import com.google.gwt.event.dom.client.MouseUpEvent;
 import com.google.gwt.event.shared.EventBus;
-import com.google.gwt.event.shared.SimpleEventBus;
 import com.google.gwt.user.client.DOM;
 import com.google.gwt.user.client.ui.AbsolutePanel;
 import com.google.gwt.user.client.ui.Composite;
@@ -311,9 +309,11 @@ public class IneChart extends Composite{
 		rs.setSelectionMode(SelectionRange.Horizontal);
 		rs.getAddressedCharts().add(this);
 		rs.setDisplayRectangleAfterSelection(true);
-		if(eventManager.getEventBus() == null){
-			eventManager.setEventBus(new SimpleEventBus());
-		}
+		
+		//TODO what for?
+//		if(eventManager.getEventBus() == null){
+//			eventManager.setEventBus(new SimpleEventBus());
+//		}
 		viewportSelectorChart.setEventBus(eventManager.getEventBus());
 		return viewportSelectorChart;
 	}
