@@ -261,7 +261,7 @@ public abstract class IneChartModule2D extends IneChartModule implements HasCoor
 	protected boolean displayLegendEntries = true;
 	protected TreeMap<String, Color> legendEntries;
 	
-	protected ArrayList<AbstractInteractiveModule> interactiveModules;
+	private ArrayList<AbstractInteractiveModule> interactiveModules;
 	protected LinkedLayers moduleLayer;
 	
 	protected IneChartModule2D(ModuleAssist moduleAssist) {

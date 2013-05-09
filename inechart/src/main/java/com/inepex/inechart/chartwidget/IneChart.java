@@ -363,4 +363,8 @@ public class IneChart extends Composite{
 		}
 		return null;
 	}
+
+	public void cearModules() {
+		modules.clear();
+	}
 }
