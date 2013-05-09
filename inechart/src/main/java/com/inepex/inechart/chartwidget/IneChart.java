@@ -2,6 +2,7 @@
 package com.inepex.inechart.chartwidget;
 
 import java.util.ArrayList;
+import java.util.Iterator;
 import java.util.List;
 
 import com.google.gwt.event.dom.client.ClickEvent;
@@ -362,9 +363,5 @@ public class IneChart extends Composite{
 			}
 		}
 		return null;
-	}
-
-	public void cearModules() {
-		modules.clear();
 	}
 }
