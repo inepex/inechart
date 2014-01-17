@@ -34,7 +34,7 @@ public class IneChartTest implements EntryPoint {
 //		addTest("linechartTest", new LineChartTest());
 		addTest("barchartTest", new BarChartTest());
 		addTest("speedTest", new SpeedTest());
-////		addTest("lineAndBar", new LineAndBarChartTest());
+//		addTest("lineAndBar", new LineAndBarChartTest());
 		addTest("multiLineChart", new MultiLineChart());
 		addTest("viewportTest", new ViewportSelectorChartTest());
 		addTest("apfLikeChartTest",new ApfLikeChartTest());
