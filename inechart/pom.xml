@@ -9,7 +9,7 @@
 	<name>inechart</name>
 	<url>http://maven.apache.org</url>
 	<scm>
-		<connection>scm:svn:https://inechart.googlecode.com/svn/trunk/inechart</connection>
+		<connection>scm:git:git@github.com:inepex/inechart.git</connection>
 	</scm>
 
 	<repositories>
@@ -32,7 +32,7 @@
 					<plugin>
 					<groupId>org.codehaus.mojo</groupId>		
 					<artifactId>buildnumber-maven-plugin</artifactId>		
-					<version>1.1</version>		
+					<version>1.3</version>		
 					<executions>		
 						<execution>		
 							<phase>validate</phase>		
@@ -44,6 +44,7 @@
 					<configuration>		
 						<doCheck>true</doCheck>		
 						<doUpdate>false</doUpdate>		
+						<shortRevisionLength>9</shortRevisionLength>
 					</configuration>	
 					</plugin>		
 				</plugins>
