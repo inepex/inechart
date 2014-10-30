@@ -42,12 +42,12 @@
 		<dependency>
 			<groupId>com.inepex</groupId>
 			<artifactId>inechart</artifactId>
-			<version>1.0.25</version>
+			<version>1.0.26</version>
 		</dependency>
 		<dependency>
 			<groupId>com.inepex</groupId>
 			<artifactId>inegraphics</artifactId>
-			<version>1.2.12</version>
+			<version>1.2.13</version>
 		</dependency>
 	</dependencies>
 	<build>
